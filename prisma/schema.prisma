@@ -75,6 +75,7 @@ model Business {
   users                 User[]
   userTemplates         UserTemplate[]
   workflows             Workflow[]
+  processedDocuments    ProcessedDocument[]
 }
 
 model UserDevice {
@@ -381,6 +382,7 @@ model App {
   user            User         @relation(fields: [userId], references: [id])
   services        AppService[]
   logs            UsageLog[]
+  processedDocuments   ProcessedDocument[]
 }
 
 model ApiKey {
@@ -410,6 +412,20 @@ model Service {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   requiredFeatureKey String?
+
+  // Service Architecture Fields
+  tier              String   @default("core") // core, transactional, sales, content, retention
+  dependencies      Json?    // Array of service slugs this service depends on
+  provides          Json?    // Array of capability tags
+  requires          Json?    // Array of capability tags required
+  defaultConfig     Json?    // Default configuration values
+  endpoints         Json?    // Array of {path, method, billable, rateLimit, scopes}
+  healthCheckUrl    String?  // URL for service health monitoring
+  scalingConfig     Json?    // {minInstances, maxInstances, targetCPU, targetMemory}
+  
+  defaultScopes     Json?    // Default scopes granted when enabling this service
+  
+  @@index([tier, slug])
   apps               AppService[]
   logs               UsageLog[]
 }
@@ -627,4 +643,85 @@ enum OnboardingStatus {
 enum AccountType {
   INDIVIDUAL
   BUSINESS
+}
+
+// ===================================
+// TRANSACTIONAL ENGINE - Phase 1
+// ===================================
+
+/// ProcessedDocument tracks all documents through the branding/email pipeline
+model ProcessedDocument {
+  id                 String   @id @default(uuid())
+  businessId         String
+  appId              String   // REQUIRED - all API calls must have App context
+  userId             String
+  
+  // Source
+  provider           String   // qbo, xero, zoho
+  resourceType       String   // invoice, estimate, contact, etc.
+  resourceId         String   // External ID from ERP
+  
+  // Processing
+  eventType          String   // Scoped event name (floovioo_transactional_...)
+  status             String   @default("pending") // pending, processing, completed, failed
+  flooviooId         String?  @unique
+  n8nExecutionId     String?
+  
+  // Results
+  brandedUrl         String?
+  emailSent          Boolean  @default(false)
+  emailRecipient     String?
+  emailMessageId     String?
+  
+  // Metadata
+  processingTimeMs   Int?
+  errorMessage       String?
+  retryCount         Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  app                App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  business           Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@index([businessId, createdAt(sort: Desc)])
+  @@index([status])
+  @@index([appId])
+  @@index([userId])
+}
+
+/// AuditLog provides universal audit trail for all API calls and n8n dispatches
+model AuditLog {
+  id              String   @id @default(uuid())
+  timestamp       DateTime @default(now())
+  
+  // Actor
+  userId          String?
+  appId           String?
+  businessId      String?
+  
+  // Action
+  actionType      String   // 'n8n_dispatch', 'n8n_response', 'api_call', 'erp_webhook'
+  serviceId       String?
+  eventType       String?
+  
+  // Request
+  requestPayload  Json?
+  requestId       String?
+  
+  // Response
+  responseStatus  Int?
+  responseData    Json?
+  
+  // Performance
+  durationMs      Int?
+  
+  // Result
+  success         Boolean
+  errorMessage    String?
+  
+  @@index([userId, timestamp(sort: Desc)])
+  @@index([businessId, timestamp(sort: Desc)])
+  @@index([eventType])
+  @@index([actionType])
+  @@index([requestId])
 }

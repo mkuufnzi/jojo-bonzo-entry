@@ -6,6 +6,8 @@ import { ServiceRepository } from '../repositories/service.repository';
 import { ServiceSlugs } from '../types/service.types';
 import { n8nPayloadFactory } from './n8n/n8n-payload.factory';
 import axios from 'axios';
+import { v4 as uuid } from 'uuid';
+import { createAuditLog } from '../middleware/audit.middleware';
 
 /**
  * WorkflowService is the central engine for Floovioo's automation.
@@ -178,7 +180,10 @@ export class WorkflowService {
         // 2. Prepare Payload for n8n
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            include: { business: true }
+            include: { 
+                business: true,
+                apps: { where: { name: 'System Automation' } }
+            }
         });
 
         let brandProfile = null;
@@ -186,11 +191,25 @@ export class WorkflowService {
              brandProfile = await brandingService.getProfile(userId);
         }
 
-        // 3. Create Standardized Envelope
+        // 3. Resolve or Create System Automation App
+        // ARCHITECTURE RULE: All ProcessedDocuments must have a valid appId
+        let appId = user?.apps[0]?.id;
+        if (!appId && user?.business) {
+            // Lazy creation: Create System Automation app on first workflow execution
+            const { resolveSystemApp } = await import('../services/app-resolution.service');
+            appId = await resolveSystemApp(user.business.id);
+            logger.info({ businessId: user.business.id, appId }, 'Resolved System App for ERP workflows');
+        }
+
+        if (!appId) {
+            throw new Error(`Unable to resolve appId for userId: ${userId}`);
+        }
+
+        // 4. Create Standardized Envelope
         const context = {
-            serviceId: ServiceSlugs.TRANSACTIONAL_BRANDING, // Explicit for now
+            serviceId: ServiceSlugs.TRANSACTIONAL_BRANDING,
             serviceTenantId: user?.business?.id || 'unknown',
-            appId: 'system-workflows',
+            appId, // Now always a valid UUID
             requestId: `wf_${workflowId.substring(0, 8)}_${Date.now()}`
         };
 
@@ -205,14 +224,71 @@ export class WorkflowService {
             payload.normalizedEventType // Use strict event type if provided by integration
         );
 
-        // 4. Call n8n
+        // 5. Create ProcessedDocument for tracking (pending status)
+        const flooviooId = `req_${workflowId.substring(0, 8)}_${Date.now()}`;
+        const processedDoc = await prisma.processedDocument.create({
+            data: {
+                id: uuid(),
+                businessId: user?.business?.id || 'unknown',
+                appId, // REQUIRED: enforces architecture rule
+                userId,
+                provider: payload.provider || 'unknown',
+                resourceType: payload.resourceType || payload.type?.split('.')[0] || 'unknown',
+                resourceId: payload.entityId || payload.id || 'unknown',
+                eventType: payload.normalizedEventType || 'unknown',
+                status: 'processing',
+                flooviooId,
+                createdAt: new Date()
+            }
+        });
+
+        // 5. Pre-dispatch Audit Log
+        await createAuditLog({
+            userId,
+            appId: context.appId,
+            businessId: user?.business?.id,
+            actionType: 'n8n_dispatch',
+            serviceId: ServiceSlugs.TRANSACTIONAL_BRANDING,
+            eventType: payload.normalizedEventType,
+            requestPayload: envelope,
+            requestId: flooviooId,
+            success: true // Dispatch initiated successfully
+        });
+
+        // 6. Call n8n
         logger.info({ workflowId, webhookUrl, serviceTenantId: context.serviceTenantId }, '🔗 [WorkflowService] Calling n8n Envelope');
         const startTime = Date.now();
         
         const response = await axios.post(webhookUrl, envelope, {
             timeout: 15000, // 15s to handle cold starts or heavy processing
             headers: { 'Content-Type': 'application/json' }
-        }).catch(err => {
+        }).catch(async (err) => {
+            // Update ProcessedDocument on failure
+            await prisma.processedDocument.update({
+                where: { id: processedDoc.id },
+                data: {
+                    status: 'failed',
+                    errorMessage: err.message,
+                    processingTimeMs: Date.now() - startTime,
+                    updatedAt: new Date()
+                }
+            });
+            
+            // Post-failure Audit Log
+            await createAuditLog({
+                userId,
+                appId: context.appId,
+                businessId: user?.business?.id,
+                actionType: 'n8n_response',
+                serviceId: ServiceSlugs.TRANSACTIONAL_BRANDING,
+                eventType: payload.normalizedEventType,
+                responseStatus: err.response?.status || 0,
+                durationMs: Date.now() - startTime,
+                success: false,
+                errorMessage: err.message,
+                requestId: flooviooId
+            });
+            
             if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
                 logger.error({ workflowId, timeout: 15000 }, '❌ [WorkflowService] n8n Webhook TIMEOUT');
                 throw new Error(`n8n Webhook Timed Out after 15s at ${webhookUrl}`);
