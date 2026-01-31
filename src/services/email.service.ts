@@ -60,7 +60,7 @@ export class EmailService {
     }
 
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
     
     try {
         const info = await this.transporter.sendMail({
@@ -81,7 +81,7 @@ export class EmailService {
   async sendNewPassword(to: string, password: string) {
     await this.ensureTransporter();
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
 
     try {
       const info = await this.transporter.sendMail({
@@ -110,7 +110,7 @@ export class EmailService {
     }
 
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
 
     try {
       const info = await this.transporter.sendMail({
@@ -131,7 +131,7 @@ export class EmailService {
   async sendWelcomeEmail(email: string, name: string) {
     await this.ensureTransporter();
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
 
     try {
       const info = await this.transporter.sendMail({
@@ -153,7 +153,7 @@ export class EmailService {
   async sendPasswordEmail(email: string, password: string) {
     await this.ensureTransporter();
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
 
     try {
       const info = await this.transporter.sendMail({
@@ -181,7 +181,7 @@ export class EmailService {
     }
     
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
 
     let htmlContent = `<p>Hello,</p><p>Please verify your email address by clicking the link below:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`;
     let textContent = `Hello,\n\nPlease verify your email address by clicking the link below:\n${verifyUrl}`;
@@ -218,7 +218,7 @@ export class EmailService {
   async sendTwoFactorCode(email: string, code: string, reason: string = 'Login') {
     await this.ensureTransporter();
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
 
     const subject = reason === 'Login' ? 'Your 2FA Login Code' : `${reason} Verification Code`;
     const actionText = reason === 'Login' ? 'login' : 'action';
@@ -243,7 +243,7 @@ export class EmailService {
   async sendPdf(to: string, pdfBuffer: Buffer, filename: string = 'document.pdf') {
     await this.ensureTransporter();
     const fromName = config.FROM_NAME || 'Flozino';
-    const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
 
     try {
         const info = await this.transporter.sendMail({
@@ -270,7 +270,7 @@ export class EmailService {
   async sendContactEmail(name: string, email: string, message: string) {
       await this.ensureTransporter();
       const fromName = config.FROM_NAME || 'Flozino';
-      const fromEmail = config.FROM_EMAIL || 'no-reply@afstools.com';
+      const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
       const adminEmail = config.NOTIFICATION_EMAILS?.split(',')[0] || config.SMTP_USER;
       
       if (!adminEmail) {

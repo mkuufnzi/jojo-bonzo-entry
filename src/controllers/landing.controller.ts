@@ -91,9 +91,9 @@ export class LandingController {
       } else {
         // Define external URLs for SaaS tools
         const externalUrls: Record<string, string> = {
-          'chat-with-page': 'https://chat-with-page.afstools.com',
-          'brand-with-jojo': 'https://brand-with-jojo.afstools.com',
-          'automation-for-smes': 'https://automation-for-smes.afstools.com'
+          'chat-with-page': 'https://chat-with-page.floovioo.com',
+          'brand-with-jojo': 'https://brand-with-jojo.floovioo.com',
+          'automation-for-smes': 'https://automation-for-smes.floovioo.com'
         };
 
         // Render Coming Soon page

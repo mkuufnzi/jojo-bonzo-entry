@@ -80,15 +80,17 @@
                     <div class="bg-gray-800 rounded-lg p-4 overflow-x-auto">
                         <code class="text-sm text-gray-100 block whitespace-pre-wrap">
 # 1. Submit Job
-curl -X POST https://api.afstools.com/api/pdf/convert \
+curl -X POST https://api.floovioo.com/api/pdf/convert \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"html": "<h1>Hello World</h1>"}'
+  -d '{
+    "html": "<h1>Hello World</h1>"
+  }'
 
 # Response: {"status":"pending", "jobId":"YOUR_JOB_ID", ...}
 
 # 2. Poll Status (Repeat until PDF is returned)
-curl https://api.afstools.com/api/jobs/YOUR_JOB_ID \
+curl https://api.floovioo.com/api/jobs/YOUR_JOB_ID \
   -H "X-API-Key: YOUR_API_KEY" \
   --output document.pdf
                         </code>

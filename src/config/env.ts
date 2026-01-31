@@ -77,7 +77,7 @@ const envSchema = z.object({
   SMTP_PORT: z.string().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  FROM_EMAIL: z.string().default('no-reply@afstools.com'),
+  FROM_EMAIL: z.string().default('no-reply@floovioo.com'),
   FROM_NAME: z.string().default('Floovioo '),
   NOTIFICATION_EMAILS: z.string().optional(),
 

@@ -1,7 +1,7 @@
 # E2E Browser Test Checklist
 
 ## Test Credentials
-- Email: bwj.afs.tools.test@gmail.com
+- Email: bwj.floovioo.test@gmail.com
 - Password: 37V@9bCX7z
 
 ## Web Routes to Test

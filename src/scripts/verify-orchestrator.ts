@@ -10,7 +10,7 @@ async function verify() {
     await SeederService.seed();
 
     // 2. Mock Context with Real User
-    const user = await prisma.user.findUnique({ where: { email: 'guest@afs-tools.com' } });
+    const user = await prisma.user.findUnique({ where: { email: 'guest@floovioo.com' } });
     const userId = user?.id || 'test-user-id';
 
     const context = {

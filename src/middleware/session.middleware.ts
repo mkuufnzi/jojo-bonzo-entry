@@ -62,7 +62,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         
         // Admin Check
         const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
-        const isTestUser = user.email === 'bwj.afs.tools.test@gmail.com'; 
+        const isTestUser = user.email === 'bwj.floovioo.test@gmail.com'; 
         // Respect DB flag OR hardcoded email
         (res.locals.user as any).isAdmin = user.isAdmin || user.email === adminEmail || isTestUser;
         

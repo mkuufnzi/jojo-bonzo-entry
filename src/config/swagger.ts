@@ -10,7 +10,7 @@ const options = {
       description: 'Professional document processing API for generating, converting, and manipulating documents at scale. Use your X-API-KEY for authentication.',
       contact: {
         name: 'Floovioo Support',
-        email: 'support@afstools.com',
+        email: 'support@floovioo.com',
       },
     },
     servers: [

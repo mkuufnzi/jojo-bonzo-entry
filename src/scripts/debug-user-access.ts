@@ -1,7 +1,7 @@
 import prisma from '../lib/prisma';
 
 async function main() {
-    const email = 'bwj.afs.tools.test@gmail.com';
+    const email = 'bwj.floovioo.test@gmail.com';
     const slug = 'html-to-pdf';
 
     console.log(`\n\n--- Debugging Access for ${email} -> ${slug} ---`);

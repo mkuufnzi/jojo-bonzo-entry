@@ -135,7 +135,7 @@ export class AuthService {
       await this.subscriptionRepository.create(user.id, freePlan.id, undefined, tx);
 
       const crypto = require('crypto');
-      const apiKey = 'afs_' + crypto.randomBytes(24).toString('hex');
+      const apiKey = 'fl_' + crypto.randomBytes(24).toString('hex');
 
       // Find core services to auto-connect
       const coreServices = await tx.service.findMany({

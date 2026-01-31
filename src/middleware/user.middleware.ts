@@ -31,7 +31,7 @@ export const injectUser = async (req: Request, res: Response, next: NextFunction
 
                        // 2. Ensure Default App
                        if (user.apps.length === 0) {
-                           const apiKey = 'afs_' + uuidv4().replace(/-/g, '');
+                           const apiKey = 'fl_' + uuidv4().replace(/-/g, '');
                            const coreServices = await tx.service.findMany({
                                where: { slug: { in: ['html-to-pdf', 'ai-doc-generator', 'transactional-branding'] } }
                            });

@@ -156,12 +156,12 @@ export class SeederService {
 
         // --- SEED ADMIN USERS ---
         const admins = [
-            { email: 'bwj.afs.tools.test@gmail.com', name: 'SaaS Super Admin', role: 'ROOT' },
-            { email: 'ceo@afs.com', name: 'Chief Executive Officer', role: 'CEO' },
-            { email: 'coo@afs.com', name: 'Chief Operating Officer', role: 'COO' },
-            { email: 'devops@afs.com', name: 'DevOps Lead', role: 'DEVOPS' },
-            { email: 'marketing@afs.com', name: 'Marketing Lead', role: 'MARKETING' },
-            { email: 'support@afs.com', name: 'Customer Support', role: 'SUPPORT' }
+            { email: 'bwj.floovioo.test@gmail.com', name: 'SaaS Super Admin', role: 'ROOT' },
+            { email: 'ceo@floovioo.com', name: 'Chief Executive Officer', role: 'CEO' },
+            { email: 'coo@floovioo.com', name: 'Chief Operating Officer', role: 'COO' },
+            { email: 'devops@floovioo.com', name: 'DevOps Lead', role: 'DEVOPS' },
+            { email: 'marketing@floovioo.com', name: 'Marketing Lead', role: 'MARKETING' },
+            { email: 'support@floovioo.com', name: 'Customer Support', role: 'SUPPORT' }
         ];
 
         const { hash } = await import('bcryptjs');
@@ -228,7 +228,7 @@ export class SeederService {
         console.log('✅ Admin Roles verification complete.');
 
         // Seed Guest User and App
-        const guestEmail = 'guest@afs-tools.com';
+        const guestEmail = 'guest@floovioo.com';
         let guestUser = await prisma.user.findUnique({ where: { email: guestEmail } });
 
         if (!guestUser) {

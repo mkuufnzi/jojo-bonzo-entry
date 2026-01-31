@@ -191,7 +191,7 @@ export class AppService {
       throw new AppError(`App limit reached for ${planName} plan. Upgrade to create more apps.`, 403);
     }
 
-    const apiKey = `afs_${uuidv4().replace(/-/g, '')}`;
+    const apiKey = `fl_${uuidv4().replace(/-/g, '')}`;
     
     // Validate Services against Plan before connecting
     const services = await this.serviceRepository.findAllActive();
@@ -260,7 +260,7 @@ export class AppService {
     if (!app) throw new AppError('App not found', 404);
     if (app.userId !== userId) throw new AppError('Unauthorized', 403);
 
-    const newApiKey = `afs_${uuidv4().replace(/-/g, '')}`;
+    const newApiKey = `fl_${uuidv4().replace(/-/g, '')}`;
     const updatedApp = await this.appRepository.update(appId, { apiKey: newApiKey });
 
     await this.logRepository.createUsageLog({
