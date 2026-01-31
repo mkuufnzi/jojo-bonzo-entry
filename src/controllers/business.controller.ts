@@ -3,8 +3,11 @@ import { businessService } from '../services/business.service';
 import { integrationService } from '../services/integration.service';
 import { ProviderRegistry } from '../services/integrations/providers';
 import { onboardingService } from '../services/onboarding.service';
+import { AppService } from '../services/app.service';
 import prisma from '../lib/prisma';
 import { logger } from '../lib/logger';
+
+const appService = new AppService();
 
 export class BusinessController {
   
@@ -141,6 +144,53 @@ export class BusinessController {
     } catch (error: any) {
       console.error('[BusinessController] saveProfile Error:', error);
       res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
+    }
+  }
+
+  /**
+   * POST /api/step - Persist current onboarding step and track skips
+   */
+  static async trackStep(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id || req.session.userId!;
+      const { step, isSkipped } = req.body;
+
+      const business = await businessService.getBusinessByUserId(userId);
+      if (!business) return res.status(404).json({ success: false, error: 'Business not found' });
+
+      // [ENTERPRISE] Ensure all services are linked to the user's default app
+      try {
+        await appService.ensureAllServicesLinked(userId);
+      } catch (e) {
+        logger.warn({ userId, err: e }, '[BusinessController] Failed lazy app-service linkage during trackStep');
+      }
+
+      const currentMetadata = (business.metadata as any) || {};
+      const skippedSteps = currentMetadata.skippedSteps || [];
+
+      if (isSkipped && !skippedSteps.includes(step)) {
+        skippedSteps.push(step);
+      } else if (!isSkipped) {
+        const index = skippedSteps.indexOf(step);
+        if (index > -1) skippedSteps.splice(index, 1);
+      }
+
+      await prisma.business.update({
+        where: { id: business.id },
+        data: {
+          currentOnboardingStep: step,
+          metadata: {
+            ...currentMetadata,
+            skippedSteps
+          }
+        }
+      });
+
+      logger.info({ userId, step, isSkipped }, '🚀 [Onboarding] Step Tracked');
+      res.json({ success: true });
+    } catch (error: any) {
+      logger.error({ userId: req.user?.id || req.session.userId, err: error }, '[BusinessController] trackStep Error');
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   }
 
@@ -380,31 +430,43 @@ export class BusinessController {
     }
 
     static async submitCompleteOnboarding(req: Request, res: Response, next: NextFunction) {
+        console.log('🚀 [BusinessController] submitCompleteOnboarding called', { userId: req.user?.id || req.session.userId, body: req.body });
         try {
             const userId = req.user?.id || req.session.userId!;
-            const { config } = req.body; // Extract config from full formData
-            const documentTypes = config?.documents || [];
+            const config = req.body.config || {};
+            const documentTypes = config.documents || [];
 
             const business = await businessService.getBusinessByUserId(userId);
             if (!business) return res.status(400).json({ success: false, error: 'Business not found' });
 
             // 1. Update Business Metadata and Status
             const currentMetadata = (business.metadata as any) || {};
+            const skippedSteps = currentMetadata.skippedSteps || [];
+            const needsRemediation = skippedSteps.includes(2) || skippedSteps.includes('integrations');
+
             await prisma.business.update({
                 where: { id: business.id },
                 data: { 
                     onboardingStatus: 'COMPLETED',
                     metadata: {
                         ...currentMetadata,
-                        documentTypes
+                        documentTypes,
+                        needsRemediation
                     }
                 }
             });
 
-            // 2. Mark Profile as completed
-            await prisma.userProfile.update({
+            // 2. Mark Profile as completed (Defensive Upsert for Social Auth users)
+            await prisma.userProfile.upsert({
                 where: { userId },
-                data: { onboardingCompleted: true }
+                create: {
+                    userId,
+                    firstName: req.user?.name?.split(' ')[0] || '',
+                    lastName: req.user?.name?.split(' ')[1] || '',
+                    onboardingCompleted: true,
+                    accountType: 'BUSINESS'
+                },
+                update: { onboardingCompleted: true }
             });
 
             // 3. Sync with design engine (Webhook)

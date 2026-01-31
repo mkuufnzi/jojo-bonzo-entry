@@ -17,6 +17,7 @@ router.post('/api/profile', requireAuth, BusinessController.saveProfile);
 router.post('/api/business/branding', requireAuth, logoUpload, handleImageUploadError, BusinessController.saveBrandConfig);
 router.post('/api/documents', requireAuth, BusinessController.saveDocumentConfig);
 router.post('/api/complete', requireAuth, BusinessController.submitCompleteOnboarding);
+router.post('/api/step', requireAuth, BusinessController.trackStep);
 
 // Integration Routes (Read operations for onboarding)
 router.get('/api/integrations', requireAuth, BusinessController.listIntegrations);

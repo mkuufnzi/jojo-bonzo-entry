@@ -42,7 +42,7 @@ npx ts-node scripts/codex/cli.ts save-constraint "name" "path/to/json"
 ```
 
 ****IMPORTNAT***
-0. This comment is not an interuption of your current takks, but an update, context, and instructions to obey as you work. Do not fuck up other code while wirking on this feature/bug fix. Always assume that code has effect down/upstream  -inspect the end-to-end flow design/user journey/usecase to make sense of the objective of the code we are updating in light of the overall goal and feature and value being created for users. Then, assume that we need ideal, lean, professionally implemented, best-practice-adhereing, maintainable solutions that are fully production-ready.
+0. This comment is not an interuption of your current tasks, but an update, context, and instructions to obey as you work. Do not fuck up other code while wirking on this feature/bug fix. Always assume that code has effect down/upstream  -inspect the end-to-end flow design/user journey/usecase to make sense of the objective of the code we are updating in light of the overall goal and feature and value being created for users. Then, assume that we need ideal, lean, professionally implemented, best-practice-adhereing, maintainable solutions that are fully production-ready.
 1. Use Redis MCP server as a cdebase knowledge base, and save and refer to memories that will save you hallucinations later. 
 2. Use the sequentialthinking 
  MCP server to reason and make decisions for long context problems.

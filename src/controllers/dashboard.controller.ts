@@ -106,19 +106,21 @@ export class DashboardController {
         
         const recentLogs = await usageService.getServiceLogs(userId, '', ['pdf', 'invoice', 'GENERATE_DOC'], 10); 
         
-        // [AUTO-HEAL] If we are in the Transactional Dashboard but status is not COMPLETED,
-        // and user has started (IN_PROGRESS), we can consider it "enough" if they haven't explicitly finished Step 4.
-        // But better to just ensure we have the context we need.
-        if (business && business.onboardingStatus === 'IN_PROGRESS' && connectivity.connected) {
-             // If we have a connection and we are here, let's at least ensure core services are linked
-             // which we already did above with appService.ensureAllServicesLinked.
-        }
-
+        // [READINESS CHECK] Check if critical steps were skipped
+        const skippedSteps = (business?.metadata as any)?.skippedSteps || [];
+        const isIntegrationSkipped = skippedSteps.includes(2) || skippedSteps.includes('integrations');
+        const isBrandingSkipped = skippedSteps.includes(3) || skippedSteps.includes('branding');
+        
+        const isReady = !!business && business.onboardingStatus === 'COMPLETED' && !isIntegrationSkipped;
+    
         res.render('dashboard/services/transactional', {
             user,
-            business, // Pass business for onboarding checks
-            metrics,  // Pass computed metrics
-            connectivity, // Pass dynamic connectivity status
+            business, 
+            metrics, 
+            connectivity,
+            isReady,
+            isIntegrationSkipped,
+            isBrandingSkipped,
             title: 'Transactional Branding',
             activeService: 'transactional',
             recentLogs, 

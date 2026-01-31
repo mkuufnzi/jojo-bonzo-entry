@@ -204,7 +204,7 @@
 
             <div class="pt-6 flex justify-between items-center">
                 <button @click="goToStep(1)" class="text-gray-500 hover:text-gray-800 font-medium">Back</button>
-                <button @click="goToStep(3)" class="px-8 py-3 rounded-lg font-medium transition-all"
+                <button @click="goToStep(3, !hasConnections)" class="px-8 py-3 rounded-lg font-medium transition-all"
                     :class="hasConnections ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' : 'text-gray-500 hover:text-gray-700 underline'">
                     <span x-text="hasConnections ? 'Continue &rarr;' : 'Skip Integration'"></span>
                 </button>
@@ -873,9 +873,8 @@ function onboardingWizard(initialData) {
             }
         },
 
-        goToStep(s) {
+        async goToStep(s, isSkipped = false) {
             // Prevent forward navigation if profile not saved (unless we have business data initial)
-            // initialData.business is populated if exists on server.
             const hasBusiness = this.formData.profile.name && (initialData.business || this.formData.profile.id);
             
             if (s > 1 && !hasBusiness) {
@@ -883,6 +882,18 @@ function onboardingWizard(initialData) {
                  return;
             }
             if (s > 4) s = 4;
+
+            // Persist step change to backend
+            try {
+                fetch('/onboarding/api/step', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ step: s, isSkipped })
+                });
+            } catch (e) {
+                console.error('[Wizard] Failed to persist step:', e);
+            }
+
             this.step = s;
             window.history.pushState({}, '', `/onboarding/wizard?step=${s}`);
         },

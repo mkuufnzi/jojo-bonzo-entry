@@ -82,7 +82,11 @@ export class AuthService {
         where: { [idField]: profileId }
     });
 
-    if (user) return user;
+    if (user) {
+        // [FIX] Ensure user has a profile even if they logged in before
+        await this.postRegistrationSetup(user);
+        return user;
+    }
 
     if (!email) {
         throw new AppError(`No email found in ${provider} profile`, 400);
@@ -92,13 +96,18 @@ export class AuthService {
     user = await this.userRepository.findByEmail(email);
     if (user) {
         // Link account
-        return prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: { 
                 [idField]: profileId,
                 avatar: user.avatar || photoUrl
             }
         });
+        
+        // [FIX] Ensure user has a profile backfilled
+        await this.postRegistrationSetup(updatedUser);
+        
+        return updatedUser;
     }
 
     // Create new user with subscription and default app
