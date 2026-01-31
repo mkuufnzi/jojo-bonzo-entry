@@ -1,6 +1,13 @@
 import { Integration } from '@prisma/client';
-import { IERPProvider, FetchParams, ERPDocument } from './types';
+import { IERPProvider, FetchParams, ERPDocument, NormalizedWebhookEvent } from './types';
 import { TokenManager } from '../token.manager';
+import { EventSegments, buildScopedEventName } from '../../../types/service.types';
+
+/**
+ * ZohoProvider handles communication with the Zoho Books API.
+ * It implements standard ERP fetching and webhook parsing for the Floovioo 
+ * "Transactional Branding" product line.
+ */
 
 export class ZohoProvider implements IERPProvider {
     private integration: Integration | null = null;
@@ -263,8 +270,12 @@ export class ZohoProvider implements IERPProvider {
         return true; 
     }
 
-    async parseWebhook(payload: any, headers?: any): Promise<import('./types').NormalizedWebhookEvent[]> {
-        const events: import('./types').NormalizedWebhookEvent[] = [];
+    async parseWebhook(payload: any, headers?: any): Promise<NormalizedWebhookEvent[]> {
+        /**
+         * Zoho Webhooks often send a payload with a 'JSONString' field.
+         * We normalize the events to Floovioo's scoped naming convention.
+         */
+        const events: NormalizedWebhookEvent[] = [];
         let data = payload;
         
         if (payload?.JSONString) {
@@ -284,7 +295,15 @@ export class ZohoProvider implements IERPProvider {
                  entityId: data.invoice_number || data.invoice_id,
                  entityType: 'invoice',
                  payload: data,
-                 tenantId: data.organization_id 
+                 tenantId: data.organization_id,
+                 // Standard naming: floovioo_transactional_branding_automation_request_apply_invoice
+                 normalizedEventType: buildScopedEventName(
+                     EventSegments.PRODUCT.TRANSACTIONAL,
+                     EventSegments.SERVICE.BRANDING_AUTOMATION,
+                     EventSegments.REQUEST_TYPE.REQUEST,
+                     EventSegments.ACTION.APPLY,
+                     'invoice'
+                 )
              });
         }
         
@@ -297,7 +316,15 @@ export class ZohoProvider implements IERPProvider {
                 entityId: data.estimate_number || data.estimate_id,
                 entityType: 'estimate',
                 payload: data,
-                tenantId: data.organization_id
+                tenantId: data.organization_id,
+                // Standard naming: floovioo_transactional_branding_automation_request_apply_estimate
+                normalizedEventType: buildScopedEventName(
+                    EventSegments.PRODUCT.TRANSACTIONAL,
+                    EventSegments.SERVICE.BRANDING_AUTOMATION,
+                    EventSegments.REQUEST_TYPE.REQUEST,
+                    EventSegments.ACTION.APPLY,
+                    'estimate'
+                )
             });
         }
 
@@ -310,26 +337,77 @@ export class ZohoProvider implements IERPProvider {
                 entityId: data.contact_name || data.contact_id,
                 entityType: 'contact',
                 payload: data,
-                tenantId: data.organization_id
+                tenantId: data.organization_id,
+                // Standard naming: floovioo_transactional_branding_automation_request_apply_contact
+                normalizedEventType: buildScopedEventName(
+                    EventSegments.PRODUCT.TRANSACTIONAL,
+                    EventSegments.SERVICE.BRANDING_AUTOMATION,
+                    EventSegments.REQUEST_TYPE.REQUEST,
+                    EventSegments.ACTION.APPLY,
+                    'contact'
+                )
             });
         }
 
         return events;
     }
 
-    async getInvoicePdf(invoiceId: string): Promise<Buffer | null> {
+    async getEntityPdf(type: string, id: string): Promise<Buffer | null> {
         try {
+            const pdfSupported = ['invoice', 'estimate', 'salesorder', 'purchaseorder', 'creditnote'];
+            const normalizedType = type.toLowerCase();
+            
+            if (!pdfSupported.includes(normalizedType)) return null;
+
             if (!this.orgId) await this.validateConnection();
             const headers = await this.getHeaders();
-            const url = `${this.baseUrl}/invoices/pdf?invoice_ids=${invoiceId}&organization_id=${this.orgId}`;
+            
+            // Zoho PDF endpoints follow /<entities>/pdf pattern
+            const entityPlural = normalizedType === 'contact' ? 'contacts' : `${normalizedType}s`;
+            const url = `${this.baseUrl}/${entityPlural}/pdf?${normalizedType}_ids=${id}&organization_id=${this.orgId}`;
+            
             const response = await fetch(url, { headers: { ...headers } });
             if (response.status !== 200) return null;
+            
             const arrayBuffer = await response.arrayBuffer();
             return Buffer.from(arrayBuffer);
         } catch (e) {
             console.error('[ZohoProvider] PDF Fetch Error:', e);
             return null;
         }
+    }
+
+    async getEntity(type: string, id: string): Promise<any | null> {
+        if (!this.orgId) await this.validateConnection();
+        
+        const entityMap: Record<string, string> = {
+            'invoice': 'invoices',
+            'estimate': 'estimates',
+            'salesorder': 'salesorders',
+            'purchaseorder': 'purchaseorders',
+            'contact': 'contacts',
+            'item': 'items',
+            'payment': 'customerpayments',
+            'bill': 'bills'
+        };
+
+        const zohoPath = entityMap[type.toLowerCase()] || `${type.toLowerCase()}s`;
+        
+        try {
+            const data = await this.fetchRaw(`/${zohoPath}/${id}`);
+            // Zoho returns { code: 0, message: "...", [entity]: { ... } }
+            // We need to return the inner entity object
+            const key = type.toLowerCase() === 'contact' ? 'contact' : type.toLowerCase();
+            return data[key] || data;
+        } catch (e) {
+            console.error(`[ZohoProvider] Failed to fetch enriched ${type}:`, e);
+            return null;
+        }
+    }
+
+    // --- Legacy / Compatibility ---
+    async getInvoicePdf(invoiceId: string): Promise<Buffer | null> {
+        return this.getEntityPdf('invoice', invoiceId);
     }
 
     async getContact(id: string): Promise<ERPDocument | null> {

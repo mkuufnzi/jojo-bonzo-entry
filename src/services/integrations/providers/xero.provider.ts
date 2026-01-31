@@ -1,6 +1,13 @@
 import { Integration } from '@prisma/client';
-import { IERPProvider, FetchParams, ERPDocument } from './types';
+import { IERPProvider, FetchParams, ERPDocument, NormalizedWebhookEvent } from './types';
 import { TokenManager } from '../token.manager';
+import { EventSegments, buildScopedEventName } from '../../../types/service.types';
+
+/**
+ * XeroProvider handles communication with the Xero API.
+ * It implements standard ERP fetching and webhook parsing with a focus on 
+ * Floovioo's "Transactional Branding" product line.
+ */
 
 export class XeroProvider implements IERPProvider {
     private integration: Integration | null = null;
@@ -223,9 +230,12 @@ export class XeroProvider implements IERPProvider {
         }
     }
 
-    async parseWebhook(payload: any, headers?: any): Promise<import('./types').NormalizedWebhookEvent[]> {
-        // Xero Webhooks usually send an array of events
-        const events: import('./types').NormalizedWebhookEvent[] = [];
+    async parseWebhook(payload: any, headers?: any): Promise<NormalizedWebhookEvent[]> {
+        /**
+         * Xero Webhooks usually send an array of events.
+         * We normalize these to consistent Floovioo events.
+         */
+        const events: NormalizedWebhookEvent[] = [];
         const xeroEvents = payload?.events || [];
 
         for (const ev of xeroEvents) {
@@ -235,8 +245,11 @@ export class XeroProvider implements IERPProvider {
              // ev.tenantId: string
              
              if (ev.eventCategory === 'INVOICING') {
-                 // Invoice? Or Bill? Xero treats both under Invoicing
-                 // We naively assume Invoice for now or fetch to check
+                 /**
+                  * Xero treats both Invoices and Bills under 'INVOICING'.
+                  * For the Branding Automation service, we treat these as 'apply' requests 
+                  * to a potentially branding-capable document (invoice).
+                  */
                  events.push({
                      type: ev.eventType === 'CREATE' ? 'invoice.created' : 'invoice.updated',
                      provider: 'xero',
@@ -244,9 +257,20 @@ export class XeroProvider implements IERPProvider {
                      entityId: ev.resourceId,
                      entityType: 'invoice',
                      payload: ev,
-                     tenantId: ev.tenantId
+                     tenantId: ev.tenantId,
+                     // Standardized naming: floovioo_transactional_branding_automation_request_apply_invoice
+                     normalizedEventType: buildScopedEventName(
+                         EventSegments.PRODUCT.TRANSACTIONAL,
+                         EventSegments.SERVICE.BRANDING_AUTOMATION,
+                         EventSegments.REQUEST_TYPE.REQUEST,
+                         EventSegments.ACTION.APPLY,
+                         'invoice'
+                     )
                  });
              } else if (ev.eventCategory === 'CONTACT') {
+                 /**
+                  * Contacts can also trigger branding workflows (e.g. welcome letters).
+                  */
                  events.push({
                      type: ev.eventType === 'CREATE' ? 'contact.created' : 'contact.updated',
                      provider: 'xero',
@@ -254,7 +278,15 @@ export class XeroProvider implements IERPProvider {
                      entityId: ev.resourceId,
                      entityType: 'contact',
                      payload: ev,
-                     tenantId: ev.tenantId
+                     tenantId: ev.tenantId,
+                     // Standardized naming: floovioo_transactional_branding_automation_request_apply_contact
+                     normalizedEventType: buildScopedEventName(
+                         EventSegments.PRODUCT.TRANSACTIONAL,
+                         EventSegments.SERVICE.BRANDING_AUTOMATION,
+                         EventSegments.REQUEST_TYPE.REQUEST,
+                         EventSegments.ACTION.APPLY,
+                         'contact'
+                     )
                  });
              }
         }
@@ -262,12 +294,23 @@ export class XeroProvider implements IERPProvider {
         return events;
     }
 
-    async getInvoicePdf(invoiceId: string): Promise<Buffer | null> {
-         // Xero PDF fetch usually requires specific header 'Accept: application/pdf'
+    async getEntityPdf(type: string, id: string): Promise<Buffer | null> {
+         const pdfSupported = ['invoice', 'creditnote', 'purchaseorder'];
+         const normalizedType = type.toLowerCase();
+         
+         if (!pdfSupported.includes(normalizedType)) return null;
+
          try {
              const headers = await this.getHeaders();
-             // URL might vary, checking docs: /Invoices/{InvoiceID} with Accept: application/pdf
-             const response = await fetch(`${this.baseUrl}/Invoices/${invoiceId}`, {
+             // Mapping to Xero endpoints
+             const endpointMap: Record<string, string> = {
+                 'invoice': 'Invoices',
+                 'creditnote': 'CreditNotes',
+                 'purchaseorder': 'PurchaseOrders'
+             };
+             
+             const path = endpointMap[normalizedType];
+             const response = await fetch(`${this.baseUrl}/${path}/${id}`, {
                  headers: { 
                      ...headers as any,
                      'Accept': 'application/pdf'
@@ -278,6 +321,33 @@ export class XeroProvider implements IERPProvider {
              const buf = await response.arrayBuffer();
              return Buffer.from(buf);
          } catch (e) { return null; }
+    }
+
+    async getEntity(type: string, id: string): Promise<any | null> {
+        const entityMap: Record<string, string> = {
+            'invoice': 'Invoices',
+            'contact': 'Contacts',
+            'item': 'Items',
+            'payment': 'Payments',
+            'bill': 'Invoices', // Xero bills are type='ACCPAY' in Invoices
+            'purchaseorder': 'PurchaseOrders'
+        };
+
+        const xeroPath = entityMap[type.toLowerCase()] || `${type.charAt(0).toUpperCase()}${type.slice(1)}s`;
+        
+        try {
+            const data = await this.fetchRaw(`/${xeroPath}/${id}`);
+            // Xero returns { [PluralName]: [{...}] }
+            return data[xeroPath]?.[0] || data;
+        } catch (e) {
+            console.error(`[XeroProvider] Failed to fetch enriched ${type}:`, e);
+            return null;
+        }
+    }
+
+    // --- Legacy / Compatibility ---
+    async getInvoicePdf(invoiceId: string): Promise<Buffer | null> {
+        return this.getEntityPdf('invoice', invoiceId);
     }
 
     async getContact(id: string): Promise<ERPDocument | null> {

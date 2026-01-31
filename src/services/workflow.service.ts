@@ -2,9 +2,16 @@ import prisma from '../lib/prisma';
 import { logger } from '../lib/logger';
 import { brandingService } from './branding.service';
 import { webhookService } from './webhook.service';
+import { ServiceRepository } from '../repositories/service.repository';
+import { ServiceSlugs } from '../types/service.types';
 import { n8nPayloadFactory } from './n8n/n8n-payload.factory';
 import axios from 'axios';
 
+/**
+ * WorkflowService is the central engine for Floovioo's automation.
+ * It resolves business logic, filters incoming signals, and dispatches tasks 
+ * to external engines like n8n.
+ */
 export class WorkflowService {
   
   async listWorkflows(userId: string) {
@@ -50,7 +57,11 @@ export class WorkflowService {
    * Taking a trigger payload, checking against workflows, and executing actions.
    */
   async processWebhook(userId: string, payload: any) {
-    logger.info({ userId, type: payload.type }, 'Processing Webhook Event');
+    /**
+     * processWebhook takes an incoming signal (ERP event, manual trigger, etc.)
+     * and matches it against active workflows for the user's business.
+     */
+    logger.info({ userId, type: payload.normalizedEventType || payload.type }, 'Processing Webhook Event');
     
     // Resolving User's Business context
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
@@ -74,9 +85,34 @@ export class WorkflowService {
       // Check if payload matches trigger criteria
       const config = wf.triggerConfig as any;
       
-      // Filter by Event Type (e.g. "invoice.created")
-      if (config?.event && payload.type !== config.event) {
-        continue;
+      // Filter by Event Type (Supports exact match or wildcard like 'invoice.*')
+      if (config?.event) {
+          /**
+           * Prioritize the new scoped event names for trigger matching.
+           * Fallback to raw provider types for backward compatibility.
+           */
+          const eventToMatch = payload.normalizedEventType || payload.type;
+          
+          const pattern = config.event.replace(/\*/g, '.*');
+          const regex = new RegExp(`^${pattern}$`);
+          let matches = regex.test(eventToMatch);
+          
+          // Fuzzy Matching for Backward Compatibility
+          // 1. If trigger is 'invoice.created' but event is 'invoice.updated/voided/etc', we should match
+          // 2. If trigger is 'invoice' (simple) but event is 'invoice.created/updated/etc', we should match
+          if (!matches) {
+              const triggerBase = config.event.split('.')[0];
+              const eventBase = payload.type.split('.')[0];
+              
+              if (triggerBase === eventBase) {
+                  matches = true;
+                  logger.info({ trigger: config.event, event: payload.type }, '🤖 [WorkflowService] Fuzzy Trigger Match Applied');
+              }
+          }
+
+          if (!matches) {
+              continue;
+          }
       }
       
       // Filter by Provider (e.g. "zoho")
@@ -136,7 +172,7 @@ export class WorkflowService {
     if (type === 'apply_branding' || type === 'brand_and_email' || type === 'email') {
         
         // 1. Resolve External Endpoint (n8n)
-        const serviceSlug = 'transactional-branding';
+        const serviceSlug = ServiceSlugs.TRANSACTIONAL_BRANDING;
         const webhookUrl = await webhookService.getEndpoint(serviceSlug, type === 'email' ? 'email' : 'apply_branding');
         
         // 2. Prepare Payload for n8n
@@ -152,7 +188,7 @@ export class WorkflowService {
 
         // 3. Create Standardized Envelope
         const context = {
-            serviceId: 'transactional-branding', // Explicit for now
+            serviceId: ServiceSlugs.TRANSACTIONAL_BRANDING, // Explicit for now
             serviceTenantId: user?.business?.id || 'unknown',
             appId: 'system-workflows',
             requestId: `wf_${workflowId.substring(0, 8)}_${Date.now()}`
@@ -165,14 +201,28 @@ export class WorkflowService {
             actionConfig,
             brandProfile,
             userId,
-            context
+            context,
+            payload.normalizedEventType // Use strict event type if provided by integration
         );
 
         // 4. Call n8n
         logger.info({ workflowId, webhookUrl, serviceTenantId: context.serviceTenantId }, '🔗 [WorkflowService] Calling n8n Envelope');
         const startTime = Date.now();
-        const response = await axios.post(webhookUrl, envelope);
+        
+        const response = await axios.post(webhookUrl, envelope, {
+            timeout: 15000, // 15s to handle cold starts or heavy processing
+            headers: { 'Content-Type': 'application/json' }
+        }).catch(err => {
+            if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+                logger.error({ workflowId, timeout: 15000 }, '❌ [WorkflowService] n8n Webhook TIMEOUT');
+                throw new Error(`n8n Webhook Timed Out after 15s at ${webhookUrl}`);
+            }
+            logger.error({ workflowId, error: err.message, status: err.response?.status }, '❌ [WorkflowService] n8n Webhook Failure');
+            throw err;
+        });
+
         const duration = Date.now() - startTime;
+        logger.info({ workflowId, duration, status: response.status }, '✅ [WorkflowService] n8n Dispatch Successful');
 
         // 4. Return Data
         return {

@@ -112,6 +112,58 @@ export class DashboardController {
         const isBrandingSkipped = skippedSteps.includes(3) || skippedSteps.includes('branding');
         
         const isReady = !!business && business.onboardingStatus === 'COMPLETED' && !isIntegrationSkipped;
+
+        // [REVENUE MACHINE] Fetch Branding History & Recovery Opportunities
+        const { dunningService } = await import('../services/dunning.service');
+        
+        // 1. Fetch Real Blueprints (UserTemplates)
+        const activeBlueprints = business ? await prisma.userTemplate.findMany({
+            where: { businessId: business.id, status: 'active' },
+            orderBy: { updatedAt: 'desc' }
+        }) : [];
+
+        // 2. Fetch Processed Documents (Successful Branding Logs)
+        const processedLogs = await prisma.usageLog.findMany({
+            where: { 
+                userId, 
+                service: { slug: 'transactional-branding' },
+                status: 'success'
+            },
+            include: { service: true },
+            orderBy: { createdAt: 'desc' },
+            take: 20
+        });
+
+        // 3. Branding History: Join successful logs with ExternalDocuments
+        // We'll extract externalId from metadata if it exists
+        const processedExternalIds = processedLogs
+            .map(log => {
+                try {
+                    const meta = JSON.parse(log.metadata || '{}');
+                    return meta.externalId || meta.id;
+                } catch (e) { return null; }
+            })
+            .filter(Boolean);
+
+        const brandingHistory = isReady ? await prisma.externalDocument.findMany({
+            where: { 
+                businessId: business.id, 
+                externalId: { in: processedExternalIds as string[] }
+            },
+            orderBy: { syncedAt: 'desc' },
+            take: 10
+        }) : [];
+
+        // 4. Calculate Real Total Revenue
+        // Sum revenue in memory for accurate Json access (Prisma cannot aggregate on Json fields directly)
+        const totalRevenue = brandingHistory.reduce((sum, doc) => {
+            const amount = (doc.normalized as any)?.amount || 0;
+            return sum + amount;
+        }, 0);
+
+        const processedCount = processedLogs.length;
+
+        const overdueInvoices = isReady ? await dunningService.getOverdueInvoices(business.id) : [];
     
         res.render('dashboard/services/transactional', {
             user,
@@ -121,9 +173,14 @@ export class DashboardController {
             isReady,
             isIntegrationSkipped,
             isBrandingSkipped,
+            brandingHistory,
+            overdueInvoices,
+            activeBlueprints,
+            processedCount,
+            totalRevenue,
             title: 'Transactional Branding',
             activeService: 'transactional',
-            recentLogs, 
+            recentLogs: processedLogs, 
             stats,
             nonce: res.locals.nonce
         });

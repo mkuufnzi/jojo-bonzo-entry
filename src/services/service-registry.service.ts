@@ -13,7 +13,7 @@ import prisma from '../lib/prisma';
 import { aiService } from './ai.service';
 import { designEngineService } from './design-engine.service';
 import { ServiceManifest } from '../types/service-manifest';
-import { ServiceSlug, ServiceConfig } from '../types/service.types';
+import { ServiceSlug, ServiceConfig, ServiceSlugs } from '../types/service.types';
 
 export class ServiceRegistry {
     private static instance: ServiceRegistry;
@@ -51,14 +51,14 @@ export class ServiceRegistry {
         
         const deManifest = designEngineService.getManifest();
         this.registerManifest(deManifest); // Register 'design-engine'
-        this.registerManifest({ ...deManifest, slug: 'transactional-core', name: 'Transactional Branding' }); // Register alias 1
-        this.registerManifest({ ...deManifest, slug: 'transactional-branding', name: 'Transactional Branding' }); // Register alias 2
-
+        this.registerManifest({ ...deManifest, slug: ServiceSlugs.TRANSACTIONAL_BRANDING, name: 'Transactional Branding' }); 
+        this.registerManifest({ ...deManifest, slug: 'transactional-core', name: 'Transactional Branding' }); // Legacy alias
+        
         // Register Provider Instance for Execution
-        this.registerProvider('ai-doc-generator', aiService);
-        this.registerProvider('design-engine', designEngineService); // [NEW]
-        this.registerProvider('transactional-core', designEngineService); // [NEW] Wire up Transactional Branding to Design Engine
-        this.registerProvider('transactional-branding', designEngineService); // [NEW] Wire up SyncWorker slug
+        this.registerProvider(ServiceSlugs.AI_DOC_GENERATOR, aiService);
+        this.registerProvider(ServiceSlugs.DESIGN_ENGINE, designEngineService); 
+        this.registerProvider(ServiceSlugs.TRANSACTIONAL_BRANDING, designEngineService); 
+        this.registerProvider('transactional-core', designEngineService); // Legacy alias
 
         console.log(`   ✅ Loaded ${services.length} services & ${this.manifests.size} manifests into registry`);
     }

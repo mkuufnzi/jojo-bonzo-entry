@@ -78,18 +78,22 @@ export interface IERPProvider {
      */
     parseWebhook(payload: any, headers?: any): Promise<NormalizedWebhookEvent[]>;
 
-    // --- Specific Data Fetchers (Used by Webhook Controller) ---
-    getInvoicePdf(invoiceId: string): Promise<Buffer | null>;
+    // --- Universal Data Fetchers (Used by Webhook Controller) ---
+    getEntity(type: string, id: string): Promise<any | null>;
+    getEntityPdf(type: string, id: string): Promise<Buffer | null>;
+    
+    // --- Legacy Subset Fetchers ---
     getContact(id: string): Promise<ERPDocument | null>;
     getItem(id: string): Promise<ERPDocument | null>;
 }
 
 export interface NormalizedWebhookEvent {
-    type: 'invoice.created' | 'invoice.updated' | 'estimate.created' | 'contact.created' | 'contact.updated' | 'item.created' | 'item.updated' | 'unknown';
+    type: string;
     provider: string; // 'zoho', 'quickbooks', etc.
     originalEvent: string; // The raw event name
     entityId: string; // External ID (e.g. INV-001)
-    entityType: 'invoice' | 'estimate' | 'contact' | 'item' | 'unknown'; 
+    entityType: string; 
     payload: any; // The raw data or normalized subset
     tenantId?: string; // e.g. RealmID, OrgID
+    normalizedEventType?: string; // e.g. 'transactional_branding_request'
 }

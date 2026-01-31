@@ -15,7 +15,58 @@ export const ServiceSlugs = {
     // AI Tools
     AI_DOC_GENERATOR: 'ai-doc-generator',
     AI_SUMMARIZER: 'ai-summarizer', // Proposed
+
+    // Branding & Core
+    TRANSACTIONAL_BRANDING: 'transactional-branding',
+    DESIGN_ENGINE: 'design-engine',
 } as const;
+
+export const EventSegments = {
+    PROJECT: 'floovioo',
+    PRODUCT: {
+        TRANSACTIONAL: 'transactional',
+        AI: 'ai',
+        SALES: 'sales',
+        RETENTION: 'retention'
+    },
+    SERVICE: {
+        BRANDING_AUTOMATION: 'branding_automation',
+        DOC_GENERATOR: 'doc_generator'
+    },
+    REQUEST_TYPE: {
+        REQUEST: 'request',
+        EVENT: 'event',
+        TASK: 'task'
+    },
+    ACTION: {
+        APPLY: 'apply',
+        CREATE: 'create',
+        UPDATE: 'update',
+        DELETE: 'delete',
+        SYNC: 'sync'
+    }
+} as const;
+
+/**
+ * Builds a scoped event name following the pattern:
+ * floovioo_<product_name>_<service_name>_<request_type>_<action>_<resource>
+ */
+export function buildScopedEventName(
+    product: string,
+    service: string,
+    requestType: string,
+    action: string,
+    resource: string
+): string {
+    return [
+        EventSegments.PROJECT,
+        product,
+        service,
+        requestType,
+        action,
+        resource
+    ].join('_').toLowerCase();
+}
 
 export type ServiceSlug = typeof ServiceSlugs[keyof typeof ServiceSlugs] | string; // Allow string for DB extensibility but prefer Enum
 

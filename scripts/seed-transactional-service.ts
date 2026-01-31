@@ -58,11 +58,36 @@ async function seed() {
             method: 'POST',
             label: 'Onboarding: Data Sync'
         },
-        // Real-time Event Triggers (Legacy/Direct)
+        // Real-time Event Triggers (Standardized)
         'invoice.created': {
             url: defaultN8nWebhook,
             method: 'POST',
             label: 'Invoice Created Event'
+        },
+        'invoice.updated': {
+            url: defaultN8nWebhook,
+            method: 'POST',
+            label: 'Invoice Updated Event'
+        },
+        'estimate.created': {
+            url: defaultN8nWebhook,
+            method: 'POST',
+            label: 'Estimate Created Event'
+        },
+        'purchaseorder.created': {
+            url: defaultN8nWebhook,
+            method: 'POST',
+            label: 'Purchase Order Created Event'
+        },
+        'salesreceipt.created': {
+            url: defaultN8nWebhook,
+            method: 'POST',
+            label: 'Sales Receipt Created Event'
+        },
+        'transactional_branding_request': {
+            url: defaultN8nWebhook,
+            method: 'POST',
+            label: 'Transactional Branding Request (Production)'
         }
       }
     }

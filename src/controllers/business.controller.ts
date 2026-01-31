@@ -483,4 +483,22 @@ export class BusinessController {
             res.status(500).json({ success: false, error: 'Internal Server Error' });
         }
     }
+
+    static async triggerDunningFollowup(req: Request, res: Response) {
+        try {
+            const userId = req.user?.id || req.session.userId!;
+            const { invoiceId } = req.body;
+            
+            const business = await businessService.getBusinessByUserId(userId);
+            if (!business) return res.status(400).json({ success: false, error: 'Business not found' });
+
+            const { dunningService } = await import('../services/dunning.service');
+            const result = await dunningService.triggerFollowup(userId, business.id, invoiceId);
+
+            res.json(result);
+        } catch (error: any) {
+            console.error('[BusinessController] triggerDunningFollowup Error:', error);
+            res.status(500).json({ success: false, error: error.message || 'Internal Server Error' });
+        }
+    }
 }

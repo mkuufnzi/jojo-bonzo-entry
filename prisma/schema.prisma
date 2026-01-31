@@ -151,6 +151,7 @@ model Integration {
   externalDocuments ExternalDocument[]
   business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
+  @@unique([businessId, provider])
   @@index([businessId])
 }
 

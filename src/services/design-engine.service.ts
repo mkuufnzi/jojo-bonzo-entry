@@ -3,6 +3,7 @@ import prisma from '../lib/prisma';
 import { logger } from '../lib/logger';
 import { n8nPayloadFactory } from './n8n/n8n-payload.factory';
 import { OnboardingEventTypes } from '../domain-events';
+import { ServiceSlugs } from '../types/service.types';
 
 /**
  * Design Engine
@@ -23,7 +24,7 @@ export class DesignEngineService {
      */
     getManifest(): ServiceManifest {
         return {
-            slug: 'design-engine',
+            slug: ServiceSlugs.DESIGN_ENGINE,
             name: 'Design Engine',
             version: '1.0.0',
             description: 'Centralized rendering core for generating branded visual assets and documents across all products.',
@@ -75,10 +76,10 @@ export class DesignEngineService {
                 { domain: 'n8n.automation-for-smes.com', purpose: 'AI Visual Analysis & Layout Optimization' }
             ],
             endpoints: [
-                { path: '/services/design-engine/compose', method: 'POST', description: 'Compose API' },
-                { path: '/services/design-engine/generate', method: 'POST', description: 'Full Generation API', billable: true },
-                { path: '/services/design-engine/render', method: 'POST', description: 'Render API', billable: true },
-                { path: '/services/design-engine/extract', method: 'POST', description: 'Brand Extraction API', billable: true }
+                { path: `/services/${ServiceSlugs.DESIGN_ENGINE}/compose`, method: 'POST', description: 'Compose API' },
+                { path: `/services/${ServiceSlugs.DESIGN_ENGINE}/generate`, method: 'POST', description: 'Full Generation API', billable: true },
+                { path: `/services/${ServiceSlugs.DESIGN_ENGINE}/render`, method: 'POST', description: 'Render API', billable: true },
+                { path: `/services/${ServiceSlugs.DESIGN_ENGINE}/extract`, method: 'POST', description: 'Brand Extraction API', billable: true }
             ]
         };
     }
@@ -129,7 +130,7 @@ export class DesignEngineService {
     /**
      * Helper: Resolve Service Context (IDs)
      */
-    private async _resolveServiceContext(appId: string, serviceSlug: string = 'transactional-branding'): Promise<{ serviceId: string, serviceTenantId: string }> {
+    private async _resolveServiceContext(appId: string, serviceSlug: string = ServiceSlugs.TRANSACTIONAL_BRANDING): Promise<{ serviceId: string, serviceTenantId: string }> {
         let serviceId = 'unknown';
         let serviceTenantId = 'unknown';
 
@@ -170,7 +171,7 @@ export class DesignEngineService {
         
         logger.info({ action, userId: context?.id }, '🎨 [Design Engine] Executing Action');
 
-        const serviceSlug = 'transactional-branding'; 
+        const serviceSlug = ServiceSlugs.TRANSACTIONAL_BRANDING; 
 
          // 1. Resolve Webhook URL
          let webhookUrl = '';
@@ -180,7 +181,7 @@ export class DesignEngineService {
             try {
                 webhookUrl = await webhookService.getEndpoint(serviceSlug, 'default');
             } catch (e2) {
-                 logger.error('No webhook URL found for transactional-branding');
+                 logger.error(`No webhook URL found for ${ServiceSlugs.TRANSACTIONAL_BRANDING}`);
                  return;
             }
          }
@@ -188,7 +189,7 @@ export class DesignEngineService {
          if (action === 'ping') {
              try {
                  const axios = require('axios');
-                 await axios.post(webhookUrl, { type: 'ping', floovioo_id: envelope?.floovioo_id || context?.id, service_id: envelope?.service_id || 'transactional-branding' }, { timeout: 3000 });
+                 await axios.post(webhookUrl, { type: 'ping', floovioo_id: envelope?.floovioo_id || context?.id, service_id: envelope?.service_id || ServiceSlugs.TRANSACTIONAL_BRANDING }, { timeout: 3000 });
                  return { success: true, connected: true, url: webhookUrl };
              } catch (err: any) {
                  logger.warn({ err: err.message, url: webhookUrl }, '⚠️ [DesignEngine] Ping Failed');

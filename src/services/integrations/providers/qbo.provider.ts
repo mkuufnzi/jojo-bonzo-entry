@@ -1,6 +1,7 @@
 import { Integration } from '@prisma/client';
 import { IERPProvider, FetchParams, ERPDocument, NormalizedWebhookEvent } from './types';
 import { TokenManager } from '../token.manager';
+import { EventSegments, buildScopedEventName } from '../../../types/service.types';
 
 export class QBOProvider implements IERPProvider {
     private integration: Integration | null = null;
@@ -75,14 +76,22 @@ export class QBOProvider implements IERPProvider {
         const headers = await this.getHeaders();
         const url = `${this.baseUrl}/${this.realmId}${endpoint}`;
         
+        console.log(`[QBOProvider] 🌐 Calling API: ${url}`);
+        
         const response = await fetch(url, {
             ...options,
             headers: { ...headers, ...options?.headers }
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[QBOProvider] ❌ API Error (${response.status}): ${errorText}`);
+            throw new Error(`QBO API Error: ${response.status} - ${errorText}`);
+        }
+
         const data = await response.json();
         if (data.Fault) {
-            throw new Error(`QBO API Error: ${JSON.stringify(data.Fault)}`);
+            throw new Error(`QBO API Error Data: ${JSON.stringify(data.Fault)}`);
         }
         return data;
     }
@@ -94,7 +103,7 @@ export class QBOProvider implements IERPProvider {
 
         const token = secret || process.env.QBO_WEBHOOK_VERIFIER_TOKEN;
         if (!token) {
-            console.warn('[QBOProvider] Missing Verifier Token');
+            console.warn('[QBOProvider] Missing Verifier Token (ENV: QBO_WEBHOOK_VERIFIER_TOKEN)');
             return false;
         }
 
@@ -102,8 +111,13 @@ export class QBOProvider implements IERPProvider {
             const crypto = require('crypto');
             const hmac = crypto.createHmac('sha256', token);
             hmac.update(rawBody);
-            const generated = hmac.digest('base64');
-            return generated === signature;
+            const calculatedSignature = hmac.digest('base64');
+            
+            const isValid = calculatedSignature === signature;
+            if (!isValid) {
+                console.warn(`[QBOProvider] Signature Mismatch. Received: ${signature.substring(0, 10)}... Calculated: ${calculatedSignature.substring(0, 10)}...`);
+            }
+            return isValid;
         } catch (e) {
             console.error('[QBOProvider] Verification Error', e);
             return false;
@@ -111,68 +125,272 @@ export class QBOProvider implements IERPProvider {
     }
 
     async parseWebhook(payload: any, headers?: any): Promise<NormalizedWebhookEvent[]> {
-        // QBO Structure: { eventNotifications: [ { realmId, dataChangeEvent: { entities: [] } } ] }
-        const notifications = payload?.eventNotifications || [];
         const events: NormalizedWebhookEvent[] = [];
-        
-        for (const notification of notifications) {
-            const entities = notification.dataChangeEvent?.entities || [];
-            for (const entity of entities) {
-                const op = entity.operation; // Create, Update, Delete
-                let type: any = 'unknown';
-                let entityType: any = 'unknown';
 
-                if (entity.name === 'Invoice') {
-                    type = op === 'Create' ? 'invoice.created' : 'invoice.updated';
-                    entityType = 'invoice';
-                } else if (entity.name === 'Customer') {
-                    type = 'contact.created';
-                    entityType = 'contact';
-                } else if (entity.name === 'Item') {
-                    type = 'item.created';
-                    entityType = 'item';
-                }
+        // 1. Handle Legacy Format (eventNotifications wrapper)
+        if (payload?.eventNotifications) {
+            const notifications = payload.eventNotifications;
+            for (const notification of notifications) {
+                const entities = notification.dataChangeEvent?.entities || [];
+                for (const entity of entities) {
+                    const op = entity.operation; // Create, Update, Delete, Void, Merge, Emailed
+                    const entityName = entity.name;
+                    
+                    // Standardize Operation to Suffix
+                    const opMap: Record<string, string> = {
+                        'Create': 'created',
+                        'Update': 'updated',
+                        'Delete': 'deleted',
+                        'Void': 'voided',
+                        'Merge': 'merged',
+                        'Emailed': 'emailed'
+                    };
+                    const suffix = opMap[op] || op.toLowerCase();
 
-                if (type !== 'unknown') {
+                    // Standardize Entity Name to Prefix (Handling all 29+ entities)
+                    const entityMap: Record<string, string> = {
+                        'Account': 'account',
+                        'Bill': 'bill',
+                        'BillPayment': 'billpayment',
+                        'Budget': 'budget',
+                        'Class': 'class',
+                        'CreditMemo': 'creditmemo',
+                        'Currency': 'currency',
+                        'Customer': 'contact',
+                        'Department': 'department',
+                        'Deposit': 'deposit',
+                        'Employee': 'employee',
+                        'Estimate': 'estimate',
+                        'Invoice': 'invoice',
+                        'Item': 'item',
+                        'JournalCode': 'journalcode',
+                        'JournalEntry': 'journalentry',
+                        'Payment': 'payment',
+                        'PaymentMethod': 'paymentmethod',
+                        'Preferences': 'preferences',
+                        'Purchase': 'purchase',
+                        'PurchaseOrder': 'purchaseorder',
+                        'RefundReceipt': 'refundreceipt',
+                        'SalesReceipt': 'salesreceipt',
+                        'TaxAgency': 'taxagency',
+                        'Term': 'term',
+                        'TimeActivity': 'timeactivity',
+                        'Transfer': 'transfer',
+                        'Vendor': 'vendor',
+                        'VendorCredit': 'vendorcredit'
+                    };
+                    const prefix = entityMap[entityName] || entityName.toLowerCase();
+
+                    const type: any = `${prefix}.${suffix}`;
+                    const entityType: any = prefix === 'contact' ? 'customer' : prefix;
+
                     events.push({
                         type,
                         provider: 'qbo',
                         originalEvent: op,
                         entityId: entity.id,
                         entityType,
-                        payload: entity
+                        payload: entity,
+                        tenantId: notification.realmId,
+                        normalizedEventType: buildScopedEventName(
+                            EventSegments.PRODUCT.TRANSACTIONAL,
+                            EventSegments.SERVICE.BRANDING_AUTOMATION,
+                            EventSegments.REQUEST_TYPE.REQUEST,
+                            EventSegments.ACTION.APPLY,
+                            entityType
+                        )
                     });
                 }
             }
+        } 
+        // 2. Handle New Format (CloudEvents - Array at root)
+        else if (Array.isArray(payload)) {
+            for (const item of payload) {
+                const entityName = item.intuitentityname;
+                const op = item.intuitoperation;
+                const entityId = item.intuitentityid;
+                const realmId = item.intuitrealm;
+
+                // Standardize Operation to Suffix
+                const opMap: Record<string, string> = {
+                    'Create': 'created',
+                    'Update': 'updated',
+                    'Delete': 'deleted',
+                    'Void': 'voided',
+                    'Merge': 'merged',
+                    'Emailed': 'emailed'
+                };
+                const suffix = opMap[op] || op.toLowerCase();
+
+                // Standardize Entity Name to Prefix
+                const entityMap: Record<string, string> = {
+                    'Account': 'account',
+                    'Bill': 'bill',
+                    'BillPayment': 'billpayment',
+                    'Budget': 'budget',
+                    'Class': 'class',
+                    'CreditMemo': 'creditmemo',
+                    'Currency': 'currency',
+                    'Customer': 'contact',
+                    'Department': 'department',
+                    'Deposit': 'deposit',
+                    'Employee': 'employee',
+                    'Estimate': 'estimate',
+                    'Invoice': 'invoice',
+                    'Item': 'item',
+                    'JournalCode': 'journalcode',
+                    'JournalEntry': 'journalentry',
+                    'Payment': 'payment',
+                    'PaymentMethod': 'paymentmethod',
+                    'Preferences': 'preferences',
+                    'Purchase': 'purchase',
+                    'PurchaseOrder': 'purchaseorder',
+                    'RefundReceipt': 'refundreceipt',
+                    'SalesReceipt': 'salesreceipt',
+                    'TaxAgency': 'taxagency',
+                    'Term': 'term',
+                    'TimeActivity': 'timeactivity',
+                    'Transfer': 'transfer',
+                    'Vendor': 'vendor',
+                    'VendorCredit': 'vendorcredit'
+                };
+                const prefix = entityMap[entityName] || entityName.toLowerCase();
+
+                const type: any = `${prefix}.${suffix}`;
+                const entityType: any = prefix === 'contact' ? 'customer' : prefix;
+
+                events.push({
+                    type,
+                    provider: 'qbo',
+                    originalEvent: op,
+                    entityId,
+                    entityType,
+                    payload: item,
+                    tenantId: realmId,
+                    normalizedEventType: buildScopedEventName(
+                        EventSegments.PRODUCT.TRANSACTIONAL,
+                        EventSegments.SERVICE.BRANDING_AUTOMATION,
+                        EventSegments.REQUEST_TYPE.REQUEST,
+                        EventSegments.ACTION.APPLY,
+                        entityType
+                    )
+                });
+            }
         }
+
         return events;
     }
 
     // --- Specific Fetchers ---
 
-    async getInvoicePdf(invoiceId: string): Promise<Buffer | null> {
+    async getEntity(type: string, id: string): Promise<any | null> {
+        if (!this.integration) throw new Error('Not Initialized');
+        
+        // Map common normalized types to QBO entity names
+        const entityMap: Record<string, string> = {
+            'account': 'Account',
+            'bill': 'Bill',
+            'billpayment': 'BillPayment',
+            'budget': 'Budget',
+            'class': 'Class',
+            'creditmemo': 'CreditMemo',
+            'currency': 'Currency',
+            'contact': 'Customer',
+            'customer': 'Customer',
+            'department': 'Department',
+            'deposit': 'Deposit',
+            'employee': 'Employee',
+            'estimate': 'Estimate',
+            'invoice': 'Invoice',
+            'item': 'Item',
+            'journalcode': 'JournalCode',
+            'journalentry': 'JournalEntry',
+            'payment': 'Payment',
+            'paymentmethod': 'PaymentMethod',
+            'preferences': 'Preferences',
+            'purchase': 'Purchase',
+            'purchaseorder': 'PurchaseOrder',
+            'refundreceipt': 'RefundReceipt',
+            'salesreceipt': 'SalesReceipt',
+            'taxagency': 'TaxAgency',
+            'term': 'Term',
+            'timeactivity': 'TimeActivity',
+            'transfer': 'Transfer',
+            'vendor': 'Vendor',
+            'vendorcredit': 'VendorCredit'
+        };
+
+        const qboType = entityMap[type.toLowerCase()] || type;
+        const query = `select * from ${qboType} where Id = '${id}'`;
+        
+        try {
+            const result = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+            // QBO wraps responses in a key named after the entity
+            const data = result.QueryResponse?.[qboType]?.[0] || null;
+            if (data) {
+                console.log(`[QBOProvider] ✅ Enriched ${qboType} ${id} found`);
+            } else {
+                console.warn(`[QBOProvider] ⚠️ No data found for ${qboType} ${id} in query response`, result.QueryResponse);
+            }
+            return data;
+        } catch (e) {
+            console.error(`[QBOProvider] Failed to fetch enriched ${qboType}:`, e);
+            return null;
+        }
+    }
+
+    async getEntityPdf(type: string, id: string): Promise<Buffer | null> {
+        if (!this.integration) throw new Error('Not Initialized');
+
+        // Supported entities for PDF export per Intuit Docs
+        const pdfSupported = [
+            'invoice', 'salesreceipt', 'creditmemo', 
+            'estimate', 'payment', 'purchaseorder', 
+            'refundreceipt'
+        ];
+
+        const normalizedType = type.toLowerCase();
+        if (!pdfSupported.includes(normalizedType)) {
+            return null;
+        }
+
+        const entityMap: Record<string, string> = {
+            'invoice': 'invoice',
+            'salesreceipt': 'salesreceipt',
+            'creditmemo': 'creditmemo',
+            'estimate': 'estimate',
+            'payment': 'payment', // Payment receipts
+            'purchaseorder': 'purchaseorder',
+            'refundreceipt': 'refundreceipt'
+        };
+
+        const qboPath = entityMap[normalizedType];
+        console.log(`[QBOProvider] 📄 Fetching PDF for ${normalizedType} ${id}`);
+
         try {
             const headers = await this.getHeaders();
-            const url = `${this.baseUrl}/${this.realmId}/invoice/${invoiceId}/pdf`;
+            const url = `${this.baseUrl}/${this.realmId}/${qboPath}/${id}/pdf`;
             
-            const response = await fetch(url, { 
-                headers: { 
-                    ...headers,
-                    'Accept': 'application/pdf' 
-                } 
+            const response = await fetch(url, {
+                headers: { ...headers, 'Accept': 'application/pdf' }
             });
 
-            if (response.status !== 200) {
-                console.warn(`[QBOProvider] PDF Fetch Failed: ${response.status}`);
+            if (!response.ok) {
+                console.warn(`[QBOProvider] ⚠️ PDF Export not available for ${normalizedType} ${id} (Status: ${response.status})`);
                 return null;
             }
 
             const arrayBuffer = await response.arrayBuffer();
             return Buffer.from(arrayBuffer);
         } catch (e) {
-            console.error('[QBOProvider] PDF Exception:', e);
+            console.error(`[QBOProvider] ❌ Error fetching PDF for ${normalizedType} ${id}:`, e);
             return null;
         }
+    }
+
+    // --- Legacy / Compatibility ---
+    async getInvoicePdf(invoiceId: string): Promise<Buffer | null> {
+        return this.getEntityPdf('invoice', invoiceId);
     }
 
     async getContact(id: string): Promise<ERPDocument | null> {

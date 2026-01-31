@@ -29,4 +29,7 @@ router.post('/api/integrations/:slug/import', requireAuth, IntegrationController
 router.get('/api/business/oauth/:provider', requireAuth, BusinessController.startOAuth);
 router.get('/api/business/oauth/callback/:provider', requireAuth, BusinessController.handleOAuthCallback);
 
+// Dunning / Recovery
+router.post('/api/dunning/followup', requireAuth, BusinessController.triggerDunningFollowup);
+
 export default router;

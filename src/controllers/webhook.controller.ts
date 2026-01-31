@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { StripeProvider } from '../services/payment/stripe.provider';
 import { workflowService } from '../services/workflow.service';
+import { ServiceSlugs } from '../types/service.types';
 import { createQueue, QUEUES } from '../lib/queue';
 import { logger } from '../lib/logger';
 import prisma from '../lib/prisma';
@@ -201,6 +202,12 @@ export class WebhookController {
     return this.freePlanIdCache;
   }
 
+  /**
+   * Universal ERP Webhook Entry Point.
+   * Processes incoming signals from QuickBooks, Xero, and Zoho.
+   * Floovioo acts as a high-level filter/dispatcher, determining if the event 
+   * should trigger downstream automation (like n8n branding).
+   */
   async handleErpWebhook(req: Request, res: Response) {
     const { provider } = req.params;
     const userIdFromPath = req.params.userId;
@@ -210,44 +217,43 @@ export class WebhookController {
     }
 
     try {
-      // 1. Initialize Provider
+      // 1. Initialize Provider (Normalize 'quickbooks' to 'qbo')
+      const normalizedProvider = provider.toLowerCase() === 'quickbooks' ? 'qbo' : provider.toLowerCase();
       const { ProviderRegistry } = await import('../services/integrations/providers'); 
-      const providerInstance = ProviderRegistry.createInstance(provider);
+      const providerInstance = ProviderRegistry.createInstance(normalizedProvider);
 
       // 2. Verify Signature (Generic)
-      // Pass rawBody if available, else JSON stringified (less reliable but fallback)
       const rawBody = (req as any).rawBody || JSON.stringify(req.body);
       const isVerified = await providerInstance.verifyWebhookSignature(rawBody, req.headers, req.query);
       
       if (!isVerified) {
           logger.warn({ provider }, '⚠️ [Webhook] Signature Verification Failed');
-          // return res.status(401).send('Unauthorized'); // Strict mode?
       } else {
           logger.info({ provider }, '✅ [Webhook] Signature Verified');
       }
 
       // 3. Parse Webhook Event (Normalized)
+      logger.debug({ provider: normalizedProvider, body: req.body }, '📥 [Webhook] Received Payload');
       const events = await providerInstance.parseWebhook(req.body, req.headers);
       
       if (!events || events.length === 0) {
+          logger.warn({ provider: normalizedProvider, body: req.body }, '⚠️ [Webhook] No events parsed from payload');
           return res.status(200).send('No events processed');
       }
 
       for (const event of events) {
            let userId = userIdFromPath;
 
-           // 4. Resolve Context (User/App)
-            if (!userId && event.tenantId) {
-                // Determine Metadata Key based on Provider
-                // Different providers store Tenant ID in different metadata keys
-                let metadataKey = 'realmId'; // Default for QBO
+           // 4. Resolve Context (User/App/Integration)
+           let integration: any = null;
+           if (event.tenantId) {
+                let metadataKey = 'realmId';
                 if (provider === 'xero') metadataKey = 'tenantId';
                 else if (provider === 'zoho') metadataKey = 'organization_id';
                 
-                // Find Integration by TenantID (Metadata)
-                const integration = await prisma.integration.findFirst({
+                integration = await prisma.integration.findFirst({
                     where: { 
-                        provider,
+                        provider: normalizedProvider,
                         metadata: {
                             path: [metadataKey], 
                             equals: event.tenantId 
@@ -256,8 +262,8 @@ export class WebhookController {
                     include: { business: { include: { users: true } } }
                 });
 
-                if (integration && integration.business?.users?.length) {
-                    userId = integration.business.users[0].id; // Heuristic: First user
+                if (integration && !userId && integration.business?.users?.length) {
+                    userId = integration.business.users[0].id;
                 }
            }
 
@@ -266,53 +272,77 @@ export class WebhookController {
                continue;
            }
 
-           logger.info({ userId, provider, eventType: event.type }, '⚡ [Webhook] Processing Event');
+           logger.info({ userId, provider: normalizedProvider, eventType: event.type, entityId: event.entityId }, '⚡ [Webhook] Processing Event');
+           
+           // 5. Data Enrichment (Fetch full entity if available)
+           try {
+               if (integration && (providerInstance as any).initialize) {
+                   await (providerInstance as any).initialize(integration);
+               }
 
-           // 6. Action Dispatch
-           const { serviceRegistry } = await import('../services/service-registry.service');
-           const designEngine = serviceRegistry.getProvider('transactional-core');
+                const fullEntity = await providerInstance.getEntity(event.entityType, event.entityId);
+               if (fullEntity) {
+                   console.log(`[Webhook] ✅ Enriched ${event.entityType} data for ${event.entityId}`);
+                   event.payload = {
+                       ...event.payload,
+                       ...fullEntity,
+                       _raw: fullEntity, // Preserve original JSON structure explicitly
+                       _enriched: true
+                   };
+                   
+                   // Attempt universal PDF download
+                   console.log(`[Webhook] 🔍 Attempting PDF download for ${event.entityType} ${event.entityId}`);
+                   const pdfBuffer = await providerInstance.getEntityPdf(event.entityType, event.entityId);
+                   if (pdfBuffer) {
+                       console.log(`[Webhook] ✅ Downloaded PDF for ${event.entityType} ${event.entityId}`);
+                       event.payload.original_pdf = pdfBuffer.toString('base64');
+                   }
+               } else {
+                   console.warn(`[Webhook] ⚠️ Failed to fetch full entity for ${event.entityType} ${event.entityId}`);
+               }
+           } catch (e) { logger.warn({ e, entityId: event.entityId }, 'Failed data enrichment for ERP event'); }
 
-           if (designEngine) {
-                const user = await prisma.user.findUnique({ 
-                    where: { id: userId },
-                    include: { business: true } // Include Business context if needed by engine
-                });
-                if (!user) continue;
+           // 6. Delegate to WorkflowService
+           /**
+            * The final payload contains both the raw ERP data and 
+            * the normalized Floovioo scoped event type.
+            */
+            const finalPayload = {
+                ...event.payload,
+                _event: {
+                    type: event.type,
+                    provider: event.provider,
+                    originalEvent: event.originalEvent,
+                    entityId: event.entityId,
+                    entityType: event.entityType,
+                    tenantId: event.tenantId,
+                    normalizedEventType: event.normalizedEventType
+                },
+                normalizedEventType: event.normalizedEventType, // Direct access for WorkflowService
+                // Backward compatibility shim
+                type: event.type,
+                provider: event.provider,
+                entityId: event.entityId,
+                entityType: event.entityType
+            };
 
-                if (event.type === 'invoice.created' || event.type === 'invoice.updated') {
-                    // Fetch PDF
-                    let pdfBuffer: Buffer | null = null;
-                    try {
-                        pdfBuffer = await providerInstance.getInvoicePdf(event.entityId);
-                    } catch (e) { console.error('PDF Fetch Error', e); }
+            logger.info({ 
+                userId, 
+                eventType: event.type, 
+                enriched: !!event.payload._enriched,
+                hasPdf: !!event.payload.original_pdf 
+            }, '📤 [Webhook] Dispatching Event');
+            
+            logger.debug({ payload: finalPayload }, '📤 [Webhook] Payload Detail');
 
-                    const payload = {
-                        ...event.payload,
-                        provider,
-                        source: provider,
-                        // Attach PDF
-                        ...(pdfBuffer ? { original_pdf: pdfBuffer.toString('base64') } : {})
-                    };
-                    
-                    // We interpret 'user' as full context, but DesignEngine might need businessId explicitly
-                    const contextUser = { ...user, businessId: user.business?.id };
-
-                    designEngine.executeAction('invoice_created', payload, contextUser)
-                        .catch((e: any) => logger.error({ e }, 'DesignEngine Failed'));
-                }
-                else if (event.type === 'contact.created' || event.type === 'contact.updated') {
-                     const contact = await providerInstance.getContact(event.entityId);
-                     const contextUser = { ...user, businessId: user.business?.id };
-                     designEngine.executeAction('contact_sync', { ...contact, provider }, contextUser)
-                        .catch((e: any) => logger.error({ e }, 'Contact Sync Failed'));
-                }
-                else if (event.type === 'item.created' || event.type === 'item.updated') {
-                     const item = await providerInstance.getItem(event.entityId);
-                     const contextUser = { ...user, businessId: user.business?.id };
-                     designEngine.executeAction('product_sync', { ...item, provider }, contextUser)
-                        .catch((e: any) => logger.error({ e }, 'Product Sync Failed'));
-                }
-           }
+            console.log(`[Webhook] ⚙️ Dispatching to WorkflowService for User ${userId}`);
+            try {
+                const results = await workflowService.processWebhook(userId, finalPayload);
+                console.log(`[Webhook] 🏁 Dispatch complete. Results: ${results.length} workflows triggered`);
+            } catch (e) {
+                console.error(`[Webhook] ❌ Workflow processing failed:`, e);
+                logger.error({ e }, 'Workflow processing failed');
+            }
       }
 
       res.status(200).send('Processed');

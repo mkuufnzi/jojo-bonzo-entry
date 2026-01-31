@@ -6,6 +6,7 @@ import { ServiceRepository } from '../repositories/service.repository';
 import { TraceManager } from '../lib/trace';
 import { webhookService } from './webhook.service';
 import { logger } from '../lib/logger';
+import { ServiceSlugs } from '../types/service.types';
 
 interface AiFile {
   name: string;
@@ -99,7 +100,7 @@ class AiService {
       let action = options.action || 'generate';
       
       // Dynamic Async Lookup (Service Slug: 'ai-doc-generator')
-      const webhookUrl = await webhookService.getEndpoint('ai-doc-generator', action);
+      const webhookUrl = await webhookService.getEndpoint(ServiceSlugs.AI_DOC_GENERATOR, action);
 
       const requestPayload: AiGenerationRequest = {
         prompt,
@@ -363,7 +364,7 @@ class AiService {
       const traceContext = TraceManager.getContext();
       // Don't log full cost for Analysis steps? Or log as separate resource type?
       // For now, consistent logging.
-      const service = await this.serviceRepository.findBySlug('ai-doc-generator');
+      const service = await this.serviceRepository.findBySlug(ServiceSlugs.AI_DOC_GENERATOR);
       if (service) {
           this.logRepository.createUsageLog({
               userId: traceContext?.userId || userId,
@@ -408,7 +409,7 @@ class AiService {
 
   async isConfigured(): Promise<boolean> { 
     try {
-        await webhookService.getEndpoint('ai-doc-generator');
+        await webhookService.getEndpoint(ServiceSlugs.AI_DOC_GENERATOR);
         return true;
     } catch {
         return false;
@@ -419,7 +420,7 @@ class AiService {
 
   public getManifest(): ServiceManifest {
       return {
-          slug: 'ai-doc-generator',
+          slug: ServiceSlugs.AI_DOC_GENERATOR,
           name: 'AI Document Generator',
           version: '1.0.0',
           description: 'AI-powered document generation suite with Human-in-the-Loop workflow.',
@@ -455,12 +456,12 @@ class AiService {
               { domain: 'n8n.automation-for-smes.com', purpose: 'AI Workflow Execution (Analysis, Drafting, Enrichment)' }
           ],
           endpoints: [
-              { path: '/services/ai-doc-generator/analyze', method: 'POST', description: 'Analyze Request (HITL)', billable: false },
-              { path: '/services/ai-doc-generator/generate', method: 'POST', description: 'Generate Document', billable: true },
-              { path: '/services/ai-doc-generator/enrich', method: 'POST', description: 'Smart Data Enrichment', billable: true },
-              { path: '/services/ai-doc-generator/jobs/:jobId', method: 'GET', description: 'Poll Job Status' },
-              { path: '/services/ai-doc-generator/preview', method: 'POST', description: 'Preview PDF' },
-              { path: '/services/ai-doc-generator/convert', method: 'POST', description: 'Convert to PDF', billable: true }
+              { path: `/services/${ServiceSlugs.AI_DOC_GENERATOR}/analyze`, method: 'POST', description: 'Analyze Request (HITL)', billable: false },
+              { path: `/services/${ServiceSlugs.AI_DOC_GENERATOR}/generate`, method: 'POST', description: 'Generate Document', billable: true },
+              { path: `/services/${ServiceSlugs.AI_DOC_GENERATOR}/enrich`, method: 'POST', description: 'Smart Data Enrichment', billable: true },
+              { path: `/services/${ServiceSlugs.AI_DOC_GENERATOR}/jobs/:jobId`, method: 'GET', description: 'Poll Job Status' },
+              { path: `/services/${ServiceSlugs.AI_DOC_GENERATOR}/preview`, method: 'POST', description: 'Preview PDF' },
+              { path: `/services/${ServiceSlugs.AI_DOC_GENERATOR}/convert`, method: 'POST', description: 'Convert to PDF', billable: true }
           ]
       };
   }
@@ -473,7 +474,7 @@ class AiService {
       userId: string
   ): Promise<any> {
       try {
-        const webhookUrl = await webhookService.getEndpoint('ai-doc-generator', 'enrich');
+        const webhookUrl = await webhookService.getEndpoint(ServiceSlugs.AI_DOC_GENERATOR, 'enrich');
         
         logger.info({ userId, itemCount: transactionContext.items?.length }, '🧠 [AI Service] Requesting Smart Enrichment');
 

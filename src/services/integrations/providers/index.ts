@@ -8,9 +8,15 @@ export class ProviderRegistry {
     }
 
     static getProviderClass(name: string): any {
-        // Handle aliases (e.g., zoho-crm -> zoho)
-        if (name.startsWith('zoho')) return this.providers['zoho'];
-        return this.providers[name];
+        const normalized = name.toLowerCase();
+        // Handle QuickBooks alias
+        if (normalized === 'qbo' || normalized === 'quickbooks') {
+            return this.providers['qbo'] || this.providers['quickbooks'];
+        }
+        // Handle Zoho aliases (e.g., zoho-crm -> zoho)
+        if (normalized.startsWith('zoho')) return this.providers['zoho'];
+        
+        return this.providers[normalized];
     }
 
     static createInstance(name: string): IERPProvider {
@@ -28,5 +34,6 @@ import { QBOProvider } from './qbo.provider';
 import { XeroProvider } from './xero.provider';
 
 ProviderRegistry.register('zoho', ZohoProvider);
+ProviderRegistry.register('qbo', QBOProvider);
 ProviderRegistry.register('quickbooks', QBOProvider);
 ProviderRegistry.register('xero', XeroProvider);
