@@ -1,0 +1,10 @@
+{
+  "source": {
+    "type": "url",
+    "content": "https://brandwithjojo.com"
+  },
+  "options": {
+    "format": "A4",
+    "printBackground": true
+  }
+}

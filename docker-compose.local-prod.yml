@@ -1,0 +1,81 @@
+# =============================================================================
+# PRODUCTION MODE - LOCAL INFRASTRUCTURE
+# Run: docker-compose -f docker-compose.local-prod.yml up --build
+# =============================================================================
+# Runs the app in production mode but connects to local Redis/PostgreSQL
+# Useful for testing production builds locally before VPS deployment
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: afs_doc_tools_local_prod
+    restart: always
+    ports:
+      - "3004:3002" # Avoid conflict with local dev (3002) and docker dev (3003)
+    env_file:
+      - .env.production.local
+    environment:
+      - NODE_ENV=production
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      # Shared DB/Redis Configuration
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=n8n
+      - DB_HOST=postgres
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/n8n?schema=public
+      - REDIS_URL=redis://redis:6379
+      - APP_URL=http://localhost:3004
+      - PORT=3002
+      - COOKIE_SECURE=false
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    networks:
+      - db_net
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: afs_doc_tools_worker_local
+    restart: always
+    command: npm run worker:prod
+    env_file:
+      - .env.production.local
+    environment:
+      - NODE_ENV=production
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      # Shared DB/Redis Configuration
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=n8n
+      - DB_HOST=postgres
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/n8n?schema=public
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - db_net
+    depends_on:
+      - app
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  db_net:
+    external: true

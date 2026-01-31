@@ -1,0 +1,149 @@
+<!-- Navigation Guard Modal & Logic -->
+<div id="navGuardModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+    <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div class="p-8 text-center text-pretty">
+            <div class="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-amber-500 border border-amber-100 shadow-sm">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tighter mb-3">Unsaved Changes Detected</h3>
+            <p class="text-sm font-medium text-slate-500 leading-relaxed mb-8">
+                You have active work in the workspace. Navigating away now will cause you to lose your current progress.
+            </p>
+            
+            <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mb-8 text-left">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-blue-500 mt-0.5"></i>
+                    <div>
+                        <p class="text-[0.6875rem] font-black text-blue-900 uppercase tracking-widest mb-1">Coming Soon</p>
+                        <p class="text-[0.6875rem] font-medium text-blue-700 leading-normal">
+                            We're working on a "Save Progress" feature for a future version so you can resume your work later.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button id="confirmNavBtn" class="w-full py-3.5 bg-red-500 text-white rounded-xl font-black text-[0.75rem] uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all active:scale-[0.98]">
+                    Discard Work & Leave
+                </button>
+                <button onclick="closeNavGuard()" class="w-full py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black text-[0.75rem] uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-[0.98]">
+                    Stay in Workspace
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+    window.isWorkDirty = window.isWorkDirty || false;
+    var pendingNavUrl = null;
+
+    // Track dirty state using global delegation (more robust for dynamic content)
+    function setupDirtyTracking() {
+        // Use a single global listener for inputs
+        // Use Capture Phase (true) to catch events before they are stopped by other scripts
+        document.body.addEventListener('input', (e) => {
+            const target = e.target;
+            // [Fix] Only track REAL user interactions (ignore script-triggered events)
+            if (!e.isTrusted) return;
+            
+            // [Fix] Ignore app toggles and elements marked to not trigger dirty state
+            if (target.classList.contains('app-toggle') || target.hasAttribute('data-ignore-dirty')) {
+                return;
+            }
+
+            if (target.matches('input:not([type="hidden"]):not([type="checkbox"]), textarea, select')) {
+                // Ignore internal search boxes or negligible inputs if needed
+                if (!window.isWorkDirty) {
+                    console.log('📝 [Nav-Guard] Work started by user interaction on:', target);
+                    window.isWorkDirty = true;
+                }
+            }
+        }, true);
+        
+        // File inputs often fire 'change' not 'input'
+        document.body.addEventListener('change', (e) => {
+            if (e.target.matches('input[type="file"]')) {
+                window.isWorkDirty = true;
+            }
+        }, true);
+        
+        console.log('🔍 [Nav-Guard] Global dirty tracking enabled (Capture Mode)');
+    }
+
+    function showNavGuard(url) {
+        console.log('🚨 [Nav-Guard] Showing modal for URL:', url, 'isWorkDirty:', window.isWorkDirty);
+        pendingNavUrl = url;
+        const modal = document.getElementById('navGuardModal');
+        if (!modal) {
+            console.error('❌ [Nav-Guard] Modal element not found!');
+            return;
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeNavGuard() {
+        const modal = document.getElementById('navGuardModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        pendingNavUrl = null;
+    }
+
+    // Initialize tracking and button listeners on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+        setupDirtyTracking();
+        
+        // Attach modal button listener
+        const confirmBtn = document.getElementById('confirmNavBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                window.isWorkDirty = false; // Reset to allow navigation
+                if (pendingNavUrl) {
+                    window.location.href = pendingNavUrl;
+                }
+            });
+        }
+    });
+
+    // Intercept internal links
+    // Use Capture Phase (true) to intercept clicks before any other handler stops them
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        
+        // Debug logging
+        if (link) {
+            // Only log if we are actually tracking state
+            if (window.isWorkDirty) {
+                 console.log('🔗 [Nav-Guard] Intercepting click on:', link.href);
+            }
+        }
+
+        if (link && window.isWorkDirty) {
+            const href = link.getAttribute('href');
+            const target = link.getAttribute('target');
+            
+            // Only intercept internal standard links
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:') && target !== '_blank' && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+                // If it's a link to the same origin
+                const url = new URL(href, window.location.origin);
+                if (url.origin === window.location.origin) {
+                    console.log('🛑 [Nav-Guard] Blocking navigation to:', href);
+                    e.preventDefault();
+                    e.stopPropagation(); // Stop other handlers from processing the navigation
+                    showNavGuard(href);
+                }
+            }
+        }
+    }, true);
+
+    // Native browser warning for external navigation/refresh/tab close
+    // [DISABLED] Per user request: "never ever use browser alert"
+    // window.addEventListener('beforeunload', (e) => {
+    //     if (window.isWorkDirty) {
+    //         e.preventDefault();
+    //         e.returnValue = ''; // Required for Chrome
+    //     }
+    // });
+</script>

@@ -1,0 +1,8 @@
+{
+  "watch": ["src", "environments"],
+  "ext": "ts,json,ejs,css,html",
+  "env": {
+    "NODE_ENV": "development",
+    "DOTENV_CONFIG_PATH": ".env.development"
+  }
+}

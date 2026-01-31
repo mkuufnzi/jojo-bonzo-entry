@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floovioo Docs | Revenue-Driving Documents</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="bg-off-white text-slate-600 font-sans antialiased selection:bg-brand-blue selection:text-white" x-data="{ 
+    slideIndex: 0, 
+    slides: [
+        { id: 'business', title: 'Stop Drowning in Manual Paperwork.' },
+        { id: 'scale', title: 'Generate Thousands of Documents in Minutes.' },
+        { id: 'dev', title: 'The API your Developers Will Love.' }
+    ],
+    nextSlide() { this.slideIndex = (this.slideIndex + 1) % this.slides.length; },
+    init() { setInterval(() => this.nextSlide(), 8000); }
+}">
+
+    <%- include('../../partials/landing-nav') %>
+
+    <main>
+        <!-- TRANSACTIONAL BRANDING CAROUSEL -->
+        <%- include('../../partials/components/hero-carousel', {
+            slides: [
+                {
+                    id: 'business',
+                    badge: { text: 'Revenue Enablement', classes: 'bg-blue-50 text-brand-blue' },
+                    title: 'Your Invoices Should',
+                    titleHighlight: 'Sell, Not Just Bill.',
+                    titleHighlightColor: 'text-brand-blue',
+                    text: 'Transactional documents are opened 95% of the time. Don\'t waste that attention on ugly, generic PDFs. Turn them into branded touchpoints.',
+                    cta: { text: 'Upgrade Your Brand', link: '/dashboard/transactional' },
+                    secondaryCta: { text: 'View Templates', link: '/templates' },
+                    visuals: ['/assets/images/smart-invoice-features.jpg', '/assets/images/report-sample-3.jpg', '/assets/images/report-sample-0.jpg']
+                },
+                {
+                    id: 'scale',
+                    badge: { text: 'Automated Polish', classes: 'bg-indigo-50 text-indigo-600' },
+                    title: 'Make Your Data',
+                    titleHighlight: 'Look Expensive.',
+                    titleHighlightColor: 'text-indigo-600',
+                    text: 'We sit between your boring ERP and your client. We take the raw numbers and wrap them in your premium design identity, automatically.',
+                    cta: { text: 'View Gallery', link: '/templates' },
+                     secondaryCta: { text: 'How It Works', link: '/products/transactional' },
+                    visuals: ['/assets/images/report-sample-1.jpg', '/assets/images/report-sample-2.jpg', '/assets/images/report-sample-3.jpg']
+                },
+                {
+                    id: 'dev',
+                    badge: { text: 'Operational Excellence', classes: 'bg-green-50 text-green-600' },
+                    title: 'Zero Friction',
+                    titleHighlight: 'Document Ops.',
+                    titleHighlightColor: 'text-green-600',
+                    text: 'No more "Save as PDF" then "Attach to Email." Connect your tools once, and let Floovioo handle the generation and delivery pipeline.',
+                    cta: { text: 'See Integration Docs', link: '/docs' },
+                    secondaryCta: { text: 'API Reference', link: '/api-docs' },
+                    visuals: ['/assets/logos/trusted-brand-2.png', '/assets/logos/trusted-brand-5.png', '/assets/logos/trusted-brand-4.png']
+                }
+            ]
+        }) %>
+
+        <!-- Features (Existing) -->
+        <section class="py-20 bg-off-white">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                     <div class="p-8 bg-white rounded-2xl shadow-card border border-slate-100 hover:shadow-card-hover transition-shadow">
+                         <h3 class="text-xl font-bold text-deep-ocean mb-3">Headless Chrome Rendering</h3>
+                         <p class="text-slate-500">We use real browser usage for rendering, meaning detailed CSS, Flexbox, and Grid just work. No limited XML layouts.</p>
+                     </div>
+                     <div class="p-8 bg-white rounded-2xl shadow-card border border-slate-100 hover:shadow-card-hover transition-shadow">
+                         <h3 class="text-xl font-bold text-deep-ocean mb-3">Immutable Archiving</h3>
+                         <p class="text-slate-500">Every generated document is hashed and stored in S3-compatible cold storage for audit trails.</p>
+                     </div>
+                     <div class="p-8 bg-white rounded-2xl shadow-card border border-slate-100 hover:shadow-card-hover transition-shadow">
+                         <h3 class="text-xl font-bold text-deep-ocean mb-3">Zero-Latency Mode</h3>
+                         <p class="text-slate-500">Pre-warm renderers for high-volume batch generation. Generate thousands of invoices in minutes.</p>
+                     </div>
+                 </div>
+             </div>
+        </section>
+
+    </main>
+
+    <%- include('../../partials/footer') %>
+
+</body>
+</html>

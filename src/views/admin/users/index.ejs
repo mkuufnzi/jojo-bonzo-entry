@@ -1,0 +1,559 @@
+<%- include('../../partials/head', { title: 'User Management - Admin Console' }) %>
+
+<body class="bg-slate-50 min-h-screen font-sans">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../../partials/dashboard-header', {title: 'User Management', user: user }) %>
+
+        <div class="flex-1 overflow-hidden relative">
+            <div class="grid grid-cols-12 h-full">
+                
+                <!-- LEFT: Main Content -->
+                <div class="col-span-12 lg:col-span-9 h-full overflow-y-auto p-6 pb-32 custom-scrollbar">
+                    <div class="max-w-6xl mx-auto space-y-6">
+                        <!-- Header -->
+                        <div class="flex flex-col gap-4 mb-6">
+                            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                <div>
+                                    <h1 class="text-2xl font-bold text-slate-900">User Management</h1>
+                                    <p class="text-sm text-slate-500 mt-1">Manage users, system accounts, and IP access control</p>
+                                </div>
+                                
+                                <form action="/admin/users" method="GET" class="w-full sm:w-auto relative">
+                                    <input type="hidden" name="tab" value="<%= activeTab %>">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                                        <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    </div>
+                                    <input type="text" name="search" value="<%= search %>" placeholder="Search users..." class="pl-10 block w-full sm:w-64 rounded-lg border-slate-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                </form>
+                            </div>
+
+                            <!-- Role Stats -->
+                            <div class="flex flex-wrap gap-2">
+                                <% const roles = ['ROOT', 'CEO', 'COO', 'DEVOPS', 'MARKETING', 'SUPPORT', 'USER']; %>
+                                <% roles.forEach(role => { %>
+                                    <span class="px-3 py-1 text-xs font-bold rounded-full <%= role === 'USER' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700' %>">
+                                        <%= role %>: <%= roleStats[role] || 0 %>
+                                    </span>
+                                <% }); %>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="border-b border-slate-200">
+                            <nav class="-mb-px flex space-x-8">
+                                <a href="/admin/users?tab=end-users" 
+                                   class="tab-link py-4 px-1 border-b-2 font-bold text-sm uppercase tracking-widest <%= activeTab === 'end-users' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' %>">
+                                    <i data-lucide="users" class="w-4 h-4 inline-block mr-2"></i>
+                                    End Users
+                                    <span class="ml-2 bg-slate-100 text-slate-600 rounded-full px-2 py-0.5 text-xs"><%= endUsers.length %></span>
+                                </a>
+                                <a href="/admin/users?tab=system-users" 
+                                   class="tab-link py-4 px-1 border-b-2 font-bold text-sm uppercase tracking-widest <%= activeTab === 'system-users' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' %>">
+                                    <i data-lucide="shield" class="w-4 h-4 inline-block mr-2"></i>
+                                    System Users
+                                    <span class="ml-2 bg-amber-100 text-amber-700 rounded-full px-2 py-0.5 text-xs"><%= systemUsers.length %></span>
+                                </a>
+                                <a href="/admin/users?tab=banned-ips" 
+                                   class="tab-link py-4 px-1 border-b-2 font-bold text-sm uppercase tracking-widest <%= activeTab === 'banned-ips' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' %>">
+                                    <i data-lucide="ban" class="w-4 h-4 inline-block mr-2"></i>
+                                    Banned IPs
+                                    <span class="ml-2 bg-red-100 text-red-700 rounded-full px-2 py-0.5 text-xs"><%= bannedIps.length %></span>
+                                </a>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content: End Users -->
+                        <% if (activeTab === 'end-users') { %>
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-200">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">User</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Email</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Plan</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Last IP</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Joined</th>
+                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        <% if (endUsers && endUsers.length > 0) { %>
+                                            <% endUsers.forEach(u => { %>
+                                                <tr class="user-row hover:bg-slate-50 transition-colors" data-status="<%= u.isActive ? 'active' : 'inactive' %>">
+                                                    <td class="px-6 py-4 text-sm font-bold text-slate-900"><%= u.name || 'No Name' %></td>
+                                                    <td class="px-6 py-4 text-sm text-slate-600"><%= u.email %></td>
+                                                    <td class="px-6 py-4 text-sm">
+                                                        <% if (u.subscription && u.subscription.plan) { %>
+                                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold"><%= u.subscription.plan.name %></span>
+                                                        <% } else { %>
+                                                            <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">Free</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td class="px-6 py-4">
+                                                        <span class="px-2 py-1 <%= u.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %> rounded-full text-xs font-bold">
+                                                            <%= u.isActive ? 'Active' : 'Banned' %>
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-sm text-slate-500 font-mono text-xs">
+                                                        <%= u.loginHistory && u.loginHistory[0] ? u.loginHistory[0].ipAddress : '-' %>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-sm text-slate-500"><%= new Date(u.createdAt).toLocaleDateString() %></td>
+                                                    <td class="px-6 py-4 text-right">
+                                                        <div class="flex items-center justify-end gap-2">
+                                                            <button onclick="viewIpHistory('<%= u.id %>')" class="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors" title="View IP History">
+                                                                <i data-lucide="network" class="w-4 h-4"></i>
+                                                            </button>
+                                                            <% if (u.isActive) { %>
+                                                                <button onclick="banUser('<%= u.id %>', '<%= u.email %>')" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors" title="Ban User">
+                                                                    <i data-lucide="user-x" class="w-4 h-4"></i>
+                                                                </button>
+                                                            <% } else { %>
+                                                                <button onclick="unbanUser('<%= u.id %>')" class="p-1.5 text-slate-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors" title="Unban User">
+                                                                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                                                                </button>
+                                                            <% } %>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 italic">No end users found.</td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <% } %>
+
+                        <!-- Tab Content: System Users -->
+                        <% if (activeTab === 'system-users') { %>
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-200">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">User</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Email</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Role</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Last IP</th>
+                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        <% if (systemUsers && systemUsers.length > 0) { %>
+                                            <% systemUsers.forEach(u => { %>
+                                                <tr class="hover:bg-slate-50 transition-colors">
+                                                    <td class="px-6 py-4 text-sm font-bold text-slate-900"><%= u.name || 'No Name' %></td>
+                                                    <td class="px-6 py-4 text-sm text-slate-600"><%= u.email %></td>
+                                                    <td class="px-6 py-4">
+                                                        <span class="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold uppercase"><%= u.role %></span>
+                                                    </td>
+                                                    <td class="px-6 py-4">
+                                                        <span class="px-2 py-1 <%= u.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %> rounded-full text-xs font-bold">
+                                                            <%= u.isActive ? 'Active' : 'Inactive' %>
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-sm text-slate-500 font-mono text-xs">
+                                                        <%= u.loginHistory && u.loginHistory[0] ? u.loginHistory[0].ipAddress : '-' %>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-right">
+                                                        <% if (permissions.manage_users) { %>
+                                                        <button onclick="changeRole('<%= u.id %>', '<%= u.role %>')" class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                                            Change Role
+                                                        </button>
+                                                        <% } %>
+                                                    </td>
+                                                </tr>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="6" class="px-6 py-8 text-center text-slate-500 italic">No system users found.</td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <% } %>
+
+                        <!-- Tab Content: Banned IPs -->
+                        <% if (activeTab === 'banned-ips') { %>
+                        <div class="space-y-4">
+                            <!-- Ban New IP Form -->
+                            <% if (permissions.manage_users) { %>
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                                <h3 class="text-sm font-bold text-slate-900 mb-3 uppercase tracking-widest">Ban New IP</h3>
+                                <form id="banIpForm" class="flex flex-wrap gap-3 items-end">
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">IP Address</label>
+                                        <input type="text" name="ipAddress" required placeholder="192.168.1.1" class="w-full border-slate-200 rounded-lg text-sm">
+                                    </div>
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Reason</label>
+                                        <input type="text" name="reason" placeholder="Abuse, spam, etc." class="w-full border-slate-200 rounded-lg text-sm">
+                                    </div>
+                                    <div class="w-40">
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Duration</label>
+                                        <select name="duration" class="w-full border-slate-200 rounded-lg text-sm">
+                                            <option value="permanent">Permanent</option>
+                                            <option value="1">1 Hour</option>
+                                            <option value="24">24 Hours</option>
+                                            <option value="168">7 Days</option>
+                                            <option value="720">30 Days</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-colors">
+                                        Ban IP
+                                    </button>
+                                </form>
+                            </div>
+                            <% } %>
+
+                            <!-- Banned IPs Table -->
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-slate-200">
+                                        <thead class="bg-slate-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">IP Address</th>
+                                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Reason</th>
+                                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Expires</th>
+                                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Banned On</th>
+                                                <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-200">
+                                            <% if (bannedIps && bannedIps.length > 0) { %>
+                                                <% bannedIps.forEach(ban => { %>
+                                                    <tr class="hover:bg-slate-50 transition-colors">
+                                                        <td class="px-6 py-4 text-sm font-bold text-slate-900 font-mono"><%= ban.ipAddress %></td>
+                                                        <td class="px-6 py-4 text-sm text-slate-600"><%= ban.reason || '-' %></td>
+                                                        <td class="px-6 py-4 text-sm">
+                                                            <% if (ban.expiresAt) { %>
+                                                                <span class="text-amber-600"><%= new Date(ban.expiresAt).toLocaleString() %></span>
+                                                            <% } else { %>
+                                                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold">Permanent</span>
+                                                            <% } %>
+                                                        </td>
+                                                        <td class="px-6 py-4 text-sm text-slate-500"><%= new Date(ban.createdAt).toLocaleDateString() %></td>
+                                                        <td class="px-6 py-4 text-right">
+                                                            <% if (permissions.manage_users) { %>
+                                                            <button onclick="unbanIp('<%= ban.id %>')" class="px-3 py-1.5 text-xs font-bold text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                                                                Unban
+                                                            </button>
+                                                            <% } %>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="5" class="px-6 py-8 text-center text-slate-500 italic">No banned IPs.</td>
+                                                </tr>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Help Guide Panel (Fixed) -->
+                <div class="hidden lg:block col-span-3 border-l border-slate-200 bg-white h-full relative z-10 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
+                    <div id="helpGuideContent" class="h-full">
+                        <!-- Loaded via JS -->
+                        <div class="flex items-center justify-center h-full text-slate-400 text-sm animate-pulse">
+                            Loading Guide...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- IP History Modal -->
+    <div id="ipHistoryModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">IP History</h3>
+                <button onclick="closeModal('ipHistoryModal')" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="ipHistoryContent" class="p-6 overflow-y-auto max-h-[60vh]">
+                <div class="text-center text-slate-400">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Change Modal -->
+    <div id="roleModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full shadow-2xl">
+            <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">Change User Role</h3>
+                <button onclick="closeModal('roleModal')" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="roleChangeForm" class="p-6 space-y-4">
+                <input type="hidden" id="roleUserId" name="userId">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">New Role</label>
+                    <select id="newRole" name="role" class="w-full border-slate-200 rounded-lg">
+                        <option value="ROOT">ROOT</option>
+                        <option value="CEO">CEO</option>
+                        <option value="COO">COO</option>
+                        <option value="DEVOPS">DEVOPS</option>
+                        <option value="MARKETING">MARKETING</option>
+                        <option value="SUPPORT">SUPPORT</option>
+                        <option value="USER">USER</option>
+                    </select>
+                </div>
+
+                <div id="verificationStep" class="hidden space-y-4">
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <p class="text-sm text-amber-800">A verification code has been sent to your email. Enter it below to confirm the role change.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">Verification Code</label>
+                        <input type="text" id="verificationCode" name="verificationCode" maxlength="6" placeholder="000000" class="w-full border-slate-200 rounded-lg text-center text-2xl tracking-widest font-mono">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('roleModal')" class="px-4 py-2 text-slate-600 bg-slate-100 rounded-lg font-bold hover:bg-slate-200 transition-colors">Cancel</button>
+                    <button type="submit" id="roleSubmitBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors">Request Verification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../../partials/sidebar-script') %>
+    <%- include('../../partials/toast') %>
+
+    <script nonce="<%= nonce %>">
+        // Load Help Guide
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/help/users-guide.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('helpGuideContent').innerHTML = html;
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                })
+                .catch(err => {
+                    console.error('Failed to load help guide:', err);
+                    document.getElementById('helpGuideContent').innerHTML = '<div class="p-6 text-red-500">Failed to load guide.</div>';
+                });
+
+            // Initialize Lucide
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+
+        // Modal helpers
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // View IP History
+        async function viewIpHistory(userId) {
+            document.getElementById('ipHistoryModal').classList.remove('hidden');
+            document.getElementById('ipHistoryContent').innerHTML = '<div class="text-center text-slate-400">Loading...</div>';
+            
+            try {
+                const res = await fetch(`/admin/users/${userId}/ips`);
+                const data = await res.json();
+                
+                if (data.success) {
+                    let html = '<div class="space-y-3">';
+                    Object.entries(data.ipStats).forEach(([ip, stats]) => {
+                        html += `
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div>
+                                    <p class="font-mono text-sm font-bold">${ip}</p>
+                                    <p class="text-xs text-slate-500">${stats.count} logins, Last: ${new Date(stats.lastSeen).toLocaleString()}</p>
+                                </div>
+                                <button onclick="banIpDirect('${ip}')" class="px-3 py-1 text-xs font-bold text-red-600 bg-red-50 rounded hover:bg-red-100">Ban IP</button>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    document.getElementById('ipHistoryContent').innerHTML = html;
+                }
+            } catch (err) {
+                document.getElementById('ipHistoryContent').innerHTML = '<div class="text-center text-red-500">Failed to load IP history.</div>';
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // Ban User
+        async function banUser(userId, email) {
+            if (!confirm(`Are you sure you want to ban ${email}?`)) return;
+            
+            const reason = prompt('Enter ban reason (optional):');
+            try {
+                const res = await fetch(`/admin/users/${userId}/ban`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Success', 'User banned successfully', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Error', data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'Failed to ban user', 'error');
+            }
+        }
+
+        // Unban User
+        async function unbanUser(userId) {
+            try {
+                const res = await fetch(`/admin/users/${userId}/unban`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Success', 'User unbanned successfully', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            } catch (err) {
+                showToast('Error', 'Failed to unban user', 'error');
+            }
+        }
+
+        // Ban IP from form
+        document.getElementById('banIpForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const res = await fetch('/admin/ip-bans', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Success', 'IP banned successfully', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Error', data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'Failed to ban IP', 'error');
+            }
+        });
+
+        // Ban IP directly
+        async function banIpDirect(ip) {
+            const reason = prompt('Enter ban reason (optional):');
+            try {
+                const res = await fetch('/admin/ip-bans', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ipAddress: ip, reason, duration: 'permanent' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Success', 'IP banned successfully', 'success');
+                    closeModal('ipHistoryModal');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Error', data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'Failed to ban IP', 'error');
+            }
+        }
+
+        // Unban IP
+        async function unbanIp(banId) {
+            try {
+                const res = await fetch(`/admin/ip-bans/${banId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Success', 'IP unbanned successfully', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            } catch (err) {
+                showToast('Error', 'Failed to unban IP', 'error');
+            }
+        }
+
+        // Change Role
+        let roleChangeStep = 'initial';
+        function changeRole(userId, currentRole) {
+            document.getElementById('roleModal').classList.remove('hidden');
+            document.getElementById('roleUserId').value = userId;
+            document.getElementById('newRole').value = currentRole;
+            document.getElementById('verificationStep').classList.add('hidden');
+            document.getElementById('roleSubmitBtn').textContent = 'Request Verification';
+            roleChangeStep = 'initial';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        document.getElementById('roleChangeForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (roleChangeStep === 'initial') {
+                // Step 1: Request verification code
+                try {
+                    const res = await fetch('/admin/verification/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'UPDATE_USER_ROLE' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Success', 'Verification code sent to your email', 'success');
+                        document.getElementById('verificationStep').classList.remove('hidden');
+                        document.getElementById('roleSubmitBtn').textContent = 'Confirm Role Change';
+                        roleChangeStep = 'verify';
+                    } else {
+                        showToast('Error', data.error || 'Failed to send code', 'error');
+                    }
+                } catch (err) {
+                    showToast('Error', 'Failed to send verification code', 'error');
+                }
+            } else {
+                // Step 2: Submit with verification code
+                const userId = document.getElementById('roleUserId').value;
+                const role = document.getElementById('newRole').value;
+                const verificationCode = document.getElementById('verificationCode').value;
+                
+                try {
+                    const res = await fetch(`/admin/users/${userId}/role`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role, verificationCode })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Success', 'Role updated successfully', 'success');
+                        closeModal('roleModal');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Error', data.error, 'error');
+                    }
+                } catch (err) {
+                    showToast('Error', 'Failed to update role', 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

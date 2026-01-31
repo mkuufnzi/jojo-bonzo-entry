@@ -1,0 +1,144 @@
+<nav class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 text-slate-800 font-sans" x-data="{ mobileMenuOpen: false, openDropdown: null }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="/" class="flex-shrink-0 flex items-center gap-2 group">
+                    <div class="w-9 h-9 bg-brand-blue rounded-xl flex items-center justify-center shadow-glow transition-transform group-hover:scale-105">
+                        <span class="font-heading font-bold text-white text-xl">F</span>
+                    </div>
+                    <span class="font-heading font-bold text-2xl tracking-tight text-deep-ocean group-hover:text-brand-blue transition-colors">Floovioo</span>
+                </a>
+            </div>
+
+            <!-- Desktop Nav -->
+            <div class="hidden lg:flex items-center space-x-1">
+                
+                <!-- Platform Dropdown (Enterprise Mega Menu) -->
+                <div class="relative group" @mouseenter="openDropdown = 'platform'" @mouseleave="openDropdown = null">
+                    <button class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand-blue flex items-center gap-1 transition-colors group-hover:bg-slate-50 rounded-lg">
+                        Platform
+                        <svg class="w-4 h-4 text-slate-400 group-hover:text-brand-blue transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <!-- Mega Menu Panel -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2 mt-0 w-screen max-w-4xl px-2 sm:px-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pt-4">
+                         <div class="rounded-2xl shadow-card-hover ring-1 ring-black ring-opacity-5 overflow-hidden bg-white">
+                            <div class="grid grid-cols-3 gap-0">
+                                <!-- Col 1: Document Engine -->
+                                <div class="p-8 bg-white">
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Document Engine</h3>
+                                    <div class="space-y-6">
+                                        <a href="/products/transactional" class="group flex items-start">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center group-hover:bg-brand-blue group-hover:text-white transition-colors">
+                                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                            </div>
+                                            <div class="ml-4">
+                                                <p class="text-base font-medium text-slate-900 group-hover:text-brand-blue">Transactional Branding</p>
+                                                <p class="mt-1 text-sm text-slate-500">Invoices & Receipts that sell.</p>
+                                            </div>
+                                        </a>
+                                        <a href="/products/workflows" class="group flex items-start">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                            </div>
+                                            <div class="ml-4">
+                                                <p class="text-base font-medium text-slate-900 group-hover:text-brand-blue">Workflows</p>
+                                                <p class="mt-1 text-sm text-slate-500">Automate via API & Webhooks.</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Col 2: Floovioo Network -->
+                                <div class="p-8 bg-white border-l border-r border-slate-100">
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Floovioo Network</h3>
+                                    <div class="space-y-6">
+                                        <a href="/products/content" class="group flex items-start">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-white border border-slate-200 text-slate-600 flex items-center justify-center group-hover:border-brand-blue group-hover:text-brand-blue transition-colors">
+                                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                            </div>
+                                            <div class="ml-4">
+                                                <p class="text-base font-medium text-slate-900 group-hover:text-brand-blue flex items-center">
+                                                    Content Engine
+                                                    <svg class="w-3 h-3 ml-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                                </p>
+                                                <p class="mt-1 text-sm text-slate-500">Turn data into viral content.</p>
+                                            </div>
+                                        </a>
+                                        <a href="/products/sales" class="group flex items-start">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-white border border-slate-200 text-slate-600 flex items-center justify-center group-hover:border-brand-blue group-hover:text-brand-blue transition-colors">
+                                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                            </div>
+                                            <div class="ml-4">
+                                                <p class="text-base font-medium text-slate-900 group-hover:text-brand-blue flex items-center">
+                                                    Sales Enablement
+                                                    <svg class="w-3 h-3 ml-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                                </p>
+                                                <p class="mt-1 text-sm text-slate-500">Auto-generate Pitch Decks.</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Col 3: Resources -->
+                                <div class="p-8 bg-white">
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Resources</h3>
+                                    <ul class="space-y-4">
+                                        <li><a href="/docs" class="text-sm font-medium text-slate-600 hover:text-brand-blue">Documentation</a></li>
+                                        <li><a href="/docs" class="text-sm font-medium text-slate-600 hover:text-brand-blue">API Reference</a></li>
+                                        <li><a href="/templates" class="text-sm font-medium text-slate-600 hover:text-brand-blue">Template Gallery</a></li>
+                                        <li><a href="/blog" class="text-sm font-medium text-slate-600 hover:text-brand-blue">Blog & Updates</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Bottom Footer -->
+                            <div class="bg-slate-50 px-8 py-4 border-t border-slate-100 flex justify-between items-center">
+                                <span class="text-sm text-slate-500">Need help building a template?</span>
+                                <a href="/contact" class="text-sm font-bold text-brand-blue hover:text-brand-indigo">Contact Solutions Engineering &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solutions Link -->
+                <a href="/solutions/automation-for-smes" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand-blue hover:bg-slate-50 rounded-lg transition-colors">Solutions</a>
+
+                <!-- Pricing Link -->
+                <a href="/pricing" class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand-blue hover:bg-slate-50 rounded-lg transition-colors">Pricing</a>
+            </div>
+
+            <!-- Auth Buttons -->
+            <div class="hidden lg:flex items-center space-x-4">
+                <a href="/auth/login" class="text-sm font-bold text-slate-600 hover:text-brand-blue transition">Log in</a>
+                <a href="/auth/register" class="inline-flex items-center justify-center px-5 py-2.5 border border-transparent rounded-xl shadow-glow text-sm font-bold text-white bg-brand-blue hover:bg-brand-indigo focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-all hover:shadow-card-hover hover:-translate-y-0.5">
+                    Start Building
+                </a>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="flex lg:hidden">
+                <button type="button" @click="mobileMenuOpen = !mobileMenuOpen" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-blue" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <svg x-show="!mobileMenuOpen" class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                    <svg x-show="mobileMenuOpen" class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="lg:hidden" x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95">
+        <div class="pt-2 pb-3 space-y-1 px-4 bg-white shadow-xl border-b border-slate-100">
+            <a href="/products/transactional" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:text-brand-blue hover:bg-blue-50">Transactional Branding</a>
+            <a href="/products/workflows" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:text-brand-blue hover:bg-blue-50">Workflows</a>
+            <a href="/products/content" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:text-brand-blue hover:bg-blue-50">Content Engine</a>
+            <a href="/products/sales" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:text-brand-blue hover:bg-blue-50">Sales Enablement</a>
+            <a href="/pricing" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:text-brand-blue hover:bg-blue-50">Pricing</a>
+            <div class="border-t border-slate-100 mt-2 pt-2">
+                 <a href="/auth/login" class="block w-full text-center px-4 py-2 text-base font-bold text-slate-600 hover:bg-slate-50 rounded-lg">Log in</a>
+                 <a href="/auth/register" class="block w-full text-center px-4 py-3 mt-2 border border-transparent shadow-sm text-base font-bold rounded-xl text-white bg-brand-blue hover:bg-brand-indigo">Sign up Free</a>
+            </div>
+        </div>
+    </div>
+</nav>
+<script src="//unpkg.com/alpinejs" defer></script>

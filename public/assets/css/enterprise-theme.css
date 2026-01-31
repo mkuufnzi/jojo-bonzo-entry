@@ -1,0 +1,55 @@
+:root {
+    /* Brand Colors - Floovioo Enterprise */
+    --brand-blue: #2563eb;
+    --brand-blue-glow: rgba(37, 99, 235, 0.4);
+    --deep-ocean: #0f172a;
+    --electric-teal: #14b8a6;
+    
+    /* Surface Colors */
+    --dash-bg: #f8fafc;
+    --dash-card: #ffffff;
+    --dash-sidebar: #0f172a;
+    --dash-border: #e2e8f0;
+    
+    /* Typography */
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+}
+
+/* Premium Dashboard Utilities */
+.shadow-glow {
+    box-shadow: 0 0 20px -5px var(--brand-blue-glow);
+}
+
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-link-active {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--brand-blue);
+    border-left: 3px solid var(--brand-blue);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Dashboard Specific Transitions */
+.transition-sidebar {
+    transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* AI Sidepanel specific */
+#aiSidepanel {
+    box-shadow: -10px 0 30px -15px rgba(15, 23, 42, 0.1);
+}

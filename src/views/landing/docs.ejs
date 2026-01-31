@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Floovioo </title>
+    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-900">
+
+    <%- include('../partials/navbar') %>
+
+    <div class="flex max-w-7xl mx-auto min-h-screen">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 hidden md:block sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto border-r border-gray-200 bg-white pt-8 pb-10">
+            <nav class="px-4 space-y-8">
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available Tools</h3>
+                    <div class="mt-2 space-y-1">
+                        <a href="#tool-ai-generator" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50">
+                            AI Document Generator
+                        </a>
+                        <a href="#tool-pdf-converter" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50">
+                            PDF Conversion Suite
+                        </a>
+                        <a href="#tool-compliance" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50">
+                            Compliance Tools
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Webhooks</h3>
+                    <div class="mt-2 space-y-1">
+                        <a href="#webhooks-lifecycle" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50">
+                            Job Status Lifecycle
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 pt-10 px-4 sm:px-6 lg:px-8 pb-20">
+            <div class="max-w-3xl mx-auto">
+                
+                <section id="introduction" class="mb-16">
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-4">Introduction</h1>
+                    <p class="text-lg text-gray-500 mb-4">
+                        Welcome to the Floovioo  documentation. Our platform provides a suite of powerful tools for document manipulation, including PDF generation, merging, splitting, and more.
+                    </p>
+                    <p class="text-lg text-gray-500 mb-6">
+                        Whether you are using our web interface or integrating our API into your applications, this documentation will help you get up and running quickly.
+                    </p>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">
+                                    Looking for the interactive API reference? Check out our 
+                                    <a href="/api/docs" class="font-medium underline text-blue-700 hover:text-blue-600">
+                                        Swagger API Documentation
+                                    </a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="quick-start" class="mb-16">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Quick Start</h2>
+                    <p class="text-gray-600 mb-4">
+                        To start using our tools immediately, simply navigate to the <a href="/" class="text-blue-600 hover:underline">Tools</a> section and select the tool you need. No account is required for basic usage.
+                    </p>
+                    <div class="bg-gray-800 rounded-lg p-4 overflow-x-auto">
+                        <code class="text-sm text-gray-100 block whitespace-pre-wrap">
+# 1. Submit Job
+curl -X POST https://api.afstools.com/api/pdf/convert \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"html": "<h1>Hello World</h1>"}'
+
+# Response: {"status":"pending", "jobId":"YOUR_JOB_ID", ...}
+
+# 2. Poll Status (Repeat until PDF is returned)
+curl https://api.afstools.com/api/jobs/YOUR_JOB_ID \
+  -H "X-API-Key: YOUR_API_KEY" \
+  --output document.pdf
+                        </code>
+                    </div>
+                </section>
+
+                <section id="authentication" class="mb-16">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Authentication</h2>
+                    <p class="text-gray-600 mb-4">
+                        To use the API, you need an API key. You can obtain an API key by signing up for an account and navigating to your dashboard.
+                    </p>
+                    <p class="text-gray-600 mb-4">
+                        <strong>Important:</strong> You must also provide an <code>appId</code> in your request body for usage attribution. You can manage your apps in the <a href="/apps" class="text-blue-600 hover:underline">Apps dashboard</a>.
+                    </p>
+                    <p class="text-gray-600">
+                        Include your API key in the <code>X-API-KEY</code> header of your requests:
+                    </p>
+                    <div class="mt-4 bg-gray-100 p-4 rounded-md border border-gray-200">
+                        <code class="text-sm text-gray-800">X-API-KEY: YOUR_API_KEY</code>
+                    </div>
+                </section>
+
+                <section id="tool-ai-generator" class="mb-16 pt-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">AI Document Generator</h2>
+                    <p class="text-gray-600 mb-4">
+                        Generate professional documents using our advanced AI. This endpoint accepts context and doc-type to produce high-quality HTML content.
+                    </p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Endpoint</h3>
+                    <div class="bg-gray-100 p-2 rounded mb-4 inline-block font-mono text-sm">POST /api/ai/generate</div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Parameters</h3>
+                    <table class="min-w-full divide-y divide-gray-200 mb-6">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Field</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-sm">
+                            <tr><td class="px-4 py-2 font-mono">appId</td><td class="px-4 py-2">string</td><td class="px-4 py-2">Required for attribution.</td></tr>
+                            <tr><td class="px-4 py-2 font-mono">documentType</td><td class="px-4 py-2">string</td><td class="px-4 py-2">e.g., `gdpr-notice`, `employment-contract`.</td></tr>
+                            <tr><td class="px-4 py-2 font-mono">prompt</td><td class="px-4 py-2">string</td><td class="px-4 py-2">The main prompt or context for generation.</td></tr>
+                            <tr><td class="px-4 py-2 font-mono">context</td><td class="px-4 py-2">string</td><td class="px-4 py-2">Additional background info.</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="tool-pdf-converter" class="mb-16 pt-8 border-t border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">PDF Conversion Suite</h2>
+                    <p class="text-gray-600 mb-4">
+                        Convert HTML, URLs, or DOCX files to professional PDFs.
+                    </p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Endpoint</h3>
+                    <div class="bg-gray-100 p-2 rounded mb-4 inline-block font-mono text-sm">POST /api/pdf/convert</div>
+                    <div class="bg-blue-50 p-4 rounded mb-4 text-sm text-blue-700">
+                        Supports both `application/json` (for HTML strings) and `multipart/form-data` (for file uploads).
+                    </div>
+                </section>
+
+                <section id="tool-compliance" class="mb-16 pt-8 border-t border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Compliance Tools</h2>
+                    <p class="text-gray-600 mb-6">
+                        Specialized automated workflows for UK regulatory compliance and business operations.
+                    </p>
+                    
+                    <div class="space-y-12">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">HMRC VAT Invoice Generator</h3>
+                            <p class="text-sm text-gray-600 mb-4">Converts Word/HTML invoices into HMRC-compliant PDF format with correct tax calculations and layouts.</p>
+                            <div class="bg-gray-100 p-3 rounded font-mono text-xs mb-2">POST /api/pdf/convert?slug=docx-to-pdf</div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">GDPR SAR Compiler</h3>
+                            <p class="text-sm text-gray-600 mb-4">Combines multiple client record files (PDFs, Images) into a single, organized Subject Access Request bundle with automatic page numbering.</p>
+                            <div class="bg-gray-100 p-3 rounded font-mono text-xs mb-2">POST /api/pdf/convert?slug=merge-pdf</div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">Right to Rent Proof Extractor</h3>
+                            <p class="text-sm text-gray-600 mb-4">Extracts passport or visa pages from identity documents for ID verification checks in the rental sector.</p>
+                            <div class="bg-gray-100 p-3 rounded font-mono text-xs mb-2">POST /api/pdf/convert?slug=pdf-to-image</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="webhooks-lifecycle" class="mb-16 pt-8 border-t border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Job Status Lifecycle</h2>
+                    <p class="text-gray-600 mb-8">
+                        Our API uses an asynchronous job-based architecture for heavy processing. Follow this lifecycle to retrieve your documents.
+                    </p>
+                    <div class="relative pl-8 border-l-2 border-blue-200 space-y-12">
+                        <div class="relative">
+                            <span class="absolute left-[-2.5625rem] top-1 flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-[0.625rem] font-bold">1</span>
+                            <h4 class="font-bold text-gray-900">Submission (Accepted)</h4>
+                            <p class="text-sm text-gray-600 mt-1">Submit your request to any processing endpoint. You will receive a <code>202 Accepted</code> response with a unique <code>jobId</code>.</p>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-[-2.5625rem] top-1 flex items-center justify-center w-6 h-6 rounded-full bg-yellow-500 text-white text-[0.625rem] font-bold">2</span>
+                            <h4 class="font-bold text-gray-900">Queue & Processing</h4>
+                            <p class="text-sm text-gray-600 mt-1">The job enters our distributed worker queue. You can poll <code>GET /api/jobs/:id</code> to check progress. Statuses include <code>pending</code>, <code>processing</code>, and <code>completed</code>.</p>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-[-2.5625rem] top-1 flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-white text-[0.625rem] font-bold">3</span>
+                            <h4 class="font-bold text-gray-900">Retrieval</h4>
+                            <p class="text-sm text-gray-600 mt-1">Once status is <code>completed</code>, the polling endpoint returns either the binary file data directly or a <code>downloadUrl</code> for larger datasets.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

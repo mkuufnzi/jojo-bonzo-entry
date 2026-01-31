@@ -1,0 +1,443 @@
+<%- include('partials/head', { title: 'Floovioo  - Dashboard' }) %>
+
+<body class="bg-gray-100 min-h-screen font-sans">
+    <%- include('partials/sidebar', { currentPath: '/dashboard' }) %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('partials/dashboard-header', {title: 'Dashboard' , user: user }) %>
+        <%- include('partials/onboarding-modal') %>
+
+        <main class="flex-1">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-6">
+                <div class="mb-4 md:flex md:items-center md:justify-between">
+                    <div>
+                        <p class="text-[0.8125rem] font-bold text-gray-400 uppercase tracking-widest mt-1">Account Overview</p>
+                    </div>
+                </div>
+
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                                    <!-- User Info & API Key -->
+                                    <div class="card">
+                                        <div class="flex items-center justify-between mb-5">
+                                            <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
+                                                Account Details</h2>
+                                            <span
+                                                class="px-2 py-0.5 text-[0.6875rem] font-bold rounded border <%= user.isActive ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100' %> uppercase tracking-widest">
+                                                <%= user.isActive ? 'Active' : 'Inactive' %>
+                                            </span>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label
+                                                        class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Identity</label>
+                                                    <p
+                                                        class="text-[0.8125rem] text-slate-900 dark:text-gray-100 font-bold uppercase tracking-tight">
+                                                        <%= user.name %>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Email
+                                                        Address</label>
+                                                    <p class="text-[0.8125rem] text-slate-900 dark:text-gray-100 font-bold truncate tracking-tight"
+                                                        title="<%= user.email %>">
+                                                        <%= user.email %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="pt-4 border-t border-slate-100 dark:border-slate-700">
+                                                <label
+                                                    class="block text-[0.6875rem] font-bold text-slate-400 uppercase tracking-widest mb-2">Subscription
+                                                    Plan</label>
+                                                <div class="flex items-center justify-between">
+                                                    <span
+                                                        class="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                                                        <%= (user.subscription && user.subscription.plan) ? user.subscription.plan.name
+                                                            : 'No Active Plan' %>
+                                                    </span>
+                                                    <%- include('partials/components/button', { 
+                                                        href: '/subscription', 
+                                                        label: 'Manage', 
+                                                        size: 'sm', 
+                                                        variant: 'secondary',
+                                                        class: 'uppercase tracking-widest'
+                                                    }) %>
+                                                </div>
+                                                <% if (user.subscription && user.subscription.plan && user.subscription.plan.name==='Free' ) { %>
+                                                    <p
+                                                        class="text-[0.6875rem] font-bold text-yellow-600 mt-2 uppercase tracking-widest italic">
+                                                        Standard access only.</p>
+                                                    <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Usage Stats -->
+                                    <div class="card">
+                                        <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-5">Usage
+                                            Overview</h2>
+
+                                        <!-- Monthly Quota Progress -->
+                                        <div class="mb-5">
+                                            <div class="flex justify-between items-center mb-1.5">
+                                                <span
+                                                    class="text-[0.75rem] font-bold text-slate-400 uppercase tracking-widest">Monthly
+                                                    Quota</span>
+                                                <span
+                                                    class="text-[0.75rem] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-800">
+                                                    <%= monthlyUsage %> / <%= planLimit===-1 ? 'Unlimited' : planLimit
+                                                            %>
+                                                </span>
+                                            </div>
+                                            <% if (planLimit !==-1) { %>
+                                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                                    <% const percentage=Math.min((monthlyUsage / planLimit) * 100, 100);
+                                                        %>
+                                                        <div id="quota-progress-bar"
+                                                            class="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
+                                                            data-percentage="<%= percentage %>"></div>
+                                                </div>
+                                                <% } else { %>
+                                                    <div
+                                                        class="w-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-[0.5rem] font-bold px-2 py-1 rounded border border-blue-100 dark:border-blue-800 text-center uppercase tracking-widest">
+                                                        Unlimited Generation Access
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <p
+                                                        class="text-[0.8125rem] font-bold text-slate-400 uppercase tracking-widest">
+                                                        Global Requests</p>
+                                                    <i data-lucide="zap" class="w-3.5 h-3.5 text-blue-400"></i>
+                                                </div>
+                                                <p class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                                    <%= logsCount %>
+                                                </p>
+                                                <p
+                                                    class="text-[0.6875rem] font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                                                    Lifetime Total</p>
+                                            </div>
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <p
+                                                        class="text-[0.8125rem] font-bold text-slate-400 uppercase tracking-widest">
+                                                        Success Rate</p>
+                                                    <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
+                                                </div>
+                                                <% const rate=logsCount> 0 ? Math.round((successCount / logsCount) *
+                                                    100) :
+                                                    100;
+                                                    %>
+                                                    <p class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                                        <%= rate %>%
+                                                    </p>
+                                                    <p
+                                                        class="text-[0.6875rem] font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                                                        30D Success Rate</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Multi-App Usage Chart -->
+                                        <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700">
+                                            <h3
+                                                class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                                                Daily Request Distribution</h3>
+                                            <div class="relative h-48 w-full">
+                                                <canvas id="dashboardChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Quick
+                                            Tools</h2>
+                                    </div>
+                                    <!-- Quick Actions / Recently Used -->
+                                    <div class="card lg:col-span-2">
+                                        <h2 class="text-[0.8125rem] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                                            Recently Used Tools</h2>
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <% /* Extract unique services from recent logs */ const uniqueServices=[];
+                                                const seenServiceIds=new Set(); if (typeof recentLogs !=='undefined' ) {
+                                                recentLogs.forEach(log=> {
+                                                if (log.service && !seenServiceIds.has(log.service.id)) {
+                                                seenServiceIds.add(log.service.id);
+                                                uniqueServices.push(log.service);
+                                                }
+                                                });
+                                                }
+
+                                                /* Take top 4 */
+                                                const displayServices = uniqueServices.slice(0, 4);
+                                                %>
+
+                                                <% if (displayServices.length> 0) { %>
+                                                    <% displayServices.forEach(service=> { %>
+                                                        <a href="/services/<%= service.slug %>"
+                                                            class="p-4 border border-slate-100 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex flex-col items-center justify-center text-center group">
+                                                            <%- include('partials/service-icon', { service: service,
+                                                                type: 'grid' }) %>
+                                                                <span
+                                                                    class="text-sm font-medium text-slate-900 dark:text-white group-hover:text-blue-600 mt-2">
+                                                                    <%= service.name %>
+                                                                </span>
+                                                        </a>
+                                                        <% }); %>
+                                                            <!-- Add placeholders to fill up to 4 if needed, or just let it be -->
+                                                            <% } else { %>
+                                                                <!-- Default Items if no history -->
+                                                                <a href="/services/html-to-pdf"
+                                                                    class="p-4 border border-slate-100 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex flex-col items-center justify-center text-center group">
+                                                                    <%- include('partials/service-icon', { service: {
+                                                                        slug: 'html-to-pdf' }, type: 'grid' }) %>
+                                                                        <span
+                                                                            class="text-sm font-medium text-slate-900 dark:text-white group-hover:text-blue-600 mt-2">HTML
+                                                                            to PDF</span>
+                                                                </a>
+                                                                <a href="/tools"
+                                                                    class="p-4 border border-slate-100 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex flex-col items-center justify-center text-center group">
+                                                                    <%- include('partials/service-icon', { service: {
+                                                                        slug: 'browse' }, type: 'grid' }) %>
+                                                                        <span
+                                                                            class="text-sm font-medium text-slate-900 dark:text-white group-hover:text-purple-600 mt-2">Browse
+                                                                            All Tools</span>
+                                                                </a>
+                                                                <% } %>
+                                        </div>
+                                    </div>
+
+                                    <!-- Recent Logs -->
+                                    <div class="mt-4 card overflow-hidden p-0">
+                                        <div
+                                            class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/20 flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                                                <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
+                                                    Recent Activity</h2>
+                                            </div>
+                                            <a href="/billing?tab=usage"
+                                                class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View
+                                                All</a>
+                                        </div>
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
+                                                <thead class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+                                                    <tr>
+                                                        <th
+                                                            class="px-5 py-2.5 text-left text-[0.6875rem] font-bold text-slate-400 uppercase tracking-widest">
+                                                            Timestamp</th>
+                                                        <th
+                                                            class="px-5 py-2.5 text-left text-[0.6875rem] font-bold text-slate-400 uppercase tracking-widest">
+                                                            Operation</th>
+                                                        <th
+                                                            class="px-5 py-2.5 text-left text-[0.6875rem] font-bold text-slate-400 uppercase tracking-widest">
+                                                            Status</th>
+                                                        <th
+                                                            class="px-5 py-2.5 text-left text-[0.6875rem] font-bold text-slate-400 uppercase tracking-widest">
+                                                            Latency</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
+                                                    <% if (!user.logs || user.logs.length===0) { %>
+                                                        <tr>
+                                                            <td colspan="4"
+                                                                class="px-6 py-8 text-center text-slate-500 text-sm">
+                                                                No activity recorded yet. Make your first API call!
+                                                            </td>
+                                                        </tr>
+                                                        <% } %>
+                                                            <% (user.logs || []).slice(0, 5).forEach(log=> { %>
+                                                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                                                    <td
+                                                                        class="px-5 py-3 whitespace-nowrap text-[0.8125rem] text-slate-500 font-medium">
+                                                                        <%= new
+                                                                            Date(log.createdAt).toLocaleString(undefined,
+                                                                            { month: 'short' , day: 'numeric' ,
+                                                                            hour: '2-digit' , minute: '2-digit' }) %>
+                                                                    </td>
+                                                                    <td
+                                                                        class="px-5 py-3 whitespace-nowrap text-[0.8125rem] text-slate-900 dark:text-white font-bold uppercase tracking-tight">
+                                                                        <span class="text-blue-600 dark:text-blue-400">
+                                                                            <%= log.action %>
+                                                                        </span> <span
+                                                                            class="text-slate-400 font-medium text-[0.6875rem] ml-1">[
+                                                                            <%= log.resourceType %>]</span>
+                                                                    </td>
+                                                                    <td class="px-5 py-3 whitespace-nowrap">
+                                                                        <% if (log.status==='success' ) { %>
+                                                                            <span
+                                                                                class="px-2 py-0.5 inline-flex text-[0.6875rem] font-bold rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-800 uppercase tracking-widest">
+                                                                                Success
+                                                                            </span>
+                                                                            <% } else { %>
+                                                                                <span
+                                                                                    class="px-2 py-0.5 inline-flex text-[0.6875rem] font-bold rounded bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-800 uppercase tracking-widest">
+                                                                                    Fail
+                                                                                </span>
+                                                                                <% } %>
+                                                                    </td>
+                                                                    <td
+                                                                        class="px-5 py-3 whitespace-nowrap text-[0.8125rem] text-slate-400 font-bold uppercase">
+                                                                        <%= log.duration %>ms
+                                                                    </td>
+                                                                </tr>
+                                                                <% }); %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                        </main>
+            </div>
+
+
+            <%- include('partials/sidebar-script') %>
+
+                <!-- System Data Provisioning -->
+                <script id="dashboard-data" type="application/json" nonce="<%= nonce %>">
+                <%- JSON.stringify({
+                    usageByApp: locals.usageByApp || {},
+                    apps: (locals.user && locals.user.apps) ? locals.user.apps : [],
+                    logsCount: parseInt(locals.logsCount || 0),
+                    successCount: parseInt(locals.successCount || 0)
+                }) %>
+            </script>
+
+                <script nonce="<%= nonce %>">
+                    (function () {
+                        try {
+                            const dataElement = document.getElementById('dashboard-data');
+                            if (!dataElement) return;
+
+                            const sysData = JSON.parse(dataElement.textContent);
+                            const usageByApp = sysData.usageByApp;
+                            const apps = sysData.apps;
+                            const logsCount = sysData.logsCount;
+                            const successCount = sysData.successCount;
+
+                            // Apply Progress Bar Width
+                            const progressBar = document.getElementById('quota-progress-bar');
+                            if (progressBar) {
+                                const pct = progressBar.getAttribute('data-percentage');
+                                progressBar.style.width = pct + '%';
+                            }
+
+                            const ctx = document.getElementById('dashboardChart')?.getContext('2d');
+                            if (!ctx) return;
+
+                            // Generate last 30 days labels
+                            const labels = [];
+                            const today = new Date();
+                            for (let i = 29; i >= 0; i--) {
+                                const d = new Date();
+                                d.setDate(today.getDate() - i);
+                                labels.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                            }
+
+                            // Prepare datasets
+                            const datasets = apps.map((app, index) => {
+                                const appUsage = usageByApp[app.id] || {};
+                                const data = [];
+
+                                for (let i = 29; i >= 0; i--) {
+                                    const d = new Date();
+                                    d.setDate(today.getDate() - i);
+                                    const dateStr = d.toISOString().split('T')[0];
+                                    data.push(appUsage[dateStr] || 0);
+                                }
+
+                                // Generate a color based on index
+                                const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
+                                const color = colors[index % colors.length];
+
+                                return {
+                                    label: app.name,
+                                    data: data,
+                                    borderColor: color,
+                                    backgroundColor: color + '20',
+                                    borderWidth: 1.5,
+                                    tension: 0.4,
+                                    pointRadius: 0,
+                                    pointHoverRadius: 4,
+                                    fill: true
+                                };
+                            });
+
+                            new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: datasets
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    interaction: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    plugins: {
+                                        legend: {
+                                            display: true,
+                                            position: 'bottom',
+                                            labels: {
+                                                boxWidth: 8,
+                                                usePointStyle: true,
+                                                font: { size: 9, weight: 'bold' },
+                                                padding: 20
+                                            }
+                                        },
+                                        tooltip: {
+                                            enabled: true,
+                                            mode: 'index',
+                                            intersect: false,
+                                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                            titleColor: '#1e293b',
+                                            bodyColor: '#475569',
+                                            borderColor: '#e2e8f0',
+                                            borderWidth: 1,
+                                            padding: 10,
+                                            bodyFont: { size: 10 },
+                                            titleFont: { size: 10, weight: 'bold' }
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                precision: 0,
+                                                font: { size: 8 }
+                                            },
+                                            grid: { color: '#f1f5f9' }
+                                        },
+                                        x: {
+                                            grid: { display: false },
+                                            ticks: {
+                                                maxTicksLimit: 7,
+                                                font: { size: 8 }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        } catch (e) {
+                            console.error('Dashboard script initialization error:', e);
+                        }
+                    })();
+
+                    // Initialize Lucide icons
+                    document.addEventListener('DOMContentLoaded', () => {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    });
+                </script>
+                <%- include('partials/toast') %>
+    </body>
+
+    </html>

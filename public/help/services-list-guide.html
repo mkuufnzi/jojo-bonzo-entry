@@ -1,0 +1,83 @@
+<div class="h-full overflow-y-auto p-6 space-y-6 bg-slate-50 custom-scrollbar">
+    
+    <!-- Header -->
+    <div class="mb-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Services Guide
+        </h3>
+        <p class="text-sm text-slate-500 mt-1">Overview of all active tools.</p>
+    </div>
+
+    <!-- Section: Service Registry -->
+    <details class="group bg-white rounded-xl border border-slate-200 transition-all duration-200 open:shadow-sm open:border-indigo-200" open>
+        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                1. The Registry
+            </h4>
+            <span class="text-slate-400 transition-transform duration-200 group-open:rotate-180">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </span>
+        </summary>
+        <div class="px-4 pb-4 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-50 mt-1">
+            <p class="pt-2">This list shows every tool installed in the system.</p>
+            <div class="text-sm text-slate-600 space-y-2">
+                <p><strong>Configured:</strong> Ready to use (has webhooks/paths set up).</p>
+                <p><strong>Active:</strong> Visible to customers.</p>
+            </div>
+        </div>
+    </details>
+
+    <!-- Section: Health Checks -->
+    <details class="group bg-white rounded-xl border border-slate-200 transition-all duration-200 open:shadow-sm open:border-indigo-200">
+        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                2. Status Indicators
+            </h4>
+            <span class="text-slate-400 transition-transform duration-200 group-open:rotate-180">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </span>
+        </summary>
+        <div class="px-4 pb-4 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-50 mt-1">
+            <ul class="space-y-2 pt-2">
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="text-emerald-700 font-bold">Active:</span> Running normally.
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                    <span class="text-slate-500 font-bold">Inactive:</span> Disabled. Users cannot see it.
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                     <span class="text-amber-700 font-bold">Maintenance:</span> Temporarily offline.
+                </li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- Section: Editing -->
+    <details class="group bg-white rounded-xl border border-slate-200 transition-all duration-200 open:shadow-sm open:border-indigo-200">
+        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                3. Configuration
+            </h4>
+            <span class="text-slate-400 transition-transform duration-200 group-open:rotate-180">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </span>
+        </summary>
+        <div class="px-4 pb-4 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-50 mt-1">
+            <p class="pt-2">
+                Click <strong>"Configure"</strong> to edit a service's connection to n8n, its pricing, or its description.
+            </p>
+            <div class="flex items-start gap-2 text-xs text-indigo-700 bg-indigo-50 p-2 rounded">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                 <span>The "Configure" page has its own detailed guide for advanced settings.</span>
+            </div>
+        </div>
+    </details>
+
+</div>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Features - Admin</title>
+    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <%- include('../../partials/admin-sidebar') %>
+    
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../../partials/dashboard-header', {title: 'Plan Feature Management', user: user}) %>
+        
+        <main class="flex-1 p-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-2xl font-bold mb-6">Assign Features to Plans</h2>
+                    
+                    <!-- Feature Matrix Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Feature</th>
+                                    <% plans.forEach(plan => { %>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                            <%= plan.name %>
+                                            <br>
+                                            <span class="text-gray-400">£<%= plan.price %></span>
+                                        </th>
+                                    <% }) %>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% allFeatures.forEach(feature => { %>
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-medium text-gray-900"><%= feature.name %></div>
+                                            <div class="text-sm text-gray-500"><%= feature.description %></div>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                <%= feature.category %>
+                                            </span>
+                                        </td>
+                                        <% plans.forEach(plan => { 
+                                            const hasFeature = plan.planFeatures.find(pf => pf.featureId === feature.id && pf.isEnabled);
+                                        %>
+                                            <td class="px-6 py-4 text-center">
+                                                <button 
+                                                    onclick="toggleFeature('<%= plan.id %>', '<%= feature.id %>')"
+                                                    class="<%= hasFeature ? 'bg-green-500' : 'bg-gray-300' %> relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out">
+                                                    <span class="<%= hasFeature ? 'translate-x-5' : 'translate-x-0' %> pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                                </button>
+                                            </td>
+                                        <% }) %>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script nonce="<%= nonce %>">
+        async function toggleFeature(planId, featureId) {
+            try {
+                const response = await fetch('/admin/plan-features/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ planId, featureId })
+                });
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    showToast('Error', 'Failed to toggle feature', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error', 'Error toggling feature', 'error');
+            }
+        }
+    </script>
+    <%- include('../../partials/toast') %>
+    <%- include('../../partials/sidebar-script') %>
+</body>
+</html>

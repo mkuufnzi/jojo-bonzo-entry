@@ -1,0 +1,759 @@
+<%- include('../partials/head', { title: 'HTML to PDF Converter - Floovioo ', additionalCss: '/css/services/pdf-converter.css' }) %>
+
+<body class="bg-gray-100 min-h-screen font-sans">
+    <%- include('../partials/sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../partials/dashboard-header', {title: 'HTML to PDF Converter' , user: user }) %>
+
+        <div class="flex-1 flex flex-col min-w-0 bg-gray-50/50">
+            <main class="flex-1 flex flex-col relative overflow-hidden">
+                <!-- Header Row (High Level CTAs) -->
+                <div class="bg-white border-b border-slate-200 sticky top-0 lg:static z-30">
+                    <div class="max-w-[100rem] mx-auto px-6 lg:px-8 py-3 flex flex-row flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-blue-50 rounded-lg">
+                                <i data-lucide="file-code" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold text-gray-900 tracking-tight">PDF Converter</h1>
+                                <p class="text-sm font-medium text-slate-500">Professional document generation</p>
+                            </div>
+                        </div>
+                        <!-- Settings / More Actions Menu -->
+                        <div class="relative" id="pdf-settings-container">
+                            <button id="pdf-settings-btn" class="p-2 sm:px-2.5 sm:py-2 bg-slate-50 text-slate-500 border border-slate-200 rounded-lg hover:bg-white hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm group" aria-label="Service Settings">
+                                <i data-lucide="settings-2" class="w-5 h-5 group-hover:rotate-45 transition-transform duration-500 ease-out"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="pdf-settings-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl ring-1 ring-slate-200 py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-200 origin-top-right">
+                                <button onclick="openActionModal('about')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-3 transition-colors group/item">
+                                    <i data-lucide="info" class="w-4 h-4 text-slate-400 group-hover/item:text-blue-500"></i>
+                                    About Service
+                                </button>
+                                <button onclick="openActionModal('api')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-3 transition-colors group/item">
+                                    <i data-lucide="code-2" class="w-4 h-4 text-slate-400 group-hover/item:text-blue-500"></i>
+                                    API Documentation
+                                </button>
+                                <div class="h-px bg-slate-100 my-1 mx-2"></div>
+                                <button onclick="openActionModal('support')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-3 transition-colors group/item">
+                                    <i data-lucide="help-circle" class="w-4 h-4 text-slate-400 group-hover/item:text-blue-500"></i>
+                                    Get Support
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dropdown Logic -->
+                <script nonce="<%= nonce %>">
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const settingsBtn = document.getElementById('pdf-settings-btn');
+                        const settingsDropdown = document.getElementById('pdf-settings-dropdown');
+                        const settingsContainer = document.getElementById('pdf-settings-container');
+                        
+                        if (settingsBtn && settingsDropdown && settingsContainer) {
+                            settingsBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                settingsDropdown.classList.toggle('hidden');
+                            });
+
+                            document.addEventListener('click', (e) => {
+                                if (!settingsContainer.contains(e.target)) {
+                                    settingsDropdown.classList.add('hidden');
+                                }
+                            });
+                        }
+                    });
+                </script>
+
+                <!-- Service Navigation (Compact) -->
+                <div class="bg-white border-b border-slate-100 sticky top-0 z-20">
+                    <div class="max-w-[100rem] mx-auto px-6 lg:px-8">
+                        <nav class="-mb-px flex flex-nowrap overflow-x-auto no-scrollbar gap-4 sm:gap-6 justify-start">
+                            <button data-service-tab="home" id="nav-home" 
+                                class="nav-tab-active flex-shrink-0 whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-sm transition-all">
+                                Workspace
+                            </button>
+                            <button data-service-tab="history" id="nav-history" 
+                                class="flex-shrink-0 whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-all">
+                                Activity
+                            </button>
+                            <button data-service-tab="usage" id="nav-usage" 
+                                class="flex-shrink-0 whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-all">
+                                Usage
+                            </button>
+                            <button data-service-tab="apps" id="nav-apps" 
+                                class="flex-shrink-0 whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-all">
+                                API Keys
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Scrollable Body -->
+                <div class="flex-1 overflow-y-auto flex flex-col">
+                    <div class="max-w-[100rem] w-full mx-auto px-6 lg:px-8 py-3 flex-1 flex flex-col">
+                        <!-- Tab Content: Home (Converter) -->
+                        <div id="tab-content-home" class="service-tab-content flex-1 flex flex-col">
+                            <% if (locals.limitReached || locals.featureMissing) { %>
+                                <div class="flex-1 flex items-center justify-center min-h-[500px]">
+                                    <%- include('../partials/limit-reached-block') %>
+                                </div>
+                            <% } else { %>
+                                <!-- Error Alert -->
+                                <div id="errorAlert" class="hidden">
+                                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm flex items-start mb-6">
+                                        <div class="flex-shrink-0">
+                                            <i data-lucide="alert-circle" class="h-5 w-5 text-red-500"></i>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p id="errorMessage" class="text-sm font-bold text-red-800 uppercase tracking-tight">Service Execution Failure</p>
+                                        </div>
+                                        <button id="closeErrorBtn" class="ml-auto text-red-400 hover:text-red-500">
+                                            <i data-lucide="x" class="h-4 w-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch flex-1">
+                                <!-- Wide Column: Service UI Workspace (9/12) -->
+                                <div class="lg:col-span-9 space-y-4">
+                                    <!-- Workspace Sub-Header / Step Flow -->
+                                    <div class="minimal-card px-4 py-2 border-b border-slate-100 bg-white flex items-center justify-between">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex items-center px-4 py-1.5 rounded-md text-[0.8125rem] font-black uppercase tracking-widest transition-all bg-slate-50 border border-slate-200 text-blue-600">
+                                                Workspace
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1.5 text-slate-400">
+                                                <div class="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_5px_rgba(59,130,246,0.5)]"></div>
+                                                <span class="text-[0.75rem] font-bold uppercase tracking-widest">Protocol Active</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Workspace UI (2-Column side-by-side) -->
+                                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 min-h-0 lg:min-h-[37.5rem] overflow-hidden">
+                                        <!-- Column 1: Config/Form (5/12) -->
+                                        <div class="lg:col-span-5 flex flex-col">
+                                            <div class="minimal-card flex-1 flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                                <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-white">
+                                                    <div class="flex items-center gap-2">
+                                                        <i data-lucide="settings-2" class="w-3.5 h-3.5 text-blue-600"></i>
+                                                            <h2 class="text-[0.8125rem] font-bold text-gray-900 uppercase tracking-widest leading-none">Source PDF</h2>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="bg-white border-b border-slate-100 flex items-center justify-between">
+                                                    <div class="flex">
+                                                        <button id="tabUrl" type="button"
+                                                            class="px-6 py-3 font-black text-[0.8125rem] uppercase tracking-widest focus:outline-none border-b-2 border-blue-600 text-blue-600 bg-white"
+                                                            data-input-tab="url">URL</button>
+                                                        <button id="tabHtml" type="button"
+                                                            class="px-6 py-3 font-black text-[0.8125rem] uppercase tracking-widest text-slate-400 hover:text-slate-600 focus:outline-none border-b-2 border-transparent transition-all"
+                                                            data-input-tab="html">Source Code</button>
+                                                    </div>
+                                                </div>
+
+                                                <form id="pdfForm" class="flex-1 flex flex-col">
+                                                    <div class="p-6 space-y-5 flex-1 overflow-y-auto">
+                                                        <div id="urlInputGroup">
+                                                            <label class="block text-[0.75rem] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                <i data-lucide="globe" class="w-3 h-3"></i>
+                                                                Enter URL
+                                                            </label>
+                                                            <input type="url" name="url" id="urlInput" placeholder="https://example.com"
+                                                                class="w-full bg-slate-50 border border-slate-100 rounded-lg p-3 text-sm font-bold outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                                                                <%=connectedApps.length===0 ? 'disabled' : '' %>>
+                                                            <p class="mt-1.5 text-[0.625rem] font-medium text-slate-400 uppercase tracking-widest leading-relaxed">Enter the source URL to convert into a professional PDF</p>
+                                                        </div>
+
+                                                        <div id="htmlInputGroup" class="hidden h-full flex flex-col">
+                                                            <div class="flex items-center justify-between mb-2">
+                                                                    <label class="text-[0.75rem] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                                                        <i data-lucide="code-2" class="w-3 h-3"></i>
+                                                                        Document Content
+                                                                    </label>
+                                                            </div>
+                                                            <textarea name="html" id="htmlInput" class="flex-1 w-full bg-slate-900 border border-slate-800 rounded-lg p-4 font-mono text-[0.8125rem] text-blue-100 outline-none focus:ring-1 focus:ring-blue-500 transition-all shadow-xl resize-none min-h-[300px]"
+                                                                placeholder="<h1>Hello World</h1>" <%=connectedApps.length===0 ? 'disabled' : '' %>></textarea>
+                                                            <p class="mt-1.5 text-[0.625rem] font-medium text-slate-400 uppercase tracking-widest leading-relaxed">Provide raw HTML content for direct document rendering</p>
+                                                        </div>
+
+                                                        <!-- Syncing Area -->
+                                                        <div class="hidden">
+                                                            <select name="appId" id="syncAppId">
+                                                                <% if (locals.connectedApps && connectedApps.length > 0) { %>
+                                                                    <% connectedApps.filter(item => item.app.isActive).forEach((item, index) => { %>
+                                                                        <option value="<%= item.app.id %>" <%= item.isEnabled ? 'selected' : '' %>
+                                                                            data-api-key="<%= item.app.apiKey %>" <%= index === 0 ? 'selected' : '' %>>
+                                                                            <%= item.app.name %>
+                                                                        </option>
+                                                                    <% }); %>
+                                                                <% } %>
+                                                            </select>
+                                                            <input type="hidden" name="format" id="syncFormat" value="A4">
+                                                            <input type="hidden" name="landscape" id="syncLandscape" value="false">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                                                        <p class="text-[0.6875rem] font-black text-slate-400 uppercase tracking-widest">
+                                                            Cost: <span class="text-blue-600">$<%= locals.service ? service.pricePerRequest.toFixed(2) : '0.00' %></span>
+                                                        </p>
+                                                        <button type="submit" id="convertBtn"
+                                                            class="bg-blue-600 text-white py-2.5 px-6 rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center font-black text-[0.8125rem] uppercase tracking-widest shadow-minimal active:scale-95 <%= connectedApps.length === 0 ? 'opacity-50 cursor-not-allowed' : '' %>"
+                                                            <%=connectedApps.length===0 ? 'disabled' : '' %>>
+                                                            <span id="btnText">Generate PDF</span>
+                                                            <i id="btnSpinner" data-lucide="loader-2" class="animate-spin ml-3 w-4 h-4 hidden"></i>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <!-- Column 2: Visual Preview (7/12) -->
+                                        <div class="lg:col-span-7 flex flex-col">
+                                            <div class="minimal-card flex-1 flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                                <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+                                                    <div class="flex items-center gap-2.5">
+                                                        <i data-lucide="eye" class="w-4 h-4 text-blue-600"></i>
+                                                        <h3 class="text-[0.8125rem] font-black text-gray-900 uppercase tracking-widest leading-none">Output Preview</h3>
+                                                    </div>
+                                                    <div class="flex items-center gap-4">
+                                                        <a id="openPdfBtn" href="#" target="_blank"
+                                                            class="hidden text-[0.6875rem] text-blue-600 hover:text-blue-800 font-black uppercase tracking-widest flex items-center group">
+                                                            <i data-lucide="external-link" class="w-3 h-3 mr-1.5 opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                                                            External
+                                                        </a>
+                                                        <div class="flex items-center gap-3 bg-slate-50 px-3 py-1.5 border border-slate-200 rounded-lg shadow-inner">
+                                                            <div class="flex items-center gap-2">
+                                                                <button type="button" onclick="window.currentZoom = Math.max(0.5, window.currentZoom - 0.1); window.applyZoom();" class="p-1 rounded hover:bg-white hover:shadow-sm text-slate-400 hover:text-blue-600 transition-all">
+                                                                    <i data-lucide="minus-circle" class="w-4 h-4"></i>
+                                                                </button>
+                                                                <input type="range" id="zoomRange" min="50" max="150" value="100" oninput="window.currentZoom = this.value / 100; window.applyZoom();" class="w-24 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                                                <button type="button" onclick="window.currentZoom = Math.min(1.5, window.currentZoom + 0.1); window.applyZoom();" class="p-1 rounded hover:bg-white hover:shadow-sm text-slate-400 hover:text-blue-600 transition-all">
+                                                                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                                                </button>
+                                                            </div>
+                                                            <span id="zoomValue" class="text-[0.6875rem] font-black text-slate-600 min-w-[4ch] text-center">100%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex-1 bg-slate-50/50 overflow-hidden relative group subtle-grid">
+                                                    <div id="previewContainer" class="w-full h-full overflow-auto flex justify-center p-6">
+                                                        <!-- Empty State -->
+                                                        <div id="emptyState" class="m-auto text-center p-12 max-w-sm">
+                                                            <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-6 text-slate-200 border border-slate-100">
+                                                                <i data-lucide="file-search-2" class="w-7 h-7 opacity-40"></i>
+                                                            </div>
+                                                            <h3 class="text-[0.8125rem] font-black text-slate-900 uppercase tracking-[0.1em] mb-2">No Preview Available</h3>
+                                                            <p class="text-[0.75rem] font-bold text-slate-400 uppercase tracking-widest leading-loose">Draft a document to see the results here.</p>
+                                                        </div>
+                                                        
+                                                        <div id="loadingPreview" class="hidden m-auto text-center">
+                                                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mb-4"></div>
+                                                            <p class="text-[0.75rem] font-black text-blue-600 uppercase tracking-widest">Building Preview...</p>
+                                                        </div>
+                                                        
+                                                        <div class="bg-white shadow-2xl relative transition-transform duration-200 origin-top hidden" style="width: 794px; min-height: 1123px;" id="previewCanvasArea">
+                                                            <img id="pdfPreview" class="w-full h-auto border border-slate-200 shadow-sm" src="" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="py-1.5 bg-white border-t border-slate-100 flex justify-center">
+                                                    <p class="text-[0.625rem] text-slate-400 font-bold uppercase tracking-widest leading-none">Results Preview</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Narrow Column: Service Configuration Sidebar (3/12) -->
+                                <div class="lg:col-span-3 space-y-4">
+                                    <div class="minimal-card flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm sticky top-[3.75rem]">
+                                        <!-- Sidebar Tabs -->
+                                        <div class="flex border-b border-slate-100 bg-slate-50/50">
+                                            <button class="flex-1 py-3 text-[0.75rem] font-black uppercase tracking-widest border-b-2 border-blue-600 text-blue-600 bg-white">Settings</button>
+                                            <button class="flex-1 py-3 text-[0.75rem] font-black uppercase tracking-widest border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all opacity-50 cursor-not-allowed">Help</button>
+                                            <button class="flex-1 py-3 text-[0.75rem] font-black uppercase tracking-widest border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all opacity-50 cursor-not-allowed">Resources</button>
+                                        </div>
+                                        
+                                        <!-- Sidebar Tab Content -->
+                                        <div class="p-5 space-y-6">
+                                            <div class="flex items-center justify-between pb-2 border-b border-slate-50">
+                                                <div class="flex items-center gap-2">
+                                                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-blue-600"></i>
+                                                    <h4 class="text-[0.8125rem] font-black text-gray-900 uppercase tracking-widest">Configuration</h4>
+                                                </div>
+                                                <i data-lucide="shield-check" class="w-3 h-3 text-green-500 opacity-60"></i>
+                                            </div>
+
+                                            <div class="space-y-5">
+                                                <!-- Run as App Selector -->
+                                                <div class="space-y-2">
+                                                    <p class="text-[0.75rem] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between">
+                                                        Active App
+                                                        <i data-lucide="info" class="w-2.5 h-2.5 opacity-40 hover:opacity-100 transition-opacity"></i>
+                                                    </p>
+                                                    <select id="sidebarAppId" class="w-full text-sm font-black text-gray-700 border border-slate-200 rounded-lg py-2.5 px-3 focus:ring-1 focus:ring-blue-500 outline-none bg-slate-50/50 transition-all uppercase tracking-tight">
+                                                        <% if (connectedApps && connectedApps.length > 0) { %>
+                                                            <% connectedApps.filter(item => item.app.isActive).forEach(item => { %>
+                                                                <option value="<%= item.app.id %>" <%= item.isEnabled ? 'selected' : '' %>
+                                                                    data-api-key="<%= item.app.apiKey %>">
+                                                                    <%= item.app.name %>
+                                                                </option>
+                                                            <% }); %>
+                                                        <% } else { %>
+                                                            <option value="" disabled selected>No apps found</option>
+                                                        <% } %>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Paper Format -->
+                                                <div class="space-y-2">
+                                                    <label class="text-[0.5625rem] font-black text-slate-400 uppercase tracking-widest">Paper Format</label>
+                                                    <div class="grid grid-cols-3 gap-1.5">
+                                                        <% ['A4', 'Letter', 'Legal'].forEach(f => { %>
+                                                            <button type="button" data-format-value="<%= f %>" onclick="selectFormat(this, '<%= f %>')" 
+                                                                class="format-badge py-2 border border-slate-100 rounded-lg text-[0.5rem] font-black uppercase tracking-widest text-slate-400 hover:border-blue-200 transition-all shadow-sm <%= f === 'A4' ? 'border-blue-500 bg-blue-50 text-blue-600 shadow-sm' : '' %>">
+                                                                <%= f %>
+                                                            </button>
+                                                        <% }) %>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Orientation -->
+                                                <div class="space-y-2">
+                                                    <label class="text-[0.75rem] font-black text-slate-400 uppercase tracking-widest">Orientation</label>
+                                                    <div class="flex gap-2">
+                                                        <button type="button" data-land-value="false" onclick="selectOrientation(this, 'false')" 
+                                                            class="orientation-badge flex-1 py-2 border border-blue-500 bg-blue-50 text-blue-600 rounded-lg text-[0.6875rem] font-black uppercase tracking-widest transition-all shadow-sm">
+                                                            Portrait
+                                                        </button>
+                                                        <button type="button" data-land-value="true" onclick="selectOrientation(this, 'true')" 
+                                                            class="orientation-badge flex-1 py-2 border border-slate-100 rounded-lg text-[0.6875rem] font-black uppercase tracking-widest text-slate-400 hover:border-blue-200 transition-all shadow-sm">
+                                                            Landscape
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Automation Card -->
+                                    <div class="minimal-card p-5 bg-slate-900 text-white rounded-xl shadow-lg relative overflow-hidden group">
+                                        <div class="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
+                                        <div class="flex items-center gap-2 mb-3">
+                                            <i data-lucide="webhook" class="w-4 h-4 text-blue-400"></i>
+                                            <h4 class="text-[0.8125rem] font-black uppercase tracking-widest">API Endpoint</h4>
+                                        </div>
+                                        <p class="text-[0.75rem] font-medium text-slate-400 leading-relaxed mb-5">Deploy this conversion logic as an automated workstation via our API.</p>
+                                        <a href="/docs/api" class="inline-flex items-center text-[0.75rem] font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-all text-white w-full justify-center">
+                                            API Docs
+                                            <i data-lucide="arrow-right" class="w-3 h-3 ml-2"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <!-- Tab Content: History -->
+                    <div id="tab-content-history" class="service-tab-content flex-1 flex flex-col hidden">
+                        <div class="minimal-card p-4 flex-1">
+                            <h2 class="text-[0.8125rem] font-bold text-gray-900 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="history" class="w-3.5 h-3.5 text-blue-600"></i>
+                                Activity
+                            </h2>
+                            <div class="overflow-hidden">
+                                <%- include('../partials/history-table') %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Usage -->
+                    <div id="tab-content-usage" class="service-tab-content flex-1 flex flex-col hidden">
+                        <div class="minimal-card p-4 flex-1">
+                            <h2 class="text-[0.8125rem] font-bold text-gray-900 mb-4 flex items-center gap-2 uppercase tracking-widest">
+                                <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-600"></i>
+                                Usage Stats
+                                <span class="text-[0.625rem] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 border border-blue-100 rounded uppercase">Live</span>
+                            </h2>
+                            <%- include('../partials/usage-block') %>
+                        </div>
+                    </div>
+                        
+                    <!-- Tab Content: Connected Apps -->
+                    <div id="tab-content-apps" class="service-tab-content flex-1 flex flex-col hidden">
+                        <div class="minimal-card p-4 flex-1">
+                            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                                <h2 class="text-[0.625rem] font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-600"></i>
+                                    Connected Applications
+                                </h2>
+                                <a href="/apps" class="inline-flex items-center px-3 py-1 bg-slate-50 border border-slate-200 rounded text-[0.5625rem] font-bold text-blue-600 hover:bg-white transition-all uppercase tracking-widest">Manage Registry</a>
+                            </div>
+                            <%- include('../partials/connected-apps-list') %>
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- Service Control Bar (Sticky Bottom) -->
+                    <div class="bg-white border-t border-slate-200 py-2 px-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 sticky bottom-0">
+                        <div class="max-w-[100rem] mx-auto flex items-center justify-between">
+                            <div class="flex items-center gap-6">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.4)]"></div>
+                                    <span class="text-[0.8125rem] font-black text-slate-600 uppercase tracking-widest">Ready</span>
+                                </div>
+                                <div class="h-4 w-px bg-slate-100"></div>
+                                <div class="flex items-center gap-2 text-slate-400">
+                                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                                    <span class="text-[0.8125rem] font-black uppercase tracking-widest">TLS 1.3 SECURE CONNECTION</span>
+                                </div>
+                                <div class="h-4 w-px bg-slate-100 hidden sm:block"></div>
+                                <div class="hidden sm:flex items-center gap-2 text-slate-400">
+                                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                                    <span class="text-[0.8125rem] font-black uppercase tracking-widest">Version: PDF-v2.1</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center -space-x-1">
+                                    <div class="w-4 h-4 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                    </div>
+                                    <div class="w-4 h-4 rounded-full border-2 border-white bg-slate-100"></div>
+                                    <div class="w-4 h-4 rounded-full border-2 border-white bg-slate-200"></div>
+                                </div>
+                                 <span class="text-[0.75rem] font-bold text-slate-400 uppercase tracking-widest">Server Location: North-1</span>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-- Usage Data Configuration -->
+            <script id="usage-data" type="application/json" nonce="<%= nonce %>">
+                <%- JSON.stringify(dailyUsage || {}) %>
+            </script>
+
+            <!-- Styles Extracted to /css/services/pdf-converter.css -->
+
+            <script nonce="<%= nonce %>">
+                document.addEventListener('DOMContentLoaded', () => {
+                    // Zoom Implementation
+                window.currentZoom = 1;
+                window.applyZoom = function() {
+                    const area = document.getElementById('previewCanvasArea');
+                    const zoomValue = document.getElementById('zoomValue');
+                    const zoomRange = document.getElementById('zoomRange');
+                    if (area) {
+                        area.style.transform = `scale(${window.currentZoom})`;
+                        if (zoomValue) zoomValue.textContent = `${Math.round(window.currentZoom * 100)}%`;
+                        if (zoomRange) zoomRange.value = window.currentZoom * 100;
+                    }
+                };
+
+                    // Navigation
+                    const serviceTabs = document.querySelectorAll('[data-service-tab]');
+                    const serviceTabContents = document.querySelectorAll('.service-tab-content');
+
+                    serviceTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            const tabName = tab.dataset.serviceTab;
+                            serviceTabContents.forEach(el => el.classList.add('hidden'));
+                            document.getElementById('tab-content-' + tabName).classList.remove('hidden');
+
+                            serviceTabs.forEach(btn => {
+                                btn.classList.remove('nav-tab-active');
+                                btn.classList.add('border-transparent', 'text-gray-400');
+                            });
+                            tab.classList.add('nav-tab-active');
+                            tab.classList.remove('border-transparent', 'text-gray-400');
+                        });
+                    });
+
+                    // Sidebar sync
+                    const sidebarAppId = document.getElementById('sidebarAppId');
+                    const syncAppId = document.getElementById('syncAppId');
+                    if (sidebarAppId && syncAppId) {
+                        sidebarAppId.addEventListener('change', () => {
+                            syncAppId.value = sidebarAppId.value;
+                        });
+                    }
+
+                    window.selectFormat = (el, val) => {
+                        document.getElementById('syncFormat').value = val;
+                        document.querySelectorAll('.format-badge').forEach(b => {
+                            b.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-600', 'shadow-sm');
+                            b.classList.add('border-slate-100', 'text-slate-400');
+                        });
+                        el.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-600', 'shadow-sm');
+                        el.classList.remove('border-slate-100', 'text-slate-400');
+                    };
+
+                    window.selectOrientation = (el, val) => {
+                        document.getElementById('syncLandscape').value = val;
+                        document.querySelectorAll('.orientation-badge').forEach(b => {
+                            b.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-600', 'shadow-sm');
+                            b.classList.add('border-slate-100', 'text-slate-400');
+                        });
+                        el.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-600', 'shadow-sm');
+                        el.classList.remove('border-slate-100', 'text-slate-400');
+                    };
+
+                    // Input tabs
+                    const inputTabs = document.querySelectorAll('[data-input-tab]');
+                    inputTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            const mode = tab.dataset.inputTab;
+                            inputTabs.forEach(t => {
+                                t.classList.remove('border-blue-600', 'text-blue-600', 'bg-white');
+                                t.classList.add('text-slate-400', 'border-transparent');
+                            });
+                            tab.classList.add('border-blue-600', 'text-blue-600', 'bg-white');
+                            tab.classList.remove('text-slate-400', 'border-transparent');
+
+                            document.getElementById('urlInputGroup').classList.toggle('hidden', mode !== 'url');
+                            document.getElementById('htmlInputGroup').classList.toggle('hidden', mode !== 'html');
+                        });
+                    });
+
+                    // Form
+                    const form = document.getElementById('pdfForm');
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const btnText = document.getElementById('btnText');
+                        const spinner = document.getElementById('btnSpinner');
+                        const btn = document.getElementById('convertBtn');
+
+                        btn.disabled = true;
+                        btnText.textContent = 'EXECUTING...';
+                        spinner.classList.remove('hidden');
+
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData.entries());
+                        data.appId = document.getElementById('sidebarAppId').value;
+                        data.landscape = data.landscape === 'true';
+
+                        try {
+                            const res = await fetch('/services/html-to-pdf/convert', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            const result = await res.json();
+                            if (!res.ok) throw new Error(result.error || 'Conversion failed');
+                            if (result.jobId) {
+                                pollJob(result.jobId, document.querySelector(`#sidebarAppId option[value="${data.appId}"]`).dataset.apiKey);
+                            }
+                        } catch (err) {
+                            showError(err.message);
+                            btn.disabled = false;
+                            btnText.textContent = 'EXECUTE PROTOCOL';
+                            spinner.classList.add('hidden');
+                        }
+                    });
+
+                    async function pollJob(jobId, apiKey) {
+                        let attempts = 0;
+                        while (attempts < 60) {
+                            try {
+                                const res = await fetch(`/api/jobs/${jobId}`, { headers: { 'X-API-Key': apiKey } });
+                                if (res.headers.get('content-type')?.includes('application/pdf')) {
+                                    const blob = await res.blob();
+                                    const url = URL.createObjectURL(blob);
+                                    window.open(url, '_blank');
+                                    document.getElementById('openPdfBtn').href = url;
+                                    document.getElementById('openPdfBtn').classList.remove('hidden');
+                                    document.getElementById('pdfPreview').src = url;
+                                    document.getElementById('pdfPreview').classList.remove('hidden');
+                                    document.getElementById('emptyState').classList.add('hidden');
+                                    
+                                    const btnText = document.getElementById('btnText');
+                                    const spinner = document.getElementById('btnSpinner');
+                                    const btn = document.getElementById('convertBtn');
+                                    btn.disabled = false;
+                                    btnText.textContent = 'Convert to PDF';
+                                    spinner.classList.add('hidden');
+                                    return;
+                                }
+                                attempts++;
+                                await new Promise(r => setTimeout(r, 2000));
+                            } catch (e) { break; }
+                        }
+                    }
+
+                    // Analytics
+                    (function() {
+                        const dataEl = document.getElementById('usage-data');
+                        if (!dataEl) return;
+                        const usage = JSON.parse(dataEl.textContent);
+                        const ctx = document.getElementById('usageChart')?.getContext('2d');
+                        if (!ctx) return;
+                        const labels = [];
+                        const data = [];
+                        const today = new Date();
+                        for (let i = 29; i >= 0; i--) {
+                            const d = new Date(); d.setDate(today.getDate() - i);
+                            const ds = d.toISOString().split('T')[0];
+                            labels.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                            data.push(usage[ds]?.count || 0);
+                        }
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels,
+                                datasets: [{ label: 'Signals', data, backgroundColor: '#3b82f6', borderRadius: 4 }]
+                            },
+                            options: {
+                                responsive: true, maintainAspectRatio: false,
+                                scales: { y: { beginAtZero: true, ticks: { font: { size: 9 } } }, x: { display: false } },
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    })();
+
+                    function showError(msg) {
+                        const err = document.getElementById('errorMessage');
+                        err.textContent = msg;
+                        document.getElementById('errorAlert').classList.remove('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                    document.getElementById('closeErrorBtn')?.addEventListener('click', () => document.getElementById('errorAlert').classList.add('hidden'));
+                    
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                });
+            </script>
+            <%- include('../partials/sidebar-script') %>
+
+            <!-- Action Modals -->
+            <div id="actionModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-all">
+                <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div class="flex items-center gap-3">
+                            <div id="modalIconContainer" class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                                <i data-lucide="info" class="w-4 h-4" id="modalIcon"></i>
+                            </div>
+                            <h3 id="modalTitle" class="text-xs font-black text-slate-900 uppercase tracking-widest">About This Tool</h3>
+                        </div>
+                        <button onclick="closeActionModal()" class="p-2 hover:bg-white hover:shadow-sm rounded-lg text-slate-400 hover:text-slate-600 transition-all">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div id="modalBody" class="space-y-4">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 border-t border-slate-50 bg-slate-50/30 flex justify-end">
+                        <button onclick="closeActionModal()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-[0.625rem] font-black uppercase tracking-widest hover:bg-slate-800 transition-all">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script nonce="<%= nonce %>">
+                const modalContent = {
+                    about: {
+                        title: 'About File Converter',
+                        icon: 'info',
+                        body: `
+                            <div class="space-y-4">
+                                <p class="text-[0.6875rem] font-bold text-slate-600 uppercase tracking-widest leading-relaxed">
+                                    Our high-performance engine ensures 100% fidelity.
+                                </p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                        <p class="text-[0.5rem] font-black text-slate-400 uppercase tracking-widest mb-1">Engine</p>
+                                        <p class="text-[0.625rem] font-black text-blue-600 uppercase">Pro Logic v1.2</p>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                        <p class="text-[0.5rem] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                        <p class="text-[0.625rem] font-black text-green-600 uppercase tracking-widest">Online</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    api: {
+                        title: 'API Integration',
+                        icon: 'code-2',
+                        body: `
+                            <div class="space-y-4">
+                                <p class="text-[0.6875rem] font-bold text-slate-600 uppercase tracking-widest mb-3">cURL Implementation</p>
+                                <div class="bg-slate-900 rounded-xl p-4 font-mono text-[0.625rem] text-blue-100 overflow-x-auto shadow-inner">
+                                    <pre>curl -X POST /api/v1/convert \\
+  -H "X-API-Key: YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url": "https://example.com"}'</pre>
+                                </div>
+                                <p class="text-[0.5625rem] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                                    Refer to documentation for full parameter list including custom formats.
+                                </p>
+                            </div>
+                        `
+                    },
+                    support: {
+                        title: 'How can we help?',
+                        icon: 'help-circle',
+                        body: `
+                            <div class="space-y-4">
+                                <p class="text-[0.6875rem] font-bold text-slate-600 uppercase tracking-widest leading-relaxed">
+                                    Need help with your documents or account?
+                                </p>
+                                <div class="space-y-2">
+                                    <a href="#" class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-all group">
+                                        <span class="text-[0.625rem] font-black text-slate-600 uppercase tracking-widest">View Guidebook</span>
+                                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 transition-all"></i>
+                                    </a>
+                                    <a href="#" class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-all group">
+                                        <span class="text-[0.625rem] font-black text-slate-600 uppercase tracking-widest">Contact Support</span>
+                                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 transition-all"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        `
+                    }
+                };
+
+                function openActionModal(type) {
+                    const modal = document.getElementById('actionModal');
+                    const title = document.getElementById('modalTitle');
+                    const icon = document.getElementById('modalIcon');
+                    const body = document.getElementById('modalBody');
+                    const content = modalContent[type];
+
+                    if (content) {
+                        title.textContent = content.title;
+                        icon.setAttribute('data-lucide', content.icon);
+                        body.innerHTML = content.body;
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                }
+
+                function closeActionModal() {
+                    const modal = document.getElementById('actionModal');
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+
+                // Close on backdrop click
+                document.getElementById('actionModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'actionModal') closeActionModal();
+                });
+            </script>
+            <%- include('../partials/sidebar-script') %>
+            <%- include('../partials/nav-guard') %>
+            <%- include('../partials/toast') %>
+    </div>
+</body>
+</html>

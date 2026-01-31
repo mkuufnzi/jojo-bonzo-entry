@@ -1,0 +1,317 @@
+<header class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-[1000] transition-colors duration-300 relative">
+    <div class="max-w-[100rem] mx-auto px-6 lg:px-8 py-2 flex justify-between items-center relative">
+        <div class="flex items-center min-w-0">
+            <!-- Mobile Sidebar Toggle (Hidden on Tablet/Desktop) -->
+            <button id="openSidebar" class="lg:hidden mr-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white flex-shrink-0 transition-colors touch-target-min p-1">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <h1 class="text-xs md:text-sm font-black text-slate-900 dark:text-white truncate uppercase tracking-widest">
+                <% if (locals.userProfile && locals.userProfile.lastName) { %>
+                    Welcome back, <%= locals.userProfile.lastName %>
+                <% } else if (typeof title !== 'undefined') { %>
+                    <%= title %>
+                <% } else { %>
+                    Welcome back
+                <% } %>
+            </h1>
+        </div>
+
+            <!-- Right Side Actions -->
+            <div class="flex items-center gap-3">
+                <!-- Onboarding Status -->
+                <% if (locals.showOnboardingModal) { %>
+                <button onclick="window.location.reload()" class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[0.6875rem] font-black uppercase tracking-widest hover:bg-blue-700 shadow-sm transition-all">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    Complete Onboarding
+                </button>
+                <% } %>
+                <!-- Global Time Filter (Only if currentPeriod is available) -->
+                <% if (typeof currentPeriod !== 'undefined') { %>
+                <div class="relative hidden sm:block" id="time-filter-container">
+                    <button id="time-filter-button" class="flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-colors text-xs font-bold shadow-sm">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span>
+                            <% 
+                                const labels = { 
+                                    '7d': 'Last 7 Days', 
+                                    '30d': 'Last 30 Days', 
+                                    '90d': 'Last 90 Days', 
+                                    'ytd': 'Year to Date', 
+                                    '1y': 'Last 1 Year', 
+                                    'all': 'All Time' 
+                                }; 
+                            %>
+                            <%= labels[currentPeriod] || 'Last 30 Days' %>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </button>
+                    
+                    <!-- Dropdown -->
+                    <div id="time-filter-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <% Object.entries(labels).forEach(([key, label]) => { %>
+                            <a href="?period=<%= key %>" class="flex items-center justify-between px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <span><%= label %></span>
+                                <% if (currentPeriod === key) { %>
+                                    <i data-lucide="check" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                                <% } %>
+                            </a>
+                        <% }); %>
+                    </div>
+                    
+                    <script nonce="<%= nonce %>">
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const btn = document.getElementById('time-filter-button');
+                            const dropdown = document.getElementById('time-filter-dropdown');
+                            const container = document.getElementById('time-filter-container');
+                            
+                            if (btn && dropdown) {
+                                btn.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    dropdown.classList.toggle('hidden');
+                                });
+                                document.addEventListener('click', (e) => {
+                                    if (!container.contains(e.target)) dropdown.classList.add('hidden');
+                                });
+                            }
+                        });
+                    </script>
+                </div>
+                <% } %>
+                <!-- Notification Bell -->
+                <div class="relative" id="notification-container">
+                    <button id="notification-button" type="button" class="group relative bg-slate-50 dark:bg-slate-800 p-2 rounded-xl text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 focus:outline-none ring-1 ring-slate-200 dark:ring-slate-700 border-none touch-target-min">
+                        <span class="sr-only">View notifications</span>
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <% if (typeof unreadNotificationsCount !== 'undefined' && unreadNotificationsCount > 0) { %>
+                            <span class="absolute top-2 right-2 block h-2 w-2 rounded-full ring-2 ring-white dark:ring-slate-900 bg-red-500 animate-pulse"></span>
+                        <% } %>
+                    </button>
+    
+                    <!-- Notification Dropdown -->
+                    <div id="notification-dropdown" class="hidden fixed left-1/2 -translate-x-1/2 top-14 sm:left-auto sm:right-4 sm:translate-x-0 w-[calc(100vw-2rem)] sm:w-80 rounded-xl shadow-xl py-2 bg-white dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 focus:outline-none z-[9999] animate-in fade-in slide-in-from-top-2 duration-200" style="max-width: 20rem;">
+                        <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Recent Activity</h3>
+                            <button id="markAllReadBtn" class="text-[0.625rem] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold hover:underline">Mark all read</button>
+                        </div>
+                        <div id="notifications-list" class="max-h-72 overflow-y-auto no-scrollbar">
+                            <div class="px-5 py-8 text-sm text-slate-400 text-center">
+                                <div class="w-12 h-12 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i data-lucide="inbox" class="w-6 h-6 text-slate-300 dark:text-slate-500"></i>
+                                </div>
+                                <p class="font-medium text-slate-500 dark:text-slate-400">No new notifications</p>
+                                <p class="text-[0.6875rem] mt-1 text-slate-400">We'll alert you when tasks finish.</p>
+                            </div>
+                        </div>
+                        <div class="p-2 border-t border-slate-100 dark:border-slate-700">
+                            <a href="/notifications" class="flex items-center justify-center w-full py-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                                Manage All Notifications
+                            </a>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Profile / Settings Dropdown -->
+                <div class="relative" id="user-menu-container">
+                    <button id="user-menu-button" class="group flex items-center bg-slate-50 dark:bg-slate-800 p-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:border-blue-100 dark:hover:border-blue-800">
+                        <div class="w-7 h-7 rounded bg-blue-600 flex items-center justify-center text-[0.625rem] font-bold text-white shadow-sm group-hover:scale-105 transition-transform">
+                            <% if (locals.userProfile && locals.userProfile.firstName) { %>
+                                <%= locals.userProfile.firstName.substring(0, 1).toUpperCase() %>
+                            <% } else { %>
+                                <%= user.name ? user.name.substring(0, 1).toUpperCase() : 'U' %>
+                            <% } %>
+                        </div>
+                        <div class="ml-2 text-left hidden sm:block min-w-0">
+                            <p class="text-[0.625rem] md:text-xs font-bold text-slate-800 dark:text-slate-200 leading-none mb-0.5 truncate max-w-[100px]">
+                                <% if (locals.userProfile && locals.userProfile.firstName) { %>
+                                    <%= locals.userProfile.firstName %> <%= locals.userProfile.lastName %>
+                                <% } else { %>
+                                    <%= user.name %>
+                                <% } %>
+                            </p>
+                            <p class="text-[0.5625rem] md:text-[0.625rem] text-slate-500 dark:text-slate-400 font-medium lowercase leading-none truncate max-w-[100px]"><%= user.email %></p>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 ml-3 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"></i>
+                    </button>
+    
+                    <!-- Profile Dropdown Menu -->
+                    <div id="user-menu-dropdown" class="hidden fixed right-4 top-14 w-56 rounded-xl shadow-xl py-2 bg-white dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 focus:outline-none z-[9999] animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div class="px-4 py-3 border-b border-slate-50 dark:border-slate-700/50">
+                            <p class="text-sm font-bold text-slate-900 dark:text-white">
+                                <% if (locals.userProfile && locals.userProfile.firstName) { %>
+                                    <%= locals.userProfile.firstName %> <%= locals.userProfile.lastName %>
+                                <% } else { %>
+                                    <%= user.name %>
+                                <% } %>
+                            </p>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[0.625rem] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mt-1">
+                                <%= (user.subscription && user.subscription.plan) ? user.subscription.plan.name : 'Free Library' %>
+                            </span>
+                        </div>
+                        <div class="p-1">
+                            <a href="/user/profile" class="flex items-center space-x-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-colors">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                                <span>Profile & Security</span>
+                            </a>
+                            <a href="/apps" class="flex items-center space-x-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-colors md:hidden">
+                                <i data-lucide="key" class="w-4 h-4"></i>
+                                <span>API Keys</span>
+                            </a>
+                            <a href="/billing" class="flex items-center space-x-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-colors">
+                                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                                <span>Billing History</span>
+                            </a>
+                        </div>
+                        <div class="border-t border-slate-50 dark:border-slate-700/50 mt-1 p-1">
+                            <a href="/auth/logout" class="flex items-center space-x-3 px-3 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 rounded-xl transition-colors font-medium">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                                <span>Sign out</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script nonce="<%= nonce %>">
+                document.addEventListener('DOMContentLoaded', function() {
+                    const setupMenu = (containerId, buttonId, dropdownId) => {
+                        const btn = document.getElementById(buttonId);
+                        const dropdown = document.getElementById(dropdownId);
+                        const container = document.getElementById(containerId);
+                        if (!btn || !dropdown) return;
+                        
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            dropdown.classList.toggle('hidden');
+                            
+                            // Load notifications when dropdown is opened
+                            if (dropdownId === 'notification-dropdown' && !dropdown.classList.contains('hidden')) {
+                                loadNotifications();
+                            }
+                        });
+                        
+                        document.addEventListener('click', (e) => {
+                            if (!container.contains(e.target)) dropdown.classList.add('hidden');
+                        });
+                    };
+
+                    setupMenu('notification-container', 'notification-button', 'notification-dropdown');
+                    setupMenu('user-menu-container', 'user-menu-button', 'user-menu-dropdown');
+
+                    // Load notifications function
+                    async function loadNotifications() {
+                        try {
+                            const res = await fetch('/notifications', {
+                                headers: { 'Accept': 'application/json' }
+                            });
+                            const notifications = await res.json();
+                            renderNotifications(notifications);
+                        } catch (error) {
+                            console.error('Failed to load notifications:', error);
+                        }
+                    }
+
+                    // Render notifications in dropdown
+                    function renderNotifications(notifications) {
+                        const list = document.getElementById('notifications-list');
+                        if (!notifications || notifications.length === 0) {
+                            list.innerHTML = `
+                                 <div class="px-5 py-8 text-sm text-slate-400 text-center">
+                                    <div class="w-12 h-12 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i data-lucide="inbox" class="w-6 h-6 text-slate-300 dark:text-slate-500"></i>
+                                    </div>
+                                    <p class="font-medium text-slate-500 dark:text-slate-400">No new notifications</p>
+                                    <p class="text-[0.6875rem] mt-1 text-slate-400">We'll alert you when tasks finish.</p>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        list.innerHTML = notifications.slice(0, 5).map(notif => `
+                            <button onclick="markNotificationRead('${notif.id}')" class="w-full px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-50 dark:border-slate-700/50 transition-colors text-left ${!notif.isRead ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-8 h-8 rounded-lg ${getNotifBgColor(notif.type)} flex items-center justify-center">
+                                        ${getNotifIcon(notif.type)}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">${notif.title}</p>
+                                            ${!notif.isRead ? '<span class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"></span>' : ''}
+                                        </div>
+                                        <p class="text-[0.6875rem] text-slate-600 dark:text-slate-400 line-clamp-2">${notif.message}</p>
+                                        <p class="text-[0.625rem] text-slate-400 mt-1">${formatTimeAgo(notif.createdAt)}</p>
+                                    </div>
+                                </div>
+                            </button>
+                        `).join('');
+                    }
+
+                    // Mark notification as read
+                    window.markNotificationRead = async function(id) {
+                        try {
+                            await fetch(`/notifications/${id}/read`, { method: 'POST' });
+                            loadNotifications(); // Reload
+                            // Update unread count badge
+                            const badge = document.querySelector('#notification-button .animate-pulse');
+                            if (badge) {
+                                const res = await fetch('/notifications/unread/count');
+                                const data = await res.json();
+                                if (data.count === 0) badge.remove();
+                            }
+                        } catch (error) {
+                            console.error('Failed to mark as read:', error);
+                        }
+                    };
+
+                    // Mark all as read
+                    document.getElementById('markAllReadBtn')?.addEventListener('click', async function() {
+                        try {
+                            await fetch('/notifications/mark-all-read', { method: 'POST' });
+                            loadNotifications();
+                            document.querySelector('#notification-button .animate-pulse')?.remove();
+                        } catch (error) {
+                            console.error('Failed to mark all as read:', error);
+                        }
+                    });
+
+                    // Helper functions
+                    function getNotifBgColor(type) {
+                        const colors = {
+                            success: 'bg-green-100 dark:bg-green-900/30',
+                            error: 'bg-red-100 dark:bg-red-900/30',
+                            warning: 'bg-yellow-100 dark:bg-yellow-900/30',
+                            info: 'bg-blue-100 dark:bg-blue-900/30'
+                        };
+                        return colors[type] || 'bg-slate-100 dark:bg-slate-800';
+                    }
+
+                    function getNotifIcon(type) {
+                        // Use Lucide icons instead of SVGs for simplicity in template string if possible, 
+                        // but here we are in JS string. Keep SVGs but adapt colors.
+                        const icons = {
+                            success: '<svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+                            error: '<svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+                            warning: '<svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+                            info: '<svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                        };
+                        return icons[type] || icons.info;
+                    }
+
+                    function formatTimeAgo(date) {
+                        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+                        if (seconds < 60) return 'Just now';
+                        const minutes = Math.floor(seconds / 60);
+                        if (minutes < 60) return `${minutes}m ago`;
+                        const hours = Math.floor(minutes / 60);
+                        if (hours < 24) return `${hours}h ago`;
+                        const days = Math.floor(hours / 24);
+                        return `${days}d ago`;
+                    }
+
+                    // Initialize Lucide icons
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                });
+            </script>
+        </div>
+</header>

@@ -1,0 +1,126 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[0.625rem] font-bold rounded-lg border border-indigo-100 uppercase tracking-widest">Deep Dive</span>
+                <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">Business Intelligence</h1>
+            </div>
+            <p class="text-slate-500 font-medium">Real-time insights across all your connected integrations.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="flex -space-x-2">
+                <% if (business && business.integrations) { %>
+                    <% business.integrations.forEach(i => { %>
+                         <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm text-[0.6rem] font-bold text-slate-500 uppercase" title="<%= i.provider %>">
+                            <%= i.provider.substring(0, 2) %>
+                         </div>
+                    <% }) %>
+                <% } %>
+            </div>
+            <button class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center">
+                <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Insights / Alerts Section (Actionable) -->
+    <% if (insights && insights.length > 0) { %>
+        <div class="grid grid-cols-1 gap-6 mb-12">
+            <% insights.forEach(insight => { %>
+                <div class="bg-amber-50 border border-amber-100 rounded-3xl p-6 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div class="flex items-center gap-6">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600">
+                            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-1"><%= insight.metadata?.description || 'Action Required' %></h3>
+                            <p class="text-amber-700 font-medium text-sm">
+                                You have <strong><%= insight.metadata?.count %></strong> items totaling <strong><%= insight.metadata?.currency %> <%= insight.value.toLocaleString() %></strong> that need attention.
+                            </p>
+                        </div>
+                    </div>
+                    <button class="px-6 py-3 bg-white border border-amber-200 text-amber-700 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-amber-100 transition-colors">
+                        Review Items
+                    </button>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <!-- Analytics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <!-- Total Revenue -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden group hover:border-blue-500 transition-all">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Total Revenue</h3>
+                <i data-lucide="dollar-sign" class="w-5 h-5 text-green-500"></i>
+            </div>
+            <div class="relative z-10">
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight mb-2">
+                    <%= metrics && metrics['total_revenue'] ? '$' + metrics['total_revenue'].value.toLocaleString() : '$0.00' %>
+                </h2>
+                <div class="flex items-center gap-2 text-green-600 bg-green-50 w-fit px-3 py-1 rounded-lg border border-green-100">
+                    <i data-lucide="trending-up" class="w-3 h-3"></i>
+                    <span class="text-xs font-bold uppercase tracking-widest"> lifetime </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Revenue -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden group hover:border-blue-500 transition-all">
+             <div class="flex items-center justify-between mb-8">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Pending Revenue</h3>
+                <i data-lucide="clock" class="w-5 h-5 text-amber-500"></i>
+            </div>
+             <div class="relative z-10">
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight mb-2">
+                    <%= metrics && metrics['pending_revenue'] ? '$' + metrics['pending_revenue'].value.toLocaleString() : '$0.00' %>
+                </h2>
+                <div class="flex items-center gap-2 text-amber-600 bg-amber-50 w-fit px-3 py-1 rounded-lg border border-amber-100">
+                    <span class="text-xs font-bold uppercase tracking-widest">Unpaid / Open</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Base -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden group hover:border-blue-500 transition-all">
+             <div class="flex items-center justify-between mb-8">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Active Contacts</h3>
+                <i data-lucide="users" class="w-5 h-5 text-blue-500"></i>
+            </div>
+             <div class="relative z-10">
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight mb-2">
+                     <%= metrics && metrics['contact_count'] ? metrics['contact_count'].value : 0 %>
+                </h2>
+                <div class="flex items-center gap-2 text-blue-600 bg-blue-50 w-fit px-3 py-1 rounded-lg border border-blue-100">
+                    <span class="text-xs font-bold uppercase tracking-widest">Synced Customers</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section (Placeholder for V3) -->
+    <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm mb-12">
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Revenue Velocity</h3>
+            <div class="flex gap-2">
+                 <button class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[0.6rem] font-bold uppercase tracking-widest">30 Days</button>
+                 <button class="px-3 py-1 bg-white text-slate-400 rounded-lg text-[0.6rem] font-bold uppercase tracking-widest">90 Days</button>
+            </div>
+        </div>
+        <div class="h-64 flex items-center justify-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-sm font-bold">
+            Chart Visualization Loading... (Requires Chart.js init)
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+</script>

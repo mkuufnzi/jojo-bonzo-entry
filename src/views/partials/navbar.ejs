@@ -1,0 +1,227 @@
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="flex justify-between h-20">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex-shrink-0 flex items-center gap-2">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-lg">
+                            <span class="font-bold text-white text-xl">F</span>
+                        </div>
+                        <span class="font-bold text-2xl tracking-tight text-gray-900">Floovioo</span>
+                    </a>
+                    
+                    <!-- Desktop Nav -->
+                    <div class="hidden md:ml-12 md:flex md:space-x-8 h-full items-center">
+                        
+                        <!-- Products Mega Menu -->
+                        <div class="group h-full flex items-center">
+                            <button class="group inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 focus:outline-none transition-colors duration-200">
+                                <span>Products</span>
+                                <svg class="ml-2 h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-transform duration-200 group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+
+                            <!-- Flyout Menu -->
+                            <div class="absolute left-0 right-0 mx-auto top-full mt-1 w-full max-w-4xl px-4 sm:px-6 lg:px-8 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-out z-50">
+                                <div class="rounded-xl shadow-2xl ring-1 ring-black ring-opacity-5 overflow-hidden bg-white">
+                                    <div class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <!-- SaaS Solutions Section -->
+                                        <div class="col-span-1 md:col-span-2 lg:col-span-3 mb-4">
+                                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">SaaS Solutions</h3>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <a href="/solutions/brand-with-jojo" class="group flex items-start p-3 -m-3 rounded-lg hover:bg-pink-50 transition ease-in-out duration-150">
+                                                    <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-md bg-pink-100 text-pink-600 group-hover:bg-pink-200 transition-colors">
+                                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <p class="text-sm md:text-base font-medium text-gray-900 group-hover:text-pink-600 transition-colors">Brand With Jojo</p>
+                                                        <p class="mt-1 text-xs md:text-sm text-gray-500">AI-powered brand identity generation.</p>
+                                                    </div>
+                                                </a>
+                                                <a href="/solutions/automation-for-smes" class="group flex items-start p-3 -m-3 rounded-lg hover:bg-green-50 transition ease-in-out duration-150">
+                                                    <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-md bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
+                                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <p class="text-sm md:text-base font-medium text-gray-900 group-hover:text-green-600 transition-colors">Automation For SMEs</p>
+                                                        <p class="mt-1 text-xs md:text-sm text-gray-500">Streamline business workflows.</p>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-span-1 md:col-span-2 lg:col-span-3 border-t border-gray-100 pt-4 mb-2">
+                                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Developer Tools</h3>
+                                        </div>
+
+                                        <% 
+                                        const getIcon = (slug) => {
+                                            const icons = {
+                                                'html-to-pdf': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
+                                                'merge-pdf': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />',
+                                                'split-pdf': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />',
+                                                'compress-pdf': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />',
+                                                'default': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 2H7a2 2 0 00-2 2v15a2 2 0 002 2z" />'
+                                            };
+                                            return icons[slug] || icons['default'];
+                                        }
+                                        %>
+                                        <% services.forEach(service => { %>
+                                            <a href="/tools/<%= service.slug %>" class="group flex items-start p-3 -m-3 rounded-lg hover:bg-gray-50 transition ease-in-out duration-150">
+                                                <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-md bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 group-hover:text-indigo-700 transition-colors">
+                                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <%- getIcon(service.slug) %>
+                                                    </svg>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <p class="text-base font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                        <%= service.name %>
+                                                    </p>
+                                                    <p class="mt-1 text-sm text-gray-500 line-clamp-2">
+                                                        <% if (service.slug === 'html-to-pdf') { %>
+                                                            Convert HTML to PDF instantly.
+                                                        <% } else { %>
+                                                            Professional <%= service.name %> tool.
+                                                        <% } %>
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        <% }); %>
+                                    </div>
+                                    <div class="bg-gray-50 p-5 sm:p-8">
+                                        <div class="flex items-center justify-between">
+                                            <div class="text-sm font-medium text-gray-500">
+                                                Looking for something else?
+                                            </div>
+                                            <a href="/tools" class="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                                                View all tools &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="/pricing" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Pricing</a>
+                        <a href="/docs" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Documentation</a>
+                        <a href="/contact" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Contact</a>
+                    </div>
+                </div>
+
+                <!-- Auth Buttons -->
+                <div class="flex items-center space-x-4">
+                    <% if (user) { %>
+                        <!-- Notification Bell -->
+                        <div class="relative ml-3">
+                            <a href="/notifications" class="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <span class="sr-only">View notifications</span>
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <% if (typeof notificationCount !== 'undefined' && notificationCount > 0) { %>
+                                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
+                                <% } %>
+                            </a>
+                        </div>
+                        <a href="/dashboard" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
+                    <% } else { %>
+                        <a href="/auth/login" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">Log in</a>
+                        <a href="/auth/register" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            Sign up
+                        </a>
+                    <% } %>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="-mr-2 flex items-center md:hidden ml-4">
+                    <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <!-- Icon when menu is closed -->
+                        <svg class="block h-6 w-6" id="menu-closed-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <!-- Icon when menu is open -->
+                        <svg class="hidden h-6 w-6" id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu, show/hide based on menu state. -->
+        <div class="hidden md:hidden border-t border-gray-100 bg-white" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1 px-4">
+                <!-- Products Accordion -->
+                <div>
+                    <button type="button" id="mobile-products-btn" class="w-full flex items-center justify-between px-3 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 rounded-md transition-colors">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            Products
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" id="mobile-products-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <!-- Sub-menu -->
+                    <div class="hidden space-y-1 pl-4 mt-1 border-l-2 border-gray-100 ml-4" id="mobile-products-menu">
+                        <div class="py-2">
+                            <span class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Solutions</span>
+                            <a href="/solutions/brand-with-jojo" class="block mt-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md">Brand With Jojo</a>
+                            <a href="/solutions/automation-for-smes" class="block px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md">Automation For SMEs</a>
+                        </div>
+                        <div class="py-2 border-t border-gray-50">
+                            <span class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</span>
+                            <% services.forEach(service => { %>
+                                <a href="/tools/<%= service.slug %>" class="block mt-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md"><%= service.name %></a>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/pricing" class="flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Pricing
+                </a>
+                <a href="/docs" class="flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Documentation
+                </a>
+                <a href="/contact" class="flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    Contact
+                </a>
+            </div>
+        </div>
+
+        <script nonce="<%= nonce %>">
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('mobile-menu-btn');
+                const menu = document.getElementById('mobile-menu');
+                const closedIcon = document.getElementById('menu-closed-icon');
+                const openIcon = document.getElementById('menu-open-icon');
+
+                // Mobile Menu Toggle
+                btn?.addEventListener('click', () => {
+                    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+                    btn.setAttribute('aria-expanded', !isExpanded);
+                    menu.classList.toggle('hidden');
+                    closedIcon.classList.toggle('hidden');
+                    openIcon.classList.toggle('hidden');
+                });
+
+                // Products Accordion
+                const prodBtn = document.getElementById('mobile-products-btn');
+                const prodMenu = document.getElementById('mobile-products-menu');
+                const prodChevron = document.getElementById('mobile-products-chevron');
+
+                prodBtn?.addEventListener('click', () => {
+                    prodMenu.classList.toggle('hidden');
+                    prodChevron.classList.toggle('rotate-180');
+                });
+            });
+        </script>

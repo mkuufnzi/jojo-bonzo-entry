@@ -1,0 +1,2 @@
+id,tenant_id,contact_id,type,file_url,metadata_json,created_at
+d-1,uuid-1,c-1,invoice,https://s3.com/inv_123.pdf,"{""amount"":500}",2024-01-29T12:01:00Z

@@ -1,0 +1,27 @@
+/* ============================================
+   PDF Converter Service Styles
+   ============================================ */
+
+.nav-tab-active {
+    border-bottom-color: #3b82f6;
+    color: #1e3a8a;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.subtle-grid {
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+#previewCanvasArea {
+    transform-origin: top center;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

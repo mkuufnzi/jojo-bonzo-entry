@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request a Tool - Floovioo </title>
+    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-900">
+
+    <%- include('../partials/navbar') %>
+
+    <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Request a Tool
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Can't find what you're looking for? Tell us what you need!
+            </p>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <form id="requestForm" class="space-y-6" action="#" method="POST">
+                    <div>
+                        <label for="tool_name" class="block text-sm font-medium text-gray-700">
+                            Tool Name / Concept
+                        </label>
+                        <div class="mt-1">
+                            <input id="tool_name" name="tool_name" type="text" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g. PDF to Excel Converter">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">
+                            Description & Requirements
+                        </label>
+                        <div class="mt-1">
+                            <textarea id="description" name="description" rows="4" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Describe how this tool should work..."></textarea>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">
+                            Your Email (for notification)
+                        </label>
+                        <div class="mt-1">
+                            <input id="email" name="email" type="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">
+                                Our Promise
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 text-center text-sm text-gray-500">
+                        <p>Our developers will review your request. If selected, we'll build it and add it to our suite of tools.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/toast') %>
+    <script nonce="<%= nonce %>">
+        document.getElementById('requestForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast('Success', 'Thank you! Your request has been submitted. We will notify you when the tool is ready.', 'success');
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>

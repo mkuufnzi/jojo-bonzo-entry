@@ -1,0 +1,34 @@
+<% if (limitReached || featureMissing) { %>
+    <!-- Reusable Service Lock Overlay -->
+    <div class="absolute inset-x-0 inset-y-0 z-20 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-[2rem] p-12 text-center shadow-xl relative overflow-hidden">
+        <!-- Abstract Background Accents -->
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-50 rounded-full blur-[6.25rem] opacity-20"></div>
+        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-50 rounded-full blur-[6.25rem] opacity-20"></div>
+
+        <div class="relative z-10 inline-flex items-center justify-center w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl mb-6 rotate-3">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900 mb-3">
+            <%= limitReached ? 'Usage Limit Reached' : 'Pro Tool Locked' %>
+        </h3>
+        <p class="text-gray-500 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
+            <%= limitReached 
+                ? 'You have exhausted your monthly allowance for this tool. Upgrade your plan to continue generating documents without interruption.' 
+                : 'This advanced tool is exclusive to our Pro and Enterprise plans. Instant access to all premium features is just one click away.' %>
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+            <a href="/billing?upgrade=true&feature=<%= service.slug %>" class="inline-flex items-center px-8 py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <%= limitReached ? 'Increase My Quota' : 'Go Pro Now' %>
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </a>
+            <% if (limitReached) { %>
+                <a href="/billing" class="inline-flex items-center px-8 py-4 bg-white text-gray-600 font-bold rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all shadow-sm">
+                    View Billing
+                </a>
+            <% } %>
+        </div>
+        <p class="mt-8 text-xs text-gray-400 font-medium italic">Your History and Usage tabs remain fully accessible below.</p>
+    </div>
+<% } %>

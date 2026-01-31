@@ -1,0 +1,184 @@
+<%- include('../../partials/head', { title: 'Manage Features - Admin Console' }) %>
+
+<body class="bg-slate-50 min-h-screen font-sans">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../../partials/dashboard-header', {title: 'Manage Features', user: user }) %>
+
+        <div class="flex-1 overflow-hidden relative">
+            <div class="grid grid-cols-12 h-full">
+                
+                <!-- LEFT: Main Content -->
+                <div class="col-span-12 lg:col-span-9 h-full overflow-y-auto p-6 pb-32 custom-scrollbar">
+                    <div class="max-w-6xl mx-auto space-y-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h1 class="text-2xl font-bold text-slate-900">Feature Flags</h1>
+                                <p class="text-sm text-slate-500 mt-1">Manage app capabilities and permissions.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="document.getElementById('createFeatureModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors">
+                                    + Create Feature
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                            <button onclick="filterFeatures('all')" class="filter-btn px-3 py-1 text-xs font-bold rounded-full bg-slate-800 text-white transition-colors" data-filter="all">All</button>
+                            <% 
+                                const categories = [...new Set(features.map(f => f.category))].sort();
+                                categories.forEach(cat => { 
+                            %>
+                                <button onclick="filterFeatures('<%= cat %>')" class="filter-btn px-3 py-1 text-xs font-bold rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors uppercase" data-filter="<%= cat %>"><%= cat %></button>
+                            <% }); %>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-200">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Key</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Category</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
+                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        <% if (features && features.length > 0) { %>
+                                            <% features.forEach(f => { %>
+                                                <tr class="feature-row hover:bg-slate-50 transition-colors" data-category="<%= f.category %>">
+                                                    <td class="px-6 py-4 text-sm font-mono text-slate-600"><%= f.key %></td>
+                                                    <td class="px-6 py-4 text-sm font-bold text-slate-900"><%= f.name %></td>
+                                                    <td class="px-6 py-4 text-sm text-slate-500">
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800">
+                                                            <%= f.category %>
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-6 py-4">
+                                                        <button onclick="toggleFeature('<%= f.id %>')" class="px-2 py-1 <%= f.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %> rounded-full text-xs font-bold hover:opacity-80 transition-opacity">
+                                                            <%= f.isActive ? 'Active' : 'Disabled' %>
+                                                        </button>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-right">
+                                                        <a href="/admin/features/<%= f.id %>/edit" class="text-blue-600 hover:text-blue-800 text-xs font-bold bg-blue-50 px-3 py-1 rounded-md">
+                                                            Manage
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="5" class="px-6 py-8 text-center text-slate-500 italic">No features found.</td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Help Guide Panel (Fixed) -->
+                <div class="hidden lg:block col-span-3 border-l border-slate-200 bg-white h-full relative z-10 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
+                    <div id="helpGuideContent" class="h-full">
+                        <!-- Loaded via JS -->
+                        <div class="flex items-center justify-center h-full text-slate-400 text-sm animate-pulse">
+                            Loading Guide...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Create Feature Modal -->
+        <div id="createFeatureModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Create New Feature</h3>
+                <form action="/admin/features" method="POST">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Feature Key</label>
+                            <input type="text" name="key" required placeholder="e.g. ai_generation" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+                             <p class="text-xs text-slate-500 mt-1">Unique identifier used in code.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Display Name</label>
+                            <input type="text" name="name" required placeholder="AI Generation" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Category</label>
+                            <select name="category" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="core">Core Functionality</option>
+                                <option value="ai">AI Features</option>
+                                <option value="limit">Usage Limits</option>
+                                <option value="ui">UI/UX</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="isActive" id="isActive" class="rounded text-blue-600 focus:ring-blue-500">
+                            <label for="isActive" class="ml-2 text-sm font-bold text-slate-700">Enable immediately</label>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" onclick="document.getElementById('createFeatureModal').classList.add('hidden')" class="px-4 py-2 text-slate-700 hover:bg-slate-50 font-bold rounded-lg transition-colors">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors">Create Feature</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script nonce="<%= nonce %>">
+            async function toggleFeature(id) {
+                try {
+                    const res = await fetch(`/admin/features/${id}/toggle`, { method: 'POST' });
+                    if(res.ok) location.reload();
+                } catch(e) { console.error(e); window.showToast ? window.showToast('Error', 'Failed to toggle feature', 'error') : console.error('Failed to toggle'); }
+            }
+
+            function filterFeatures(category) {
+                // Update buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    if(btn.dataset.filter === category) {
+                        btn.classList.remove('bg-slate-100', 'text-slate-500');
+                        btn.classList.add('bg-slate-800', 'text-white');
+                    } else {
+                        btn.classList.remove('bg-slate-800', 'text-white');
+                        btn.classList.add('bg-slate-100', 'text-slate-500');
+                    }
+                });
+
+                // Filter rows
+                const rows = document.querySelectorAll('.feature-row');
+                rows.forEach(row => {
+                    if(category === 'all' || row.dataset.category === category) {
+                        row.style.display = 'table-row';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            // Load Help Guide on Mount
+            document.addEventListener('DOMContentLoaded', () => {
+                fetch('/help/features-guide.html')
+                    .then(res => res.text())
+                    .then(html => {
+                        document.getElementById('helpGuideContent').innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error('Failed to load help guide:', err);
+                        document.getElementById('helpGuideContent').innerHTML = '<div class="p-6 text-red-500">Failed to load guide.</div>';
+                    });
+            });
+        </script>
+            </div>
+        </main>
+    </div>
+    <%- include('../../partials/sidebar-script') %>
+</body>
+</html>

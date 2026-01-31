@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Required - <%= service.name %> | Floovioo </title>
+    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/layouts/sidebar.css" nonce="<%= nonce %>">
+    <link rel="stylesheet" href="/css/services/status-pages.css" nonce="<%= nonce %>">
+</head>
+<body class="bg-[#F8FAFC] min-h-screen">
+    <%- include('../partials/sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../partials/dashboard-header', { title: 'Upgrade Required', user: user }) %>
+
+        <main class="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50">
+            <div class="max-w-4xl w-full">
+                <!-- Header -->
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[0.625rem] font-bold uppercase tracking-widest border border-blue-100 mb-4">
+                        💎 Pro Feature
+                    </div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                        Level up your <span class="text-blue-600"><%= service.name %></span> workflow
+                    </h1>
+                    <p class="text-gray-500 max-w-lg mx-auto leading-relaxed">
+                        Access premium capabilities, higher usage limits, and enterprise-grade tools designed for serious developers.
+                    </p>
+                </div>
+
+                <!-- Comparison Cards -->
+                <div class="grid md:grid-cols-2 gap-8 items-stretch">
+                    <!-- Current Plan (Disabled Look) -->
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-200 opacity-60 flex flex-col">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-900">Current Plan: <%= user.subscription?.plan?.name || 'Free' %></h3>
+                            <p class="text-3xl font-bold text-gray-400 mt-2">
+                                <span class="uppercase text-lg"><%= user.subscription?.plan?.currency || 'USD' %></span> 
+                                <%= user.subscription?.plan?.price || 0 %> 
+                                <span class="text-sm font-normal text-gray-400">/mo</span>
+                            </p>
+                        </div>
+                        
+                        <div class="space-y-4 mb-8 flex-1 text-sm text-gray-500">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span><%= user.subscription?.plan?.pdfQuota || 0 %> PDF Conversions</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span><%= user.subscription?.plan?.aiQuota || 0 %> AI Generations / mo</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <% if (user.subscription?.plan?.name === 'Pro' || user.subscription?.plan?.name === 'Enterprise') { %>
+                                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    <span>High Performance API</span>
+                                <% } else { %>
+                                    <svg class="w-4 h-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    <span>No Advanced API Access</span>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-gray-100 text-center">
+                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg border border-red-100">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <span class="text-xs font-bold uppercase tracking-widest">Plan Limit Reached</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pro Plan (Focus) -->
+                    <div class="premium-card p-8 rounded-[2rem] text-white flex flex-col transform md:scale-105 shadow-2xl">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold">Pro Plan</h3>
+                            <p class="text-3xl font-bold mt-2">$39 <span class="text-sm font-normal opacity-70">/mo</span></p>
+                        </div>
+                        
+                        <div class="space-y-4 mb-8 flex-1 text-sm">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span>5,000 PDF Conversions</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span>500 AI Generations / mo</span>
+                            </div>
+                             <div class="flex items-center gap-3">
+                                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Advanced API & High Performance</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Priority Support & SLA</span>
+                            </div>
+                        </div>
+
+                        <a href="/subscription?plan=pro" class="w-full py-4 bg-white text-blue-600 rounded-2xl font-bold text-center hover:bg-gray-50 transition-all shadow-lg">
+                            Upgrade Now
+                        </a>
+                        <p class="text-[0.625rem] text-center mt-4 opacity-70">30-day money-back guarantee.</p>
+                    </div>
+                </div>
+
+                <!-- Benefits Row -->
+                <div class="grid grid-cols-3 gap-6 mt-16 pb-12">
+                    <div class="text-center group">
+                        <div class="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Fast Processing</h4>
+                        <p class="text-[0.625rem] text-gray-400 mt-1">Instant results without delay</p>
+                    </div>
+                    <div class="text-center group">
+                        <div class="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Secure storage</h4>
+                        <p class="text-[0.625rem] text-gray-400 mt-1">Bank-level file encryption</p>
+                    </div>
+                    <div class="text-center group">
+                        <div class="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Advanced Metrics</h4>
+                        <p class="text-[0.625rem] text-gray-400 mt-1">Detailed usage & cost tracking</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <%- include('../partials/sidebar-script') %>
+</body>
+</html>

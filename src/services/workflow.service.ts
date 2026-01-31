@@ -1,0 +1,237 @@
+import prisma from '../lib/prisma';
+import { logger } from '../lib/logger';
+import { brandingService } from './branding.service';
+import { webhookService } from './webhook.service';
+import { n8nPayloadFactory } from './n8n/n8n-payload.factory';
+import axios from 'axios';
+
+export class WorkflowService {
+  
+  async listWorkflows(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
+    if (!user?.businessId) return [];
+
+    return await prisma.workflow.findMany({
+      where: { businessId: user.businessId },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async createWorkflow(userId: string, data: any) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
+    if (!user?.businessId) throw new Error('Business account required');
+
+    return await prisma.workflow.create({
+      data: {
+        businessId: user.businessId,
+        name: data.name,
+        description: data.description,
+        isActive: data.isActive !== false,
+        triggerType: data.triggerType,
+        triggerConfig: data.triggerConfig ?? {}, 
+        actionConfig: data.actionConfig ?? {}
+      }
+    });
+  }
+  
+  async deleteWorkflow(userId: string, id: string) {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
+      if (!user?.businessId) throw new Error('Business account required');
+
+      // Verify ownership
+      const wf = await prisma.workflow.findFirst({ where: { id, businessId: user.businessId } });
+      if (!wf) throw new Error('Not found');
+      
+      return await prisma.workflow.delete({ where: { id } });
+  }
+
+  /**
+   * The Core Logic Engine
+   * Taking a trigger payload, checking against workflows, and executing actions.
+   */
+  async processWebhook(userId: string, payload: any) {
+    logger.info({ userId, type: payload.type }, 'Processing Webhook Event');
+    
+    // Resolving User's Business context
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
+    if (!user?.businessId) {
+        logger.warn({ userId }, 'Webhook received for user without business');
+        return [];
+    }
+
+    // Find active workflows for this user driven by webhook
+    const workflows = await prisma.workflow.findMany({
+      where: { 
+        businessId: user.businessId, 
+        isActive: true, 
+        triggerType: 'webhook' 
+      }
+    });
+
+    const results: any[] = [];
+
+    for (const wf of workflows) {
+      // Check if payload matches trigger criteria
+      const config = wf.triggerConfig as any;
+      
+      // Filter by Event Type (e.g. "invoice.created")
+      if (config?.event && payload.type !== config.event) {
+        continue;
+      }
+      
+      // Filter by Provider (e.g. "zoho")
+      if (payload.provider && config?.provider && payload.provider !== config.provider) {
+          continue;
+      }
+
+      // Execute Action
+      try {
+        const result = await this.executeAction(wf.id, wf.actionConfig, payload, userId);
+        results.push({ workflowId: wf.id, status: 'success', result });
+        
+        // Log Success
+        await prisma.workflowExecutionLog.create({
+          data: {
+            workflowId: wf.id,
+            status: 'success',
+            inputData: payload,
+            outputData: result as any, // Json compatible
+            duration: 100 // We might want to measure this
+          }
+        });
+
+      } catch (error: any) {
+        logger.error({ workflowId: wf.id, error }, 'Workflow Execution Failed');
+        results.push({ workflowId: wf.id, status: 'failed', error: error.message });
+        
+        // Log Failure
+        await prisma.workflowExecutionLog.create({
+          data: {
+            workflowId: wf.id,
+            status: 'failed',
+            inputData: payload,
+            error: error.message
+          }
+        });
+      }
+    }
+    
+    return results;
+  }
+
+  async processWebhookForBusiness(businessId: string, payload: any) {
+      // Fallback: Find first user - Ideally we should track the 'Owner' of the business
+      const user = await prisma.user.findFirst({ where: { businessId } });
+      if (user) {
+          return this.processWebhook(user.id, payload);
+      }
+      return [];
+  }
+
+  async executeAction(workflowId: string, actionConfig: any, payload: any, userId: string) {
+    if (!actionConfig) return { message: 'No action config' };
+    
+    const type = actionConfig.type || actionConfig.steps?.[0]?.type;
+
+    if (type === 'apply_branding' || type === 'brand_and_email' || type === 'email') {
+        
+        // 1. Resolve External Endpoint (n8n)
+        const serviceSlug = 'transactional-branding';
+        const webhookUrl = await webhookService.getEndpoint(serviceSlug, type === 'email' ? 'email' : 'apply_branding');
+        
+        // 2. Prepare Payload for n8n
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { business: true }
+        });
+
+        let brandProfile = null;
+        if (actionConfig.profileId) {
+             brandProfile = await brandingService.getProfile(userId);
+        }
+
+        // 3. Create Standardized Envelope
+        const context = {
+            serviceId: 'transactional-branding', // Explicit for now
+            serviceTenantId: user?.business?.id || 'unknown',
+            appId: 'system-workflows',
+            requestId: `wf_${workflowId.substring(0, 8)}_${Date.now()}`
+        };
+
+        const envelope = n8nPayloadFactory.createWorkflowExecutionPayload(
+            workflowId,
+            type,
+            payload,
+            actionConfig,
+            brandProfile,
+            userId,
+            context
+        );
+
+        // 4. Call n8n
+        logger.info({ workflowId, webhookUrl, serviceTenantId: context.serviceTenantId }, '🔗 [WorkflowService] Calling n8n Envelope');
+        const startTime = Date.now();
+        const response = await axios.post(webhookUrl, envelope);
+        const duration = Date.now() - startTime;
+
+        // 4. Return Data
+        return {
+            source: 'n8n',
+            statusCode: response.status,
+            data: response.data,
+            duration
+        };
+    }
+    
+    return { message: 'Unknown action type', config: actionConfig };
+  }
+
+  /**
+   * Manual Test Trigger
+   */
+  async testWorkflow(userId: string, workflowId: string) {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
+      if (!user?.businessId) throw new Error('Business account required');
+
+      const wf = await prisma.workflow.findFirst({ where: { id: workflowId, businessId: user.businessId } });
+      if (!wf) throw new Error('Workflow not found');
+
+      const mockPayload = {
+          type: (wf.triggerConfig as any)?.event || 'invoice.created',
+          provider: 'manual_test',
+          id: 'test-invoice-123',
+          amount: 100.00,
+          currency: 'USD',
+          customer: {
+              name: 'Test Customer',
+              email: 'test@example.com'
+          }
+      };
+
+      try {
+          const result = await this.executeAction(wf.id, wf.actionConfig, mockPayload, userId);
+           await prisma.workflowExecutionLog.create({
+              data: {
+                  workflowId: wf.id,
+                  status: 'success',
+                  inputData: mockPayload,
+                  outputData: result as any, 
+                  duration: result.duration || 0
+              }
+          });
+          return result;
+      } catch (error: any) {
+           await prisma.workflowExecutionLog.create({
+              data: {
+                  workflowId: wf.id,
+                  status: 'failed',
+                  inputData: mockPayload,
+                  error: error.message
+              }
+          });
+          throw error;
+      }
+  }
+}
+
+export const workflowService = new WorkflowService();

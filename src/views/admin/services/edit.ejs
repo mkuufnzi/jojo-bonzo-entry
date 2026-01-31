@@ -1,0 +1,474 @@
+<%- include('../../partials/head', { title: 'Edit Service - Admin' }) %>
+
+<body class="bg-slate-50 min-h-screen font-sans">
+    <%- include('../../partials/admin-sidebar') %>
+    
+    <div id="mainContent" class="flex flex-col h-screen  overflow-hidden bg-slate-50">
+        <%- include('../../partials/dashboard-header', {title: 'Edit Service', user: user}) %>
+        
+        <div class="flex-1 overflow-hidden relative">
+            <div class="grid grid-cols-12 h-full">
+                
+                <!-- LEFT: Main Form Content (Scrollable) -->
+                <div class="col-span-12 lg:col-span-9 h-full overflow-y-auto p-6 pb-32 custom-scrollbar">
+                    <div class="max-w-5xl mx-auto">
+                        
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-6">
+                            <a href="/admin/services" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                                Back to Services
+                            </a>
+                        </div>
+
+                        <!-- 1. Main Service Details Form -->
+                        <form action="/admin/services/<%= service.id %>/update" method="POST" id="serviceDetailsForm" class="mb-8">
+                            <input type="hidden" name="verificationCode" id="detailsVerificationCode">
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                                        Service Details
+                                        <span class="px-3 py-1 text-xs rounded-full <%= service.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                            <%= service.isActive ? 'Active' : 'Inactive' %>
+                                        </span>
+                                    </h2>
+                                    <button type="button" onclick="triggerSaveDetails()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-sm text-sm">
+                                        Save Details
+                                    </button>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-bold text-slate-700 mb-1">Service Name</label>
+                                            <input type="text" name="name" value="<%= service.name %>" required class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-slate-700 mb-1">Slug</label>
+                                            <input type="text" value="<%= service.slug %>" disabled class="w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 font-mono text-sm cursor-not-allowed">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 mb-1">Description</label>
+                                        <textarea name="description" rows="2" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500"><%= service.description || '' %></textarea>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-bold text-slate-700 mb-1">Price / Request</label>
+                                            <div class="relative">
+                                                <span class="absolute left-3 top-2.5 text-slate-500">$</span>
+                                                <input type="number" step="0.0001" name="pricePerRequest" value="<%= service.pricePerRequest %>" class="pl-6 w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-slate-700 mb-1">Execution Type</label>
+                                            <select name="executionType" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="webhook" <%= service.executionType === 'webhook' ? 'selected' : '' %>>Webhook (n8n)</option>
+                                                <option value="local" <%= service.executionType === 'local' ? 'selected' : '' %>>Local Function</option>
+                                                <option value="api" <%= service.executionType === 'api' ? 'selected' : '' %>>External API</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-bold text-slate-700 mb-1">Required Feature Key</label>
+                                        <select name="requiredFeatureKey" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="">-- No Restriction (Public / Plan Based) --</option>
+                                            <% if (typeof features !== 'undefined') { %>
+                                                <% features.forEach(feature => { %>
+                                                    <option value="<%= feature.key %>" <%= service.requiredFeatureKey === feature.key ? 'selected' : '' %>>
+                                                        <%= feature.name %> (<%= feature.key %>)
+                                                    </option>
+                                                <% }); %>
+                                            <% } %>
+                                        </select>
+                                        <p class="text-xs text-slate-500 mt-1">If selected, this service will only be accessible to users with this feature enabled in their plan.</p>
+                                    </div>
+                                    <div class="flex items-center gap-4 mt-4">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="isActive" <%= service.isActive ? 'checked' : '' %> class="rounded text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2 text-sm font-bold text-slate-700">Service Active</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="space-y-6">
+                            <!-- 2. Webhooks Configuration (Atomic) -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold text-slate-900">Webhooks</h3>
+                                    <button type="button" onclick="addWebhookRow()" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-200">
+                                        + Add Webhook
+                                    </button>
+                                </div>
+                                <div id="webhooks-container" class="space-y-4">
+                                    <% 
+                                        const webhooks = (service.config && service.config.webhooks) || {};
+                                        Object.entries(webhooks).forEach(([key, data]) => {
+                                            const webhook = typeof data === 'string' ? { url: data } : data;
+                                    %>
+                                    <div class="webhook-row p-4 border border-slate-200 rounded-lg bg-slate-50 space-y-3" data-key="<%= key %>">
+                                        <div class="flex flex-col md:flex-row gap-2 md:items-start">
+                                            <input type="text" placeholder="Key" value="<%= key %>" class="webhook-key w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono font-bold" readonly>
+                                            <select class="webhook-method w-full md:w-auto rounded-lg border-slate-300 text-sm font-bold">
+                                                <option value="POST" <%= webhook.method === 'POST' ? 'selected' : '' %>>POST</option>
+                                                <option value="GET" <%= webhook.method === 'GET' ? 'selected' : '' %>>GET</option>
+                                            </select>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            <input type="text" placeholder="Label" value="<%= webhook.label || '' %>" class="webhook-label w-full rounded-lg border-slate-300 text-sm">
+                                            <input type="text" placeholder="Description" value="<%= webhook.description || '' %>" class="webhook-desc w-full rounded-lg border-slate-300 text-sm">
+                                        </div>
+                                        <div>
+                                            <input type="text" placeholder="URL" value="<%= webhook.url || '' %>" class="webhook-url w-full rounded-lg border-slate-300 text-sm font-mono">
+                                        </div>
+                                        <div class="flex justify-end gap-2 pt-2">
+                                            <button onclick="triggerDeleteConfig('webhook', '<%= key %>')" class="text-sm text-red-600 hover:text-red-800 font-medium">Delete</button>
+                                            <button onclick="triggerSaveConfig('webhook', '<%= key %>', this.closest('.webhook-row'))" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700">Save Item</button>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+
+                            <!-- 3. Paths Configuration (Atomic) -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold text-slate-900">API Paths</h3>
+                                    <button type="button" onclick="addPathRow()" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-200">
+                                        + Add Path
+                                    </button>
+                                </div>
+                                <div id="paths-container" class="space-y-3">
+                                    <% 
+                                        const paths = (service.config && service.config.paths) || [];
+                                        paths.forEach(p => {
+                                    %>
+                                    <div class="path-row flex flex-col md:flex-row gap-2 md:items-center p-3 border border-slate-200 rounded-lg bg-slate-50" data-key="<%= p.path %>">
+                                        <input type="text" value="<%= p.path %>" class="path-value w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono" readonly>
+                                        <div class="flex items-center justify-between gap-2 w-full md:w-auto">
+                                            <label class="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200 flex-1 md:flex-none justify-center">
+                                                <input type="checkbox" <%= p.billable ? 'checked' : '' %> class="path-billable rounded text-blue-600">
+                                                <span class="text-sm font-bold text-slate-700">Billable</span>
+                                            </label>
+                                            <div class="flex gap-2">
+                                                <button onclick="triggerDeleteConfig('path', '<%= p.path %>')" class="text-red-600 hover:bg-red-50 p-2 rounded">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
+                                                <button onclick="triggerSaveConfig('path', '<%= p.path %>', this.closest('.path-row'))" class="text-blue-600 hover:bg-blue-50 p-2 rounded font-bold">
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+
+                            <!-- 4. Dependencies Configuration (Atomic) -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold text-slate-900">Dependencies</h3>
+                                    <button type="button" onclick="addDependencyRow()" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-200">
+                                        + Add Dependency
+                                    </button>
+                                </div>
+                                <div id="dependencies-container" class="space-y-3">
+                                     <% 
+                                        const dependencies = (service.config && service.config.dependencies) || [];
+                                        dependencies.forEach(dep => {
+                                            const key = dep.service + ':' + dep.endpoint;
+                                    %>
+                                    <div class="dep-row p-4 border border-slate-200 rounded-lg bg-slate-50 space-y-2" data-key="<%= key %>">
+                                        <div class="flex flex-col md:flex-row gap-2 md:items-start">
+                                            <input type="text" value="<%= dep.service %>" class="dep-service w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono" readonly>
+                                            <input type="text" value="<%= dep.endpoint %>" class="dep-endpoint w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono" readonly>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            <input type="text" value="<%= dep.purpose %>" class="dep-purpose rounded-lg border-slate-300 text-sm">
+                                            <label class="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200">
+                                                <input type="checkbox" <%= dep.required ? 'checked' : '' %> class="dep-required rounded text-blue-600">
+                                                <span class="text-sm font-bold text-slate-700">Required</span>
+                                            </label>
+                                        </div>
+                                        <div class="flex justify-end gap-2 pt-2">
+                                            <button onclick="triggerDeleteConfig('dependency', '<%= key %>')" class="text-sm text-red-600 hover:text-red-800 font-medium">Delete</button>
+                                            <button onclick="triggerSaveConfig('dependency', '<%= key %>', this.closest('.dep-row'))" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700">Save Item</button>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Help Guide Panel (Fixed) -->
+                <div class="hidden lg:block col-span-3 border-l border-slate-200 bg-white h-full relative z-10 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
+                    <div id="helpGuideContent" class="h-full">
+                        <!-- Loaded via JS -->
+                        <div class="flex items-center justify-center h-full text-slate-400 text-sm animate-pulse">
+                            Loading Guide...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- Security Verification Modal -->
+    <div id="verificationModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 animate-[fadeIn_0.2s_ease-out]">
+            <div class="text-center mb-6">
+                <div class="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Security Verification</h3>
+                <p class="text-slate-500 mt-2 text-sm">Please verify this action by entering the code sent to your email.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Verification Code</label>
+                    <input type="text" id="otpCode" placeholder="Enter 6-digit code" class="w-full text-center text-2xl font-mono tracking-[0.5em] py-3 rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" maxlength="6">
+                    <p id="otpError" class="text-red-500 text-xs mt-2 text-center hidden"></p>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeVerificationModal()" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-50">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="submitVerifiedAction()" class="flex-1 px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">
+                        Verify & Execute
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <button type="button" onclick="sendVerificationCode()" class="text-xs text-blue-600 hover:text-blue-800 hover:underline">Resend Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../../partials/sidebar-script') %>
+
+    <script nonce="<%= nonce %>">
+        let pendingAction = null; // Store the function to run after verification
+
+        // Load Help Guide on Mount
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/help/service-editor-guide.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('helpGuideContent').innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Failed to load help guide:', err);
+                    document.getElementById('helpGuideContent').innerHTML = '<div class="p-6 text-red-500">Failed to load guide.</div>';
+                });
+        });
+
+        // --- Auth & Verification ---
+
+        async function sendVerificationCode() {
+            try {
+                const btn = document.querySelector('#verificationModal button[onclick="sendVerificationCode()"]');
+                const originalText = btn.innerText;
+                btn.innerText = 'Sending...';
+                btn.disabled = true;
+
+                const res = await fetch('/admin/verification/send', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    btn.innerText = 'Code Sent!';
+                    setTimeout(() => { btn.innerText = 'Resend Code'; btn.disabled = false; }, 3000);
+                } else {
+                    if (window.showToast) window.showToast('Error', 'Failed to send code: ' + (data.error || 'Unknown error'), 'error');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                console.error(e);
+                if (window.showToast) window.showToast('Error', 'Error sending verification code', 'error');
+            }
+        }
+
+        function triggerAction(actionFn) {
+            pendingAction = actionFn;
+            const modal = document.getElementById('verificationModal');
+            document.getElementById('otpCode').value = '';
+            document.getElementById('otpError').classList.add('hidden');
+            modal.classList.remove('hidden');
+            document.getElementById('otpCode').focus();
+            sendVerificationCode();
+        }
+
+        function closeVerificationModal() {
+            document.getElementById('verificationModal').classList.add('hidden');
+            pendingAction = null;
+        }
+
+        function submitVerifiedAction() {
+            const code = document.getElementById('otpCode').value.trim();
+            if (code.length < 6) {
+                document.getElementById('otpError').innerText = 'Invalid code';
+                document.getElementById('otpError').classList.remove('hidden');
+                return;
+            }
+            if (!pendingAction) return;
+
+            // Execute the pending action with the code
+            pendingAction(code);
+            closeVerificationModal();
+        }
+
+        // --- Main Details Save ---
+
+        function triggerSaveDetails() {
+            triggerAction((code) => {
+                 document.getElementById('detailsVerificationCode').value = code;
+                 document.getElementById('serviceDetailsForm').submit();
+            });
+        }
+
+        // --- Config Item Save/Delete ---
+
+        function triggerSaveConfig(type, key, rowElement) {
+             // Extract data based on type
+             let data = {};
+             if (type === 'webhook') {
+                 data = {
+                     key: rowElement.querySelector('.webhook-key').value,
+                     method: rowElement.querySelector('.webhook-method').value,
+                     url: rowElement.querySelector('.webhook-url').value,
+                     label: rowElement.querySelector('.webhook-label').value,
+                     description: rowElement.querySelector('.webhook-desc').value
+                 };
+                 // For new items, key might come from input
+                 key = data.key; 
+             } else if (type === 'path') {
+                 data = {
+                     path: rowElement.querySelector('.path-value').value,
+                     billable: rowElement.querySelector('.path-billable').checked
+                 };
+                 key = data.path; // Update by path
+             } else if (type === 'dependency') {
+                 data = {
+                     service: rowElement.querySelector('.dep-service').value,
+                     endpoint: rowElement.querySelector('.dep-endpoint').value,
+                     purpose: rowElement.querySelector('.dep-purpose').value,
+                     required: rowElement.querySelector('.dep-required').checked
+                 };
+                 key = data.service + ':' + data.endpoint;
+             }
+
+             triggerAction((code) => {
+                 saveConfigItem(type, 'save', key, data, code);
+             });
+        }
+
+        function triggerDeleteConfig(type, key) {
+            if(!confirm('Are you sure you want to delete this item?')) return;
+            triggerAction((code) => {
+                 saveConfigItem(type, 'delete', key, {}, code);
+            });
+        }
+
+        async function saveConfigItem(type, action, key, data, code) {
+            try {
+                const res = await fetch(`/admin/services/<%= service.id %>/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, action, key, data, verificationCode: code })
+                });
+                
+                if (res.ok) {
+                    window.location.reload(); // Atomic update success -> Reload to reflect
+                } else {
+                    const err = await res.json();
+                    if (window.showToast) window.showToast('Error', 'Error: ' + (err.error || 'Failed to save configuration'), 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                if (window.showToast) window.showToast('Error', 'Network error saving configuration', 'error');
+            }
+        }
+
+        // --- UI Helpers for Adding Rows ---
+
+        function addWebhookRow() {
+            const container = document.getElementById('webhooks-container');
+            const div = document.createElement('div');
+            div.className = 'webhook-row p-4 border border-slate-200 rounded-lg bg-blue-50 space-y-3';
+            div.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-2 md:items-start">
+                    <input type="text" placeholder="Key (e.g. analyze)" class="webhook-key w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono font-bold">
+                    <select class="webhook-method w-full md:w-auto rounded-lg border-slate-300 text-sm font-bold">
+                        <option value="POST">POST</option>
+                        <option value="GET">GET</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <input type="text" placeholder="Label" class="webhook-label w-full rounded-lg border-slate-300 text-sm">
+                    <input type="text" placeholder="Description" class="webhook-desc w-full rounded-lg border-slate-300 text-sm">
+                </div>
+                <div>
+                    <input type="text" placeholder="URL" class="webhook-url w-full rounded-lg border-slate-300 text-sm font-mono">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="this.closest('.webhook-row').remove()" class="text-sm text-slate-500 font-medium">Cancel</button>
+                    <button onclick="triggerSaveConfig('webhook', '', this.closest('.webhook-row'))" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700">Add Item</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addPathRow() {
+            const container = document.getElementById('paths-container');
+            const div = document.createElement('div');
+            div.className = 'path-row flex flex-col md:flex-row gap-2 md:items-center p-3 border border-slate-200 rounded-lg bg-blue-50';
+            div.innerHTML = `
+                <input type="text" placeholder="/path" class="path-value w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono">
+                <div class="flex items-center justify-between gap-2 w-full md:w-auto">
+                    <label class="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200 flex-1 md:flex-none justify-center">
+                        <input type="checkbox" checked class="path-billable rounded text-blue-600">
+                        <span class="text-sm font-bold text-slate-700">Billable</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <button onclick="this.closest('.path-row').remove()" class="text-slate-500 p-2 text-sm">Cancel</button>
+                        <button onclick="triggerSaveConfig('path', '', this.closest('.path-row'))" class="text-blue-600 hover:bg-blue-50 p-2 rounded font-bold">Save</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addDependencyRow() {
+             const container = document.getElementById('dependencies-container');
+             const div = document.createElement('div');
+             div.className = 'dep-row p-4 border border-slate-200 rounded-lg bg-blue-50 space-y-2';
+             div.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-2 md:items-start">
+                    <input type="text" placeholder="Service Slug" class="dep-service w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono">
+                    <input type="text" placeholder="Endpoint" class="dep-endpoint w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <input type="text" placeholder="Purpose" class="dep-purpose rounded-lg border-slate-300 text-sm">
+                    <label class="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200">
+                        <input type="checkbox" checked class="dep-required rounded text-blue-600">
+                        <span class="text-sm font-bold text-slate-700">Required</span>
+                    </label>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="this.closest('.dep-row').remove()" class="text-sm text-slate-500 font-medium">Cancel</button>
+                    <button onclick="triggerSaveConfig('dependency', '', this.closest('.dep-row'))" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700">Add Item</button>
+                </div>
+             `;
+             container.appendChild(div);
+        }
+    </script>
+</body>
+</html>

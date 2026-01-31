@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limit Reached - <%= service.name %> | Floovioo </title>
+    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/layouts/sidebar.css" nonce="<%= nonce %>">
+    <link rel="stylesheet" href="/css/services/status-pages.css" nonce="<%= nonce %>">
+</head>
+<body class="bg-[#F8FAFC] min-h-screen">
+    <%- include('../partials/sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../partials/dashboard-header', { title: 'Usage Limit Reached', user: user }) %>
+
+        <main class="flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-orange-50/50 via-white to-red-50/50">
+            <div class="max-w-2xl w-full bg-white rounded-[2.5rem] p-8 text-center relative overflow-hidden">
+                <!-- Abstract Background -->
+                <div class="absolute -top-24 -right-24 w-32 h-32 bg-orange-100 rounded-full blur-[100px] opacity-20"></div>
+                <div class="absolute -bottom-24 -left-24 w-32 h-32 bg-red-100 rounded-full blur-[100px] opacity-20"></div>
+
+                <!-- Icon -->
+                <div class="relative z-10 mx-auto w-24 h-24 bg-orange-50 rounded-3xl flex items-center justify-center mb-8 rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <svg class="w-12 h-12 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                    Monthly Quota Reached
+                </h1>
+                
+                <p class="text-gray-500 mb-10 leading-relaxed">
+                    You've successfully used all your allocated <span class="text-gray-900 font-semibold"><%= service.name %></span> credits for this cycle. Upgrade to a higher plan or wait for the next billing cycle to continue generating.
+                </p>
+
+                <!-- Status Meter (Visual Only) -->
+                <div class="max-w-xs mx-auto mb-10">
+                    <div class="flex justify-between text-[0.625rem] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                        <span>Current Usage</span>
+                        <span class="text-orange-600">100% Full</span>
+                    </div>
+                    <div class="h-3 w-full bg-gray-100 rounded-full overflow-hidden p-0.5">
+                        <div class="h-full w-full bg-gradient-to-r from-orange-500 to-red-600 rounded-full"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+                    <a href="/subscription" class="flex-1 px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+                        Increase My Quota
+                    </a>
+                    <button onclick="window.history.back()" class="flex-1 px-8 py-4 bg-white text-gray-600 border border-gray-200 rounded-2xl font-bold hover:bg-gray-50 transition-all">
+                        Go Back
+                    </button>
+                </div>
+
+                <p class="mt-8 text-xs text-gray-400">
+                    Questions? <a href="mailto:support@afstools.com" class="text-blue-600 hover:underline">Contact Support</a>
+                </p>
+            </div>
+        </main>
+    </div>
+    <%- include('../partials/sidebar-script') %>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<script nonce="<%= nonce %>">
+    document.addEventListener('DOMContentLoaded', () => {
+        const usageCanvas = document.getElementById('usageChart');
+        if (usageCanvas) {
+            const dailyUsage = JSON.parse('<%- JSON.stringify(locals.dailyUsage || { }) %>');
+            const ctx = usageCanvas.getContext('2d');
+
+            const labels = [];
+            const dataCost = [];
+            const dataCount = [];
+            const today = new Date();
+
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                labels.push(d.toLocaleDateString(undefined, {month: 'short', day: 'numeric' }));
+
+                const stat = dailyUsage[dateStr] || {count: 0, cost: 0 };
+                dataCost.push(stat.cost);
+                dataCount.push(stat.count);
+            }
+
+            console.log(dataCount);
+            console.log(dataCost);  
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Requests',
+                            data: dataCount,
+                            backgroundColor: '#93c5fd',
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Cost ($)',
+                            data: dataCost,
+                            backgroundColor: '#2563eb',
+                            yAxisID: 'y1',
+                            type: 'line'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {display: true, text: 'Requests' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {drawOnChartArea: false },
+                            title: {display: true, text: 'Cost ($)' }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,2 @@
+tenant_id,logo_url,primary_color,secondary_color,font_heading,font_body,templates_json
+uuid-1,https://example.com/logo.png,#0000FF,#FF0000,Red Hat Display,Inter,"{""invoice"":""tpl_inv_01""}"

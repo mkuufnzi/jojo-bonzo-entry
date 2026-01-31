@@ -1,0 +1,141 @@
+<!-- Users Management Guide -->
+<div class="p-5 h-full overflow-y-auto">
+    <div class="flex items-center gap-2 mb-6">
+        <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+            <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+        </div>
+        <h2 class="text-sm font-bold text-slate-900">Users Guide</h2>
+    </div>
+
+    <!-- Section 1: Overview -->
+    <div class="mb-6">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span class="w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
+            Overview
+        </h3>
+        <div class="space-y-3 text-slate-600 text-sm">
+            <p>This dashboard manages all user accounts and access control.</p>
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <p class="text-xs font-bold text-slate-700 mb-1">Three Tabs:</p>
+                <ul class="text-xs space-y-1 text-slate-500">
+                    <li><strong>End Users</strong> - Customer accounts</li>
+                    <li><strong>System Users</strong> - Admin/staff accounts</li>
+                    <li><strong>Banned IPs</strong> - Blocked addresses</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: System Roles -->
+    <div class="mb-6">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span class="w-5 h-5 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
+            System Roles
+        </h3>
+        <div class="space-y-2">
+            <!-- ROOT -->
+            <div class="bg-red-50 border border-red-100 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-red-700">ROOT</span>
+                    <span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">Full Access</span>
+                </div>
+                <p class="text-[11px] text-red-600">Complete system control. Can manage all users, services, billing, and system settings. Highest privilege level.</p>
+            </div>
+            
+            <!-- CEO -->
+            <div class="bg-purple-50 border border-purple-100 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-purple-700">CEO</span>
+                    <span class="text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-bold">Executive View</span>
+                </div>
+                <p class="text-[11px] text-purple-600">View revenue, billing, subscriptions, analytics, users, and features. Read-only executive dashboard access.</p>
+            </div>
+            
+            <!-- COO -->
+            <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-indigo-700">COO</span>
+                    <span class="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-bold">Operations</span>
+                </div>
+                <p class="text-[11px] text-indigo-600">View revenue, subscriptions, analytics, users, and features. Operations oversight without edit access.</p>
+            </div>
+            
+            <!-- DEVOPS -->
+            <div class="bg-green-50 border border-green-100 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-green-700">DEVOPS</span>
+                    <span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold">Technical</span>
+                </div>
+                <p class="text-[11px] text-green-600">System management, logs, analytics, service configuration. Can ban users/IPs and manage service settings.</p>
+            </div>
+            
+            <!-- MARKETING -->
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-blue-700">MARKETING</span>
+                    <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">Growth</span>
+                </div>
+                <p class="text-[11px] text-blue-600">View analytics, manage features and plans. Focused on product growth and feature releases.</p>
+            </div>
+            
+            <!-- SUPPORT -->
+            <div class="bg-cyan-50 border border-cyan-100 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-cyan-700">SUPPORT</span>
+                    <span class="text-[10px] bg-cyan-100 text-cyan-600 px-2 py-0.5 rounded-full font-bold">Customer Care</span>
+                </div>
+                <p class="text-[11px] text-cyan-600">View users only. Limited access for customer support and account assistance.</p>
+            </div>
+            
+            <!-- USER -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-700">USER</span>
+                    <span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold">Customer</span>
+                </div>
+                <p class="text-[11px] text-slate-600">Standard customer account. No admin panel access. Uses public-facing features only.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Quick Actions -->
+    <div class="mb-6">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span class="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
+            Quick Actions
+        </h3>
+        <div class="space-y-2">
+            <a href="/admin/users?tab=end-users" class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors group">
+                <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+                </div>
+                <span class="text-sm text-slate-600 group-hover:text-slate-900">View End Users</span>
+            </a>
+            <a href="/admin/users?tab=system-users" class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors group">
+                <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                    <i data-lucide="shield" class="w-4 h-4 text-amber-600"></i>
+                </div>
+                <span class="text-sm text-slate-600 group-hover:text-slate-900">View System Users</span>
+            </a>
+            <a href="/admin/users?tab=banned-ips" class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors group">
+                <div class="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                    <i data-lucide="ban" class="w-4 h-4 text-red-600"></i>
+                </div>
+                <span class="text-sm text-slate-600 group-hover:text-slate-900">Manage Banned IPs</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Section 4: Security Notes -->
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
+            <h4 class="text-xs font-bold text-amber-800 uppercase tracking-widest">Security</h4>
+        </div>
+        <ul class="text-xs text-amber-700 space-y-1">
+            <li>• Role changes require email verification</li>
+            <li>• IP bans block all access immediately</li>
+            <li>• All actions are logged for audit</li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+<div class="flex-1 overflow-y-auto flex flex-col">
+    <div class="max-w-[100rem] w-full mx-auto px-4 py-3 flex-1 flex flex-col">
+        
+        <!-- Tab Content: Home (Service Workspace) -->
+        <div id="tab-content-home" class="service-tab-content flex-1 flex flex-col">
+            <% if (locals.accessDenied) { %>
+                    <div class="flex-1 flex items-center justify-center min-h-[500px]">
+                    <%- include('service-access-blocker') %>
+                    </div>
+            <% } else if (locals.limitReached) { %>
+                <div class="flex-1 flex items-center justify-center min-h-[500px]">
+                    <%- include('limit-reached-block', { serviceName: locals.service ? locals.service.name : 'Service' }) %>
+                </div>
+            <% } else { %>
+                <!-- Service Content Slot -->
+                <%- content %>
+            <% } %>
+        </div>
+
+        <!-- Other Tabs (History, etc) -->
+        <!-- These are generic placeholders, specific views can append more tabs -->
+        <div id="tab-content-history" class="service-tab-content hidden flex-1 flex flex-col items-center justify-center text-slate-400">
+            <%- include('service-history-placeholder') %>
+        </div>
+    </div>
+</div>

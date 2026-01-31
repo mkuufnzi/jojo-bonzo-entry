@@ -1,0 +1,70 @@
+<div class="h-full overflow-y-auto p-6 space-y-6 bg-slate-50 custom-scrollbar">
+    
+    <!-- Header -->
+    <div class="mb-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Features Guide
+        </h3>
+        <p class="text-sm text-slate-500 mt-1">Controlling access to tools.</p>
+    </div>
+
+    <!-- Section: What is a Feature? -->
+    <details class="group bg-white rounded-xl border border-slate-200 transition-all duration-200 open:shadow-sm open:border-indigo-200" open>
+        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                1. What is a Feature?
+            </h4>
+            <span class="text-slate-400 transition-transform duration-200 group-open:rotate-180">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </span>
+        </summary>
+        <div class="px-4 pb-4 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-50 mt-1">
+            <p class="pt-2">A Feature is a "Key" that unlocks a specific part of the app.</p>
+            <div class="bg-indigo-50 p-3 rounded border border-indigo-100 text-xs text-slate-600 space-y-1">
+                <p><span class="font-bold text-indigo-700">Example:</span> "AI Generation"</p>
+                <p>If a user has this key (via their plan), they can use the AI tools.</p>
+            </div>
+        </div>
+    </details>
+
+    <!-- Section: Metered vs Boolean -->
+    <details class="group bg-white rounded-xl border border-slate-200 transition-all duration-200 open:shadow-sm open:border-indigo-200">
+        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                2. Feature Types
+            </h4>
+            <span class="text-slate-400 transition-transform duration-200 group-open:rotate-180">
+                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </span>
+        </summary>
+        <div class="px-4 pb-4 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-50 mt-1">
+            <div class="pt-2 space-y-2">
+                <p><strong>Boolean (On/Off):</strong> You either have it or you don't. (e.g., "Remove Watermark").</p>
+                <p><strong>Metered (Counted):</strong> You have it, but with a limit. (e.g., "50 Documents / Month").</p>
+            </div>
+        </div>
+    </details>
+
+    <!-- Section: Linking -->
+    <details class="group bg-white rounded-xl border border-slate-200 transition-all duration-200 open:shadow-sm open:border-indigo-200">
+        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                3. Connecting Services
+            </h4>
+             <span class="text-slate-400 transition-transform duration-200 group-open:rotate-180">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </span>
+        </summary>
+        <div class="px-4 pb-4 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-50 mt-1">
+            <p class="pt-2">
+                To make a Service billable, go to the <strong>Services</strong> page and link it to a required Feature Key.
+            </p>
+            <p class="text-xs text-slate-500 italic bg-slate-50 p-2 rounded">Example: Link "PDF Tool" service to "pdf_generation" feature. Only users with that feature can access it.</p>
+        </div>
+    </details>
+
+</div>

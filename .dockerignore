@@ -1,0 +1,89 @@
+# Dependencies (will be installed fresh in container)
+node_modules/
+
+# Build output (will be built in container)
+dist/
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.*
+
+# Documentation (not needed in image)
+*.md
+docs/
+
+# Tests
+tests/
+coverage/
+*.test.ts
+*.spec.ts
+
+# IDE
+.vscode/
+.idea/
+
+# Archives
+*.zip
+*.tar.gz
+*.pdf
+
+# Debug/check scripts
+check_*.ts
+check_*.js
+debug_*.ts
+debug_*.js
+diagnostic.ts
+patch_db.ts
+force_patch_db.ts
+migrate_data.ts
+final_verify.ts
+inspect_services.ts
+update_webhook_config.ts
+run-dev.js
+read_memories.js
+fix_ui.py
+
+# Scripts folder (deployment scripts not needed in image)
+scripts/
+
+# Infrastructure configs
+infrastructure/
+
+# Docker files (not needed inside container)
+Dockerfile*
+docker-compose*.yml
+
+# Local dev
+docker-compose.override.yml
+nodemon.json
+
+# PowerShell scripts
+*.ps1
+
+# SQL files
+*.sql
+
+# JSON workflow exports
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!nodemon.json
+!ecosystem.config.js
+!eslint.config.js
+
+# Prisma migrations (only needed for db setup, not app runtime)
+prisma/migrations/
+
+# Local keys
+vps_keys/
+
+# Agent/AI files
+.agent/
+
+# Misc
+false/

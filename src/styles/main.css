@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Floovioo Modern Theme (Blue) */
+    --color-primary: #2563EB; /* Blue 600 */
+    --color-accent: #06B6D4; /* Cyan 500 */
+    
+    --bg-background: #F8FAFC;
+    --bg-surface: #ffffff;
+    
+    --text-primary: #0F172A; /* Slate 900 */
+    --text-secondary: #334155; /* Slate 700 */
+    --border-color: #E2E8F0;
+  }
+
+  /* Dark Theme Support (Optional/Partial for now as per spec mostly light) */
+  .dark {
+    --bg-background: #0F172A;
+    --bg-surface: #1E293B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --border-color: #334155;
+  }
+
+  body {
+    @apply bg-off-white text-text-primary font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold tracking-tight text-text-primary;
+  }
+}
+
+@layer components {
+  /* Common component classes can go here if heavily reused, 
+     but prefer utility classes in HTML where possible. */
+  
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-hover focus:ring-primary;
+  }
+  
+  .btn-secondary {
+    @apply bg-white border border-border text-text-secondary hover:bg-slate-50 focus:ring-secondary dark:bg-surface dark:hover:bg-slate-700 dark:text-text-primary;
+  }
+  
+  .card {
+     @apply bg-surface rounded-xl shadow-sm border border-border p-6;
+  }
+
+  .input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-700 dark:text-white;
+  }
+}

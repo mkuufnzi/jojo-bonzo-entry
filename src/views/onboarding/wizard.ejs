@@ -1,0 +1,1127 @@
+<% layout('layouts/dashboard-layout') -%>
+
+<div class="max-w-4xl mx-auto py-10 px-4" 
+     x-data="onboardingWizard({ 
+        initialStep: <%= step %>, 
+        business: <%= JSON.stringify(business || {}) %>,
+        importStats: <%= JSON.stringify(typeof importStats !== 'undefined' ? importStats : null) %>
+     })"
+     @open-import="importConfigItem = $event.detail" x-cloak>
+    
+    <!-- Wizard Progress -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between relative max-w-2xl mx-auto">
+            <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 -z-10"></div>
+            
+            <template x-for="(label, index) in ['Profile', 'Connect', 'Brand', 'Docs']">
+                <div class="flex flex-col items-center bg-white px-2 cursor-pointer" @click="goToStep(index + 1)">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors duration-300"
+                        :class="step >= index + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'"
+                        x-text="index + 1"></div>
+                    <span class="text-xs mt-2 font-medium" 
+                          :class="step >= index + 1 ? 'text-blue-600' : 'text-gray-600'" 
+                          x-text="label"></span>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Step 1: Profile Form -->
+    <div x-show="step === 1" class="transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+            <h2 class="text-2xl font-bold mb-6">Tell us about your business</h2>
+            
+            <form @submit.prevent="saveProfile" class="space-y-6">
+                <!-- Core Identity -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Business Name *</label>
+                        <input type="text" name="organization" autocomplete="organization" x-model="formData.profile.name" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sector/Industry *</label>
+                        <select name="industry" autocomplete="organization-title" x-model="formData.profile.sector" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Sector</option>
+                            <option value="technology">Technology</option>
+                            <option value="retail">Retail</option>
+                            <option value="services">Professional Services</option>
+                            <option value="healthcare">Healthcare</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Branding Specifics (NEW Schema Requirements) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Specific Niche</label>
+                        <input type="text" name="niche" autocomplete="off" x-model="formData.profile.niche" placeholder="e.g. B2B SaaS, Luxury Fashion" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Slogan / Tagline</label>
+                        <input type="text" name="slogan" autocomplete="off" x-model="formData.profile.slogan" placeholder="e.g. Innovation for Everyone"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">About the Business</label>
+                    <textarea name="description" autocomplete="off" x-model="formData.profile.about" rows="3" placeholder="Briefly describe what you do and who you serve..." required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <!-- Admin Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tax ID / VAT Number</label>
+                        <input type="text" name="taxId" autocomplete="off" x-model="formData.profile.taxId"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                        <input type="url" name="url" autocomplete="url" x-model="formData.profile.website" placeholder="https://"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <div class="pt-6 flex justify-end">
+                    <button type="submit" :disabled="submitting" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center disabled:opacity-50">
+                        <span x-show="!submitting">Next: Connect Data &rarr;</span>
+                        <span x-show="submitting">Saving...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Step 2: Integrations -->
+    <div x-show="step === 2" class="transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8" x-data="integrationCatalog()">
+            <h2 class="text-2xl font-bold mb-6">Connect your Business Data</h2>
+            <p class="text-gray-600 mb-8">Connect your ERP or Accounting software to automatically import invoices.</p>
+
+            <div x-show="loading" class="flex justify-center py-12">
+                 <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+
+            <div x-show="!loading">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <template x-for="item in popular" :key="item.slug">
+                        <div class="border rounded-xl p-6 transition-all text-center group bg-white hover:shadow-md relative"
+                             :class="{'border-blue-300 ring-4 ring-blue-50': item.connected, 'hover:border-blue-300': !item.connected}">
+                            
+                            <template x-if="item.connected">
+                                <a :href="'/dashboard/connections/' + item.slug" target="_blank" 
+                                   class="absolute top-2 right-2 text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors z-10"
+                                   title="Configure Integration">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </a>
+                            </template>
+                            
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-gray-50">
+                                <template x-if="item.logoUrl"><img :src="item.logoUrl" class="w-10 h-10 object-contain"></template>
+                                <template x-if="!item.logoUrl"><span class="text-xl font-bold text-gray-400" x-text="item.name.substring(0,2)"></span></template>
+                            </div>
+
+                            <h3 class="font-bold mb-2 text-gray-900" x-text="item.name"></h3>
+                            
+                                <template x-if="item.connected">
+                                    <div class="flex flex-col gap-2 mt-4">
+                                        <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 w-full">
+                                            Connected
+                                        </span>
+                                        <button @click="openImportData(item)"
+                                            class="block w-full py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors text-sm font-medium flex items-center justify-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                            </svg>
+                                            Import Data
+                                        </button>
+                                    </div>
+                                </template>
+                            
+                            <template x-if="!item.connected">
+                                <button @click="connectProvider(item.slug)"
+                                    class="block w-full py-2 mt-4 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition-colors text-sm font-medium">
+                                    Connect
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Other Integrations (List View) -->
+            <div class="mt-8" x-show="others.length > 0">
+                <h3 class="text-lg font-bold mb-4">Other Integrations</h3>
+                <div class="bg-white border rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-3 font-medium text-gray-500">Integration</th>
+                                <th class="px-6 py-3 font-medium text-gray-500">Category</th>
+                                <th class="px-6 py-3 font-medium text-gray-500 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <template x-for="item in others" :key="item.slug">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 flex items-center">
+                                        <div class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center mr-3 text-xs font-bold text-gray-500 shrink-0">
+                                            <template x-if="item.logoUrl"><img :src="item.logoUrl" class="w-full h-full object-contain p-1"></template>
+                                            <template x-if="!item.logoUrl"><span x-text="item.name.substring(0,2)"></span></template>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900" x-text="item.name"></div>
+                                            <div class="text-xs text-gray-500 truncate max-w-[200px]" x-text="item.description"></div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-600 capitalize" x-text="item.category || 'Utility'"></span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <template x-if="item.connected">
+                                            <button @click="openImportData(item)" class="text-blue-600 font-medium hover:underline">Import Data</button>
+                                        </template>
+                                        <template x-if="!item.connected">
+                                            <button @click="connectProvider(item.slug)" class="text-gray-600 font-medium hover:text-blue-600">Connect</button>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pt-6 flex justify-between items-center">
+                <button @click="goToStep(1)" class="text-gray-500 hover:text-gray-800 font-medium">Back</button>
+                <button @click="goToStep(3)" class="px-8 py-3 rounded-lg font-medium transition-all"
+                    :class="hasConnections ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' : 'text-gray-500 hover:text-gray-700 underline'">
+                    <span x-text="hasConnections ? 'Continue &rarr;' : 'Skip Integration'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Review Modal (Success from OAuth) -->
+    <!-- We check importStats passed from Controller -->
+    <template x-if="step === 2 && importStats && importStats.isNewlyConnected">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 animate-fade-in-up">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
+                    <h3 class="text-2xl font-bold text-gray-900">Connection Successful!</h3>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-100">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center"><div class="text-2xl font-bold text-blue-600" x-text="importStats.contactCount"></div><div class="text-xs text-gray-500">Contacts</div></div>
+                        <div class="text-center"><div class="text-2xl font-bold text-indigo-600" x-text="importStats.productCount"></div><div class="text-xs text-gray-500">Products</div></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button @click="closeImportModal()" class="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition">
+                        Confirm & Continue &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Import Configuration / Preview Modal -->
+    <template x-if="importConfigItem">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm" x-cloak>
+            <div class="bg-white rounded-xl shadow-xl w-full flex flex-col transition-all duration-300 animate-fade-in-up my-auto"
+                 :class="importState.step === 2 ? 'max-w-6xl max-h-[85vh] h-full' : 'max-w-lg h-auto'">
+                
+                <!-- Header -->
+                <div class="p-6 border-b flex justify-between items-center shrink-0">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900" x-text="importState.step === 1 ? 'Import Data from ' + importConfigItem.name : 'Review Data'"></h3>
+                        <p class="text-sm text-gray-500" x-show="importState.step === 1">Step 1 of 2: Prepare Integration</p>
+                        <p class="text-sm text-gray-500" x-show="importState.step === 2">Step 2 of 2: Select items to import</p>
+                    </div>
+                    <button @click="importConfigItem = null" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="flex-1 overflow-hidden relative flex flex-col min-h-0">
+                    
+                    <!-- Loading Overlay -->
+                    <div x-show="importState.loading" class="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
+                        <svg class="animate-spin h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-gray-900 font-bold mb-1" x-text="importState.loadingMessage || 'Contacting Provider...'"></p>
+                        <p class="text-gray-500 text-sm">Fetching invoices, contacts, and items.</p>
+                    </div>
+
+                    <!-- Step 1: Pre-Fetch / Init -->
+                    <div x-show="importState.step === 1 && !importState.loading" class="p-8 text-center space-y-6 overflow-y-auto">
+                        <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
+                            <template x-if="importConfigItem.logoUrl"><img :src="importConfigItem.logoUrl" class="w-12 h-12 object-contain"></template>
+                            <template x-if="!importConfigItem.logoUrl"><span class="text-2xl font-bold text-blue-600" x-text="importConfigItem.name.substring(0,2)"></span></template>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-900 mb-2">Ready to Import</h4>
+                            <p class="text-gray-600 max-w-sm mx-auto">
+                                Floovioo will fetch the last 30 days of data from <strong><span x-text="importConfigItem.name"></span></strong> for you to review.
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4 font-mono text-sm text-left max-w-sm mx-auto space-y-2 border border-gray-100">
+                             <div class="flex items-center text-gray-700">
+                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                 Invoices & Estimates
+                             </div>
+                             <div class="flex items-center text-gray-700">
+                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                 Customer Contacts
+                             </div>
+                             <div class="flex items-center text-gray-700">
+                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                 Products & Services
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Data Grid (The Big Modal) -->
+                    <div x-show="importState.step === 2" class="flex h-full overflow-hidden">
+                         <!-- Sidebar -->
+                         <div class="w-64 bg-gray-50 border-r flex flex-col p-4 space-y-2 overflow-y-auto">
+                             <template x-for="(rows, entity) in importState.data" :key="entity">
+                                <button @click="importState.activeEntity = entity; importState.searchTerm = ''"
+                                     class="w-full text-left px-4 py-3 rounded-lg transition-colors flex justify-between items-center group"
+                                     :class="importState.activeEntity === entity ? 'bg-white shadow-sm ring-1 ring-gray-200 text-blue-700' : 'hover:bg-gray-100 text-gray-600'">
+                                     <div>
+                                         <span class="block font-medium capitalize" x-text="entity"></span>
+                                         <span class="text-xs text-gray-400 group-hover:text-gray-500">
+                                             <span x-text="importState.selection[entity].length"></span> selected
+                                         </span>
+                                     </div>
+                                     <span class="bg-gray-200 text-gray-600 py-0.5 px-2 rounded-full text-xs" x-text="rows.length"></span>
+                                </button>
+                             </template>
+                         </div>
+
+                         <!-- Grid -->
+                         <div class="flex-1 flex flex-col bg-white overflow-hidden p-6">
+                             <div class="flex justify-between items-center mb-4">
+                                 <div class="relative w-80">
+                                     <input type="text" x-model="importState.searchTerm" @input="importState.page = 1" placeholder="Search..." 
+                                         class="w-full pl-9 pr-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                 </div>
+                                 
+                                 <div class="flex items-center text-sm text-gray-500 space-x-6">
+                                     <span>Showing <span class="font-bold text-gray-900" x-text="paginatedData.length"></span> of <span x-text="filterData(importState.data[importState.activeEntity]).length"></span></span>
+                                     
+                                     <!-- Pagination Controls -->
+                                     <div class="flex items-center border rounded-lg overflow-hidden bg-white">
+                                         <button @click="prevPage()" :disabled="importState.page === 1" class="px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50 border-r">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                         </button>
+                                         <div class="px-4 py-1.5 bg-gray-50 text-xs font-bold border-r">
+                                             Page <span x-text="importState.page"></span> of <span x-text="totalPages"></span>
+                                         </div>
+                                         <button @click="nextPage()" :disabled="importState.page === totalPages" class="px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                         </button>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <div class="border rounded-lg overflow-auto flex-1">
+                                 <table class="w-full text-sm text-left">
+                                     <thead class="bg-gray-50 text-gray-500 font-medium border-b sticky top-0">
+                                         <tr>
+                                             <th class="p-4 w-12 bg-gray-50">
+                                                 <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                                     @change="toggleAll($event.target.checked)"
+                                                     :checked="isAllSelected()">
+                                             </th>
+                                             <th class="p-4 bg-gray-50">Name / Description</th>
+                                             <th class="p-4 bg-gray-50">Details</th>
+                                             <th class="p-4 bg-gray-50 text-right">Amount</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody class="divide-y divide-gray-100">
+                                         <template x-for="row in paginatedData" :key="getRowId(row)">
+                                             <tr class="hover:bg-blue-50/50 transition-colors">
+                                                 <td class="p-4">
+                                                      <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                                         :value="getRowId(row)"
+                                                         x-model="importState.selection[importState.activeEntity]">
+                                                 </td>
+                                                 <td class="p-4">
+                                                     <div class="font-medium text-gray-900" x-text="row.name || 'Unknown'"></div>
+                                                     <div class="text-xs text-gray-500 font-mono mt-0.5" x-text="getRowId(row)"></div>
+                                                 </td>
+                                                 <td class="p-4">
+                                                     <div class="flex flex-wrap gap-2">
+                                                         <span x-show="row.date" class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs" x-text="row.date"></span>
+                                                         <span x-show="row.status" class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded text-xs capitalize" x-text="row.status"></span>
+                                                     </div>
+                                                 </td>
+                                                 <td class="p-4 text-right">
+                                                     <span class="font-mono font-medium" x-text="row.total ? '$'+Number(row.total).toFixed(2) : (row.rate ? '$'+Number(row.rate).toFixed(2) : '-')"></span>
+                                                 </td>
+                                             </tr>
+                                         </template>
+                                     </tbody>
+                                 </table>
+                                 
+                                 <!-- Empty State -->
+                                 <div x-show="!importState.loading && (!importState.data[importState.activeEntity] || importState.data[importState.activeEntity].length === 0)" 
+                                     class="flex flex-col items-center justify-center py-20 text-gray-500">
+                                     <p>No records found for this category.</p>
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="p-6 border-t bg-gray-50 flex justify-between items-center rounded-b-xl shrink-0">
+                    <button @click="importConfigItem = null" class="px-6 py-2 text-gray-600 hover:text-gray-900 font-medium">Cancel</button>
+                    
+                    <button x-show="importState.step === 1" 
+                        @click="fetchPreviewData()" 
+                        class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold shadow-md transition-transform transform active:scale-95">
+                        Fetch Data &rarr;
+                    </button>
+
+                    <button x-show="importState.step === 2" 
+                        @click="startFilteredImport()" 
+                        :disabled="!hasAnySelection() || importState.loading"
+                        class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span x-text="'Import ' + totalSelectedCount() + ' Items'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Step 3: Brand Identity & Voice -->
+    <div x-show="step === 3" class="transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+            <h2 class="text-2xl font-bold mb-2">Define your Brand Identity</h2>
+            <p class="text-gray-500 mb-8">This information powers AI-generated content, document styling, and customer communications.</p>
+            
+            <form @submit.prevent="saveBrandSettings" class="space-y-10">
+                
+                <!-- SECTION A: Brand Voice -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                        Brand Voice
+                    </h3>
+                    
+                    <!-- Persona -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Persona</label>
+                        <input type="text" x-model="formData.brand.persona" placeholder="e.g. The Helpful Expert, The Friendly Advisor" 
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-400 mt-1">How would you describe your brand's personality in one phrase?</p>
+                    </div>
+
+                    <!-- Tone Adjectives (Multi-Select) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Tone Adjectives <span class="text-gray-400">(Select all that apply)</span></label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <template x-for="tone in ['Professional', 'Warm', 'Concise', 'Playful', 'Authoritative', 'Empathetic', 'Bold', 'Minimalist']">
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" :value="tone" x-model="formData.brand.toneAdjectives" class="peer sr-only">
+                                    <div class="p-3 border rounded-lg text-center peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 transition-all text-sm font-medium"
+                                         x-text="tone"></div>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- AI Writing Rules -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">AI Writing Instructions</label>
+                        <textarea x-model="formData.brand.aiRules" rows="4" placeholder="Provide specific instructions for AI-generated content. E.g., 'Always use active voice. Avoid jargon. End emails with a friendly sign-off.'"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 font-mono text-sm"></textarea>
+                        <p class="text-xs text-gray-400 mt-1">These rules guide the AI when generating emails, invoice notes, and marketing copy.</p>
+                    </div>
+
+                    <!-- Email Signature -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Default Email Signature</label>
+                        <textarea x-model="formData.brand.emailSignature" rows="3" placeholder="Best regards,\nThe [Your Company] Team\nsupport@example.com"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <!-- SECTION B: Brand Identity (Visuals) -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                        Brand Identity
+                    </h3>
+                    
+                    <!-- Logo Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                        <div class="flex items-center gap-6">
+                            <div class="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden">
+                                <template x-if="formData.brand.logoPreview">
+                                    <img :src="formData.brand.logoPreview" class="w-full h-full object-contain">
+                                </template>
+                                <template x-if="!formData.brand.logoPreview">
+                                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </template>
+                            </div>
+                            <div>
+                                <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                    <input type="file" accept="image/*" @change="handleLogoUpload($event)" class="sr-only">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    Upload Logo
+                                </label>
+                                <p class="text-xs text-gray-400 mt-2">PNG, SVG, or JPG. Max 2MB.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Color Palette -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Color Palette</label>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <template x-for="(hex, key) in formData.brand.colors" :key="key">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1 capitalize" x-text="key"></label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" x-model="formData.brand.colors[key]" class="w-10 h-10 rounded border p-0.5 cursor-pointer">
+                                        <input type="text" x-model="formData.brand.colors[key]" class="px-2 py-1.5 border rounded-md w-full font-mono text-xs uppercase">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Typography -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Heading Font</label>
+                            <select x-model="formData.brand.fonts.heading" class="w-full px-4 py-2 border rounded-lg bg-white">
+                                <option value="Inter">Inter</option>
+                                <option value="Poppins">Poppins</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Playfair Display">Playfair Display</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Lato">Lato</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Body Font</label>
+                            <select x-model="formData.brand.fonts.body" class="w-full px-4 py-2 border rounded-lg bg-white">
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Lato">Lato</option>
+                                <option value="Nunito">Nunito</option>
+                                <option value="Source Sans Pro">Source Sans Pro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <!-- SECTION C: Automation (Existing) -->
+                <div class="space-y-6 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800">Automation & Data Management</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sync Frequency</label>
+                            <select x-model="formData.config.syncFrequency" class="w-full px-4 py-2 border rounded-lg bg-white">
+                                <option value="daily">Daily Sync (Recommended)</option>
+                                <option value="weekly">Weekly Sync</option>
+                                <option value="realtime">Real-time (Webhooks)</option>
+                                <option value="manual">Manual Only</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Retention</label>
+                            <select x-model="formData.config.retention" class="w-full px-4 py-2 border rounded-lg bg-white">
+                                <option value="forever">Keep Forever</option>
+                                <option value="1year">1 Year</option>
+                                <option value="90days">90 Days (GDPR Lean)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 flex justify-between">
+                    <button type="button" @click="goToStep(2)" class="text-gray-600 px-6 py-3 hover:text-gray-900">Back</button>
+                    <button type="submit" :disabled="submitting" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center disabled:opacity-50">
+                        <span x-show="!submitting">Next: Document Setup &rarr;</span>
+                        <span x-show="submitting" class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Saving...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Step 4: Document Setup & Finish -->
+    <div x-show="step === 4" class="transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+            <h2 class="text-2xl font-bold mb-6">Select Document Types</h2>
+            <form @submit.prevent="submitComplete" class="space-y-6">
+                <div class="space-y-4">
+                    <template x-for="doc in ['invoice', 'receipt', 'estimate', 'quote', 'order', 'offer', 'statement', 'credit_note']">
+                        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50" :class="formData.config.documents.includes(doc) ? 'border-blue-200 bg-blue-50' : ''">
+                            <input type="checkbox" :value="doc" x-model="formData.config.documents" class="w-5 h-5 text-blue-600 rounded">
+                            <div class="ml-4">
+                                <span class="block font-medium capitalize" x-text="doc"></span>
+                            </div>
+                        </label>
+                    </template>
+                </div>
+
+                <div class="pt-6 flex justify-between">
+                    <button type="button" @click="goToStep(3)" class="text-gray-600 px-6 py-3 hover:text-gray-900">Back</button>
+                    <button type="submit" :disabled="submitting" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-medium transition-colors flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        :class="submitting ? 'opacity-75 cursor-wait' : ''">
+                        <span x-show="!submitting">Finish Setup & Generate Engine &rarr;</span>
+                        <span x-show="submitting" class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Creating Design Engine...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+        <template x-for="note in notifications" :key="note.id">
+            <div class="pointer-events-auto transform transition-all duration-300 ease-in-out"
+                 x-transition:enter="translate-y-2 opacity-0"
+                 x-transition:enter-end="translate-y-0 opacity-100"
+                 x-transition:leave="translate-x-full opacity-0"
+                 :class="{
+                    'bg-red-50 text-red-800 border-l-4 border-red-500': note.type === 'error',
+                    'bg-green-50 text-green-800 border-l-4 border-green-500': note.type === 'success',
+                    'bg-blue-50 text-blue-800 border-l-4 border-blue-500': note.type === 'info'
+                 }"
+                 class="p-4 rounded shadow-lg flex items-start max-w-sm">
+                <div class="flex-shrink-0">
+                    <template x-if="note.type === 'error'">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                    </template>
+                    <template x-if="note.type === 'success'">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    </template>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium" x-text="note.message"></p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <div class="-mx-1.5 -my-1.5">
+                        <button @click="removeNotification(note.id)" class="inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2" 
+                            :class="{'text-red-500 hover:bg-red-100': note.type === 'error', 'text-green-500 hover:bg-green-100': note.type === 'success'}">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+function onboardingWizard(initialData) {
+    return {
+        step: initialData.initialStep || 1,
+        submitting: false,
+        importStats: initialData.importStats,
+        importConfigItem: null,
+        notifications: [], // Store active notifications
+        
+        // New Import State for Preview Modal
+        importState: {
+            step: 1, // 1=Init, 2=Grid
+            loading: false,
+            loadingMessage: '',
+            error: null,
+            view: 'detail',
+            activeEntity: 'invoices',
+            data: {}, 
+            selection: {},
+            searchTerm: '',
+            // Pagination
+            page: 1,
+            pageSize: 10
+        },
+
+        get paginatedData() {
+            const all = this.filterData(this.importState.data[this.importState.activeEntity]);
+            if (!all) return [];
+            const start = (this.importState.page - 1) * this.importState.pageSize;
+            return all.slice(start, start + this.importState.pageSize);
+        },
+
+        get totalPages() {
+            const all = this.filterData(this.importState.data[this.importState.activeEntity]);
+            return all ? Math.ceil(all.length / this.importState.pageSize) : 0;
+        },
+
+        nextPage() { if (this.importState.page < this.totalPages) this.importState.page++; },
+        prevPage() { if (this.importState.page > 1) this.importState.page--; },
+
+        formData: {
+            profile: {
+                name: initialData.business?.name || '',
+                sector: initialData.business?.sector || '',
+                niche: initialData.business?.niche || '',
+                slogan: initialData.business?.metadata?.slogan || '',
+                about: initialData.business?.metadata?.about || '',
+                taxId: initialData.business?.taxId || '',
+                website: initialData.business?.website || ''
+            },
+            brand: {
+                // Brand Voice - Pre-populated with Floovioo sample data
+                persona: initialData.business?.brandingProfiles?.[0]?.voiceProfile?.persona || 'The Innovative Partner',
+                toneAdjectives: initialData.business?.brandingProfiles?.[0]?.voiceProfile?.toneAdjectives || ['Professional', 'Warm', 'Concise'],
+                aiRules: initialData.business?.brandingProfiles?.[0]?.voiceProfile?.aiRules || 'Use clear, jargon-free language. Be helpful and solution-oriented. End communications with a call to action.',
+                emailSignature: initialData.business?.brandingProfiles?.[0]?.voiceProfile?.emailSignature || 'Best regards,\nThe Floovioo Team\nsupport@floovioo.com',
+                // Brand Identity
+                logoFile: null,
+                logoPreview: initialData.business?.brandingProfiles?.[0]?.logoUrl || '',
+                colors: {
+                    primary: initialData.business?.brandingProfiles?.[0]?.brandColors?.primary || '#2563EB',
+                    secondary: initialData.business?.brandingProfiles?.[0]?.brandColors?.secondary || '#1E3A8A',
+                    accent: initialData.business?.brandingProfiles?.[0]?.brandColors?.accent || '#10B981',
+                    text: initialData.business?.brandingProfiles?.[0]?.brandColors?.text || '#111827',
+                    background: initialData.business?.brandingProfiles?.[0]?.brandColors?.background || '#FFFFFF'
+                },
+                fonts: {
+                    heading: initialData.business?.brandingProfiles?.[0]?.fontSettings?.headerFontFamily || 'Inter',
+                    body: initialData.business?.brandingProfiles?.[0]?.fontSettings?.bodyFontFamily || 'Open Sans'
+                }
+            },
+            config: {
+                documents: ['invoice', 'receipt', 'estimate', 'quote'],
+                syncFrequency: 'daily',
+                retention: 'forever',
+                automation: {
+                    enrichment: true,
+                    reporting: true,
+                    targeting: false,
+                    personalization: true
+                }
+            }
+        },
+
+        // --- Notification Helper ---
+        notify(message, type = 'info') {
+            const id = Date.now();
+            this.notifications.push({ id, message, type });
+            setTimeout(() => {
+                this.removeNotification(id);
+            }, 5000);
+        },
+        
+        removeNotification(id) {
+            this.notifications = this.notifications.filter(n => n.id !== id);
+        },
+
+        async init() {
+            if (this.importStats && this.importStats.provider && this.importStats.isNewlyConnected) {
+                console.log('[Wizard] Auto-opening import for newly connected:', this.importStats.provider);
+                this.notify('Integration connected successfully!', 'success');
+                
+                // Small delay to allow catalog to load
+                setTimeout(() => {
+                    const event = new CustomEvent('auto-open-import', { detail: this.importStats.provider });
+                    window.dispatchEvent(event);
+                }, 1000);
+            }
+            
+            // Clean URL of triggers regardless of auto-open
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('connected')) {
+                url.searchParams.delete('connected');
+                window.history.replaceState({}, '', url.toString());
+            }
+            
+            // Allow child components to trigger notifications
+            window.addEventListener('notify', (e) => {
+                this.notify(e.detail.message, e.detail.type);
+            });
+            
+            // Check for error query param
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('error') === 'business_required') {
+                this.notify('Please save your business profile before connecting integrations.', 'error');
+                // Clean URL
+                window.history.replaceState({}, '', '/onboarding/wizard?step=1');
+            }
+        },
+
+        // --- navigation & saving ---
+        async saveProfile() {
+            if (!this.formData.profile.name || !this.formData.profile.sector) {
+                 this.notify('Business Name and Sector are required', 'error');
+                 return;
+            }
+            
+            this.submitting = true;
+            console.log('🚀 [Step 1: Profile] Sending Payload:', JSON.stringify(this.formData.profile, null, 2));
+            try {
+                const res = await fetch('/onboarding/api/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(this.formData.profile)
+                });
+                
+                const result = await res.json().catch(() => ({}));
+                console.log('📥 [Step 1: Profile] Received Response:', JSON.stringify(result, null, 2));
+                
+                if (res.ok && result.success) {
+                    this.formData.profile.id = result.businessId; 
+                    this.notify('Profile saved successfully!', 'success');
+                    this.nextStep();
+                } else {
+                    this.notify(result.error || 'Failed to save profile', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                this.notify(e.message || 'Connection error', 'error');
+            } finally {
+                this.submitting = false;
+            }
+        },
+
+        // --- Step 3: Brand Settings ---
+        handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) {
+                this.notify('Logo file must be under 2MB.', 'error');
+                return;
+            }
+            
+            this.formData.brand.logoFile = file;
+            this.formData.brand.logoPreview = URL.createObjectURL(file);
+        },
+
+        async saveBrandSettings() {
+            this.submitting = true;
+            console.log('🚀 [Step 3: Brand] Sending Multi-part Form Data');
+            try {
+                const formData = new FormData();
+                formData.append('persona', this.formData.brand.persona);
+                formData.append('toneAdjectives', JSON.stringify(this.formData.brand.toneAdjectives));
+                formData.append('aiRules', this.formData.brand.aiRules);
+                formData.append('emailSignature', this.formData.brand.emailSignature);
+                formData.append('colors', JSON.stringify(this.formData.brand.colors));
+                formData.append('fonts', JSON.stringify(this.formData.brand.fonts));
+                if (this.formData.brand.logoFile) {
+                    formData.append('logo', this.formData.brand.logoFile);
+                }
+                formData.append('syncFrequency', this.formData.config.syncFrequency);
+                formData.append('retention', this.formData.config.retention);
+
+                const res = await fetch('/onboarding/api/business/branding', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await res.json().catch(() => ({}));
+                console.log('📥 [Step 3: Brand] Received Response:', JSON.stringify(result, null, 2));
+                
+                if (res.ok && result.success) {
+                    this.notify('Brand settings saved!', 'success');
+                    this.nextStep();
+                } else {
+                    this.notify(result.error || 'Failed to save brand settings', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                this.notify(e.message || 'Connection error', 'error');
+            } finally {
+                this.submitting = false;
+            }
+        },
+
+        goToStep(s) {
+            // Prevent forward navigation if profile not saved (unless we have business data initial)
+            // initialData.business is populated if exists on server.
+            const hasBusiness = this.formData.profile.name && (initialData.business || this.formData.profile.id);
+            
+            if (s > 1 && !hasBusiness) {
+                 this.notify('Please save your business profile first.', 'error');
+                 return;
+            }
+            if (s > 4) s = 4;
+            this.step = s;
+            window.history.pushState({}, '', `/onboarding/wizard?step=${s}`);
+        },
+
+        nextStep() {
+            if (this.step < 4) {
+                this.goToStep(this.step + 1);
+            }
+        },
+
+        // --- Import Logic ---
+        
+        openImportData(item) {
+            this.importConfigItem = item;
+            this.importState.step = 1;
+            this.importState.loading = false;
+            this.importState.error = null;
+            this.importState.data = {};
+            this.importState.selection = {};
+        },
+
+        async fetchPreviewData() {
+             this.importState.loading = true;
+             this.importState.loadingMessage = `Connecting to ${this.importConfigItem.name}...`;
+             
+             await new Promise(r => setTimeout(r, 50));
+             
+             const item = this.importConfigItem;
+             console.log('🚀 [Step 2: Preview] Fetching Data for:', item.slug);
+ 
+             try {
+                 const entities = ['invoices', 'contacts', 'items'];
+                 
+                 await Promise.all(entities.map(async (entity) => {
+                     const url = `/dashboard/connections/${item.slug}/preview?entity=${entity}&refresh=true`;
+                     console.log(`📡 [Step 2: Preview] Loading ${entity}...`);
+                     
+                     try {
+                         const res = await fetch(url);
+                         const json = await res.json();
+                         console.log(`📥 [Step 2: Preview] ${entity} Data:`, json);
+                         
+                         if (!res.ok || json.error) throw new Error(json.error || `HTTP ${res.status}`);
+                         
+                         const rows = Array.isArray(json) ? json : (json.data || []);
+                         this.importState.data[entity] = rows;
+                         this.importState.selection[entity] = rows.map(r => this.getRowId(r));
+                     } catch (e) {
+                          console.error(`❌ [Step 2: Preview] ${entity} Failed:`, e);
+                          this.importState.data[entity] = [];
+                          if (e.message.includes('400')) {
+                              this.importState.error = 'Integration Disconnected. Please reconnect in settings.';
+                          }
+                     }
+                 }));
+ 
+                 if (!this.importState.error) {
+                     this.importState.step = 2; 
+                     this.importState.activeEntity = 'invoices';
+                 }
+ 
+             } catch (e) {
+                 console.error('❌ [Step 2: Preview] Global Error:', e);
+                 this.notify('Failed to load preview data.', 'error');
+             } finally {
+                 this.importState.loading = false;
+                 this.importState.loadingMessage = '';
+             }
+        },
+
+        openDetail(entity) {
+             if (!this.importState.data[entity] || this.importState.data[entity].length === 0) return;
+             this.importState.activeEntity = entity;
+             this.importState.view = 'detail';
+        },
+
+        filterData(rows) {
+            if (!rows) return [];
+            if (!this.importState.searchTerm) return rows;
+            const lower = this.importState.searchTerm.toLowerCase();
+            return rows.filter(r => {
+                 const val = r.contact_name || r.customer_name || r.name || r.invoice_number || r.id || '';
+                 return String(val).toLowerCase().includes(lower);
+            });
+        },
+
+        getRowId(row) {
+             return row.invoice_id || row.contact_id || row.item_id || row.id || row.externalId || Math.random().toString();
+        },
+
+        // Selection Helpers
+        isAllSelected() {
+            const entity = this.importState.activeEntity;
+            const allIds = (this.importState.data[entity] || []).map(r => this.getRowId(r));
+            const selected = this.importState.selection[entity] || [];
+            return allIds.length > 0 && allIds.length === selected.length;
+        },
+
+        toggleAll(checked) {
+            const entity = this.importState.activeEntity;
+            if (checked) {
+                 this.importState.selection[entity] = (this.importState.data[entity] || []).map(r => this.getRowId(r));
+            } else {
+                 this.importState.selection[entity] = [];
+            }
+        },
+
+        hasAnySelection() {
+            return Object.values(this.importState.selection).some(ids => ids && ids.length > 0);
+        },
+
+        totalSelectedCount() {
+            return Object.values(this.importState.selection).reduce((acc, ids) => acc + (ids ? ids.length : 0), 0);
+        },
+
+        async startFilteredImport() {
+            if (!this.importConfigItem) return;
+            const item = this.importConfigItem;
+            
+            const filters = this.importState.selection;
+            const count = this.totalSelectedCount();
+            
+            console.log(`[Wizard] Triggering background import for ${item.slug}. Items selected: ${count}`);
+            this.importState.loading = true;
+            this.importState.loadingMessage = 'Initiating Historical Sync...';
+            
+            // Ensure UI renders
+            await new Promise(r => setTimeout(r, 50));
+            
+            console.log('🚀 [Step 2: Import] Triggering Historical Sync with filters:', JSON.stringify(filters, null, 2));
+            try {
+                const response = await fetch(`/onboarding/api/integrations/${item.slug}/import`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filters }) 
+                });
+                
+                const result = await response.json().catch(() => ({}));
+                console.log('📥 [Step 2: Import] Received Response:', JSON.stringify(result, null, 2));
+
+                if (response.ok && result.success) {
+                    console.log('[Wizard] Background Sync Enqueued:', result);
+                    this.notify('Historical Sync started in background! You can continue while we pull your data.', 'success');
+                    
+                    // Close modal and move to next step automatically
+                    this.importConfigItem = null;
+                    this.nextStep();
+                } else {
+                     console.error('[Wizard] Import Trigger Failed:', result);
+                     this.notify('Import Failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                console.error('[Wizard] Import Connection Error:', e);
+                this.notify('Connection error during import', 'error');
+            } finally {
+                this.importState.loading = false;
+            }
+        },
+
+        closeImportModal() {
+            const wasNewlyConnected = this.importStats?.isNewlyConnected;
+            this.importStats = null;
+            if (wasNewlyConnected) {
+                this.goToStep(3); 
+            }
+        },
+
+        async submitComplete() {
+            this.submitting = true;
+            console.log('🚀 [Step 4: Complete] Sending Final Payload:', JSON.stringify(this.formData, null, 2));
+            try {
+                const res = await fetch('/onboarding/api/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.formData)
+                });
+                
+                const result = await res.json().catch(() => ({}));
+                console.log('📥 [Step 4: Complete] Received Response:', JSON.stringify(result, null, 2));
+                
+                if (res.ok && result.success) {
+                    window.location.href = '/dashboard/transactional';
+                } else {
+                    this.notify(result.error || 'Submission failed', 'error');
+                    this.submitting = false;
+                }
+            } catch (e) {
+                console.error(e);
+                this.notify('Connection error', 'error');
+                this.submitting = false;
+            }
+        }
+    }
+}
+
+// Integration Catalog Logic (Simplified for Alpine)
+function integrationCatalog() {
+    return {
+        loading: true,
+        popular: [],
+        others: [],
+        
+        async init() {
+            try {
+                const res = await fetch('/onboarding/api/integrations/catalog');
+                const json = await res.json();
+                if (json.success) {
+                    this.popular = json.data.popular || [];
+                    this.others = json.data.others || [];
+                    // Fallback if API returns flat list
+                    if (!json.data.popular && Array.isArray(json.data)) {
+                        this.popular = json.data.slice(0, 3);
+                        this.others = json.data.slice(3);
+                    }
+                }
+            } catch (e) { console.error(e); } 
+            finally { this.loading = false; }
+
+            // Listen for auto-open event from parent
+            window.addEventListener('auto-open-import', (e) => {
+                const slug = e.detail;
+                const item = this.popular.find(p => p.slug === slug);
+                if (item) this.openImportData(item);
+            });
+        },
+
+        get hasConnections() {
+            return this.popular.some(i => i.connected);
+        },
+
+        connectProvider(slug) {
+            // Redirect to OAuth
+             const providerMap = { 'zoho-crm': 'zoho', 'quickbooks-online': 'quickbooks', 'xero': 'xero' };
+             window.location.href = `/onboarding/api/business/oauth/${providerMap[slug] || slug}`;
+        },
+
+        openImportData(item) {
+             this.$dispatch('open-import', item);
+        }
+    }
+}
+</script>

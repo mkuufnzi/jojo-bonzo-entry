@@ -1,0 +1,9 @@
+<%
+/*
+    Icon Helper Partial
+    Wraps standard Lucide icon markup.
+    Methods to use:
+    <%- include('partials/components/icon', { name: 'user', class: 'w-5 h-5 text-blue-500' }) %>
+*/
+%>
+<i data-lucide="<%= locals.name %>" class="<%= locals.class || 'w-4 h-4' %>"></i>

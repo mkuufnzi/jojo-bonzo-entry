@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floovioo | Branded Document Workflows</title>
+    <!-- Use new Tailwind output -->
+    <link rel="stylesheet" href="/assets/css/style.css"> 
+    <meta name="description" content="Turn business data into branded, automated document workflows.">
+
+    <style nonce="<%= nonce %>">
+        /* Custom Animations */
+        @keyframes flow-dash {
+            to { stroke-dashoffset: 0; }
+        }
+        .animate-flow path {
+            stroke-dasharray: 10;
+            animation: flow-dash 1s linear infinite;
+        }
+        
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
+        .fade-enter, .fade-leave-to { opacity: 0; }
+    </style>
+</head>
+<body class="bg-off-white text-slate-600 font-sans antialiased selection:bg-brand-blue selection:text-white" x-data="{ 
+    slideIndex: 0, 
+    slides: [
+        { id: 'value', title: 'Branded Document Workflows for Modern Operations.' },
+        { id: 'pain_manual', title: 'Stop Playing \'Designer\' in Canva.' },
+        { id: 'revenue', title: 'Your Invoices Should Sell, Not Just Bill.' },
+        { id: 'engagement', title: 'Engage Customers After the Transaction.' }
+    ],
+    nextSlide() { this.slideIndex = (this.slideIndex + 1) % this.slides.length; },
+    init() { setInterval(() => this.nextSlide(), 6000); }
+}">
+
+    <%- include('../partials/landing-nav') %>
+
+    <main>
+        <!-- HERO CAROUSEL SECTION -->
+        <!-- HERO CAROUSEL SECTION -->
+        <%- include('../partials/components/hero-carousel', {
+            slides: [
+                {
+                    id: 'revenue',
+                    badge: { text: 'Brand Consistency', classes: 'bg-orange-50 text-orange-600' },
+                    title: 'Your Invoices Should',
+                    titleHighlight: 'Sell, Not Just Bill.',
+                    titleHighlightColor: 'text-brand-blue',
+                    text: 'Standard accounting PDFs are ugly and generic. Use every touchpoint to reinforce your premium brand identity.',
+                    cta: { text: 'Upgrade Your Brand', link: 'https://branding.floovioo.com' },
+                    visuals: ['/assets/images/smart-invoice-features.jpg', '/assets/images/report-sample-3.jpg', '/assets/images/report-sample-0.jpg']
+                },
+                {
+                    id: 'sales',
+                    badge: { text: 'Sales Enablement', classes: 'bg-indigo-50 text-indigo-600' },
+                    title: 'Proposals that',
+                    titleHighlight: 'Close Themselves.',
+                    titleHighlightColor: 'text-indigo-500',
+                    text: 'Auto-generate hyper-personalized pitch decks and proposals from CRM data. Embed e-signatures and "Book a Call" buttons.',
+                    cta: { text: 'Automate Sales', link: '/dashboard/sales' },
+                    secondaryCta: { text: 'Explore Features', link: '/products/sales' },
+                    visuals: ['/assets/images/reports-mockup.png', '/assets/images/report-sample-1.jpg', '/assets/images/report-sample-2.jpg']
+                },
+                {
+                    id: 'content',
+                    badge: { text: 'Content Engine', classes: 'bg-purple-50 text-purple-600' },
+                    title: 'Turn Data into',
+                    titleHighlight: 'Viral Content.',
+                    titleHighlightColor: 'text-purple-500',
+                    text: 'Automatically transform reports and reviews into social-ready infographics and testimonial cards.',
+                    cta: { text: 'Start Creating', link: '/dashboard/content' },
+                    secondaryCta: { text: 'See Examples', link: '/products/content' },
+                    visuals: ['/assets/images/transformation-engine.jpg', '/assets/images/transformation-visual.png', '/assets/images/reports-mockup.png']
+                },
+                {
+                    id: 'engagement',
+                    badge: { text: 'Customer Retention', classes: 'bg-teal-50 text-teal-600' },
+                    title: 'Engage Customers',
+                    titleHighlight: 'After the Transaction.',
+                    titleHighlightColor: 'text-teal-500',
+                    text: 'Don\'t let value slip away. Auto-trigger <strong>re-engagement emails</strong>, <strong>review requests</strong>, and <strong>personalized offers</strong> based on purchase history.',
+                    cta: { text: 'Automate Retention', link: '/dashboard/retention' },
+                    secondaryCta: { text: 'View Use Cases', link: '/products/retention' },
+                    visuals: ['/assets/images/report-sample-1.jpg', '/assets/images/report-sample-2.jpg', '/assets/images/report-sample-3.jpg']
+                }
+            ]
+        }) %>
+
+        <!-- SECTION 2: THE PROBLEM -->
+        <section class="py-16 bg-off-white border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-heading font-bold text-deep-ocean sm:text-4xl">
+                        Your Operations Are Scaling. <span class="text-slate-400">Your Output Isn't.</span>
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Feature 1: Design (Efficiency) -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 hover:border-blue-200 shadow-sm transition-all group">
+                        <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-deep-ocean mb-2">Design Bottleneck</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Stop fighting with Canva. Ops teams waste 20% of their week manually formatting recurring reports.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2: Brand (Consistency) -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 hover:border-blue-200 shadow-sm transition-all group">
+                        <div class="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-deep-ocean mb-2">The "Ugly" Trap</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Generic ERP invoices ignore your brand identity. You look just like everyone else.
+                        </p>
+                    </div>
+
+                    <!-- Feature 3: Revenue (Interactive) -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 hover:border-blue-200 shadow-sm transition-all group">
+                        <div class="w-10 h-10 bg-blue-50 text-brand-blue rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-deep-ocean mb-2">Missed Revenue</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Transactional docs have 95% open rates. Don't waste them—embed upsells and offers.
+                        </p>
+                    </div>
+
+                    <!-- Feature 4: Retention (Engagement) -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 hover:border-teal-200 shadow-sm transition-all group">
+                        <div class="w-10 h-10 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-deep-ocean mb-2">Silent Churn</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Clients drift away when you only talk during billing. Re-engage them automatically.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: THE SOLUTION (Engine) -->
+        <section id="solution" class="py-20 bg-deep-ocean text-white relative overflow-hidden">
+             <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-heading font-bold sm:text-4xl text-white">
+                        From Data to Design—<span class="text-brand-blue">On Autopilot.</span>
+                    </h2>
+                    <p class="mt-4 text-xl text-slate-300 max-w-3xl mx-auto">
+                        Floovioo sits between your systems and your clients. It captures operational data, applies your unique brand system, and generates high-fidelity documents instantly.
+                    </p>
+                </div>
+
+                <!-- Solution Diagram -->
+                <div class="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-0">
+                    <!-- Layer 1: Sources -->
+                    <div class="flex flex-col items-center">
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 w-64 text-center">
+                            <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Input</div>
+                             <div class="flex flex-wrap justify-center gap-3">
+                                 <span class="px-2 py-1 bg-slate-700 rounded text-xs">SQL</span>
+                                 <span class="px-2 py-1 bg-slate-700 rounded text-xs">CSV</span>
+                                 <span class="px-2 py-1 bg-slate-700 rounded text-xs">APIs</span>
+                             </div>
+                             <div class="mt-4 font-mono text-sm text-brand-blue">Raw Data</div>
+                        </div>
+                    </div>
+
+                    <!-- Connector -->
+                    <div class="hidden lg:block w-24 h-0.5 bg-slate-700 relative">
+                        <div class="absolute -top-1.5 right-0 w-3 h-3 bg-brand-blue rounded-full animate-pulse"></div>
+                    </div>
+                    <div class="lg:hidden h-12 w-0.5 bg-slate-700"></div>
+
+                    <!-- Layer 2: Engine -->
+                    <div class="flex flex-col items-center">
+                        <div class="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-blue-500/30 w-72 text-center shadow-[0_0_40px_-10px_rgba(37,99,235,0.3)]">
+                            <div class="w-16 h-16 bg-brand-blue rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg">
+                                <span class="text-2xl font-bold text-white">F</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-1">Floovioo Engine</h3>
+                            <p class="text-sm text-slate-300">Templates + Logic + Brand Rules</p>
+                        </div>
+                    </div>
+
+                     <!-- Connector -->
+                    <div class="hidden lg:block w-24 h-0.5 bg-slate-700 relative">
+                        <div class="absolute -top-1.5 right-0 w-3 h-3 bg-brand-blue rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+                    </div>
+                    <div class="lg:hidden h-12 w-0.5 bg-slate-700"></div>
+
+                    <!-- Layer 3: Delivery -->
+                    <div class="flex flex-col items-center">
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 w-64 text-center">
+                            <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Output</div>
+                             <div class="flex flex-wrap justify-center gap-3">
+                                 <span class="px-2 py-1 bg-slate-700 rounded text-xs">PDF</span>
+                                 <span class="px-2 py-1 bg-slate-700 rounded text-xs">Email</span>
+                                 <span class="px-2 py-1 bg-slate-700 rounded text-xs">Portal</span>
+                             </div>
+                             <div class="mt-4 font-mono text-sm text-brand-blue">Branded Assets</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: THE PRODUCTS (The Trilogy) -->
+        <section class="py-24 bg-off-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                 <div class="text-center mb-16">
+                    <h2 class="text-3xl font-heading font-bold text-deep-ocean sm:text-4xl">
+                        A Complete Business Output Platform.
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- 1. Transactional Branding -->
+                    <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all p-8 border border-slate-100 group flex gap-6">
+                        <div class="shrink-0 w-16 h-16 bg-blue-50 text-brand-blue rounded-xl flex items-center justify-center group-hover:bg-brand-blue group-hover:text-white transition-colors">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <div>
+                             <h3 class="text-xl font-bold text-deep-ocean mb-2">Transactional Branding</h3>
+                             <p class="text-slate-600 mb-4 text-sm">Automate the "Baseline". Invoices, Receipts, and Manifests that look hand-crafted.</p>
+                             <ul class="text-sm text-slate-500 space-y-1 mb-4">
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-brand-blue mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Dynamic Layouts</li>
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-brand-blue mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Multi-Brand Support</li>
+                             </ul>
+                             <a href="/products/transactional" class="text-brand-blue font-bold text-sm hover:underline">Explore Docs &rarr;</a>
+                        </div>
+                    </div>
+
+                    <!-- 2. Sales Enablement -->
+                    <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all p-8 border border-slate-100 group flex gap-6">
+                        <div class="shrink-0 w-16 h-16 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        </div>
+                        <div>
+                             <h3 class="text-xl font-bold text-deep-ocean mb-2">Sales Enablement</h3>
+                             <p class="text-slate-600 mb-4 text-sm">Automate the "Pitch". Generate proposals, case studies, and pitch decks from CRM data.</p>
+                             <ul class="text-sm text-slate-500 space-y-1 mb-4">
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-indigo-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Personalized Decks</li>
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-indigo-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> CRM Integration</li>
+                             </ul>
+                             <a href="/products/sales" class="text-indigo-600 font-bold text-sm hover:underline">Explore Flows &rarr;</a>
+                        </div>
+                    </div>
+
+                    <!-- 3. Customer Success -->
+                    <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all p-8 border border-slate-100 group flex gap-6">
+                        <div class="shrink-0 w-16 h-16 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                             <h3 class="text-xl font-bold text-deep-ocean mb-2">Customer Retention</h3>
+                             <p class="text-slate-600 mb-4 text-sm">Automate the "Relationship". Turn usage data into strategic renewal decks and risk alerts.</p>
+                             <ul class="text-sm text-slate-500 space-y-1 mb-4">
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-teal-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Strategic QBRs</li>
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-teal-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Churn Prevention</li>
+                             </ul>
+                             <a href="/products/retention" class="text-teal-600 font-bold text-sm hover:underline">See Use Cases &rarr;</a>
+                        </div>
+                    </div>
+
+                    <!-- 4. Content Engine -->
+                    <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all p-8 border border-slate-100 group flex gap-6">
+                        <div class="shrink-0 w-16 h-16 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                        </div>
+                        <div>
+                             <h3 class="text-xl font-bold text-deep-ocean mb-2">Content Engine</h3>
+                             <p class="text-slate-600 mb-4 text-sm">Automate the "Marketing". Turn successful data into Social Posts and Infographics.</p>
+                             <ul class="text-sm text-slate-500 space-y-1 mb-4">
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-purple-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Auto-Testimonials</li>
+                                 <li class="flex items-center"><svg class="w-3 h-3 text-purple-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Data Visuals</li>
+                             </ul>
+                             <a href="/products/content" class="text-purple-600 font-bold text-sm hover:underline">Start Creating &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: USE CASES -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center mb-16">
+                     <h2 class="text-3xl font-heading font-bold text-deep-ocean sm:text-4xl">
+                        Automate Every Business Artifact.
+                    </h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="p-6 bg-slate-50 rounded-xl text-center hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-100">
+                        <div class="font-bold text-deep-ocean mb-1">Finance</div>
+                        <div class="text-sm text-slate-500">Invoices & Receipts</div>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-xl text-center hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-100">
+                        <div class="font-bold text-deep-ocean mb-1">Sales</div>
+                        <div class="text-sm text-slate-500">Proposals & Contracts</div>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-xl text-center hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-100">
+                        <div class="font-bold text-deep-ocean mb-1">Agencies</div>
+                        <div class="text-sm text-slate-500">Client Reports</div>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-xl text-center hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-100">
+                        <div class="font-bold text-deep-ocean mb-1">Operations</div>
+                        <div class="text-sm text-slate-500">Manifests</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: INTEGRATIONS -->
+        <section class="py-16 bg-off-white border-t border-slate-200">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                 <h2 class="text-2xl font-bold text-deep-ocean mb-8">Works Where Your Data Lives.</h2>
+                 <p class="text-slate-500 mb-10 max-w-2xl mx-auto">No need to migrate. Floovioo connects read-only to your existing stack.</p>
+                 
+                 <!-- Logo Wall -->
+                 <div class="flex flex-row flex-wrap justify-center items-center gap-8 md:gap-12">
+                     <img src="/assets/logos/xero.png" alt="Xero" class="h-8 md:h-10 w-auto object-contain hover:scale-110 transition-transform">
+                     <img src="/assets/logos/quickbooks.png" alt="Quickbooks" class="h-8 md:h-10 w-auto object-contain hover:scale-110 transition-transform">
+                     <img src="/assets/logos/salesforce.png" alt="Salesforce" class="h-8 md:h-10 w-auto object-contain hover:scale-110 transition-transform">
+                     <img src="/assets/logos/hubspot.png" alt="HubSpot" class="h-8 md:h-10 w-auto object-contain hover:scale-110 transition-transform">
+                     <img src="/assets/logos/stripe.png" alt="Stripe" class="h-8 md:h-10 w-auto object-contain hover:scale-110 transition-transform">
+                     <img src="/assets/logos/zapier.png" alt="Zapier" class="h-8 md:h-10 w-auto object-contain hover:scale-110 transition-transform">
+                 </div>
+             </div>
+        </section>
+
+        <!-- SECTION 7: CTA (Footer Precursor) -->
+        <section class="py-20 bg-deep-ocean text-center">
+             <div class="max-w-3xl mx-auto px-4">
+                 <h2 class="text-3xl font-heading font-bold text-white mb-6">Ready to upgrade your business output?</h2>
+                 <div class="flex flex-col sm:flex-row justify-center gap-4">
+                     <a href="/auth/register" class="px-8 py-3 bg-brand-blue text-white rounded-lg font-bold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20">Get Started Free</a>
+                     <a href="/contact" class="px-8 py-3 bg-transparent border border-slate-600 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors">Contact Sales</a>
+                 </div>
+             </div>
+        </section>
+
+    </main>
+
+    <%- include('../partials/footer') %>
+
+</body>
+</html>

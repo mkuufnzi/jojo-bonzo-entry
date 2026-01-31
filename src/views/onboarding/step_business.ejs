@@ -1,0 +1,84 @@
+<% layout('layouts/onboarding-layout') -%>
+
+<form action="/onboarding/step/1" method="POST" class="space-y-6">
+    
+    <div>
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Business Profile</h3>
+        <p class="mt-1 text-sm text-gray-500">Tell us about your organization so we can tailor documents for you.</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+        <div class="sm:col-span-3">
+            <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
+            <div class="mt-1">
+                <input type="text" name="businessName" id="businessName" value="<%= profile?.businessName || '' %>" required class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+
+        <div class="sm:col-span-3">
+            <label for="businessSector" class="block text-sm font-medium text-gray-700">Industry / Sector</label>
+            <div class="mt-1">
+                <select id="businessSector" name="businessSector" class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+                    <option value="">Select...</option>
+                    <option value="Technology" <%= profile?.businessSector === 'Technology' ? 'selected' : '' %>>Technology</option>
+                    <option value="Retail" <%= profile?.businessSector === 'Retail' ? 'selected' : '' %>>Retail</option>
+                    <option value="Professional Services" <%= profile?.businessSector === 'Professional Services' ? 'selected' : '' %>>Professional Services</option>
+                    <option value="Construction" <%= profile?.businessSector === 'Construction' ? 'selected' : '' %>>Construction</option>
+                    <option value="Health" <%= profile?.businessSector === 'Health' ? 'selected' : '' %>>Health</option>
+                    <option value="Other" <%= profile?.businessSector === 'Other' ? 'selected' : '' %>>Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="sm:col-span-6">
+            <label for="businessAddress" class="block text-sm font-medium text-gray-700">Address Line</label>
+            <div class="mt-1">
+                <input type="text" name="businessAddress" id="businessAddress" value="<%= profile?.businessAddress || '' %>" class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+
+        <div class="sm:col-span-2">
+            <label for="businessCity" class="block text-sm font-medium text-gray-700">City</label>
+            <div class="mt-1">
+                <input type="text" name="businessCity" id="businessCity" value="<%= profile?.businessCity || '' %>" class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+
+        <div class="sm:col-span-2">
+            <label for="businessState" class="block text-sm font-medium text-gray-700">State / Province</label>
+            <div class="mt-1">
+                <input type="text" name="businessState" id="businessState" value="<%= profile?.businessState || '' %>" class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+
+        <div class="sm:col-span-2">
+            <label for="businessZip" class="block text-sm font-medium text-gray-700">ZIP / Postal Code</label>
+            <div class="mt-1">
+                <input type="text" name="businessZip" id="businessZip" value="<%= profile?.businessZip || '' %>" class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+
+         <div class="sm:col-span-3">
+            <label for="businessCountry" class="block text-sm font-medium text-gray-700">Country</label>
+            <div class="mt-1">
+                <input type="text" name="businessCountry" id="businessCountry" value="<%= profile?.businessCountry || '' %>" class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+
+         <div class="sm:col-span-3">
+            <label for="businessWebsite" class="block text-sm font-medium text-gray-700">Website</label>
+            <div class="mt-1">
+                <input type="url" name="businessWebsite" id="businessWebsite" value="<%= profile?.businessWebsite || '' %>" placeholder="https://" class="shadow-sm focus:ring-brand-blue focus:border-brand-blue block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="pt-5 border-t border-gray-200">
+        <div class="flex justify-end">
+            <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue">
+                Save & Continue
+            </button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,2 @@
+id,tenant_id,sku,name,description,price,image_url,category
+p-1,uuid-1,SEO-01,SEO Audit,Full site analysis,500.00,https://img.com/seo.png,Services

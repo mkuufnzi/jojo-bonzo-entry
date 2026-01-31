@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floovioo Workflows | Visual Automation Builder</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="bg-off-white text-slate-600 font-sans antialiased selection:bg-brand-blue selection:text-white">
+
+    <%- include('../../partials/landing-nav') %>
+
+    <main>
+        <!-- Product Hero -->
+        <section class="pt-24 pb-20 bg-white relative overflow-hidden">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+                 <div>
+                     <div class="inline-flex items-center px-3 py-1 rounded-full bg-teal-50 text-teal-600 text-sm font-bold mb-6">
+                        Floovioo Workflows
+                     </div>
+                     <h1 class="text-4xl lg:text-5xl font-heading font-bold text-deep-ocean mb-6 leading-tight">
+                         Logic for the <br> <span class="text-teal-500">Real World.</span>
+                     </h1>
+                     <p class="text-xl text-slate-500 mb-8 max-w-lg">
+                         Build complex document logic without code. Route approvals, trigger emails, and sync to your ERP.
+                     </p>
+                     <div class="flex gap-4">
+                         <a href="/auth/register" class="px-8 py-3 bg-teal-600 text-white font-bold rounded-lg shadow-lg hover:bg-teal-700 transition-colors">Open Builder</a>
+                     </div>
+                 </div>
+                 <!-- Visual -->
+                 <div class="relative">
+                     <div class="bg-white rounded-xl shadow-2xl p-6 overflow-hidden border border-slate-100 flex flex-col items-center">
+                         <div class="flex items-center gap-4 mb-8 w-full justify-center">
+                             <div class="px-4 py-2 bg-slate-100 rounded-lg text-slate-600 font-bold text-xs border border-slate-200">Webhook Trigger</div>
+                         </div>
+                         <div class="w-0.5 h-8 bg-slate-300"></div>
+                         <div class="flex items-center gap-4 my-8 w-full justify-center">
+                             <div class="px-4 py-2 bg-blue-50 rounded-lg text-brand-blue font-bold text-xs border border-blue-200">Generate PDF</div>
+                         </div>
+                         <div class="w-0.5 h-8 bg-slate-300"></div>
+                         <div class="grid grid-cols-2 gap-8 w-full">
+                             <div class="text-center">
+                                 <div class="px-4 py-2 bg-green-50 rounded-lg text-green-600 font-bold text-xs border border-green-200 mb-2">Email Client</div>
+                             </div>
+                             <div class="text-center">
+                                 <div class="px-4 py-2 bg-orange-50 rounded-lg text-orange-600 font-bold text-xs border border-orange-200 mb-2">Save to Dropbox</div>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="absolute -bottom-6 -right-6 w-full h-full bg-teal-50 rounded-xl -z-10"></div>
+                 </div>
+             </div>
+        </section>
+
+        <!-- Features -->
+        <section class="py-20 bg-off-white">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                 <div class="text-center mb-16">
+                     <h2 class="text-3xl font-bold text-deep-ocean">Connects with everything</h2>
+                 </div>
+                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 opacity-60">
+                     <div class="h-12 bg-slate-200 rounded animate-pulse"></div>
+                     <div class="h-12 bg-slate-200 rounded animate-pulse"></div>
+                     <div class="h-12 bg-slate-200 rounded animate-pulse"></div>
+                     <div class="h-12 bg-slate-200 rounded animate-pulse"></div>
+                 </div>
+             </div>
+        </section>
+
+    </main>
+
+    <%- include('../../partials/footer') %>
+
+</body>
+</html>

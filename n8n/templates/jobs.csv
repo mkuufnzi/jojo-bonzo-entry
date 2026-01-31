@@ -1,0 +1,2 @@
+id,tenant_id,type,status,priority,payload,result,attempts,created_at,updated_at
+j-1,uuid-1,invoice_sync,pending,1,"{""invoiceId"":""123""}",,0,2024-01-29T12:00:00Z,2024-01-29T12:00:00Z

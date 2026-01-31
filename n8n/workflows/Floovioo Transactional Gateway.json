@@ -1,0 +1,946 @@
+{
+  "name": "Floovioo Transactional Gateway",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d8045423-38f0-48eb-97c9-89171fb9c080",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Status",
+                "value": "200"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -640,
+        352
+      ],
+      "id": "b177cd2d-21f0-460c-bc22-0c8cb1698652",
+      "name": "FlooviooRequest",
+      "webhookId": "d8045423-38f0-48eb-97c9-89171fb9c080"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        704,
+        1120
+      ],
+      "id": "7011d26e-b492-4865-b381-0d1f265c38ca",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "15478b3f-7a5d-4f01-be7c-37ab47719228",
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "brand_automation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  },
+                  {
+                    "id": "brand_rule_2",
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "invoice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains",
+                      "name": "filter.operator.contains"
+                    }
+                  },
+                  {
+                    "id": "brand_rule_3",
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "estimate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains",
+                      "name": "filter.operator.contains"
+                    }
+                  }
+                ],
+                "combinator": "or"
+              },
+              "renameOutput": true,
+              "outputKey": "brand_automation"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7ddb9319-9ee2-440a-920f-310c98cab3aa",
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "report_generation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "report_generation"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "181c2fd7-3a83-4962-bfa3-d4b82668a7d5",
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "sales_enablement",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "sales_enablement"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0d6c6c12-549c-49e7-be2f-119a4f1c9e86",
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "customer_engagement",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "customer_engagement"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        800
+      ],
+      "id": "43fc608d-2e36-48c9-90ce-f655c35ac9dc",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "ping",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7c85e4a2-42b2-434d-80f6-f20c6679de53"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ping"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1aa0316a-ed37-4e82-9304-07d3dc07e2ea",
+                    "leftValue": "={{ $json.body.body.type }}",
+                    "rightValue": "onboarding",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "onboarding"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "service_request"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        336
+      ],
+      "id": "a3645b97-bcd5-4dc5-b471-baf45326196d",
+      "name": "RouteRequest"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        160
+      ],
+      "id": "083a265e-706d-4d90-bcea-f7222e008f95",
+      "name": "Tenant Connectivity Test"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        352
+      ],
+      "id": "45e96a19-8666-4b72-ad18-025e3da9df44",
+      "name": "OnboardingRequest"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        32,
+        160
+      ],
+      "id": "3613025b-f412-4cfd-bf51-3779673570b1",
+      "name": "Respond to Connectivity Test"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        256,
+        352
+      ],
+      "id": "ee48a72c-08d0-44a4-9f58-b2da01200abc",
+      "name": "Respond to Onboarding Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        704,
+        544
+      ],
+      "id": "ee5237e0-ba99-4bbd-9b5d-a09c096c38ac",
+      "name": "Respond to BrandingRequest"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        544
+      ],
+      "id": "9ba5e064-25db-4e78-8107-5825fd564cb1",
+      "name": "BrandingAutomationResponse"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        704,
+        736
+      ],
+      "id": "c85d2657-664f-4d5e-9579-898061596d73",
+      "name": "Respond to BrandingRequest1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        704,
+        928
+      ],
+      "id": "c84f70e6-2138-4a02-86e5-235fe99d3b41",
+      "name": "Respond to BrandingRequest2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        736
+      ],
+      "id": "8bfb4c6b-e879-4cef-ad94-ccca3e84c299",
+      "name": "ReportGenerationResponse"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        928
+      ],
+      "id": "b8ac2765-6c5c-460e-85b9-23e1ab72969c",
+      "name": "SalesEnablementResponse"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        1120
+      ],
+      "id": "71260d7c-4c7d-4948-af3e-d55bfcfd59a1",
+      "name": "CustomerEngagementResponse"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        1120
+      ],
+      "id": "04016ddf-8d3d-49ba-87fe-92934e2146c1",
+      "name": "CustomerEngagementRequest"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        544
+      ],
+      "id": "841bcac1-4fae-4c4e-8ba2-e54de0252772",
+      "name": "BrandingAutomationRequest"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        736
+      ],
+      "id": "a55f43b1-bf95-4fff-927a-ce5a81c92730",
+      "name": "BusinessAnalyticsRequest"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "6itBhrsI8ncOzobn",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/6itBhrsI8ncOzobn",
+          "cachedResultName": "Floovioo Branding Automation Engine 1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        544
+      ],
+      "id": "a0ed1ccd-2dc5-447d-9be7-0b2b67d27ae2",
+      "name": "Execute Branding",
+      "notesInFlow": true,
+      "notes": "Floovioo Branding Automation Engine 1.0"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "3d13ZjIRZwKtDmGE",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3d13ZjIRZwKtDmGE",
+          "cachedResultName": "Floovioo Analytics Engine V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        736
+      ],
+      "id": "b8fc11e6-a09a-492c-bfc6-22eda7214f24",
+      "name": "Execute Analytics",
+      "notesInFlow": true,
+      "notes": "Floovioo Branding Automation Engine 1.0"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "XynnBNN5RoQVTeQj",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/XynnBNN5RoQVTeQj",
+          "cachedResultName": "Floovioo Sales Enablement Engine V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        928
+      ],
+      "id": "e0abb362-692d-4c88-88f9-59a6b55b6c94",
+      "name": "Execute Enablement",
+      "notesInFlow": true,
+      "notes": "Floovioo Branding Automation Engine 1.0"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        928
+      ],
+      "id": "52404d59-f4f5-4f1a-86c5-be7a4d91922e",
+      "name": "SalesEnablementRequest"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "40bz2zbpDJDgK9QZ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/40bz2zbpDJDgK9QZ",
+          "cachedResultName": "Floovioo Customer Engagement Engine V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        1120
+      ],
+      "id": "2c6818f3-55bc-4c62-8afc-d0467b512f53",
+      "name": "Execute Engagement",
+      "notesInFlow": true,
+      "notes": "Floovioo Branding Automation Engine 1.0"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "n1w6bBfhjMuDoT7L",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/n1w6bBfhjMuDoT7L",
+          "cachedResultName": "Floovioo Transacational Oboarding"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $('FlooviooRequest').item.json.body.floovioo_id }}",
+            "service_id": "={{ $('FlooviooRequest').item.json.body.service_id }}",
+            "requestId": "={{ $('FlooviooRequest').item.json.body.requestId }}",
+            "requestData": "={{ $('FlooviooRequest').item.json.body.body }}",
+            "requestType": "={{ $json.body.body.type }}",
+            "service_tenant_id": "={{ $json.body.service_tenant_id }}",
+            "brandSettings": "={{ $json.body.body.brand }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestType",
+              "displayName": "requestType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "brandSettings",
+              "displayName": "brandSettings",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "requestData",
+              "displayName": "requestData",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "service_tenant_id",
+              "displayName": "service_tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        352
+      ],
+      "id": "36ae7a0c-7b60-44a2-b8c2-f48d58681892",
+      "name": "Execute Onboarding",
+      "notesInFlow": true,
+      "notes": "Floovioo Transacational Oboarding"
+    },
+    {
+      "parameters": {
+        "height": 240,
+        "width": 630
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -928,
+        640
+      ],
+      "typeVersion": 1,
+      "id": "a0229e84-5159-46fb-8b86-78c629e426d2",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "FlooviooRequest": {
+      "main": [
+        [
+          {
+            "node": "RouteRequest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "BrandingAutomationRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "BusinessAnalyticsRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SalesEnablementRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CustomerEngagementRequest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RouteRequest": {
+      "main": [
+        [
+          {
+            "node": "Tenant Connectivity Test",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OnboardingRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tenant Connectivity Test": {
+      "main": [
+        [
+          {
+            "node": "Respond to Connectivity Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OnboardingRequest": {
+      "main": [
+        [
+          {
+            "node": "Execute Onboarding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to BrandingRequest": {
+      "main": [
+        []
+      ]
+    },
+    "BrandingAutomationResponse": {
+      "main": [
+        [
+          {
+            "node": "Respond to BrandingRequest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ReportGenerationResponse": {
+      "main": [
+        [
+          {
+            "node": "Respond to BrandingRequest1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SalesEnablementResponse": {
+      "main": [
+        [
+          {
+            "node": "Respond to BrandingRequest2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CustomerEngagementResponse": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CustomerEngagementRequest": {
+      "main": [
+        [
+          {
+            "node": "Execute Engagement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BrandingAutomationRequest": {
+      "main": [
+        [
+          {
+            "node": "Execute Branding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BusinessAnalyticsRequest": {
+      "main": [
+        [
+          {
+            "node": "Execute Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Branding": {
+      "main": [
+        [
+          {
+            "node": "BrandingAutomationResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Analytics": {
+      "main": [
+        [
+          {
+            "node": "ReportGenerationResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Enablement": {
+      "main": [
+        [
+          {
+            "node": "SalesEnablementResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SalesEnablementRequest": {
+      "main": [
+        [
+          {
+            "node": "Execute Enablement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Engagement": {
+      "main": [
+        [
+          {
+            "node": "CustomerEngagementResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Onboarding": {
+      "main": [
+        [
+          {
+            "node": "Respond to Onboarding Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b19b0d3f-54c3-4111-b241-36effaf05590",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8fb05bee768a4bab0bd17c350a6dd4427e95a710f7b628ff5a4819a166b694ae"
+  },
+  "id": "S3DFLoCWdtHTTRpq",
+  "tags": []
+}

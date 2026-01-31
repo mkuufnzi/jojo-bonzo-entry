@@ -1,0 +1,74 @@
+<div id="confirmationModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md transition-opacity duration-200">
+    <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden transform transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
+        <div class="p-8">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 border border-amber-100 shadow-sm">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Confirm Action</h3>
+            </div>
+            <p id="confirmationMessage" class="text-sm font-medium text-slate-500 leading-relaxed mb-8">
+                This operation may interrupt active integrations or permanently delete resource data.
+            </p>
+            <div class="flex items-center justify-end gap-3">
+                <button type="button" onclick="closeConfirmationModal()"
+                    class="px-6 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">
+                    No, Cancel
+                </button>
+                <button type="button" id="confirmActionBtn"
+                    class="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-lg transition-all">
+                    Yes, Proceed
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let pendingForm = null;
+
+function handleConfirm(form) {
+    const msgInput = form.querySelector('input[name="confirmMsg"]');
+    const message = msgInput ? msgInput.value : 'Confirm critical system action?';
+    
+    showConfirmationModal(message, form);
+    return false;
+}
+
+function showConfirmationModal(message, form) {
+    const modal = document.getElementById('confirmationModal');
+    const msgEl = document.getElementById('confirmationMessage');
+    const confirmBtn = document.getElementById('confirmActionBtn');
+    
+    if (modal && msgEl && confirmBtn) {
+        msgEl.textContent = message;
+        pendingForm = form;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        
+        newBtn.addEventListener('click', () => {
+            if (pendingForm) {
+                pendingForm.submit();
+                closeConfirmationModal();
+            }
+        });
+    }
+}
+
+function closeConfirmationModal() {
+    const modal = document.getElementById('confirmationModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        pendingForm = null;
+    }
+}
+
+window.addEventListener('click', (e) => {
+    const confirmModal = document.getElementById('confirmationModal');
+    if (e.target === confirmModal) closeConfirmationModal();
+});
+</script>

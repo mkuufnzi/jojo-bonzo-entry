@@ -1,0 +1,629 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String              @id @default(uuid())
+  email                String              @unique
+  password             String              @default("")
+  name                 String?
+  isActive             Boolean             @default(true)
+  emailVerified        DateTime?
+  verificationToken    String?
+  googleId             String?             @unique
+  facebookId           String?             @unique
+  linkedinId           String?             @unique
+  avatar               String?
+  stripeCustomerId     String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  twitterId            String?             @unique
+  isAdmin              Boolean             @default(false)
+  role                 String              @default("USER")
+  isTwoFactorEnabled   Boolean             @default(false)
+  twoFactorCodeExpires DateTime?
+  twoFactorCurrentCode String?
+  twoFactorSecret      String?
+  businessId           String?
+  adminLogs            AdminLog[]
+  apiKeys              ApiKey[]
+  apps                 App[]
+  invoices             Invoice[]
+  loginHistory         LoginHistory[]
+  notifications        Notification[]
+  notificationConfig   NotificationConfig?
+  paymentMethods       PaymentMethod[]
+  subscription         Subscription?
+  logs                 UsageLog[]
+  business             Business?           @relation(fields: [businessId], references: [id])
+  devices              UserDevice[]
+  profile              UserProfile?
+}
+
+model Business {
+  id                    String               @id @default(uuid())
+  name                  String
+  sector                String?
+  address               String?
+  city                  String?
+  state                 String?
+  zip                   String?
+  country               String?
+  taxId                 String?
+  website               String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  metadata              Json?
+  currentOnboardingStep Int                  @default(0)
+  onboardingStatus      OnboardingStatus     @default(NOT_STARTED)
+  analyticsEvents       AnalyticsEvent[]
+  brandingProfiles      BrandingProfile[]
+  businessMetrics       BusinessMetric[]
+  campaigns             Campaign[]
+  contacts              Contact[]
+  dunningActions        DunningAction[]
+  dunningSequence       DunningSequence?
+  externalDocuments     ExternalDocument[]
+  integrations          Integration[]
+  products              Product[]
+  recommendationRules   RecommendationRule[]
+  users                 User[]
+  userTemplates         UserTemplate[]
+  workflows             Workflow[]
+}
+
+model UserDevice {
+  id        String   @id @default(uuid())
+  userId    String
+  userAgent String
+  ipAddress String
+  lastLogin DateTime @default(now())
+  isTrusted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  ipAddress String
+  userAgent String
+  status    String
+  reason    String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model NotificationConfig {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  emailEnabled  Boolean  @default(true)
+  inAppEnabled  Boolean  @default(true)
+  toolSuccess   Boolean  @default(true)
+  toolFailure   Boolean  @default(true)
+  billingAlert  Boolean  @default(true)
+  paymentAction Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserProfile {
+  id                  String      @id @default(uuid())
+  userId              String      @unique
+  firstName           String
+  lastName            String
+  phoneNumber         String?
+  profession          String?
+  accountType         AccountType @default(INDIVIDUAL)
+  onboardingCompleted Boolean     @default(false)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Integration {
+  id                String             @id @default(uuid())
+  provider          String
+  name              String?
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         DateTime?
+  status            String             @default("connected")
+  metadata          Json?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  businessId        String
+  settings          Json?
+  externalDocuments ExternalDocument[]
+  business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+model IntegrationDefinition {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  logoUrl     String?
+  category    String
+  isPopular   Boolean  @default(false)
+  status      String   @default("active")
+  config      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BrandingProfile {
+  id            String   @id @default(uuid())
+  name          String   @default("Default Brand")
+  isDefault     Boolean  @default(false)
+  logoUrl       String?
+  faviconUrl    String?
+  brandColors   Json?
+  fontSettings  Json?
+  templates     Json?
+  upsellConfig  Json?
+  supportConfig Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  businessId    String
+  metadata      Json?
+  voiceProfile  Json?
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+model Contact {
+  id         String   @id @default(uuid())
+  businessId String
+  externalId String
+  source     String
+  name       String
+  email      String?
+  phone      String?
+  type       String   @default("customer")
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, source, externalId])
+  @@index([businessId])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  businessId  String
+  externalId  String
+  source      String
+  name        String
+  sku         String?
+  description String?
+  price       Float?
+  currency    String   @default("USD")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, source, externalId])
+  @@index([businessId])
+}
+
+model UserTemplate {
+  id           String   @id @default(uuid())
+  businessId   String
+  name         String
+  documentType String
+  htmlContent  String
+  thumbnailUrl String?
+  source       String   @default("system")
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, documentType])
+}
+
+model Workflow {
+  id            String                 @id @default(uuid())
+  name          String
+  description   String?
+  isActive      Boolean                @default(true)
+  triggerType   String
+  triggerConfig Json?
+  actionConfig  Json?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  businessId    String
+  business      Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  executionLogs WorkflowExecutionLog[]
+
+  @@index([businessId])
+}
+
+model WorkflowExecutionLog {
+  id         String   @id @default(uuid())
+  workflowId String
+  status     String
+  inputData  Json?
+  outputData Json?
+  error      String?
+  duration   Int?
+  createdAt  DateTime @default(now())
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+}
+
+model DocumentType {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  schema    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plan {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  price         Float
+  stripePriceId String?
+  requestLimit  Int
+  pdfQuota      Int            @default(0)
+  aiQuota       Int            @default(0)
+  features      String
+  currency      String         @default("USD")
+  planFeatures  PlanFeature[]
+  subscriptions Subscription[]
+}
+
+model Feature {
+  id           String        @id @default(uuid())
+  key          String        @unique
+  name         String
+  description  String?
+  category     String
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  planFeatures PlanFeature[]
+}
+
+model PlanFeature {
+  id        String   @id @default(uuid())
+  planId    String
+  featureId String
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  feature   Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureId])
+}
+
+model Subscription {
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  planId               String
+  stripeSubscriptionId String?   @unique
+  status               String    @default("active")
+  startDate            DateTime  @default(now())
+  endDate              DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  invoices             Invoice[]
+  plan                 Plan      @relation(fields: [planId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id])
+}
+
+model PaymentMethod {
+  id               String    @id @default(uuid())
+  userId           String
+  type             String
+  provider         String
+  providerMethodId String?
+  last4            String?
+  expiry           String?
+  isDefault        Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  invoices         Invoice[]
+  user             User      @relation(fields: [userId], references: [id])
+}
+
+model Invoice {
+  id              String         @id @default(uuid())
+  userId          String
+  subscriptionId  String?
+  paymentMethodId String?
+  stripeInvoiceId String?        @unique
+  amount          Float
+  currency        String         @default("USD")
+  status          String
+  paidAt          DateTime?
+  createdAt       DateTime       @default(now())
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  subscription    Subscription?  @relation(fields: [subscriptionId], references: [id])
+  user            User           @relation(fields: [userId], references: [id])
+}
+
+model App {
+  id              String       @id @default(uuid())
+  name            String
+  description     String?
+  apiKey          String       @unique
+  apiKeyExpiresAt DateTime?
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  services        AppService[]
+  logs            UsageLog[]
+}
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  key        String    @unique
+  name       String    @default("Default Key")
+  scopes     String    @default("*")
+  status     String    @default("active")
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Service {
+  id                 String       @id @default(uuid())
+  name               String       @unique
+  slug               String       @unique
+  description        String?
+  pricePerRequest    Float        @default(0.0)
+  executionType      String       @default("local")
+  endpointUrl        String?
+  config             Json?
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  requiredFeatureKey String?
+  apps               AppService[]
+  logs               UsageLog[]
+}
+
+model AppService {
+  appId     String
+  serviceId String
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([appId, serviceId])
+}
+
+model UsageLog {
+  id           String   @id @default(uuid())
+  userId       String?
+  appId        String?
+  serviceId    String?
+  action       String
+  resourceType String?
+  status       String
+  statusCode   Int?
+  duration     Int
+  cost         Float    @default(0.0)
+  ipAddress    String?
+  userAgent    String?
+  errorMessage String?
+  metadata     String?
+  createdAt    DateTime @default(now())
+  app          App?     @relation(fields: [appId], references: [id])
+  service      Service? @relation(fields: [serviceId], references: [id])
+  user         User?    @relation(fields: [userId], references: [id])
+}
+
+model ApiRequestLog {
+  id         String   @id @default(uuid())
+  method     String
+  path       String
+  statusCode Int
+  duration   Int
+  ipAddress  String?
+  userAgent  String?
+  userId     String?
+  appId      String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([appId])
+  @@index([createdAt])
+}
+
+model AdminLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  action    String
+  target    String?
+  ip        String?
+  details   Json?
+  createdAt DateTime @default(now())
+  admin     User     @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   @default("info")
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model Lead {
+  id        String   @id @default(uuid())
+  email     String
+  source    String?
+  interest  String?
+  createdAt DateTime @default(now())
+}
+
+model IpBan {
+  id        String    @id @default(uuid())
+  ipAddress String    @unique
+  reason    String?
+  bannedBy  String
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([ipAddress])
+  @@index([expiresAt])
+}
+
+model ExternalDocument {
+  id            String      @id @default(uuid())
+  businessId    String
+  integrationId String
+  externalId    String
+  type          String
+  data          Json
+  normalized    Json?
+  hash          String?
+  syncedAt      DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  business      Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([integrationId, externalId, type])
+  @@index([businessId, type])
+  @@index([syncedAt])
+}
+
+model RecommendationRule {
+  id              String   @id @default(uuid())
+  businessId      String
+  name            String
+  triggerSku      String?
+  triggerCategory String?
+  targetSku       String
+  aiPromptContext String?
+  copyTemplate    String?
+  priority        Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, triggerSku])
+}
+
+model Campaign {
+  id           String   @id @default(uuid())
+  businessId   String
+  name         String
+  startDate    DateTime
+  endDate      DateTime
+  promotedSku  String
+  discountCode String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+model DunningSequence {
+  id         String   @id @default(uuid())
+  businessId String   @unique
+  name       String   @default("Default Recovery")
+  steps      Json
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model DunningAction {
+  id                String   @id @default(uuid())
+  businessId        String
+  externalInvoiceId String
+  actionType        String
+  status            String
+  aiGeneratedCopy   String?
+  sentAt            DateTime @default(now())
+  business          Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, externalInvoiceId])
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  businessId String
+  userId     String?
+  type       String
+  amount     Float?
+  currency   String   @default("USD")
+  metadata   Json?
+  timestamp  DateTime @default(now())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, type])
+  @@index([timestamp])
+}
+
+model BusinessMetric {
+  id           String   @id @default(uuid())
+  businessId   String
+  metricKey    String
+  value        Float
+  metadata     Json?
+  calculatedAt DateTime @default(now())
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, metricKey])
+  @@index([calculatedAt])
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum AccountType {
+  INDIVIDUAL
+  BUSINESS
+}

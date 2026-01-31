@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect <%= integration.name %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans text-gray-900 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white rounded-xl shadow-lg max-w-lg w-full p-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                <% if (integration.logoUrl) { %>
+                    <img src="<%= integration.logoUrl %>" class="w-12 h-12 object-contain">
+                <% } else { %>
+                    <span class="text-2xl font-bold text-gray-400"><%= integration.name.substring(0,2) %></span>
+                <% } %>
+            </div>
+            <h1 class="text-2xl font-bold mb-2">Connect <%= integration.name %></h1>
+            <p class="text-gray-500">
+                <%= integration.description || 'Sync your business data automatically.' %>
+            </p>
+        </div>
+
+        <!-- Configuration / Info -->
+        <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-8">
+            <h3 class="text-sm font-semibold text-blue-900 mb-2">What happens next?</h3>
+            <ul class="text-sm text-blue-800 space-y-2">
+                <li class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    You will be redirected to <%= integration.name %> to login.
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    We will import your recent invoices and customers.
+                </li>
+            </ul>
+        </div>
+
+        <!-- Actions -->
+        <div class="space-y-3">
+            <a href="<%= authUrl %>" class="block w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-center shadow-md">
+                Continue to <%= integration.name %>
+            </a>
+            <a href="/onboarding/wizard?step=2" class="block w-full py-3 text-gray-500 hover:text-gray-700 font-medium text-sm text-center">
+                Cancel
+            </a>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-xs text-gray-400 flex items-center justify-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm0-9a1 1 0 011 1v4a1 1 0 11-2 0V8a1 1 0 011-1z"></path></svg>
+                Secure Connection via OAuth 2.0
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>

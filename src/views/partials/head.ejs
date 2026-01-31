@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Floovioo ' %></title>
+    <!-- <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script> REMOVED: Using local build -->
+    <script src="https://unpkg.com/lucide@latest" nonce="<%= nonce %>"></script>
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="<%= typeof appUrl !== 'undefined' ? appUrl : '' %>/assets/css/style.css" nonce="<%= nonce %>">
+    <link rel="stylesheet" href="<%= typeof appUrl !== 'undefined' ? appUrl : '' %>/css/layouts/sidebar.css" nonce="<%= nonce %>">
+    <link rel="stylesheet" href="<%= typeof appUrl !== 'undefined' ? appUrl : '' %>/css/components/onboarding-modal.css" nonce="<%= nonce %>">
+    <style nonce="<%= nonce %>">
+        /* CustomScrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="<%= nonce %>"></script>
+    <% if (locals.additionalCss) { %>
+        <% (Array.isArray(locals.additionalCss) ? locals.additionalCss : [locals.additionalCss]).forEach(css => { %>
+            <link rel="stylesheet" href="<%= css %>" nonce="<%= nonce %>">
+        <% }); %>
+    <% } %>
+</head>

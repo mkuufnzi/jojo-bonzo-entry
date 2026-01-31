@@ -1,0 +1,66 @@
+<% 
+/* 
+  Button Component
+  Props:
+  - type: 'button' | 'submit' | 'reset' (default: 'button')
+  - href: string (if provided, renders as <a>)
+  - variant: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' (default: 'primary')
+  - size: 'sm' | 'md' | 'lg' (default: 'md')
+  - icon: string (Lucide icon name)
+  - iconPosition: 'left' | 'right' (default: 'left')
+  - class: string (additional classes)
+  - disabled: boolean
+  - onclick: string
+*/
+
+const variantClasses = {
+  primary: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm border border-transparent',
+  secondary: 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm',
+  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+  danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm border border-transparent',
+  outline: 'bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50'
+};
+
+const sizeClasses = {
+  sm: 'px-2.5 py-1.5 text-xs',
+  md: 'px-4 py-2 text-sm',
+  lg: 'px-6 py-3 text-base'
+};
+
+// Destructure props with defaults to ensure variables are in scope
+const type = locals.type || 'button';
+const variant = locals.variant || 'primary';
+const size = locals.size || 'md';
+const icon = locals.icon;
+const iconPosition = locals.iconPosition || 'left';
+const href = locals.href;
+const onclick = locals.onclick;
+const disabled = locals.disabled;
+
+const baseClass = `inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${locals.class || ''}`;
+
+const iconSize = size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4';
+const iconMargin = iconPosition === 'right' ? 'ml-2' : 'mr-2';
+%>
+
+<% if (locals.href) { %>
+  <a href="<%= href %>" class="<%= baseClass %>" <%= locals.onclick ? `onclick="${onclick}"` : '' %>>
+    <% if (locals.icon && (!locals.iconPosition || iconPosition === 'left')) { %>
+      <i data-lucide="<%= icon %>" class="<%= iconSize %> <%= iconMargin %>"></i>
+    <% } %>
+    <span class="truncate"><%- locals.label || 'Button' %></span>
+    <% if (locals.icon && iconPosition === 'right') { %>
+      <i data-lucide="<%= icon %>" class="<%= iconSize %> <%= iconMargin %>"></i>
+    <% } %>
+  </a>
+<% } else { %>
+  <button type="<%= locals.type || 'button' %>" class="<%= baseClass %>" <%= locals.disabled ? 'disabled' : '' %> <%= locals.onclick ? `onclick="${onclick}"` : '' %>>
+    <% if (locals.icon && (!locals.iconPosition || iconPosition === 'left')) { %>
+      <i data-lucide="<%= icon %>" class="<%= iconSize %> <%= iconMargin %>"></i>
+    <% } %>
+    <span class="truncate"><%- locals.label || 'Button' %></span>
+    <% if (locals.icon && iconPosition === 'right') { %>
+      <i data-lucide="<%= icon %>" class="<%= iconSize %> <%= iconMargin %>"></i>
+    <% } %>
+  </button>
+<% } %>

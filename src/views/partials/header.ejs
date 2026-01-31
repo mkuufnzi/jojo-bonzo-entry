@@ -1,0 +1,122 @@
+<header class="bg-white shadow-sm sticky top-0 z-30">
+    <div class="flex items-center justify-between px-4 py-3 md:px-6">
+        <div class="flex items-center">
+            <!-- Mobile Menu Button -->
+            <button id="openSidebar" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                <span class="sr-only">Open sidebar</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            
+            <!-- Page Title (Visible on Mobile) -->
+            <h1 class="ml-3 text-xl font-semibold text-gray-800 md:hidden">Dashboard</h1>
+        </div>
+
+        <!-- Right Side Actions (Profile, etc.) -->
+        <div class="flex items-center space-x-4">
+            <!-- Notifications -->
+            <div class="relative">
+                <button id="notificationBtn" class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none relative">
+                    <span class="sr-only">View notifications</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <% if (locals.unreadNotificationsCount && locals.unreadNotificationsCount > 0) { %>
+                        <span class="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
+                    <% } %>
+                </button>
+                
+                <!-- Notification Dropdown (Hidden by default) -->
+                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                    <div class="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-gray-700">Notifications</h3>
+                        <button id="markAllReadBtn" class="text-xs text-blue-600 hover:text-blue-800">Mark all read</button>
+                    </div>
+                    <div id="notificationList" class="max-h-64 overflow-y-auto">
+                        <div class="px-4 py-3 text-sm text-gray-500 text-center">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+                    <%= user.name.charAt(0).toUpperCase() %>
+                </div>
+                <span class="hidden md:block text-sm font-medium text-gray-700"><%= user.name %></span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script nonce="<%= nonce %>">
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('notificationBtn');
+        const dropdown = document.getElementById('notificationDropdown');
+        const list = document.getElementById('notificationList');
+        const markAllBtn = document.getElementById('markAllReadBtn');
+        let isOpen = false;
+
+        btn.addEventListener('click', async () => {
+            isOpen = !isOpen;
+            if (isOpen) {
+                dropdown.classList.remove('hidden');
+                await loadNotifications();
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                isOpen = false;
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        markAllBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/notifications/mark-all-read', { method: 'POST' });
+                // Reload to update badge
+                window.location.reload();
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        async function loadNotifications() {
+            try {
+                const res = await fetch('/notifications', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        list.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 text-center">Please log in to view notifications</div>';
+                        return;
+                    }
+                    throw new Error('Failed to load');
+                }
+                const notifications = await res.json();
+                
+                if (!Array.isArray(notifications) || notifications.length === 0) {
+                    list.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 text-center">No new notifications</div>';
+                    return;
+                }
+
+                list.innerHTML = notifications.map(n => `
+                    <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 ${!n.isRead ? 'bg-blue-50' : ''}">
+                        <p class="text-sm font-medium text-gray-900">${n.title}</p>
+                        <p class="text-xs text-gray-500 mt-1">${n.message}</p>
+                        <p class="text-xs text-gray-400 mt-1">${new Date(n.createdAt).toLocaleDateString()}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = '<div class="px-4 py-3 text-sm text-red-500 text-center">Failed to load</div>';
+            }
+        }
+    });
+</script>

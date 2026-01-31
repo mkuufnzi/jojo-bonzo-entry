@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Retention Automation | Floovioo</title>
+    <meta name="description" content="Auto-generate QBRs, onboarding guides, and review requests.">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="//unpkg.com/alpinejs" defer></script>
+</head>
+<body class="bg-off-white text-slate-600 font-sans antialiased">
+
+    <%- include('../../partials/landing-nav') %>
+
+    <main>
+        <!-- RETENTION CAROUSEL -->
+        <%- include('../../partials/components/hero-carousel', {
+            slides: [
+                {
+                    id: 'qbr',
+                    badge: { text: 'Strategic Renewals', classes: 'bg-teal-50 text-teal-600' },
+                    title: 'Make Every QBR a',
+                    titleHighlight: 'Renewal Engine.',
+                    titleHighlightColor: 'text-teal-600',
+                    text: 'Shift from "reporting stats" to "proving value". Automatically generate ROI-focused decks that demonstrate exactly why they can\'t live without you.',
+                    cta: { text: 'Drive Renewals', link: '/dashboard/retention' },
+                    visuals: ['/assets/images/report-sample-1.jpg', '/assets/images/report-sample-2.jpg', '/assets/images/report-sample-3.jpg']
+                },
+                {
+                    id: 'onboarding',
+                    badge: { text: 'Time-to-Value', classes: 'bg-green-50 text-green-600' },
+                    title: 'Accelerate Their',
+                    titleHighlight: 'Path to Value.',
+                    titleHighlightColor: 'text-green-500',
+                    text: 'The first 30 days determine retention. Deliver personalized, milestone-based onboarding guides that get users to their "Aha!" moment faster.',
+                    cta: { text: 'Build Onboarding Flow', link: '/dashboard/retention/onboarding' },
+                    visuals: ['/assets/images/transformation-engine.jpg', '/assets/images/onboard-2.jpg', '/assets/images/onboard-3.jpg']
+                },
+                {
+                    id: 'churn',
+                    badge: { text: 'Proactive Health', classes: 'bg-red-50 text-red-600' },
+                    title: 'Spot Risks Before',
+                    titleHighlight: 'They Resign.',
+                    titleHighlightColor: 'text-red-500',
+                    text: 'Turn silent signals into saved accounts. Detect usage drops instantly and trigger "Value Recovery" reports to re-engage at-risk stakeholders.',
+                    cta: { text: 'Stop Churn', link: '/dashboard/retention/churn' },
+                    visuals: ['/assets/images/report-sample-0.jpg', '/assets/images/churn-2.jpg', '/assets/images/churn-3.jpg']
+                }
+            ]
+        }) %>
+
+         <!-- Feature Grid (Retention Specific) -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-extrabold text-deep-ocean sm:text-4xl">
+                    Keep your customers for life.
+                </h2>
+                <div class="mt-12 grid gap-8 grid-cols-1 md:grid-cols-3">
+                    <div class="bg-teal-50 rounded-2xl p-8">
+                        <div class="text-teal-600 font-bold text-xl mb-4">Data Connectors</div>
+                        <p>Pulls from Zendesk, Intercom, and Mixpanel automatically.</p>
+                    </div>
+                    <div class="bg-teal-50 rounded-2xl p-8">
+                        <div class="text-teal-600 font-bold text-xl mb-4">Trigger Logic</div>
+                        <p>"If usage drops by 20%, send 'Help' guide." Simple logic, powerful results.</p>
+                    </div>
+                    <div class="bg-teal-50 rounded-2xl p-8">
+                        <div class="text-teal-600 font-bold text-xl mb-4">NPS Booster</div>
+                        <p>Ask for reviews at the exact moment of value (e.g. after a report runs).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <%- include('../../partials/footer') %>
+
+</body>
+</html>

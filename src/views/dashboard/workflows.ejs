@@ -1,0 +1,127 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-10 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">Automations</h1>
+            <p class="text-slate-500 font-medium">Define rules to automatically apply your brand to ERP documents.</p>
+        </div>
+        <button @click="alert('Workflow Builder interface coming in the next update! Stay tuned.')" class="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-xl transition-all shadow-lg flex items-center">
+            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+            Create Workflow
+        </button>
+    </div>
+
+    <!-- Stats Overlays -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Rules</p>
+            <h3 class="text-2xl font-black text-slate-900"><%= workflows.filter(w => w.isActive).length %></h3>
+        </div>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Runs (24h)</p>
+            <h3 class="text-2xl font-black text-slate-900">42</h3>
+        </div>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Success Rate</p>
+            <h3 class="text-2xl font-black text-emerald-600">98.2%</h3>
+        </div>
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Delivery Time</p>
+            <h3 class="text-2xl font-black text-blue-600">~1.2s</h3>
+        </div>
+    </div>
+
+    <!-- Workflows List -->
+    <div class="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden mb-10">
+        <div class="p-6 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+            <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                Active Workflows
+            </h3>
+        </div>
+        
+        <% if (workflows && workflows.length > 0) { %>
+            <div class="divide-y divide-slate-50">
+                <% workflows.forEach(wf => { %>
+                    <div class="p-8 hover:bg-slate-50/50 transition-all group flex items-center justify-between">
+                        <div class="flex items-center gap-6">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                                <i data-lucide="git-branch" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-black text-slate-900 leading-none mb-2"><%= wf.name %></h4>
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[0.625rem] font-bold uppercase tracking-widest">Trigger</span>
+                                        <span class="text-xs font-bold text-slate-700"><%= wf.triggerType || 'ERP Webhook' %></span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 border-l border-slate-200 pl-4">
+                                        <span class="px-1.5 py-0.5 bg-blue-50 text-blue-500 rounded text-[0.625rem] font-bold uppercase tracking-widest">Action</span>
+                                        <span class="text-xs font-bold text-slate-700">Apply Brand & Email</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <div class="text-right">
+                                <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Last Run</p>
+                                <p class="text-xs font-bold text-slate-900">12 minutes ago</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="p-2 text-slate-400 hover:text-slate-900 transition-colors">
+                                    <i data-lucide="settings" class="w-5 h-5"></i>
+                                </button>
+                                <form action="/dashboard/workflows/<%= wf.id %>/delete" method="POST" onsubmit="return confirm('Archive this automation?')" class="inline">
+                                    <button class="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="p-20 text-center">
+                <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="sparkles" class="w-10 h-10 text-slate-200"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-900 mb-2">Build your first automation</h3>
+                <p class="text-slate-500 text-sm max-w-sm mx-auto mb-8 font-medium">Connect an event from Xero or QuickBooks and we'll automatically apply your brand before delivery.</p>
+                <button @click="alert('Workflow Builder interface coming in the next update! Stay tuned.')" class="px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-glow-blue">
+                    Create Custom Workflow
+                </button>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Educational Footer -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-8 flex gap-6 group">
+             <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-indigo-100 flex-shrink-0 group-hover:rotate-6 transition-transform">
+                <i data-lucide="help-circle" class="w-6 h-6 text-indigo-500"></i>
+             </div>
+             <div>
+                 <h4 class="font-black text-slate-900 mb-1">How Workflows Work</h4>
+                 <p class="text-sm text-slate-600 font-medium leading-relaxed">When a document is created in your ERP, we intercept the webhook, look up your Brand Standards, generate a high-res PDF, and optionally forward it to your client via email.</p>
+             </div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-100 rounded-3xl p-8 flex gap-6 group">
+             <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-emerald-100 flex-shrink-0 group-hover:-rotate-6 transition-transform">
+                <i data-lucide="lock" class="w-6 h-6 text-emerald-500"></i>
+             </div>
+             <div>
+                 <h4 class="font-black text-slate-900 mb-1">Idempotency & Safety</h4>
+                 <p class="text-sm text-slate-600 font-medium leading-relaxed">We ensure every document is processed exactly once. Our system cross-references the ERP document ID to prevent accidental duplicates or re-branding loops.</p>
+             </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

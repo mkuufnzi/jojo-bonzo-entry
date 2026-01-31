@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Engine | Floovioo</title>
+    <meta name="description" content="Turn data into marketing content. Auto-testimonials, infographics, and social posts.">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="//unpkg.com/alpinejs" defer></script>
+</head>
+<body class="bg-off-white text-slate-600 font-sans antialiased">
+
+    <%- include('../../partials/landing-nav') %>
+
+    <main>
+        <!-- CONTENT ENGINE CAROUSEL -->
+        <%- include('../../partials/components/hero-carousel', {
+            slides: [
+                {
+                    id: 'testimonials',
+                    badge: { text: 'Social Proof', classes: 'bg-purple-50 text-purple-600' },
+                    title: 'Turn Reviews into',
+                    titleHighlight: 'Social Gold.',
+                    titleHighlightColor: 'text-purple-600',
+                    text: 'When a user leaves a 5-star review, automatically generate a beautiful "Quote Card" image branded for LinkedIn/Twitter and email it to your marketing team.',
+                    cta: { text: 'Auto-Generate Assets', link: '/dashboard/content' },
+                    visuals: ['/assets/images/transformation-visual.png', '/assets/images/social-2.jpg', '/assets/images/social-3.jpg']
+                },
+                {
+                    id: 'infographic',
+                    badge: { text: 'Data Storytelling', classes: 'bg-pink-50 text-pink-600' },
+                    title: 'Boring Spreadsheets ->',
+                    titleHighlight: 'Viral Infographics.',
+                    titleHighlightColor: 'text-pink-500',
+                    text: 'Import that ugly "Year in Review" Excel file. Output a stunning, shareable infographic that your customers will actually want to post.',
+                    cta: { text: 'Visualize Data', link: '/dashboard/content/visuals' },
+                    visuals: ['/assets/images/BusinessReportsMockUp.jpeg', '/assets/images/info-2.jpg', '/assets/images/info-3.jpg']
+                },
+                {
+                    id: 'snippets',
+                    badge: { text: 'Content Repurposing', classes: 'bg-yellow-50 text-yellow-600' },
+                    title: 'One Report,',
+                    titleHighlight: 'Ten Pieces of Content.',
+                    titleHighlightColor: 'text-yellow-600',
+                    text: 'Automatically slice a long-form PDF report into 10 social snippets, 3 blog summary images, and an email header.',
+                    cta: { text: 'Start Repurposing', link: '/dashboard/content/repurpose' },
+                    visuals: ['/assets/images/transformation-engine.jpg', '/assets/images/snippet-2.jpg', '/assets/images/snippet-3.jpg']
+                }
+            ]
+        }) %>
+
+         <!-- Feature Grid (Content Specific) -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-extrabold text-deep-ocean sm:text-4xl">
+                    Fill your content calendar automatically.
+                </h2>
+                <div class="mt-12 grid gap-8 grid-cols-1 md:grid-cols-3">
+                    <div class="bg-purple-50 rounded-2xl p-8">
+                        <div class="text-purple-600 font-bold text-xl mb-4">Brand Guardrails</div>
+                        <p>Ensure every social card uses your exact font, hex codes, and logo spacing.</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-2xl p-8">
+                        <div class="text-purple-600 font-bold text-xl mb-4">Multi-Format Export</div>
+                        <p>Generate Square (Insta), Portrait (Stories), and Landscape (LinkedIn) variants instantly.</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-2xl p-8">
+                        <div class="text-purple-600 font-bold text-xl mb-4">Approval Feed</div>
+                        <p>Review auto-generated assets in a Slack channel before they go live.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <%- include('../../partials/footer') %>
+
+</body>
+</html>

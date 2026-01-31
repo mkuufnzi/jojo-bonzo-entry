@@ -1,0 +1,45 @@
+<%
+/*
+  Card Component
+  Props:
+  - title: string
+  - subtitle: string
+  - noPadding: boolean (default: false)
+  - class: string (additional classes)
+  - headerAction: string (HTML for right-side header action)
+*/
+%>
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md <%= locals.class || '' %>">
+    <% if (locals.title) { %>
+    <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+        <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"><%= title %></h3>
+            <% if (locals.subtitle) { %>
+                <p class="text-xs text-slate-500 mt-0.5"><%= subtitle %></p>
+            <% } %>
+        </div>
+        <% if (locals.headerAction) { %>
+            <div><%- headerAction %></div>
+        <% } %>
+    </div>
+    <% } %>
+    
+    <div class="<%= locals.noPadding ? '' : 'p-5' %>">
+        <%- body %> <!-- Usage: <%- include(..., { body: '...' }) %> or passing content as a variable is hard in EJS. 
+                         Better usage is usually: <div class="card">...content...</div> but for partials, 
+                         we might need to wrap content differently or use caller capability if supported, 
+                         but standard EJS doesn't support 'slots' easily. 
+                         
+                         SIMPLER APPROACH: usage via:
+                         <div class="bg-white ..."> <%- include('partials/components/card-header', { title: '...' }) %> ...content... </div>
+                         
+                         OR keep this as a wrapper for simple text content.
+                         For now, this assumes 'body' prop is passed or this is just a structure reference.
+                         -->
+         <!-- ACTUALLY, simpler pattern for EJS: Just Styles. 
+              But let's make this useful for strict layouts. 
+              We will rely on <%- content %> if passed, or user just uses the container classes directly.
+          -->
+         <%- locals.content || '' %>
+    </div>
+</div>

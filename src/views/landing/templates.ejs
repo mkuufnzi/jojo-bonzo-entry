@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floovioo Templates | Branded Document Gallery</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="bg-off-white text-slate-600 font-sans antialiased selection:bg-brand-blue selection:text-white">
+
+    <%- include('../partials/landing-nav') %>
+
+    <main>
+        <!-- Header -->
+        <section class="bg-deep-ocean py-20 text-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 30px 30px;"></div>
+            <div class="max-w-7xl mx-auto px-4 relative z-10">
+                <h1 class="text-4xl font-heading font-bold text-white mb-4">Template Gallery</h1>
+                <p class="text-xl text-slate-300 max-w-2xl mx-auto">Start with a professional baseline. Customize with your brand identity automatically.</p>
+            </div>
+        </section>
+
+        <!-- Gallery Grid -->
+        <section class="py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Filters -->
+                <div class="flex flex-wrap gap-2 justify-center mb-12">
+                    <button class="px-4 py-2 rounded-full bg-brand-blue text-white font-medium shadow-md">All</button>
+                    <button class="px-4 py-2 rounded-full bg-white text-slate-600 font-medium hover:bg-slate-50 border border-slate-200">Invoices</button>
+                    <button class="px-4 py-2 rounded-full bg-white text-slate-600 font-medium hover:bg-slate-50 border border-slate-200">Proposals</button>
+                    <button class="px-4 py-2 rounded-full bg-white text-slate-600 font-medium hover:bg-slate-50 border border-slate-200">Reports</button>
+                    <button class="px-4 py-2 rounded-full bg-white text-slate-600 font-medium hover:bg-slate-50 border border-slate-200">Contracts</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Template Card 1 -->
+                    <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-all overflow-hidden group border border-slate-100">
+                        <div class="h-48 bg-slate-100 relative items-center justify-center flex">
+                            <div class="w-32 h-40 bg-white shadow-lg transform group-hover:scale-105 transition-transform duration-300 flex flex-col p-2">
+                                <div class="w-full h-8 bg-blue-50 mb-2"></div>
+                                <div class="space-y-1">
+                                    <div class="w-full h-1 bg-slate-100"></div>
+                                    <div class="w-2/3 h-1 bg-slate-100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-deep-ocean text-lg">SaaS Invoice</h3>
+                                <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded">Free</span>
+                            </div>
+                            <p class="text-sm text-slate-500 mb-4">Clean, modern invoice template optimized for subscription businesses.</p>
+                            <a href="#" class="block w-full text-center px-4 py-2 border border-brand-blue text-brand-blue font-bold rounded-lg hover:bg-blue-50 transition-colors">Use Template</a>
+                        </div>
+                    </div>
+
+                    <!-- Template Card 2 -->
+                    <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-all overflow-hidden group border border-slate-100">
+                        <div class="h-48 bg-slate-100 relative items-center justify-center flex">
+                             <div class="w-32 h-40 bg-white shadow-lg transform group-hover:scale-105 transition-transform duration-300 flex flex-col p-2">
+                                <div class="w-1/2 h-4 bg-indigo-50 mb-4"></div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="h-12 bg-slate-50"></div>
+                                    <div class="h-12 bg-slate-50"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-deep-ocean text-lg">Agency Proposal</h3>
+                                <span class="px-2 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded">Pro</span>
+                            </div>
+                            <p class="text-sm text-slate-500 mb-4">High-conversion proposal layout with pricing tables and signature block.</p>
+                            <a href="#" class="block w-full text-center px-4 py-2 border border-brand-blue text-brand-blue font-bold rounded-lg hover:bg-blue-50 transition-colors">Use Template</a>
+                        </div>
+                    </div>
+
+                     <!-- Template Card 3 -->
+                    <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-all overflow-hidden group border border-slate-100">
+                        <div class="h-48 bg-slate-100 relative items-center justify-center flex">
+                             <div class="w-32 h-40 bg-white shadow-lg transform group-hover:scale-105 transition-transform duration-300 flex flex-col p-2">
+                                <div class="w-full h-2 bg-slate-200 mb-2"></div>
+                                <div class="space-y-2 mt-4">
+                                    <div class="w-full h-1 bg-slate-100"></div>
+                                    <div class="w-full h-1 bg-slate-100"></div>
+                                    <div class="w-full h-1 bg-slate-100"></div>
+                                    <div class="w-full h-1 bg-slate-100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-deep-ocean text-lg">Legal Contract</h3>
+                                <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded">Free</span>
+                            </div>
+                            <p class="text-sm text-slate-500 mb-4">Standard service agreement with clean typography and numbering.</p>
+                            <a href="#" class="block w-full text-center px-4 py-2 border border-brand-blue text-brand-blue font-bold rounded-lg hover:bg-blue-50 transition-colors">Use Template</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-16 bg-slate-50 border-t border-slate-200 text-center">
+            <h2 class="text-2xl font-bold text-deep-ocean mb-4">Don't see what you need?</h2>
+            <p class="text-slate-500 mb-8 max-w-xl mx-auto">Our engine supports any HTML/CSS layout. You can build your own templates from scratch.</p>
+            <a href="/docs" class="text-brand-blue font-bold hover:underline">Read the Documentation &rarr;</a>
+        </section>
+
+    </main>
+
+    <%- include('../partials/footer') %>
+
+</body>
+</html>

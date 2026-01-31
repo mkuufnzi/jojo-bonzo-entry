@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - Admin</title>
+    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md text-center">
+        <div class="bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700 p-8">
+            <div class="inline-block bg-red-500/10 p-4 rounded-full mb-4">
+                <svg class="h-16 w-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+
+            <h1 class="text-3xl font-bold text-white mb-2">Access Denied</h1>
+            <p class="text-slate-400 mb-6">
+                <%= typeof message !== 'undefined' ? message : 'You do not have permission to access this resource.' %>
+            </p>
+
+            <div class="flex gap-3">
+                <a href="/admin" class="flex-1 bg-gradient-to-r from-red-600 to-amber-600 text-white font-semibold py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition-all duration-200">
+                    Back to Dashboard
+                </a>
+                <a href="/admin/login" class="flex-1 bg-slate-700 text-white font-semibold py-3 rounded-lg hover:bg-slate-600 transition-all duration-200">
+                    Login
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <a href="/" class="text-slate-400 hover:text-white text-sm transition-colors duration-200 flex items-center justify-center gap-2">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Application
+            </a>
+        </div>
+    </div>
+</body>
+</html>

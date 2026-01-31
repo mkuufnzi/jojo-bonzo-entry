@@ -1,0 +1,119 @@
+<%- include('../../partials/head', { title: 'Manage Services - Admin Console' }) %>
+
+<body class="bg-slate-50 min-h-screen font-sans">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../../partials/dashboard-header', {title: 'Manage Services', user: user }) %>
+
+        <div class="flex-1 overflow-hidden relative">
+            <div class="grid grid-cols-12 h-full">
+                
+                <!-- LEFT: Main Content -->
+                <div class="col-span-12 lg:col-span-9 h-full overflow-y-auto p-6 pb-32 custom-scrollbar">
+                    <div class="max-w-6xl mx-auto space-y-6">
+                        <div class="flex justify-between items-center">
+                            <h1 class="text-2xl font-bold text-slate-900">Registered Services</h1>
+                            <form action="/admin/services/sync" method="POST">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="h-4 w-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    Sync / Refresh
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-200">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Service Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Slug</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Apps Connected</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Usage (Logs)</th>
+                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-slate-200">
+                                        <% if (services.length === 0) { %>
+                                            <tr>
+                                                <td colspan="6" class="px-6 py-8 text-center text-slate-500 text-sm italic">
+                                                    No services found.
+                                                </td>
+                                            </tr>
+                                        <% } %>
+                                        
+                                        <% services.forEach(service => { %>
+                                            <tr class="hover:bg-slate-50 transition-colors">
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-slate-100 rounded-lg text-slate-500">
+                                                            <%- include('../../partials/service-icon', { service: service, type: 'sidebar' }) %>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <div class="text-sm font-bold text-slate-900"><%= service.name %></div>
+                                                            <div class="text-xs text-slate-500 truncate max-w-[15rem]"><%= service.description || 'No description' %></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <code class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono"><%= service.slug %></code>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <% if (service.isActive) { %>
+                                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800 uppercase tracking-wider">Active</span>
+                                                    <% } else { %>
+                                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-red-100 text-red-800 uppercase tracking-wider">Inactive</span>
+                                                    <% } %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">
+                                                    <%= service._count ? service._count.apps : 0 %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">
+                                                    <%= service._count ? service._count.logs : 0 %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <a href="/admin/services/<%= service.id %>/edit" class="text-blue-600 hover:text-blue-900 font-bold hover:underline">Configure</a>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Help Guide Panel (Fixed) -->
+                <div class="hidden lg:block col-span-3 border-l border-slate-200 bg-white h-full relative z-10 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
+                    <div id="helpGuideContent" class="h-full">
+                        <!-- Loaded via JS -->
+                        <div class="flex items-center justify-center h-full text-slate-400 text-sm animate-pulse">
+                            Loading Guide...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <%- include('../../partials/sidebar-script') %>
+
+    <script nonce="<%= nonce %>">
+        // Load Help Guide on Mount
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/help/services-list-guide.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('helpGuideContent').innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Failed to load help guide:', err);
+                    document.getElementById('helpGuideContent').innerHTML = '<div class="p-6 text-red-500">Failed to load guide.</div>';
+                });
+        });
+    </script>
+</body>
+</html>

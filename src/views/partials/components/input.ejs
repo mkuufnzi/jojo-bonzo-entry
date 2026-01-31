@@ -1,0 +1,57 @@
+<%
+/*
+  Input Component
+  Props:
+  - name: string
+  - label: string
+  - type: string (default: 'text')
+  - value: string
+  - placeholder: string
+  - error: string
+  - hint: string
+  - required: boolean
+  - icon: string (Lucide icon name)
+  - class: string
+  - id: string (default: name)
+*/
+%>
+<div class="<%= locals.class || 'mb-4' %>">
+    <% if (locals.label) { %>
+        <label for="<%= locals.id || name %>" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+            <%= label %>
+            <% if (locals.required) { %><span class="text-red-500">*</span><% } %>
+        </label>
+    <% } %>
+    
+    <div class="relative">
+        <% if (locals.icon) { %>
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i data-lucide="<%= icon %>" class="h-4 w-4 text-slate-400"></i>
+            </div>
+        <% } %>
+        
+        <input 
+            type="<%= locals.type || 'text' %>" 
+            name="<%= name %>" 
+            id="<%= locals.id || name %>" 
+            value="<%= locals.value || '' %>"
+            class="block w-full rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 sm:text-sm <%= locals.icon ? 'pl-10' : 'pl-3' %> py-2.5 transition-colors <%= locals.error ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '' %>"
+            placeholder="<%= locals.placeholder || '' %>"
+            <%= locals.required ? 'required' : '' %>
+            <%= locals.readonly ? 'readonly' : '' %>
+            <%= locals.disabled ? 'disabled' : '' %>
+        >
+        
+        <% if (locals.error) { %>
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <i data-lucide="alert-circle" class="h-4 w-4 text-red-500"></i>
+            </div>
+        <% } %>
+    </div>
+    
+    <% if (locals.error) { %>
+        <p class="mt-1 text-xs text-red-600 font-medium animate-pulse"><%= error %></p>
+    <% } else if (locals.hint) { %>
+        <p class="mt-1 text-xs text-slate-500"><%= hint %></p>
+    <% } %>
+</div>

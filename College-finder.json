@@ -1,0 +1,215 @@
+{
+  "name": "Kenya College Course Miner & Caching System",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "expression": "1"
+            }
+          ]
+        }
+      },
+      "id": "7f6e5d4c-3b2a-1f0e-9d8c-7b6a5e4d3c2b",
+      "name": "Weekly Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "q": "site:kuccps.net list of colleges and universities in kenya 2026",
+        "limit": 10
+      },
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+      "name": "Brave Search - College List",
+      "type": "n8n-nodes-base.braveSearch",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.all();\nconst institutions = [];\n// Strategy: Extract primary domains for institutions to avoid deep-link spam\nreturn results.map(item => ({\n  json: {\n    college_name: item.json.title.split('-')[0].trim(),\n    source_url: item.json.url,\n    base_domain: new URL(item.json.url).origin\n  }\n}));"
+      },
+      "id": "b1c2d3e4-f5g6-h7i8-j9k0-l1m2n3o4p5q6",
+      "name": "Map Search Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": "Institutions_Master",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Institution Name": "={{ $json.college_name }}",
+            "Website": "={{ $json.base_domain }}",
+            "Last Scraped": "={{ $now }}",
+            "Status": "Pending"
+          }
+        }
+      },
+      "id": "c1d2e3f4-g5h6-i7j8-k9l0-m1n2o3p4q5r6",
+      "name": "Cache Institution Meta",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.base_domain }}",
+        "options": {
+          "responseFormat": "string"
+        }
+      },
+      "id": "d1e2f3g4-h5i6-j7k8-l9m0-n1o2p3q4r5s6",
+      "name": "Scrape Homepage Links",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "extractionValues": {
+          "values": [
+            {
+              "key": "deep_links",
+              "cssSelector": "a",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        }
+      },
+      "id": "e1f2g3h4-i5j6-k7l8-m9n0-o1p2q3r4s5t6",
+      "name": "Identify Deep Links",
+      "type": "n8n-nodes-base.htmlExtract",
+      "typeVersion": 1,
+      "position": [1400, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const links = $input.all()[0].json.deep_links;\nconst keywords = ['course', 'program', 'fee', 'requirement', 'admission', 'brochure', '.pdf'];\nconst filtered = links.filter(link => \n  keywords.some(k => link.toLowerCase().includes(k))\n).map(link => {\n  if (link.startsWith('/')) return { json: { url: $node[\"Map Search Results\"].json.base_domain + link } };\n  return { json: { url: link } };\n});\nreturn filtered;"
+      },
+      "id": "f1g2h3i4-j5k6-l7m8-n9o0-p1q2r3s4t5u6",
+      "name": "Filter Relevant Links",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1600, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.url }}",
+              "operation": "endsWith",
+              "value2": ".pdf"
+            }
+          ]
+        }
+      },
+      "id": "g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6",
+      "name": "Is PDF?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1800, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "responseFormat": "file"
+        }
+      },
+      "id": "h1i2j3k4-l5m6-n7o8-p9q0-r1s2t3u4v5w6",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2000, 200]
+    },
+    {
+      "parameters": {
+        "fileContent": "={{ $binary.data }}",
+        "fileName": "={{ $node[\"Map Search Results\"].json.college_name }}_{{ $now.format('yyyy-MM-dd') }}.pdf",
+        "parentFolder": "YOUR_DRIVE_FOLDER_ID"
+      },
+      "id": "i1j2k3l4-m5n6-o7p8-q9r0-s1t2u3v4w5x6",
+      "name": "Save to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2200, 200]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": "Course_Data",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "College": "={{ $node[\"Map Search Results\"].json.college_name }}",
+            "Program Name": "Pending Extraction",
+            "Requirement": "Pending LLM Processing",
+            "Tuition Fee": "0",
+            "Doc Link": "={{ $json.webViewLink }}"
+          }
+        }
+      },
+      "id": "j1k2l3m4-n5o6-p7q8-r9s0-t1u2v3w4x5y6",
+      "name": "Log to Database",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [2400, 200]
+    }
+  ],
+  "connections": {
+    "Weekly Trigger": {
+      "main": [[{ "node": "Brave Search - College List", "type": "main", "index": 0 }]]
+    },
+    "Brave Search - College List": {
+      "main": [[{ "node": "Map Search Results", "type": "main", "index": 0 }]]
+    },
+    "Map Search Results": {
+      "main": [[{ "node": "Cache Institution Meta", "type": "main", "index": 0 }]]
+    },
+    "Cache Institution Meta": {
+      "main": [[{ "node": "Scrape Homepage Links", "type": "main", "index": 0 }]]
+    },
+    "Scrape Homepage Links": {
+      "main": [[{ "node": "Identify Deep Links", "type": "main", "index": 0 }]]
+    },
+    "Identify Deep Links": {
+      "main": [[{ "node": "Filter Relevant Links", "type": "main", "index": 0 }]]
+    },
+    "Filter Relevant Links": {
+      "main": [[{ "node": "Is PDF?", "type": "main", "index": 0 }]]
+    },
+    "Is PDF?": {
+      "main": [
+        [{ "node": "Download PDF", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Download PDF": {
+      "main": [[{ "node": "Save to Drive", "type": "main", "index": 0 }]]
+    },
+    "Save to Drive": {
+      "main": [[{ "node": "Log to Database", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {}
+}

@@ -1,0 +1,269 @@
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+:root {
+    --sidebar-width-collapsed: 5rem;     /* 80px - rail mode */
+    --sidebar-width-expanded: 18rem;     /* 288px - full width */
+    --sidebar-width-mobile: 16rem;       /* 256px - mobile overlay */
+    --sidebar-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-z-index: 50;
+    --sidebar-overlay-z-index: 40;
+}
+
+/* ============================================
+   BASE SIDEBAR STYLES
+   ============================================ */
+#sidebar {
+    position: fixed;
+    inset-block: 0;     /* top: 0; bottom: 0 */
+    inset-inline-start: 0;  /* left: 0 */
+    z-index: var(--sidebar-z-index);
+    display: flex;
+    flex-direction: column;
+    transition: 
+        width var(--sidebar-transition),
+        transform var(--sidebar-transition);
+    
+    /* Mobile: full width when open, hidden by default */
+    width: var(--sidebar-width-mobile);
+    transform: translateX(-100%);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   MOBILE: OVERLAY MODE (< 768px)
+   ============================================ */
+#sidebar[data-mobile-open="true"] {
+    transform: translateX(0);
+}
+
+/* Prevent body scroll when mobile sidebar open */
+body[data-sidebar-mobile-open="true"] {
+    overflow: hidden;
+}
+
+/* Mobile overlay backdrop */
+#sidebarOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: var(--sidebar-overlay-z-index);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--sidebar-transition), visibility var(--sidebar-transition);
+}
+
+#sidebarOverlay[data-visible="true"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ============================================
+   TABLET: RAIL MODE (768px - 1023px)
+   ============================================ */
+@media (min-width: 768px) {
+    #sidebar {
+        width: var(--sidebar-width-collapsed);
+        transform: translateX(0);
+        box-shadow: none;
+        overflow: hidden;
+    }
+    
+    /* Hide text labels in rail mode */
+    #sidebar .sidebar-text {
+        display: none !important;
+    }
+    
+    /* Center nav items */
+    #sidebar .nav-container {
+        padding-inline: 0.5rem;
+    }
+    
+    #sidebar .header-row {
+        justify-content: center;
+    }
+    
+    #sidebar a,
+    #sidebar button,
+    #sidebar summary {
+        justify-content: center;
+    }
+    
+    /* Hide overlay on tablet+ */
+    #sidebarOverlay {
+        display: none;
+    }
+}
+
+/* ============================================
+   DESKTOP: FULL WIDTH + TOGGLE (>= 1024px)
+   ============================================ */
+@media (min-width: 1024px) {
+    #sidebar {
+        width: var(--sidebar-width-expanded);
+        overflow: visible;
+    }
+    
+    /* Show text labels on desktop */
+    #sidebar .sidebar-text {
+        display: block !important;
+    }
+    
+    /* Reset alignments */
+    #sidebar .nav-container {
+        padding-inline: 0.75rem;
+    }
+    
+    #sidebar .header-row {
+        justify-content: flex-start;
+    }
+    
+    #sidebar a,
+    #sidebar button,
+    #sidebar summary {
+        justify-content: flex-start;
+    }
+    
+    /* COLLAPSED STATE ON DESKTOP */
+    #sidebar[data-collapsed="true"] {
+        width: var(--sidebar-width-collapsed);
+        overflow: hidden;
+    }
+    
+    #sidebar[data-collapsed="true"] .sidebar-text {
+        display: none !important;
+    }
+    
+    #sidebar[data-collapsed="true"] .nav-container {
+        padding-inline: 0.5rem;
+    }
+    
+    /* Header layout fix for collapsed state */
+    #sidebar[data-collapsed="true"] .header-row {
+        position: relative;
+        justify-content: space-between !important;
+        padding-inline: 0.5rem !important;
+    }
+    
+    #sidebar[data-collapsed="true"] #toggleSidebar {
+        position: static;
+        margin-left: 0;
+        transform: none;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    #sidebar[data-collapsed="true"] .header-row > div:first-child {
+        margin-right: 0;
+    }
+    
+    #sidebar[data-collapsed="true"] a,
+    #sidebar[data-collapsed="true"] button:not(#toggleSidebar),
+    #sidebar[data-collapsed="true"] summary {
+        justify-content: center;
+    }
+    
+    /* Rotate collapse icon when collapsed */
+    #sidebar[data-collapsed="true"] #collapseIcon {
+        transform: rotate(180deg);
+    }
+}
+
+/* ============================================
+   MAIN CONTENT MARGIN ADJUSTMENT
+   ============================================ */
+#mainContent {
+    transition: margin-inline-start var(--sidebar-transition);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin-inline-start: 0; /* Mobile default */
+}
+
+@media (min-width: 768px) {
+    #mainContent {
+        margin-inline-start: var(--sidebar-width-collapsed);
+    }
+}
+
+@media (min-width: 1024px) {
+    #mainContent {
+        margin-inline-start: var(--sidebar-width-expanded);
+    }
+    
+    body[data-sidebar-collapsed="true"] #mainContent {
+        margin-inline-start: var(--sidebar-width-collapsed);
+    }
+}
+
+/* ============================================
+   TOOLTIPS
+   ============================================ */
+.sidebar-tooltip {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: #0f172a;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 150ms, visibility 150ms;
+    z-index: 100;
+    pointer-events: none;
+    display: none; /* Hidden by default mobile */
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .sidebar-tooltip { display: block; }
+    #sidebar a:hover .sidebar-tooltip,
+    #sidebar button:hover .sidebar-tooltip {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+@media (min-width: 1024px) {
+    #sidebar[data-collapsed="true"] .sidebar-tooltip { display: block; }
+    #sidebar[data-collapsed="true"] a:hover .sidebar-tooltip,
+    #sidebar[data-collapsed="true"] button:hover .sidebar-tooltip {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    #sidebar[data-collapsed="true"] .sidebar-active-indicator {
+        display: none;
+    }
+    
+    #sidebar[data-collapsed="true"] .sidebar-divider {
+        display: block;
+    }
+}
+
+/* Hide scrollbar but allow scrolling */
+#sidebar .nav-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#sidebar .nav-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Focus styles */
+#sidebar a:focus-visible,
+#sidebar button:focus-visible,
+#sidebar summary:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}

@@ -1,0 +1,216 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto" x-data="{ activeTab: '<%= filters.tab || 'usage' %>' }">
+    <!-- Header -->
+    <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-3xl font-heading font-bold text-slate-900 tracking-tight">Billing</h2>
+            <p class="mt-2 text-slate-500">Manage invoices, payment methods, and resource usage.</p>
+        </div>
+        <div class="flex items-center gap-4 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+             <button @click="activeTab = 'usage'" :class="activeTab === 'usage' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'" class="px-5 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-widest">Usage</button>
+             <button @click="activeTab = 'payment-methods'" :class="activeTab === 'payment-methods' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'" class="px-5 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-widest">Methods</button>
+             <button @click="activeTab = 'invoices'" :class="activeTab === 'invoices' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'" class="px-5 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-widest">History</button>
+        </div>
+    </div>
+
+    <!-- Usage Content -->
+    <div x-show="activeTab === 'usage'" x-transition:enter="transition-opacity duration-200" class="space-y-6">
+        <!-- Billing Overview Card -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 bg-blue-50 text-brand-blue rounded-3xl flex items-center justify-center shadow-inner scale-110">
+                        <i data-lucide="wallet" class="w-10 h-10"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900"><%= planName %> Strategy</h3>
+                        <p class="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Cycle: <%= new Date().toLocaleString('default', { month: 'long' }) %> <%= new Date().getFullYear() %></p>
+                    </div>
+                </div>
+                
+                <div class="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-8 border-l border-slate-100 pl-12">
+                    <div>
+                        <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Base Plan</p>
+                        <p class="text-3xl font-black text-slate-900"><%= currency === 'GBP' ? '£' : '$' %><%= planPrice.toFixed(0) %></p>
+                    </div>
+                    <div>
+                        <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Usage</p>
+                        <p class="text-3xl font-black text-slate-900"><%= currency === 'GBP' ? '£' : '$' %><%= usageCost.toFixed(2) %></p>
+                    </div>
+                    <div class="lg:col-span-1 col-span-2 bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Estimated Total</p>
+                            <p class="text-3xl font-black text-brand-blue"><%= currency === 'GBP' ? '£' : '$' %><%= (planPrice + usageCost).toFixed(2) %></p>
+                        </div>
+                        <i data-lucide="info" class="w-5 h-5 text-slate-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="file-check" class="w-4 h-4 text-blue-600"></i>
+                        PDF Conversion Quota
+                    </h3>
+                    <span class="text-sm font-bold text-slate-400"><%= pdfUsage %> / <%= pdfQuota === -1 ? '∞' : pdfQuota %></span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-2">
+                    <% const pdfPct = pdfQuota === -1 ? 0 : Math.min((pdfUsage / pdfQuota) * 100, 100); %>
+                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-1000" style="width: <%- pdfPct %>%;"></div>
+                </div>
+                <p class="text-[0.625rem] font-bold text-blue-600 uppercase tracking-widest">Translation Engine</p>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+                        AI Generation Quota
+                    </h3>
+                    <span class="text-sm font-bold text-slate-400"><%= aiUsage %> / <%= aiQuota === -1 ? '∞' : aiQuota %></span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-2">
+                    <% const aiPct = aiQuota === -1 ? 0 : Math.min((aiUsage / aiQuota) * 100, 100); %>
+                    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-1000" style="width: <%- aiPct %>%;"></div>
+                </div>
+                <p class="text-[0.625rem] font-bold text-indigo-600 uppercase tracking-widest">Cognitive Services</p>
+            </div>
+        </div>
+
+        <!-- Breakdown Table -->
+        <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+             <div class="p-6 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="activity" class="w-4 h-4 text-slate-400"></i>
+                    Usage by Service
+                </h3>
+             </div>
+             <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-100">
+                    <thead class="bg-slate-50/50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Service</th>
+                            <th class="px-6 py-4 text-center text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Requests</th>
+                            <th class="px-6 py-4 text-right text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Total Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        <% if (usageBreakdown.length === 0) { %>
+                             <tr><td colspan="3" class="px-6 py-12 text-center text-slate-400 font-bold uppercase text-xs">No protocol activity detected</td></tr>
+                        <% } %>
+                        <% usageBreakdown.forEach(svc => { %>
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3 font-bold text-slate-700 underline decoration-slate-200 decoration-2 underline-offset-8">
+                                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        <%= svc.name %>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center text-slate-500 font-bold"><%= svc.count %></td>
+                                <td class="px-6 py-4 text-right">
+                                    <span class="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-mono font-bold">
+                                        <%= currency === 'GBP' ? '£' : '$' %><%= svc.cost.toFixed(4) %>
+                                    </span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+             </div>
+        </div>
+    </div>
+
+    <!-- Methods Content -->
+    <div x-show="activeTab === 'payment-methods'" x-transition:enter="transition-opacity duration-200" class="space-y-6">
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-8">
+                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i>
+                    Payment Methods
+                </h3>
+                <a href="/billing/payment-methods/create" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-lg transition-all flex items-center">
+                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                    Add Endpoint
+                </a>
+            </div>
+            
+            <% if (paymentMethods.length === 0) { %>
+                 <div class="text-center py-16 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100">
+                    <p class="text-slate-400 font-bold uppercase text-xs">No active payment methods found</p>
+                 </div>
+            <% } else { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <% paymentMethods.forEach(method => { %>
+                        <div class="p-6 bg-white border border-slate-200 rounded-2xl flex items-center justify-between hover:border-brand-blue transition-all group shadow-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-brand-blue transition-colors">
+                                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900 uppercase tracking-tight">
+                                        <%= method.provider === 'mock' ? 'SECURE_NODE' : method.provider.toUpperCase() %> •••• <%= method.last4 %>
+                                    </p>
+                                    <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-1">VAL_EXP: <span class="text-slate-900"><%= method.expiry %></span></p>
+                                </div>
+                            </div>
+                            
+                            <% if (method.isDefault) { %>
+                                <span class="px-2 py-1 bg-blue-50 text-brand-blue border border-blue-100 rounded-lg text-[0.625rem] font-bold uppercase tracking-widest">Primary</span>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- History Content -->
+    <div x-show="activeTab === 'invoices'" x-transition:enter="transition-opacity duration-200" class="space-y-6">
+        <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+             <div class="p-6 border-b border-slate-100 bg-slate-50/30">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
+                    Invoice History
+                </h3>
+             </div>
+             <table class="min-w-full divide-y divide-slate-100">
+                <thead class="bg-slate-50/50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Timestamp</th>
+                        <th class="px-6 py-4 text-left text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Package</th>
+                        <th class="px-6 py-4 text-center text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Amount</th>
+                        <th class="px-6 py-4 text-right text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Document</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    <% if (invoices.length === 0) { %>
+                         <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold uppercase text-xs">No billing history found</td></tr>
+                    <% } %>
+                    <% invoices.forEach(invoice => { %>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-medium text-slate-500"><%= new Date(invoice.createdAt).toLocaleDateString() %></td>
+                            <td class="px-6 py-4 text-sm font-bold text-slate-900 uppercase tracking-tight"><%= invoice.subscription?.plan?.name || 'On-Demand' %></td>
+                            <td class="px-6 py-4 text-center font-mono font-bold text-slate-900"><%= currency === 'GBP' ? '£' : '$' %><%= invoice.amount.toFixed(2) %></td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="/billing/invoices/<%= invoice.id %>/download" class="p-2 text-brand-blue hover:bg-blue-50 rounded-lg transition-colors inline-block">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+             </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

@@ -1,0 +1,76 @@
+<% 
+    // Ensure connectedApps exists, fallback to empty array
+    const apps = typeof connectedApps !== 'undefined' ? connectedApps : [];
+    const activeConnectedApps = apps.filter(ca => ca.app.isActive); 
+%>
+<% if (activeConnectedApps.length === 0) { %>
+    <div class="text-center py-8">
+        <p class="text-gray-500 mb-2">No apps are currently connected to this service.</p>
+        <a href="/apps" class="text-blue-600 hover:underline text-sm">Go to Apps Dashboard to connect an app</a>
+    </div>
+<% } %>
+<div class="space-y-4">
+    <% activeConnectedApps.forEach(item => { 
+        const app = item.app;
+    %>
+    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <div>
+            <h3 class="font-semibold text-gray-900"><%= app.name %></h3>
+            <p class="text-xs text-gray-500 font-mono">ID: <%= app.id %></p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" class="sr-only peer app-toggle" 
+                data-app-id="<%= app.id %>" 
+                <%= item.isEnabled ? 'checked' : '' %>>
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[0.125rem] after:left-[0.125rem] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <span class="ml-3 text-sm font-medium text-gray-900"><%= item.isEnabled ? 'Enabled' : 'Disabled' %></span>
+        </label>
+    </div>
+    <% }); %>
+</div>
+</div>
+<script nonce="<%= nonce %>">
+    document.querySelectorAll('.app-toggle').forEach(toggle => {
+        toggle.addEventListener('change', async (e) => {
+            const appId = e.target.dataset.appId;
+            const isEnabled = e.target.checked;
+            const statusLabel = e.target.parentElement.querySelector('span');
+            
+            // Resolve Slug safely (Backend provides service.slug or serviceSlug)
+            const serviceSlug = '<%= (locals.service && locals.service.slug) ? locals.service.slug : (locals.serviceSlug || "ai-doc-generator") %>';
+
+            // Optimistic UI Update
+            if (statusLabel) statusLabel.textContent = isEnabled ? 'Enabled' : 'Disabled';
+
+            try {
+                const res = await fetch(`/services/${serviceSlug}/toggle-app`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ appId, enabled: isEnabled })
+                });
+
+                if (!res.ok) throw new Error('Failed to toggle');
+
+                // Notify Workspace (Fate of the World Requirement)
+                const currentAppId = document.getElementById('generatorAppId')?.value;
+                if (currentAppId === appId) {
+                    // Dispatch Custom Event for ai-doc-generator.ejs to catch
+                    window.dispatchEvent(new CustomEvent('service-access-changed', { 
+                        detail: { appId, enabled: isEnabled } 
+                    }));
+                }
+                
+                if (window.showToast) window.showToast('Success', `App Access ${isEnabled ? 'Enabled' : 'Disabled'}`, 'success');
+
+            } catch (error) {
+                console.error('Toggle Error:', error);
+                e.target.checked = !isEnabled; // Revert
+                if (statusLabel) statusLabel.textContent = !isEnabled ? 'Enabled' : 'Disabled';
+                if (window.showToast) window.showToast('Error', 'Failed to update app status', 'error');
+            }
+        });
+    });
+</script>

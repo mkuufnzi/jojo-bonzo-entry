@@ -1,0 +1,36 @@
+FAIL src/tests/unit/qbo.provider.test.ts
+  QBOProvider
+    initialize
+      ΓêÜ should properly set baseUrl and realmId form metadata (3 ms)
+      ΓêÜ should use sandbox url by default (2 ms)
+    getContacts
+      ΓêÜ should fetch customers using correct query (4 ms)
+      ΓêÜ should handle empty response gracefully (1 ms)
+    getItems
+      ├ù should fetch items (Inventory/Service) using correct query (4 ms)
+
+  ΓùÅ QBOProvider ΓÇ║ getItems ΓÇ║ should fetch items (Inventory/Service) using correct query
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: StringContaining "select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory',%20'Service')", Anything
+    Received: "https://sandbox-quickbooks.api.intuit.com/v3/company/realm_123/query?query=select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory'%2C%20'Service')%20MAXRESULTS%20100", {"headers": {"Accept": "application/json", "Authorization": "Bearer valid_token", "Content-Type": "application/json"}}
+
+    Number of calls: 1
+
+      109 |             const items = await provider.getItems();
+      110 |
+    > 111 |             expect(mockFetch).toHaveBeenCalledWith(
+          |                               ^
+      112 |                 expect.stringContaining("select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory',%20'Service')"),
+      113 |                 expect.anything()
+      114 |             );
+
+      at Object.<anonymous> (src/tests/unit/qbo.provider.test.ts:111:31)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 4 passed, 5 total
+Snapshots:   0 total
+Time:        4.49 s, estimated 5 s
+Ran all test suites matching src/tests/unit/qbo.provider.test.ts.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

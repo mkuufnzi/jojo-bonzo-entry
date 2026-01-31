@@ -1,0 +1,72 @@
+/* ============================================
+   HTML to PDF Service Styles
+   ============================================ */
+
+.nav-tab-active {
+    border-bottom-color: #3b82f6;
+    color: #1e3a8a;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.subtle-grid {
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Preview Canvas - Paper Dimensions & Aspect Ratios */
+#previewCanvasArea {
+    transform-origin: top center;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease, aspect-ratio 0.3s ease;
+    max-width: 100%;
+    height: auto;
+}
+
+/* A4 Portrait: 210mm x 297mm → aspect-ratio ~0.707 (1 / √2) */
+#previewCanvasArea[data-format="A4"][data-landscape="false"] {
+    width: 794px;
+    aspect-ratio: 210 / 297;
+}
+
+/* A4 Landscape */
+#previewCanvasArea[data-format="A4"][data-landscape="true"] {
+    width: 1123px;
+    aspect-ratio: 297 / 210;
+}
+
+/* Letter Portrait: 8.5" x 11" */
+#previewCanvasArea[data-format="Letter"][data-landscape="false"] {
+    width: 816px;
+    aspect-ratio: 8.5 / 11;
+}
+
+/* Letter Landscape */
+#previewCanvasArea[data-format="Letter"][data-landscape="true"] {
+    width: 1056px;
+    aspect-ratio: 11 / 8.5;
+}
+
+/* Legal Portrait: 8.5" x 14" */
+#previewCanvasArea[data-format="Legal"][data-landscape="false"] {
+    width: 816px;
+    aspect-ratio: 8.5 / 14;
+}
+
+/* Legal Landscape */
+#previewCanvasArea[data-format="Legal"][data-landscape="true"] {
+    width: 1344px;
+    aspect-ratio: 14 / 8.5;
+}
+
+/* Ensure iframe fills the canvas area height */
+#previewCanvasArea #htmlPreviewIframe {
+    min-height: 100%;
+    height: 100%;
+}

@@ -1,0 +1,3826 @@
+{
+  "name": "Floovioo Tools - [AI Document Generator] (Jan 5 at 08:14:35)",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e3ff2df-4b62-4a3d-a815-0cf37db95a30",
+              "name": "user_prompt",
+              "value": "={{ {...$json.user_prompt, userId: $now.toMillis()} }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6416,
+        -224
+      ],
+      "id": "6fb93a9f-0e9e-4d5a-91dc-e7a825635251",
+      "name": "validate request data"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 10000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -5872,
+        336
+      ],
+      "id": "bc2c1206-4f04-4e45-b9af-8ecfbfb31395",
+      "name": "Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BdG760hmanllJt9P",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=afs-tools:saas:tool-use:ai-document-generator:userId: {{ $('user_prompt').item.json.user_prompt.userId }}:content-output",
+        "contextWindowLength": 1000
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -5440,
+        1232
+      ],
+      "id": "397106da-d909-4ca6-8381-e61546b120f2",
+      "name": "Redis Chat Memory1",
+      "credentials": {
+        "redis": {
+          "id": "lm4HhjzaLU2EFToo",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "bpma_afs_tools_schema",
+          "mode": "list",
+          "cachedResultName": "bpma_afs_tools_schema"
+        },
+        "table": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Table', ``, 'string') }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -5488,
+        336
+      ],
+      "id": "af6be084-9496-46db-9d33-4d1f62592ad5",
+      "name": "Insert rows in a table in Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "G5dbV0qx1KkCXaAR",
+          "name": "BPMA Floovioo Tools Admin"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a2bb665-9077-465c-93db-67300ffce9c8",
+              "name": "error",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5200,
+        272
+      ],
+      "id": "9a087971-4e31-488f-a204-cc282f2eb42b",
+      "name": "generation error"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.success }}\n{{ $json.error }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -5008,
+        272
+      ],
+      "id": "42841225-7974-4a2d-a6a0-41b6b826a21f",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3f0b4ac2-4b8c-4620-abb9-afc830c6bbf2",
+              "leftValue": "={{ $json }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -6064,
+        -224
+      ],
+      "id": "c8b8176c-6d49-4d8a-98f7-10ace9caf470",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  json: {\n    user_prompt: $input.first().json.body ||\n      $input.first().json || {\n        prompt: \"The user prompt is empty. Do not proceed. STOP!\",\n        context: \"This is a broken user request - stop generation immediately!\",\n        documentType: \"random\",\n        action: \"analyze\",\n        summary: $input.first().json.body.summary,\n      },\n\n    createdAt: $now,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6624,
+        -224
+      ],
+      "id": "6e2fe852-90d9-4e64-ab85-e84823717bd1",
+      "name": "user_prompt"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"success\": false,\n  \"error\": \"Error description\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5120,
+        1152
+      ],
+      "id": "da79814b-45dc-4ee7-853c-6d41e1bfd7ef",
+      "name": "generation error1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ JSON.stringify($json) }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -4944,
+        1152
+      ],
+      "id": "7f60b818-4926-4dce-aa6a-16f479af92b6",
+      "name": "Stop and Error1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "T733tiGrS7vSlotK",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/T733tiGrS7vSlotK",
+          "cachedResultName": "Floovioo n8n Automation API Event Notifier"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "apiEvent": "={{ $json }}"
+          },
+          "matchingColumns": [
+            "apiEvent"
+          ],
+          "schema": [
+            {
+              "id": "apiEvent",
+              "displayName": "apiEvent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -3984,
+        1888
+      ],
+      "id": "c6b19ec0-978e-4e2c-b377-d6cf53c1cdc9",
+      "name": "Call 'My workflow 2'",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://bpma-afs-tools.automation-for-smes.com/api/v1/executions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkNDc0ZWFkYS00NTIzLTQwNTYtYTc1Yi0xOTYzYzFjMTliNWUiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY3MzAxMTM4LCJleHAiOjE3Njk4MTc2MDB9.lfLFhi-BOflMmH4AnKhAVm33R9ADhHuGiICV2U19bGA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -6064,
+        1888
+      ],
+      "id": "09a1b9a9-07d8-4efd-9832-8a101fdc09d4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=https://bpma-afs-tools.automation-for-smes.com/api/v1/executions/{{ $json.data.first().id }}?includeData=true",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkNDc0ZWFkYS00NTIzLTQwNTYtYTc1Yi0xOTYzYzFjMTliNWUiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY3MzAxMTM4LCJleHAiOjE3Njk4MTc2MDB9.lfLFhi-BOflMmH4AnKhAVm33R9ADhHuGiICV2U19bGA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -5840,
+        1888
+      ],
+      "id": "ff852f0c-5b12-48d1-8448-2aa11025a828",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const execution = $input.first().json;\nconst runData = execution.data.resultData.runData;\n\nlet logs = [];\nlet modelUsage = {};\nlet totalInputTokens = 0;\nlet totalOutputTokens = 0;\n\n/**\n * Helper to safely extract node data\n */\nconst getNodesByType = (nodeName) => runData[nodeName] || [];\n\n// 1. TRACK AI AGENTS & TOKEN USAGE\nconst aiNodeNames = [\"Agent 1 - extract document structure\", \"Agent 1 - extract document structure1\"];\n\naiNodeNames.forEach(nodeName => {\n  const instances = getNodesByType(nodeName);\n  instances.forEach(instance => {\n    // n8n stores tokens in the metadata of the execution data\n    const metadata = instance.metadata || {};\n    const inputT = metadata.usage?.prompt_tokens || 0;\n    const outputT = metadata.usage?.completion_tokens || 0;\n    \n    // Determine which model was likely used (from the node parameters or metadata)\n    const model = instance.data?.main?.[0]?.[0]?.json?.model || \"llama-3.1-8b\"; \n\n    if (!modelUsage[model]) modelUsage[model] = { input: 0, output: 0, calls: 0 };\n    modelUsage[model].input += inputT;\n    modelUsage[model].output += outputT;\n    modelUsage[model].calls += 1;\n    \n    totalInputTokens += inputT;\n    totalOutputTokens += outputT;\n\n    logs.push({\n      type: \"AI_GENERATION\",\n      node: nodeName,\n      model: model,\n      tokens: { input: inputT, output: outputT },\n      duration: instance.executionTime,\n      timestamp: new Date(instance.startTime).toISOString()\n    });\n  });\n});\n\n// 2. TRACK GOOGLE SHEETS READS\nconst sheetNodes = [\"Get row(s) in sheet\", \"Get row(s) in sheet1\"];\nsheetNodes.forEach(nodeName => {\n  const instances = getNodesByType(nodeName);\n  instances.forEach(instance => {\n    const rowsFound = instance.data?.main?.[0]?.length || 0;\n    const firstRow = instance.data?.main?.[0]?.[0]?.json || {};\n    \n    logs.push({\n      type: \"GOOGLE_SHEETS_READ\",\n      node: nodeName,\n      details: {\n        documentTypeFound: firstRow.document_type || \"unknown\",\n        rowsExtracted: rowsFound\n      },\n      duration: instance.executionTime,\n      timestamp: new Date(instance.startTime).toISOString()\n    });\n  });\n});\n\n// 3. TRACK EXTERNAL HTTP API REQUESTS\nconst httpInstances = getNodesByType(\"HTTP Request\");\nhttpInstances.forEach(instance => {\n  logs.push({\n    type: \"EXTERNAL_API_CALL\",\n    node: \"HTTP Request\",\n    url: \"https://bpma-afs-tools.automation-for-smes.com/api/v1/executions\",\n    method: \"GET\",\n    status: instance.executionStatus,\n    resultsCount: instance.data?.main?.[0]?.[0]?.json?.data?.length || 0,\n    duration: instance.executionTime\n  });\n});\n\n// 4. CONSTRUCT FINAL ANALYTICS OBJECT\nconst summary = {\n  executionId: execution.id,\n  user: runData[\"Webhook\"]?.[0]?.data?.main?.[0]?.[0]?.json?.body?.userId || \"anonymous\",\n  summaryUsage: {\n    totalInputTokens,\n    totalOutputTokens,\n    totalCalls: logs.length,\n    modelBreakdown: modelUsage\n  },\n  allOperations: logs\n};\n\n// 5. GENERATE MESSAGES\nconst adminMsg = `📊 Usage Report [Exec: ${execution.id}]\\n` +\n                 `- Tokens: ${totalInputTokens} in / ${totalOutputTokens} out\\n` +\n                 `- Models: ${Object.keys(modelUsage).join(', ')}\\n` +\n                 `- Operations: ${logs.length} API interactions.`;\n\nreturn {\n  analytics: summary,\n  adminNotification: adminMsg,\n  rawLogs: logs\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5616,
+        1888
+      ],
+      "id": "b3c69d13-a2cb-4859-a11d-f936b8fb2607",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "html",
+        "binaryPropertyName": "html",
+        "options": {
+          "fileName": "={{ $('user_prompt').item.json.user_prompt.userId }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -6048,
+        1440
+      ],
+      "id": "ebe56b74-47dd-4802-9948-815daf1462bb",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "html",
+        "name": "={{ $('user_prompt').item.json.user_prompt.documentType }}_{{ $('user_prompt').item.json.user_prompt.userId }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -5824,
+        1440
+      ],
+      "id": "3a4b8210-6d99-4dd4-97f1-414a471ee32d",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "TFvRMy4NGKdJDphj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst results = {\n  agentResults: $('parse agent 2 output').first().json,\n  driveResults: $('Upload file').first().json\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5184,
+        1440
+      ],
+      "id": "19491962-a384-4b65-8931-a718a5629026",
+      "name": "Code in JavaScript1",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Upload file').item.json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "owner",
+            "type": "user",
+            "emailAddress": "={{ $('user_prompt').item.json.user_prompt.payload.email }}"
+          }
+        },
+        "options": {
+          "emailMessage": "=Here is your {{ $('user_prompt').item.json.user_prompt.documentType }}'s RAW File. Open it in your browser anytime and Save as PDF!\n\nWe have made you the Owner:\nGoogle Drive Download Link:\n{{ $('Upload file').item.json.webContentLink }}\n\nFile ID: {{ $('Upload file').item.json.permissions[0].id }}\nFile Permission: {{ $('Upload file').item.json.permissions[0].displayName }}\nYou can always find the download link in your tool's dashboard.\n\nShare",
+          "moveToNewOwnersRoot": false,
+          "sendNotificationEmail": true,
+          "transferOwnership": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -5376,
+        1440
+      ],
+      "id": "1e398f77-1ae7-49a3-96d4-e02718ecc17e",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "TFvRMy4NGKdJDphj",
+          "name": "Google Drive account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6f29d253-7a91-4bd6-92df-47ed8db25a43",
+              "name": "email",
+              "value": "={{ $('user_prompt').item.json.user_prompt.payload.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5600,
+        1440
+      ],
+      "id": "d48a57b7-6c27-4d40-9999-3231074a01b7",
+      "name": "email_address"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -6320,
+        1632
+      ],
+      "id": "8280fc86-b216-4687-9c77-57729809b7cb",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3984,
+        1200
+      ],
+      "id": "babf0674-b3a5-4ee1-9ee2-a70d22eee230",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://afs-tools.automation-for-smes.com/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "afs_cbbfbb9a6d6447ec9caee0f0c627380d"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "1e724698-59f4-4698-a451-6dd8e7a2b537"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={   \n\"html\": {{ $('user_prompt').item.json.user_prompt.html }},   \n\"format\": \"A4\",\n\"userId\": \"{{ $('user_prompt').item.json.user_prompt.userId }}\",\n\"request_type\": \"\",\n\"description\": \"HTML to PDF Converstion. Learn more.\",\n\"documentType\": \"{{ $('user_prompt').item.json.user_prompt.documentType }}\",\n\"source\": \"\",\n\"hash\": \"\",\n\"landscape\": false,   \n    \"margin\": {     \n        \"top\": \"1cm\",     \n        \"right\": \"1cm\",     \n        \"bottom\": \"1cm\",     \n        \"left\": \"1cm\"\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -5840,
+        1632
+      ],
+      "id": "8e61de9a-313c-4887-84c8-5d65fb60b675",
+      "name": "convert_to_pdf",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": true
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -5408,
+        1632
+      ],
+      "id": "bc031155-5d2a-47ae-931c-faa869b1ac61",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://afs-tools.automation-for-smes.com/api/jobs/{{ $json.jobId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "afs_cbbfbb9a6d6447ec9caee0f0c627380d"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "1e724698-59f4-4698-a451-6dd8e7a2b537"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={   \n\"html\": {{ $('user_prompt').item.json.user_prompt.html }},   \n\"format\": \"A4\",\n\"userId\": \"{{ $('user_prompt').item.json.user_prompt.userId }}\",\n\"request_type\": \"\",\n\"description\": \"HTML to PDF Converstion. Learn more.\",\n\"documentType\": \"{{ $('user_prompt').item.json.user_prompt.documentType }}\",\n\"source\": \"\",\n\"hash\": \"\",\n\"landscape\": false,   \n    \"margin\": {     \n        \"top\": \"1cm\",     \n        \"right\": \"1cm\",     \n        \"bottom\": \"1cm\",     \n        \"left\": \"1cm\"\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -5248,
+        1680
+      ],
+      "id": "98e02848-2800-4d74-b15c-f7fbea2b599c",
+      "name": "poll_job_status"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"status\": \"pending\",\n  \"jobId\": \"1234567890\",\n  \"message\": \"PDF generation started. Poll /api/jobs/:id for result.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5616,
+        1632
+      ],
+      "id": "eecc8fef-880f-43bc-a4a0-18d663f38bf6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -5104,
+        1696
+      ],
+      "id": "791c267e-a460-4d9e-8841-e9ae13482ccb",
+      "name": "Wait",
+      "webhookId": "cebb82f9-c3f1-4189-8040-b9227be769f1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1DVNrZwXuwGdznaXfZ1PY8JzshMpvmmPVsfHIMJtgiWU",
+          "mode": "list",
+          "cachedResultName": "Floovioo Tools - n8n HTML Document Generator Automation Prompts 1.0.1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DVNrZwXuwGdznaXfZ1PY8JzshMpvmmPVsfHIMJtgiWU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "html_doc_gen_prompts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "document_type",
+              "lookupValue": "={{ ($json.user_prompt.documentType || 'invalid').toLowerCase()  }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -6240,
+        -224
+      ],
+      "id": "e7e8099a-7dd7-4991-9b5f-340e3ae7c2fe",
+      "name": "Get Prompts",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "14kMgPWuiBFkGIoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1DVNrZwXuwGdznaXfZ1PY8JzshMpvmmPVsfHIMJtgiWU",
+          "mode": "list",
+          "cachedResultName": "Floovioo Tools - n8n HTML Document Generator Automation Prompts 1.0.1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DVNrZwXuwGdznaXfZ1PY8JzshMpvmmPVsfHIMJtgiWU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "html_doc_gen_prompts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DVNrZwXuwGdznaXfZ1PY8JzshMpvmmPVsfHIMJtgiWU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "document_type",
+              "lookupValue": "={{ $('user_prompt').item.json.user_prompt.documentType || 'resume' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -5808,
+        -304
+      ],
+      "id": "76de9151-f485-445d-b4eb-7ec000bcb016",
+      "name": "Get Prompt",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "14kMgPWuiBFkGIoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -5568,
+        1232
+      ],
+      "id": "8ffc12d7-fd8a-4cb6-9623-93186d0f40dc",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "BdG760hmanllJt9P",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst escaped = $json.html; // or whatever field your agent outputs\n\nconst unescaped = escaped\n  .replace(/\\\\n/g, '\\n')\n  .replace(/\\\\\"/g, '\"')\n  .replace(/\\\\'/g, \"'\")\n  .replace(/\\\\\\\\/g, '\\\\');\nreturn [{\n  html: unescaped, // raw HTML string\n  format: \"A4\",\n  userId: \"7c433589-4482-4c88-b73b-8b383557a1a3\",\n  request_type: \"\",\n  description: \"HTML to PDF Conversion. Learn more.\",\n  documentType: \"General\",\n  source: \"\",\n  hash: \"\",\n  landscape: false,\n  margin: {\n    top: \"1cm\",\n    right: \"1cm\",\n    bottom: \"1cm\",\n    left: \"1cm\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6064,
+        1632
+      ],
+      "id": "edf55493-aa5e-4c5b-ba81-59cdb5071685",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const unescaped = $(\"Agent 3: HTML Designer\")\n  .first()\n  .json.output\n  .replace(/\\\\n/g, '\\n')\n  .replace(/\\\\\"/g, '\"')\n  .replace(/\\\\'/g, \"'\")\n  .replace(/\\\\\\\\/g, '\\\\');\n\nconst clean = $(\"Agent 3: HTML Designer\")\n  .first()\n  .json.output.replace(\"```json\", \"\")\n  .replace(\"````\");\nreturn { html: clean };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4944,
+        1008
+      ],
+      "id": "0a2042cb-8801-45d7-aec2-70b994aa4490",
+      "name": "parse agent 2 output"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d589295d-d986-4bad-9147-dafb3b7dd7e7",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -6880,
+        -96
+      ],
+      "id": "04c8f9a5-5a97-4365-ad21-c33a00df1943",
+      "name": "Webhook",
+      "webhookId": "d589295d-d986-4bad-9147-dafb3b7dd7e7"
+    },
+    {
+      "parameters": {
+        "formTitle": "AI Document Generator",
+        "formDescription": "Mock webform for Floovioo Tools Feature Dev",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "prompt",
+              "fieldLabel": "Describe your document",
+              "defaultValue": "Create a professional resume highlighting my experience and skills.",
+              "requiredField": true
+            },
+            {
+              "fieldName": "context",
+              "fieldLabel": "Context",
+              "placeholder": "Enter data to used in your document or that contains instructions",
+              "defaultValue": "Name: Boniface Muthaka Experience: - Senior Developer at Tech Corp (2020-Present) - Junior Developer at StartUp Inc (2018-2020) Skills: JavaScript, Python, Leadership, Education, JKUAT (BSc IT, 2021), KU(BSc General, 2012), CPA 1(2012)",
+              "requiredField": true
+            },
+            {
+              "fieldName": "files",
+              "fieldLabel": "Files",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf,.doc,.txt,.xls"
+            },
+            {
+              "fieldName": "documentType",
+              "fieldLabel": "Document Type",
+              "fieldType": "dropdown",
+              "defaultValue": "Resume",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Resume"
+                  },
+                  {
+                    "option": "Invoice"
+                  },
+                  {
+                    "option": "Proposal"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldName": "tone",
+              "fieldLabel": "Tone",
+              "fieldType": "dropdown",
+              "defaultValue": "Professional",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Professional"
+                  },
+                  {
+                    "option": "Creative"
+                  },
+                  {
+                    "option": "Direct"
+                  },
+                  {
+                    "option": "Modern"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldName": "theme",
+              "fieldLabel": "Theme",
+              "fieldType": "dropdown",
+              "defaultValue": "Classic",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Classic"
+                  },
+                  {
+                    "option": "Blue"
+                  },
+                  {
+                    "option": "Dar"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -6848,
+        -320
+      ],
+      "id": "7d600c59-06b2-4ca5-8b91-358d64db669f",
+      "name": "On form submission",
+      "webhookId": "cc8ea453-52ad-4b01-8efd-22ad4d40ad0e",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8147833e-eb54-4a52-894f-560544bce740",
+              "name": "agent_1_user_prompt",
+              "value": "={{ $json.agent_1_user }}",
+              "type": "string"
+            },
+            {
+              "id": "40c4ed89-751a-4d0b-a885-30707b6d96cf",
+              "name": "agent_1_system_instructions",
+              "value": "={{ $json.agent_1_system }}",
+              "type": "string"
+            },
+            {
+              "id": "774252a5-ed84-4800-8d97-7f91f73152b1",
+              "name": "agent_2_user_prompt",
+              "value": "={{ $json.agent_2_user }}",
+              "type": "string"
+            },
+            {
+              "id": "ef9c78bf-86d9-4492-b810-72f10c2242cf",
+              "name": "agent_2_system_instructions",
+              "value": "={{ $json.agent_2_system }}",
+              "type": "string"
+            },
+            {
+              "id": "52572797-b089-4a56-947b-853df45a9c0e",
+              "name": "agent_3_user",
+              "value": "={{ $json.agent_3_user }}",
+              "type": "string"
+            },
+            {
+              "id": "93184580-3473-497c-bbfb-3f7e0d85b820",
+              "name": "agent_3_system",
+              "value": "={{ $json.agent_3_system }}",
+              "type": "string"
+            },
+            {
+              "id": "ff0adee5-52d0-4a90-bb13-ff8d7b61b8d0",
+              "name": "document_type",
+              "value": "={{ $json.document_type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5584,
+        -224
+      ],
+      "id": "cb25d8d7-e0f6-4bcc-84b4-91631b1394f2",
+      "name": "prompts"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ed6f1a9a-3d0e-4ab9-93a2-a1262d9512ee",
+              "name": "file_summary",
+              "value": "={{$('user_prompt').item.json.user_prompt.files.isNotEmpty() ? $('Call \\'Floovioo Tools - [Extract Data From Files]\\'').item.json.text : ''}}",
+              "type": "string"
+            },
+            {
+              "id": "becec814-cdda-4b7f-8864-052d093d5942",
+              "name": "user_prompt",
+              "value": "={{ $('validate request data').item.json.user_prompt }}",
+              "type": "object"
+            },
+            {
+              "id": "003881eb-7766-49a7-82af-b4b14506f7cf",
+              "name": "agent_1_user_prompt",
+              "value": "={{ $('parsedPrompts').item.json.agent_1_user_prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "abb9b619-424b-4e3e-a658-b694b1ed54a2",
+              "name": "agent_1_system_instructions",
+              "value": "={{ $('parsedPrompts').item.json.agent_1_system_instructions }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6016,
+        112
+      ],
+      "id": "fc05df96-ddfa-42b6-8e98-c92071ec88af",
+      "name": "prepare agent 1 input"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# EXECUTION BRIEF:\n{{ $json.analysis }}\n \n# USER DATA (for reference):\n{{ \nJSON.parse(\nJSON.parse($json.jobLog)\n.initialRequestData)\n.context\n}}\n\n### files shared\n{{ $json.initialRequestFileSummary }}\n\n----------------\n# Instructions (cached prompt template - just a guide for quality - adapt and deliver the best {{ \nJSON.parse(\nJSON.parse($json.jobLog)\n.initialRequestData)\n.documentType\n}} for the user's usecase - and highlight their best.)\n----------------\n**NOTE: The instructions many contain '\\{\\{ $javscript \\} \\}' data injections that may have failed but all the information is contained in this prompt - just find it semantically.\n\n{{ \n$('prompts').item.json.agent_2_user_prompt\n.replaceAll('execution_brief','') \n}}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "={{ $json.agent_2_system_instructions }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -5488,
+        592
+      ],
+      "id": "71515ad8-e1bf-4f89-85ca-6570ddc019b4",
+      "name": "Agent 2: Resume Content Generator",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Intructions for the current task:\n# CRITICAL RULES\n**** # CHECK FOR CRITICAL INFORMATION WITHOUT WHICH THE RESULTING DOCUMENT WOULD BE USELESS AND CLEARLY INDICATE THESE IN YOUR ANALYISIS SUMMARY ****\n\n\n# User Document Prompt & Context:\nDocumentType: {{ $json.user_prompt.documentType }}\nRequested Document TONE: {{ $json.user_prompt.tone }}\nRequested Document THEME: {{ $json.user_prompt.theme }}\n\n## Prompt:\n{{ $json.user_prompt.prompt }}\n\n## Context:\n{{ $json.user_prompt.context }}\n\n# INSTRUCTIONS:\n {{ $json.agent_1_user_prompt.replaceAll('\"\"','\"').replaceAll('', '') }}\n ** NOTE - The json object is just an example - you must generate unique content as per the current context.\n# ATTACHED FILES EXTRACTED (MAKE SENSE OF THEM AND THEIR ROLE IN THIS DOCUMENT CREATION): \n{{ $json.file_summary || 'No files were attached' }}\n\n** DO NOT WRAP WITH MARKDOWN\n** DO NOT INCLUDE YOUR REASONING OR ANY EXPLANATION\n** RETURN PARSEABLE JSOIN\n# DEFAULT A4 PAPER SIZE\n\nMine and ingest all user provided information in this message - some data may be misplaced within but stil present.\n\nFINALLY - (sheets tool: LogNewJob) CREATE A NEW JOB RECORD AND AAPPEND A NEW ROW TO THE \"Floovioo Tools - n8n HTML Document Generator Automation\" GOOGLE SHEETS THE COLUMS [jobId\trequestId\tstatus(pending_hil|abandoned|completed)\tstartedAt\trequestAnalysis ({\"ready_to_generate\":\"true/false\", \"completeness\":\"insufficient|partial|full\"})\thilRequestedAt]",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "={{ $json.agent_1_system_instructions }}\n\n** DO NOT WRAP WITH MARKDOWN\n** DO NOT INCLUDE YOUR REASONING OR ANY EXPLANATION\n** RETURN PARSEABLE JSOIN\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -5648,
+        112
+      ],
+      "id": "ed670368-92de-49a5-a506-b069f879d5d5",
+      "name": "Agent 1: Intent Analyzer",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Instructions for this task:\ndocument_type: {{ $json.document_type }}\ntone: {{ $json.user_prompt.tone }}\ntheme: {{ $json.user_prompt.theme }}\n\n{{ JSON.parse($('QueryJobLog1').item.json.requestAnalysis) }}\n\n# Document Request\n{{ $('user_prompt').item.json.user_prompt.summary }}\n{{ $('QueryJobLog1').item.json.requestAnalysis }}\n# Your {{ $json.agent_3_user }}\n\n\n# *** CRITICAL *** \nDo NOT include your thoughts or any tags like <think> - RETURN ONLY VALID JSON \n\n\n\n\n\n\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "={{ $('prompts').item.json.agent_3_system }}\n\n# *** CRITICAL *** \nDo NOT include your thoughts or any tags like <think> - RETURN ONLY VALID JSON \n** DO NOT INCLUDE YOUR REASONING OR ANY EXPLANATION\n** DO NOT WRAP WITH MARKDOWN\n** RETURN RAW HTML"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -5600,
+        1024
+      ],
+      "id": "ba6e3c67-b713-4d52-b8e2-29eab6636639",
+      "name": "Agent 3: HTML Designer",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e9af4cc-a7df-4202-b32a-7782c89efd96",
+              "name": "document_type",
+              "value": "={{ $('prompts').item.json.document_type }}",
+              "type": "string"
+            },
+            {
+              "id": "04238c5c-3161-4072-8a05-3b22d5398ad0",
+              "name": "agentOutput",
+              "value": "={{ $json.agentOutput }}",
+              "type": "object"
+            },
+            {
+              "id": "da955b00-b7fa-4b5e-a891-77a14676bc97",
+              "name": "agent_3_system",
+              "value": "={{ $('prompts').item.json.agent_3_system }}",
+              "type": "string"
+            },
+            {
+              "id": "44a9e696-b223-416b-9dd3-bce7c7ab6720",
+              "name": "agent_3_user",
+              "value": "={{ $('prompts').item.json.agent_3_user }}",
+              "type": "string"
+            },
+            {
+              "id": "4a90a080-2cef-4aab-a109-09d0b75b46fb",
+              "name": "user_prompt.documentType",
+              "value": "={{ $('user_prompt').item.json.user_prompt.documentType }}",
+              "type": "string"
+            },
+            {
+              "id": "2ffc12f6-870f-4749-95db-6ead4def6344",
+              "name": "user_prompt.tone",
+              "value": "={{ $('user_prompt').item.json.user_prompt.tone }}",
+              "type": "string"
+            },
+            {
+              "id": "5d51ab89-5a25-4ead-acc5-beb91b4cd341",
+              "name": "user_prompt.theme",
+              "value": "={{ $('user_prompt').item.json.user_prompt.theme }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5872,
+        1024
+      ],
+      "id": "58cde203-f1b2-43f8-8ef9-6b619bdde1a0",
+      "name": "prepare agent 3 input"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -3472,
+        640
+      ],
+      "id": "2d32a755-69a9-423c-8d65-6711647c3a51",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1abaecea-2071-4151-b803-6892cfc7597f",
+              "name": "document_type",
+              "value": "={{ $('parsedPrompts').item.json.document_type }}",
+              "type": "string"
+            },
+            {
+              "id": "84403a66-443d-4c2c-bd90-53c8cf5934d6",
+              "name": "jobId",
+              "value": "={{ $('Webhook').item.json.body.jobId }}",
+              "type": "string"
+            },
+            {
+              "id": "f447e67b-f631-46ef-a37b-7e757635bf60",
+              "name": "analyzeRequestId",
+              "value": "={{ $('Webhook').item.json.body.requestId }}",
+              "type": "string"
+            },
+            {
+              "id": "4eb1186a-0090-44a8-821f-a792ff5cf20e",
+              "name": "draftingRequestId",
+              "value": "={{ $json.uuid }}",
+              "type": "string"
+            },
+            {
+              "id": "16008a1d-e8c1-4094-b552-7a2da34b7129",
+              "name": "appId",
+              "value": "={{ $('Webhook').item.json.body.appId }}",
+              "type": "string"
+            },
+            {
+              "id": "e88da003-55e0-4b70-ab3e-206e48f12891",
+              "name": "hiApprovalAt",
+              "value": "={{ new DateTime($now) }}",
+              "type": "string"
+            },
+            {
+              "id": "9db8f657-9fc9-4779-8e3c-9735f727c6a9",
+              "name": "action",
+              "value": "={{ $('user_prompt').item.json.user_prompt.action }}",
+              "type": "string"
+            },
+            {
+              "id": "be62fddf-8fc7-417f-8ac3-630b2bc8431f",
+              "name": "summary",
+              "value": "={{ $('user_prompt').item.json.user_prompt.summary }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6304,
+        704
+      ],
+      "id": "82a123f2-9135-443a-9e5d-05c73c7d2459",
+      "name": "user_approval"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3984,
+        1440
+      ],
+      "id": "0775b279-2c2e-401c-8350-0acf67a208ab",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3744,
+        352
+      ],
+      "id": "70f4d6d9-611a-4f07-a8d3-374478b1f4be",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "efae770b-c05e-41db-b8fb-4b3157573fe8",
+              "leftValue": "={{ ($('user_prompt').first().json.user_prompt.files || []).isNotEmpty() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -5104,
+        -288
+      ],
+      "id": "83db32fb-9ffe-47d0-89e1-2019d2220b78",
+      "name": "hasAttachments"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.action }}",
+                    "rightValue": "analyze",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "145393ae-0f96-4f2d-90a3-0dce697fa497"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "analyze"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "042a08ae-87d6-4d37-bb38-61c170801f39",
+                    "leftValue": "={{ $('Webhook').item.json.body.action }}",
+                    "rightValue": "generate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "generate"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2c5137bd-9f4b-49a0-a6f7-3b9625648768",
+                    "leftValue": "={{ $('Webhook').item.json.body.action }}",
+                    "rightValue": "format",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "format"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -6640,
+        272
+      ],
+      "id": "1f7a58a6-700b-444a-8373-1735d6e864b9",
+      "name": "action"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -4448,
+        -192
+      ],
+      "id": "24aee493-e7ba-42b1-ad72-5a30f92d1b95",
+      "name": "No Operation, do nothing4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ddabff4b-5828-47f9-a48b-06bbf58da9bb",
+              "name": "html",
+              "value": "={{ JSON.parse($json.agentResults.html).html }}",
+              "type": "string"
+            },
+            {
+              "id": "459233f0-91a8-4945-90f0-757223c34e88",
+              "name": "success",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "8a420738-e7fd-4cd2-a293-d875380214f4",
+              "name": "model",
+              "value": "llama-3.1-8b",
+              "type": "string"
+            },
+            {
+              "id": "9cf323c4-fc1a-4c8c-b5b4-502ff601aed1",
+              "name": "webContentLink",
+              "value": "={{ $json.driveResults.webContentLink }}",
+              "type": "string"
+            },
+            {
+              "id": "ad0056c0-717e-4ed5-a9d1-b1e21c766abb",
+              "name": "webViewLink",
+              "value": "={{ $json.driveResults.webViewLink }}",
+              "type": "string"
+            },
+            {
+              "id": "6dbcdeb3-6bc2-44ed-9a2b-461437a5e294",
+              "name": "agentResults.owners[0].displayName",
+              "value": "={{ $json.driveResults.owners[0].displayName }}",
+              "type": "string"
+            },
+            {
+              "id": "340a6f5a-e0ae-451f-839a-00f34ffbb11e",
+              "name": "agentResults.owners[0].emailAddress",
+              "value": "={{ $json.driveResults.lastModifyingUser.emailAddress }}",
+              "type": "string"
+            },
+            {
+              "id": "7f606353-635d-4f38-8d3c-bb6dabe6283a",
+              "name": "driveResults.lastModifyingUser.permissionId",
+              "value": "={{ $json.driveResults.lastModifyingUser.permissionId }}",
+              "type": "string"
+            },
+            {
+              "id": "15c4a827-8c34-4751-858d-fb7c65b14cac",
+              "name": "driveResults.sha256Checksum",
+              "value": "={{ $json.driveResults.sha256Checksum }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5008,
+        1440
+      ],
+      "id": "1954fc59-2ebc-4a2d-b82b-155a2cbf62ff",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -6304,
+        144
+      ],
+      "id": "5699251d-5e01-4976-acf3-0d21f3a68c1a",
+      "name": "No Operation, do nothing6"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tTSAntoq6C23R6Xe",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tTSAntoq6C23R6Xe",
+          "cachedResultName": "Floovioo Tools - [Extract Data From Files]"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $json }}"
+          },
+          "matchingColumns": [
+            "data"
+          ],
+          "schema": [
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -4672,
+        -464
+      ],
+      "id": "91703903-2697-40c8-921d-a232e4f89d24",
+      "name": "Call 'Floovioo Tools - [Extract Data From Files]'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fe3ca277-bfef-422f-b928-0212faf6fb53",
+              "name": "data",
+              "value": "={{ $('user_prompt').item.json.user_prompt.files[0] }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4896,
+        -464
+      ],
+      "id": "4c1c0b5e-cea5-4ae3-a0f8-14ea564ddd81",
+      "name": "requestData"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5938d5d-3538-4da2-a60c-be239c702dc3",
+              "name": "uploadedFileData",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4448,
+        -464
+      ],
+      "id": "a26bd2b7-b57a-4361-8750-ff1530002df1",
+      "name": "userRequestData"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1️⃣ Grab the raw row data\nconst raw = $input.first().json;          // e.g. the object shown above\n\n// 2️⃣ Helper: simple {{…}} replacement using the current item\nfunction renderTemplate(template, data) {\n  return template.replace(/\\{\\{([^}]+)\\}\\}/g, (_, key) => {\n    const parts = key.trim().split('.');   // e.g. \"user_prompt.theme\"\n    let value = data;\n    for (const part of parts) {\n      if (value && part in value) {\n        value = value[part];\n      } else {\n        // If the key is missing, leave the placeholder unchanged\n        return `{{${key}}}`;\n      }\n    }\n    // If the value is an object, stringify it\n    return typeof value === 'object' ? JSON.stringify(value) : String(value);\n  });\n}\n\n// 3️⃣ Build the new object\nconst output = {};\n\nfor (const [key, value] of Object.entries(raw)) {\n  // If the key matches an agent column, render it\n  if (/^agent_\\d+_(user|system)$/.test(key) && typeof value === 'string') {\n    output[key] = renderTemplate(value, raw);   // you can pass any data you need\n  } else {\n    // keep all other columns untouched\n    output[key] = value;\n  }\n}\n\n// 4️⃣ Return the updated item (n8n expects an array of items)\nreturn [output];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5392,
+        -240
+      ],
+      "id": "1b03e069-2516-42ac-8bb7-b2d66ad80a0e",
+      "name": "parsedPrompts"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f16521cf-cd5a-4d93-9f7f-b692a6ea345d",
+              "name": "document_type",
+              "value": "={{ $('parsedPrompts').item.json.document_type }}",
+              "type": "string"
+            },
+            {
+              "id": "4953a259-57e7-455f-81f4-1f02ce8bbcac",
+              "name": "original_user_prompt",
+              "value": "={{ $('user_prompt').item.json.user_prompt.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "30c66e7b-e9b8-46fb-90b5-203d26ae65ff",
+              "name": "original_user_context",
+              "value": "={{ $('user_prompt').item.json.user_prompt.context || '<Context was merged into the prompt>'}}",
+              "type": "string"
+            },
+            {
+              "id": "7aed6236-f4fa-416f-8a9b-4ea2dde9108a",
+              "name": "uploaded_files_text_content",
+              "value": "={{$('user_prompt').item.json.user_prompt.files.isNotEmpty() ? $('Call \\'Floovioo Tools - [Extract Data From Files]\\'').item.json.text : '<The user did not upload any files>' }}",
+              "type": "string"
+            },
+            {
+              "id": "ac208a90-1468-45f2-b3b0-c9c5336675a9",
+              "name": "analysis",
+              "value": "={{ JSON.parse(JSON.stringify(JSON.parse($json.requestAnalysis).analysis)).execution_brief }}",
+              "type": "string"
+            },
+            {
+              "id": "7664ca4f-9f9d-4cf8-b74c-ba439911b346",
+              "name": "initialRequestData",
+              "value": "={{ $json.initialRequestData }}",
+              "type": "string"
+            },
+            {
+              "id": "4166b39c-1c67-4960-89a8-5e2dfe91c1c9",
+              "name": "initialRequestFileSummary",
+              "value": "={{ $json.initialRequestFileSummary }}",
+              "type": "string"
+            },
+            {
+              "id": "1ba4e3bd-65ca-43ac-9daa-f7f5a51fce44",
+              "name": "initialRequestFileSummary",
+              "value": "={{ $json.initialRequestFileSummary }}",
+              "type": "string"
+            },
+            {
+              "id": "c941f88c-c583-49de-a1e3-6050d7186dc3",
+              "name": "jobLog",
+              "value": "={{ $('QueryJobLog').item.json }}",
+              "type": "string"
+            },
+            {
+              "id": "2024ce03-65f0-461b-85ea-45b376721324",
+              "name": "agent_2_user_prompt",
+              "value": "={{ $('parsedPrompts').item.json.agent_2_user_prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "76346701-ef06-4a90-b7da-94310021ff42",
+              "name": "agent_2_system_instructions",
+              "value": "={{ $('parsedPrompts').item.json.agent_2_system_instructions }}",
+              "type": "string"
+            },
+            {
+              "id": "5b57ef3d-ca11-413f-80d8-d43e4f761e45",
+              "name": "review",
+              "value": "={{  JSON.parse(JSON.stringify( JSON.parse( JSON.stringify( JSON.parse( $json.requestAnalysis).review ) ) )).next_steps }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5776,
+        576
+      ],
+      "id": "ccc91143-57ca-4f0d-9661-d38777127111",
+      "name": "draftingInput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY",
+          "mode": "list",
+          "cachedResultName": "Floovioo Tools - n8n HTML Document Generator Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1326850425,
+          "mode": "list",
+          "cachedResultName": "jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit#gid=1326850425"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "jobId": "={{ $json.jobId }}",
+            "requestId": "={{ $json.requestId }}",
+            "status": "={{ $json.status }}",
+            "startedAt": "={{ $json.startedAt }}",
+            "requestAnalysis": "={{ $json.requestAnalysis }}",
+            "hilRequestedAt": "={{ $json.hilRequestedAt }}",
+            "initialRequestData": "={{ $('user_prompt').item.json.user_prompt }}",
+            "initialRequestFileSummary": "={{ $('user_prompt').item.json.user_prompt.files.isEmpty() ? '<not available>' : $('Call \\'Floovioo Tools - [Extract Data From Files]\\'').first() }}",
+            "action": "={{ $('validate request data').item.json.user_prompt.action }}",
+            "appId": "={{ $json.appId }}",
+            "userId": "={{ $json.userId }}"
+          },
+          "matchingColumns": [
+            "jobId"
+          ],
+          "schema": [
+            {
+              "id": "userId",
+              "displayName": "userId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appId",
+              "displayName": "appId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "jobId",
+              "displayName": "jobId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "startedAt",
+              "displayName": "startedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requestAnalysis",
+              "displayName": "requestAnalysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hilRequestedAt",
+              "displayName": "hilRequestedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hilApproval",
+              "displayName": "hilApproval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hiApprovalAt",
+              "displayName": "hiApprovalAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "initialRequestData",
+              "displayName": "initialRequestData",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "initialRequestFileSummary",
+              "displayName": "initialRequestFileSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "revisedRequestFilesSummary",
+              "displayName": "revisedRequestFilesSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "revisedRequestData",
+              "displayName": "revisedRequestData",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "generatedDraft",
+              "displayName": "generatedDraft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "generatedHtml",
+              "displayName": "generatedHtml",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "responseAt",
+              "displayName": "responseAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4208,
+        96
+      ],
+      "id": "f475a3c9-f4c5-47da-b7b5-3f194771a8eb",
+      "name": "LogNewJob",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "14kMgPWuiBFkGIoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ab8bab31-e33b-4c0e-8969-5ae14e669eb1",
+              "name": "documentType",
+              "value": "={{ $json.initialRequestData.documentType }}",
+              "type": "string"
+            },
+            {
+              "id": "3928492e-b1dc-4d3e-9da2-b400cbdda1d3",
+              "name": "userId",
+              "value": "={{ $json.initialRequestData.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "bd37ba59-7649-4037-90cf-a07fd858ce76",
+              "name": "appId",
+              "value": "={{ $json.initialRequestData.appId }}",
+              "type": "string"
+            },
+            {
+              "id": "98d70b22-d4c5-456a-a474-ee8ab30020ce",
+              "name": "jobId",
+              "value": "={{ $json.jobId }}",
+              "type": "string"
+            },
+            {
+              "id": "d8a15aa8-43e8-42fd-b6db-eccafa9ce22c",
+              "name": "requestId",
+              "value": "={{ $json.requestId }}",
+              "type": "string"
+            },
+            {
+              "id": "4ff34684-5f70-411a-905a-daf3041ea151",
+              "name": "startedAt",
+              "value": "={{ $json.startedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "39bd4c9d-9d65-4860-94b8-b52b3083522a",
+              "name": "local.jobId",
+              "value": "={{ $json.initialRequestData.jobId }}",
+              "type": "string"
+            },
+            {
+              "id": "a4831d6f-a531-464f-966e-72ac99cb4463",
+              "name": "local.requestId",
+              "value": "={{ $json.initialRequestData.requestId }}",
+              "type": "string"
+            },
+            {
+              "id": "30faf178-8e33-4ef6-a811-ca53e4e2b730",
+              "name": "analysis",
+              "value": "={{ $('ParseAnalysisReport').item.json.analysis }}",
+              "type": "object"
+            },
+            {
+              "id": "1ddd0666-dcf6-4ced-85da-af8e5fce3e5d",
+              "name": "review",
+              "value": "={{ $('ParseAnalysisReport').item.json.review }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3968,
+        96
+      ],
+      "id": "b96dbc65-b40c-4f27-b27c-b9a238386fcc",
+      "name": "analysisResponse"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY",
+          "mode": "list",
+          "cachedResultName": "Floovioo Tools - n8n HTML Document Generator Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1326850425,
+          "mode": "list",
+          "cachedResultName": "jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit#gid=1326850425"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "jobId",
+              "lookupValue": "={{ $('user_prompt').item.json.user_prompt.jobId }}"
+            },
+            {
+              "lookupColumn": "requestId",
+              "lookupValue": "={{ $('user_prompt').item.json.user_prompt.requestId }}"
+            },
+            {
+              "lookupColumn": "action",
+              "lookupValue": "=analyze"
+            },
+            {
+              "lookupColumn": "appId",
+              "lookupValue": "={{ $('validate request data').item.json.user_prompt.appId }}"
+            },
+            {
+              "lookupColumn": "userId",
+              "lookupValue": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -6016,
+        576
+      ],
+      "id": "a611e0c1-3429-44de-860b-d79708b69e39",
+      "name": "QueryJobLog",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "14kMgPWuiBFkGIoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ed6f1a9a-3d0e-4ab9-93a2-a1262d9512ee",
+              "name": "file_summary",
+              "value": "={{ $('Call \\'Floovioo Tools - [Extract Data From Files]\\'').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "becec814-cdda-4b7f-8864-052d093d5942",
+              "name": "user_prompt",
+              "value": "={{ $('validate request data').item.json.user_prompt }}",
+              "type": "object"
+            },
+            {
+              "id": "003881eb-7766-49a7-82af-b4b14506f7cf",
+              "name": "agent_1_user_prompt",
+              "value": "={{ $('parsedPrompts').item.json.agent_1_user_prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "abb9b619-424b-4e3e-a658-b694b1ed54a2",
+              "name": "agent_1_system_instructions",
+              "value": "={{ $('parsedPrompts').item.json.agent_1_system_instructions }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4224,
+        -464
+      ],
+      "id": "b1927f3d-a1eb-4664-9dda-f6e2bd81fe82",
+      "name": "prepareAgentInputWithAttachments"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ed6f1a9a-3d0e-4ab9-93a2-a1262d9512ee",
+              "name": "file_summary",
+              "value": "=''",
+              "type": "string"
+            },
+            {
+              "id": "becec814-cdda-4b7f-8864-052d093d5942",
+              "name": "user_prompt",
+              "value": "={{ $('validate request data').item.json.user_prompt }}",
+              "type": "object"
+            },
+            {
+              "id": "003881eb-7766-49a7-82af-b4b14506f7cf",
+              "name": "agent_1_user_prompt",
+              "value": "={{ $('parsedPrompts').item.json.agent_1_user_prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "abb9b619-424b-4e3e-a658-b694b1ed54a2",
+              "name": "agent_1_system_instructions",
+              "value": "={{ $('parsedPrompts').item.json.agent_1_system_instructions }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4224,
+        -192
+      ],
+      "id": "37e6b410-e9f8-4d31-aa8b-ff933fc3eebe",
+      "name": "prepareAgentInput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3-pro-preview",
+        "options": {
+          "maxOutputTokens": 10000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -5760,
+        1232
+      ],
+      "id": "5c8c0a5c-e037-4d67-8466-44fa16d1510e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "WBVo2QkS5ABgCIC6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3984,
+        1616
+      ],
+      "id": "3f6b0961-1f3e-4c07-ad30-32c61da49aa6",
+      "name": "No Operation, do nothing5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the raw output from the previous node\n// Replace 'output' with the actual field name from your AI node (e.g., 'text' or 'message.content')\nconst rawContent = \n$(\"Agent 3: HTML Designer\").first().json.output;\n try {\n  // 1. Use Regex to find the first '{' and the last '}'\n  // This ignores <think> tags and any \"Here is your JSON:\" preamble\n  const jsonMatch = rawContent.match(/\\{[\\s\\S]*\\}/);\n  \n  if (jsonMatch) {\n    // 2. Parse the extracted string into a real JSON object\n    const cleanJson = JSON.parse(jsonMatch[0]);\n    \n    // 3. Return the parsed object to the workflow\n    return [{ json: cleanJson }];\n  } else {\n    throw new Error(\"No JSON object found in the output.\");\n  }\n} catch (error) {\n  // If parsing fails, return the error and the raw text for debugging\n  return [{ \n    json: { \n      error: \"Failed to parse JSON\", \n      message: error.message,\n      raw: rawContent \n    } \n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5136,
+        1008
+      ],
+      "id": "b15af0ba-7541-444c-b416-6a52ca5b48a7",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3936,
+        -160
+      ],
+      "id": "fec5aa80-1d89-40b1-b5d9-12f15b0093c9",
+      "name": "No Operation, do nothing7"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4768,
+        640
+      ],
+      "id": "27dcd35d-5034-4906-83d5-6ace2e30b2ae",
+      "name": "generatedDraft"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the raw string from the 'output' field\nconst rawString = $input.first().json.output;\ntry {\nreturn {json: JSON.parse(rawString)};\n  \n} catch (error) {\nconst clean = {\n  data: rawString\n    .replaceAll(\"\\n\", \"\")\n    .replaceAll('\\\\\"', '\"')\n    // .replaceAll('\"', '')\n    .replaceAll(/\\r/g, \"\")\n    .replaceAll(/\\n/g, \"\")\n    .replaceAll(/\\u00A0/g, \" \"),\n};\nreturn {json: JSON.parse(clean.data)};\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5008,
+        576
+      ],
+      "id": "03c67835-72f3-47ea-82b0-9a3958ac325c",
+      "name": "ParseGeneratedDraft"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a136490-5acb-40b5-ac5a-1de1eb9556d1",
+              "name": "documentType",
+              "value": "={{ $('user_prompt').item.json.user_prompt.documentType }}",
+              "type": "string"
+            },
+            {
+              "id": "3da6299a-0aa1-4ad5-bb93-19d8feafb999",
+              "name": "userId",
+              "value": "={{ $('user_prompt').item.json.user_prompt.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "22b29390-d9ff-472e-932d-2193d96bc0d3",
+              "name": "appId",
+              "value": "={{ $('QueryJobLog').item.json.appId }}",
+              "type": "string"
+            },
+            {
+              "id": "cd115e48-478f-4b75-bae0-bdc81d811456",
+              "name": "jobId",
+              "value": "={{ $('QueryJobLog').item.json.jobId }}",
+              "type": "string"
+            },
+            {
+              "id": "06335ca9-b8fa-48ba-a1c8-79f122d866e0",
+              "name": "requestId",
+              "value": "={{ $('GenerateDraftingRequestID').item.json.uuid }}",
+              "type": "string"
+            },
+            {
+              "id": "3d07df90-98e3-4554-b499-27dfa07b0635",
+              "name": "action",
+              "value": "={{ $('user_prompt').item.json.user_prompt.action }}",
+              "type": "string"
+            },
+            {
+              "id": "04ac8545-4ebc-4aa5-b551-cf6564642515",
+              "name": "analyzeRequestId",
+              "value": "={{ $('user_prompt').item.json.user_prompt.requestId }}",
+              "type": "string"
+            },
+            {
+              "id": "6332665c-a8a4-45d9-a8d8-9d3a170594b5",
+              "name": "={{ $('draftingInput').item.json.document_type }}",
+              "value": "={{ ($('ParseGeneratedDraft').item.json) }}",
+              "type": "object"
+            },
+            {
+              "id": "4204846a-a99c-4940-890a-7612e52c83c8",
+              "name": "formatingRequestId",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3968,
+        704
+      ],
+      "id": "0ea46dcc-c843-413b-b3b7-9aecbf2a635f",
+      "name": "draftResponse"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6304,
+        1024
+      ],
+      "id": "870aa845-75b2-4b69-9617-1f6ca5b77257",
+      "name": "GenerateFormartRequestUUID"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4752,
+        96
+      ],
+      "id": "f59e073c-09b5-455b-b17e-139a67743f59",
+      "name": "GenerateAnalyzeRequestUUID"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4976,
+        96
+      ],
+      "id": "f7ef9d7a-2f7a-4233-964f-65801aaaf4a3",
+      "name": "GenerateJobUUID"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3120,
+        -224
+      ],
+      "id": "51f24997-3cd2-4059-a25f-f3ed27f2bdbb",
+      "name": "GenerateUUID (Copy to Use)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f239033c-226c-4b58-ac44-be346a5d6bfe",
+              "name": "userId",
+              "value": "={{ $('user_prompt').item.json.user_prompt.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "e27fa0c0-0bba-45c0-8ca1-e1289cdc3b47",
+              "name": "appId",
+              "value": "={{ $('user_prompt').item.json.user_prompt.appId }}",
+              "type": "string"
+            },
+            {
+              "id": "a677cb33-33f1-45e0-85cf-cf5687e66ac7",
+              "name": "jobId",
+              "value": "={{ $('GenerateJobUUID').item.json.uuid }}",
+              "type": "string"
+            },
+            {
+              "id": "42fb208f-1f9c-48e2-872a-d663b21e5d26",
+              "name": "requestId",
+              "value": "={{ $('GenerateAnalyzeRequestUUID').item.json.uuid }}",
+              "type": "string"
+            },
+            {
+              "id": "2e31253d-3259-4c11-a3a8-d985dd92852a",
+              "name": "action",
+              "value": "={{ $('user_prompt').item.json.user_prompt.action }}",
+              "type": "string"
+            },
+            {
+              "id": "343123b2-1808-4953-87dd-0dcefc8f0c43",
+              "name": "createdAt",
+              "value": "={{ new Date($now) }}",
+              "type": "string"
+            },
+            {
+              "id": "42b18fea-6c9c-4216-a904-a11c542b3194",
+              "name": "requestedAt",
+              "value": "={{ $('user_prompt').item.json.createdAt }}",
+              "type": "string"
+            },
+            {
+              "id": "c7d36985-c90d-4974-8393-694141fa3a03",
+              "name": "startedAt",
+              "value": "={{ new Date($now).toDateTime() }}",
+              "type": "string"
+            },
+            {
+              "id": "ceb037fb-a336-4d4a-bcb5-71c91569da97",
+              "name": "status",
+              "value": "pending_hil",
+              "type": "string"
+            },
+            {
+              "id": "35ff21bc-a6b5-4877-9489-e88ed66125c6",
+              "name": "requestAnalysis",
+              "value": "={{ $('ParseAnalysisReport').item.json }}",
+              "type": "object"
+            },
+            {
+              "id": "82aa3b93-15e1-4a14-afc7-c00786f5c264",
+              "name": "hilRequestedAt",
+              "value": "={{ new Date($now).toDateTime() }}",
+              "type": "string"
+            },
+            {
+              "id": "cd19acd9-ea2e-4de2-9555-59a95309b89d",
+              "name": "user_prompt",
+              "value": "={{ $('user_prompt').item.json.user_prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "37075e03-ce59-4361-a8f7-508f82c163b4",
+              "name": "files",
+              "value": "={{ $('user_prompt').item.json.user_prompt.files }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4432,
+        96
+      ],
+      "id": "798c95d7-989b-4f53-a709-2f083ae7cb97",
+      "name": "SetJobLogEntry"
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractFirstJsonObject(input) {\n  if (typeof input === \"object\") return input;\n\n  if (typeof input !== \"string\") {\n    throw new Error(\"Unsupported input type\");\n  }\n\n  // 1. Unwrap quoted JSON ( \" { ... } \" )\n  let text = input.trim();\n  text = text.replaceAll(\"\", \"\");\n  if (text.startsWith('\"') && text.endsWith('\"')) {\n    try {\n      text = JSON.parse(text);\n    } catch {}\n  }\n\n  // 2. Find first balanced JSON object\n  let depth = 0;\n  let start = -1;\n\n  for (let i = 0; i < text.length; i++) {\n    if (text[i] === \"{\") {\n      if (depth === 0) start = i;\n      depth++;\n    } else if (text[i] === \"}\") {\n      depth--;\n      if (depth === 0 && start !== -1) {\n        const candidate = text.slice(start, i + 1);\n        try {\n          return JSON.parse(candidate);\n        } catch (e) {\n          break;\n        }\n      }\n    }\n  }\n\n  throw new Error(\"No valid JSON object found\");\n}\n\n// ---- n8n entry point ----\ntry {\n  return JSON.parse($input.first().json.output);\n} catch (error) {\n  const raw = $input.first().json.output;\n\n  const result = extractFirstJsonObject(raw);\n\n  return result;\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5200,
+        96
+      ],
+      "id": "851570a1-3ff6-4750-b445-f907d341c9c7",
+      "name": "ParseAnalysisReport"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 10000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -5568,
+        816
+      ],
+      "id": "564b3048-a09a-4543-bb2b-7965bf51725c",
+      "name": "Groq",
+      "credentials": {
+        "groqApi": {
+          "id": "BdG760hmanllJt9P",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=afs-tools:saas:tool-use:ai-document-generator:userId: {{ $json.user_prompt.userId }}:job_{{ $now.toMillis() }}:context-extration",
+        "contextWindowLength": 1000
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -5440,
+        816
+      ],
+      "id": "a90614df-19ed-4904-9ddd-eeafba12513d",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "lm4HhjzaLU2EFToo",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": {\"type\": \"string\", \"maxLength\": 500},\n    \"contact\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"name\": {\"type\": \"string\"},\n        \"email\": {\"type\": \"string\"},\n        \"phone\": {\"type\": \"string\"},\n        \"location\": {\"type\": \"string\"},\n        \"linkedin\": {\"type\": \"string\"},\n        \"website\": {\"type\": \"string\"}\n      },\n      \"required\": [\"name\", \"email\", \"location\"]\n    },\n    \"experience\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"title\": {\"type\": \"string\"},\n          \"company\": {\"type\": \"string\"},\n          \"location\": {\"type\": \"string\"},\n          \"dates\": {\"type\": \"string\"},\n          \"bullets\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n        },\n        \"required\": [\"title\", \"company\", \"dates\", \"bullets\"]\n      }\n    },\n    \"education\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"degree\": {\"type\": \"string\"},\n          \"school\": {\"type\": \"string\"},\n          \"location\": {\"type\": \"string\"},\n          \"graduation\": {\"type\": \"string\"},\n          \"gpa\": {\"type\": \"string\"},\n          \"honors\": {\"type\": \"string\"}\n        },\n        \"required\": [\"degree\", \"school\", \"graduation\"]\n      }\n    },\n    \"skills\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"technical\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n        \"languages\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n        \"certifications\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n      }\n    },\n    \"additional\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"projects\": {\"type\": \"array\"},\n        \"awards\": {\"type\": \"array\"},\n        \"volunteer\": {\"type\": \"array\"}\n      }\n    }\n  },\n  \"required\": [\"summary\", \"contact\", \"experience\", \"education\", \"skills\"],\n  \"additionalProperties\": false\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -5264,
+        800
+      ],
+      "id": "b5071c40-d443-468c-b5b2-8acd6857942e",
+      "name": "<>",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=afs-tools:saas:tool-use:ai-document-generator:userId: :job_{{ $json.user_prompt.userId }}:context-extration",
+        "contextWindowLength": 1000
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -5616,
+        336
+      ],
+      "id": "96ff79ca-32e3-4e06-ac8f-275b433e73d2",
+      "name": "<>1",
+      "credentials": {
+        "redis": {
+          "id": "lm4HhjzaLU2EFToo",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "maxTokensToSample": 3000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -5744,
+        336
+      ],
+      "id": "b7256736-7229-4534-83e5-6e5ea4d15be7",
+      "name": "Groq1",
+      "credentials": {
+        "groqApi": {
+          "id": "BdG760hmanllJt9P",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"document_type\": \"invoice\",\n  \"title\": \"Invoice\",\n  \"brand\": {\n    \"company_name\": \"\",\n    \"logo_url\": \"\",\n    \"primary_color\": \"#2563eb\",\n    \"secondary_color\": \"#64748b\",\n    \"font_family\": \"Inter\"\n  },\n  \"sections\": [\n    {\n      \"id\": \"header\",\n      \"content\": {}\n    }\n  ],\n  \"raw_content\": {},\n  \"design_notes\": \"Clean, modern, professional, print-friendly\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -5328,
+        336
+      ],
+      "id": "73131fe3-931c-4c5c-ba59-b73dba62b1dc",
+      "name": "<>2",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -5312,
+        1232
+      ],
+      "id": "f2764fd9-b9fb-4934-99da-50ecedb18dfc",
+      "name": "<>3",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3744,
+        1008
+      ],
+      "id": "070c04ce-bfee-4455-9fa5-3a1411e59a87",
+      "name": "No Operation, do nothing8"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY",
+          "mode": "list",
+          "cachedResultName": "Floovioo Tools - n8n HTML Document Generator Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1326850425,
+          "mode": "list",
+          "cachedResultName": "jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit#gid=1326850425"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "jobId",
+              "displayName": "jobId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "startedAt",
+              "displayName": "startedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requestAnalysis",
+              "displayName": "requestAnalysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hilRequestedAt",
+              "displayName": "hilRequestedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hilApproval",
+              "displayName": "hilApproval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hiApprovalAt",
+              "displayName": "hiApprovalAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "initialRequestData",
+              "displayName": "initialRequestData",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "initialRequestFileSummary",
+              "displayName": "initialRequestFileSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "revisedRequestFilesSummary",
+              "displayName": "revisedRequestFilesSummary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "revisedRequestData",
+              "displayName": "revisedRequestData",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "generatedDraft",
+              "displayName": "generatedDraft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "generatedHtml",
+              "displayName": "generatedHtml",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "responseAt",
+              "displayName": "responseAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4432,
+        704
+      ],
+      "id": "1a9e5bd1-f3c6-49b8-87b1-41b744d775fa",
+      "name": "UpdateJobLog",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "14kMgPWuiBFkGIoM",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY",
+          "mode": "list",
+          "cachedResultName": "Floovioo Tools - n8n HTML Document Generator Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 410263386,
+          "mode": "list",
+          "cachedResultName": "process_output",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit#gid=410263386"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "processId",
+              "displayName": "processId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "jobId",
+              "displayName": "jobId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reqiestId",
+              "displayName": "reqiestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "input",
+              "displayName": "input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "promptId",
+              "displayName": "promptId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "createdAt",
+              "displayName": "createdAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "inputTokens",
+              "displayName": "inputTokens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "outputTokens",
+              "displayName": "outputTokens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "startedAt",
+              "displayName": "startedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "completedAt",
+              "displayName": "completedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4208,
+        704
+      ],
+      "id": "d2153fbd-e80c-4744-bc50-dacd58685a37",
+      "name": "LogProcessOutput",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "14kMgPWuiBFkGIoM",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6304,
+        464
+      ],
+      "id": "2b247881-b27d-4a92-a454-6270744f6a22",
+      "name": "GenerateDraftingRequestID"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY",
+          "mode": "list",
+          "cachedResultName": "Floovioo Tools - n8n HTML Document Generator Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1326850425,
+          "mode": "list",
+          "cachedResultName": "jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cpm9zK32mII3slaCuoTqPGEFEJ1ZGja77CCCKInNlxY/edit#gid=1326850425"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "jobId",
+              "lookupValue": "={{ $('user_prompt').item.json.user_prompt.jobId }}"
+            },
+            {
+              "lookupColumn": "requestId",
+              "lookupValue": "={{ $('user_prompt').item.json.user_prompt.requestId }}"
+            },
+            {
+              "lookupColumn": "action",
+              "lookupValue": "=analyze"
+            },
+            {
+              "lookupColumn": "appId",
+              "lookupValue": "={{ $('validate request data').item.json.user_prompt.appId }}"
+            },
+            {
+              "lookupColumn": "userId",
+              "lookupValue": "={{ $('Webhook').item.json.body.userId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -6080,
+        1024
+      ],
+      "id": "fe3dc5ba-62fa-4348-9731-623d0e3dabf7",
+      "name": "QueryJobLog1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "14kMgPWuiBFkGIoM",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "validate request data": {
+      "main": [
+        [
+          {
+            "node": "Get Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent 1: Intent Analyzer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agent 3: HTML Designer",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table in Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agent 1: Intent Analyzer",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generation error": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_prompt": {
+      "main": [
+        [
+          {
+            "node": "validate request data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generation error1": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Call 'My workflow 2'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "email_address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email_address": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "convert_to_pdf": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "poll_job_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "poll_job_status": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Prompts": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Prompt": {
+      "main": [
+        [
+          {
+            "node": "prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent 3: HTML Designer",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "convert_to_pdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse agent 2 output": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "user_prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "user_prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prompts": {
+      "main": [
+        [
+          {
+            "node": "parsedPrompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepare agent 1 input": {
+      "main": [
+        [
+          {
+            "node": "Agent 1: Intent Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 2: Resume Content Generator": {
+      "main": [
+        [
+          {
+            "node": "ParseGeneratedDraft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 1: Intent Analyzer": {
+      "main": [
+        [
+          {
+            "node": "ParseAnalysisReport",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "generation error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 3: HTML Designer": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "generation error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepare agent 3 input": {
+      "main": [
+        [
+          {
+            "node": "Agent 3: HTML Designer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_approval": {
+      "main": [
+        [
+          {
+            "node": "QueryJobLog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing2": {
+      "main": [
+        []
+      ]
+    },
+    "No Operation, do nothing3": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "hasAttachments": {
+      "main": [
+        [
+          {
+            "node": "requestData",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "action": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GenerateDraftingRequestID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GenerateFormartRequestUUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing4": {
+      "main": [
+        [
+          {
+            "node": "prepareAgentInput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing6": {
+      "main": [
+        [
+          {
+            "node": "prepare agent 1 input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Floovioo Tools - [Extract Data From Files]'": {
+      "main": [
+        [
+          {
+            "node": "userRequestData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "requestData": {
+      "main": [
+        [
+          {
+            "node": "Call 'Floovioo Tools - [Extract Data From Files]'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "userRequestData": {
+      "main": [
+        [
+          {
+            "node": "prepareAgentInputWithAttachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parsedPrompts": {
+      "main": [
+        [
+          {
+            "node": "hasAttachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "draftingInput": {
+      "main": [
+        [
+          {
+            "node": "Agent 2: Resume Content Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LogNewJob": {
+      "main": [
+        [
+          {
+            "node": "analysisResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "analysisResponse": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QueryJobLog": {
+      "main": [
+        [
+          {
+            "node": "draftingInput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepareAgentInputWithAttachments": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepareAgentInput": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent 3: HTML Designer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "parse agent 2 output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing7": {
+      "main": [
+        [
+          {
+            "node": "action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ParseGeneratedDraft": {
+      "main": [
+        [
+          {
+            "node": "generatedDraft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generatedDraft": {
+      "main": [
+        [
+          {
+            "node": "UpdateJobLog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateFormartRequestUUID": {
+      "main": [
+        [
+          {
+            "node": "QueryJobLog1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateAnalyzeRequestUUID": {
+      "main": [
+        [
+          {
+            "node": "SetJobLogEntry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateJobUUID": {
+      "main": [
+        [
+          {
+            "node": "GenerateAnalyzeRequestUUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetJobLogEntry": {
+      "main": [
+        [
+          {
+            "node": "LogNewJob",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ParseAnalysisReport": {
+      "main": [
+        [
+          {
+            "node": "GenerateJobUUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent 2: Resume Content Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agent 2: Resume Content Generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "<>": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agent 2: Resume Content Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "<>1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agent 1: Intent Analyzer",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent 1: Intent Analyzer",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "<>2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agent 1: Intent Analyzer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "<>3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agent 3: HTML Designer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "draftResponse": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing8": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UpdateJobLog": {
+      "main": [
+        [
+          {
+            "node": "LogProcessOutput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LogProcessOutput": {
+      "main": [
+        [
+          {
+            "node": "draftResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateDraftingRequestID": {
+      "main": [
+        [
+          {
+            "node": "user_approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QueryJobLog1": {
+      "main": [
+        [
+          {
+            "node": "prepare agent 3 input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v0",
+    "errorWorkflow": "NiahwhrwtKDFeMsP"
+  },
+  "versionId": "b2e8eb97-cc19-40d2-bf5f-08544b1f175e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ac273fbe46c93a77aeb31d3a9ff760c35854c4564b8c0b3d98f1b6b08615674"
+  },
+  "id": "hiwVr9qZQYLbMPBi",
+  "tags": []
+}

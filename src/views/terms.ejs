@@ -1,0 +1,111 @@
+<%- include('partials/head', { title: 'Terms of Service | Floovioo' }) %>
+<script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+<body class="bg-slate-50 font-sans text-slate-900 leading-relaxed">
+    <%- include('partials/navbar') %>
+
+    <div class="max-w-4xl mx-auto py-20 px-6 lg:px-8">
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+            <div class="bg-brand-blue px-8 py-10 text-white">
+                <h1 class="text-4xl font-extrabold tracking-tight">Terms of Service</h1>
+                <p class="mt-2 text-blue-100 font-medium opacity-90">Last updated: January 31, 2026</p>
+            </div>
+            
+            <div class="p-8 lg:p-12 space-y-10">
+                <!-- Acceptance -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        1. Acceptance of Terms
+                    </h2>
+                    <p class="text-slate-600">
+                        By accessing or using the Floovioo Services, you agree to comply with and be bound by these Terms of Service. If you do not agree, you may not use the Services.
+                    </p>
+                </section>
+
+                <!-- Services -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        2. Description of Services
+                    </h2>
+                    <p class="text-slate-600">
+                        Floovioo provides a SaaS platform for business document automation, custom branding, and workflow orchestration. Our services integrate with third-party ERPs and providers (QuickBooks, Zoho, Google, etc.) to streamline your operations.
+                    </p>
+                </section>
+
+                <!-- Accounts -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        3. User Accounts & Responsibilities
+                    </h2>
+                    <ul class="list-disc pl-5 text-slate-600 space-y-2">
+                        <li>You must provide accurate and complete registration information.</li>
+                        <li>You are responsible for maintaining the security of your account credentials.</li>
+                        <li>You are solely responsible for all activities that occur under your account.</li>
+                    </ul>
+                </section>
+
+                <!-- Acceptable Use -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        4. Acceptable Use
+                    </h2>
+                    <p class="text-slate-600">
+                        You agree not to use the Services for any illegal or unauthorized purpose. You shall not attempt to hack, disable, or interfere with the proper working of the Services.
+                    </p>
+                </section>
+
+                <!-- Intellectual Property -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        5. Intellectual Property
+                    </h2>
+                    <p class="text-slate-600">
+                        All content, features, and functionality of the Services are the exclusive property of Floovioo and its licensors. You retain ownership of your business data, but grant us a license to process it solely for the purpose of providing the Services.
+                    </p>
+                </section>
+
+                <!-- Billing -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        6. Subscriptions & Billing
+                    </h2>
+                    <p class="text-slate-600">
+                        Subscription fees are billed in advance on a recurring basis. All fees are non-refundable except as required by law. We use Stripe for secure payment processing.
+                    </p>
+                </section>
+
+                <!-- Disclaimers -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        7. Disclaimers & Limitation of Liability
+                    </h2>
+                    <p class="text-slate-600 italic">
+                        The Services are provided "AS IS" and "AS AVAILABLE" without warranties of any kind. Floovioo shall not be liable for any indirect, incidental, special, or consequential damages resulting from the use or inability to use the Services.
+                    </p>
+                </section>
+
+                <!-- Termination -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        8. Termination
+                    </h2>
+                    <p class="text-slate-600">
+                        We reserve the right to terminate or suspend your account at our sole discretion, without notice, for conduct that we believe violates these Terms.
+                    </p>
+                </section>
+
+                <!-- Governing Law -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        9. Governing Law
+                    </h2>
+                    <p class="text-slate-600">
+                        These Terms shall be governed by and construed in accordance with the laws of Kenya, without regard to its conflict of law provisions.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

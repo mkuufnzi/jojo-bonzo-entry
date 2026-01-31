@@ -1,0 +1,178 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-0.5 bg-purple-50 text-purple-600 text-[0.625rem] font-bold rounded-lg border border-purple-100 uppercase tracking-widest">Internal Tools</span>
+            <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">API Playground</h1>
+        </div>
+        <p class="text-slate-500 font-medium">Test the Transactional API generation endpoints.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <!-- API Playground -->
+        <div class="col-span-2 bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden border border-slate-800" id="playground">
+            <div class="absolute top-0 right-0 p-8 opacity-[0.02]">
+                <i data-lucide="terminal" class="w-64 h-64 text-white"></i>
+            </div>
+            
+            <div class="flex items-center justify-between mb-8 relative z-10">
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="code" class="w-4 h-4"></i>
+                    Request Builder
+                </h3>
+                <div class="flex gap-2">
+                     <select id="templateSelector" class="bg-slate-800 text-white text-xs font-bold uppercase tracking-widest border-none rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                         <option value="invoice">Invoice</option>
+                         <option value="receipt">Receipt</option>
+                         <option value="quote">Quote</option>
+                     </select>
+                    <button id="runRequestBtn" class="bg-green-500 hover:bg-green-400 text-white text-[0.625rem] font-bold uppercase tracking-widest px-4 py-1.5 rounded-lg transition-all flex items-center gap-2">
+                        <i data-lucide="play" class="w-3 h-3"></i> POST
+                    </button>
+                </div>
+            </div>
+
+            <div class="font-mono text-[0.8125rem] leading-relaxed relative z-10">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-pink-400 font-bold">POST</span>
+                    <span class="text-slate-300">/api/v1/transactional/generate/<span id="urlType" class="text-emerald-400">invoice</span></span>
+                </div>
+                
+                <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 group relative">
+                    <textarea id="payloadEditor" class="w-full h-96 bg-transparent text-indigo-300 font-mono text-xs focus:outline-none resize-none" spellcheck="false">{
+"template_id": "standard_invoice",
+"data": {
+"invoice_number": "INV-2024-001",
+"date": "2024-01-26",
+"customer": {
+  "name": "Acme Corp",
+  "email": "billing@acme.com"
+},
+"items": [
+  { "desc": "SaaS Subscription", "qty": 1, "price": 99.00 }
+],
+"total": 99.00
+}
+}</textarea>
+                </div>
+
+                <!-- Response Area -->
+                <div id="responseArea" class="mt-4 hidden">
+                    <div class="p-4 rounded-xl text-xs font-mono overflow-auto max-h-40 border"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar Info -->
+         <div class="space-y-6">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Authentication</h3>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p class="text-xs text-slate-500 mb-2">Using API Key from first app:</p>
+                    <code class="block bg-white p-2 rounded border border-slate-200 text-[10px] font-mono break-all text-slate-600"><%= (user.apps && user.apps[0]) ? user.apps[0].apiKey : 'No App Found' %></code>
+                </div>
+            </div>
+         </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    
+    // --- API Playground Logic ---
+    const selector = document.getElementById('templateSelector');
+    const editor = document.getElementById('payloadEditor');
+    const urlType = document.getElementById('urlType');
+    const runBtn = document.getElementById('runRequestBtn');
+    const responseArea = document.getElementById('responseArea');
+    const responseContent = responseArea.querySelector('div');
+
+    const examples = {
+        invoice: JSON.stringify({
+            template_id: "standard_invoice",
+            data: {
+                invoice_number: "INV-2024-001",
+                date: "2024-01-26",
+                customer: { name: "Acme Corp", email: "billing@acme.com" },
+                items: [{ desc: "SaaS Subscription", qty: 1, "price": 99.00 }],
+                total: 99.00
+            }
+        }, null, 2),
+        receipt: JSON.stringify({
+            template_id: "simple_receipt",
+            data: {
+                receipt_number: "RCPT-9988",
+                amount_paid: 49.99,
+                payment_method: "Visa **** 4242"
+            }
+        }, null, 2),
+        quote: JSON.stringify({
+            template_id: "proposal_v1",
+            data: {
+                valid_until: "2024-02-28",
+                services: ["Web Design", "Hosting"]
+            }
+        }, null, 2)
+    };
+
+    if (selector) {
+        selector.addEventListener('change', (e) => {
+            const type = e.target.value;
+            urlType.textContent = type;
+            editor.value = examples[type];
+        });
+
+        runBtn.addEventListener('click', async () => {
+            const type = selector.value;
+            const payload = editor.value;
+            const apiKey = "<%= (user.apps && user.apps[0]) ? user.apps[0].apiKey : '' %>"; 
+
+            runBtn.disabled = true;
+            runBtn.innerHTML = '<i data-lucide="loader" class="w-3 h-3 animate-spin"></i> Processing...';
+            lucide.createIcons();
+
+            responseArea.classList.remove('hidden');
+            responseContent.className = 'p-4 rounded-xl text-xs font-mono overflow-auto max-h-40 border bg-slate-900 border-slate-800 text-slate-300';
+            responseContent.textContent = 'Sending request...';
+
+            try {
+                const res = await fetch(`/api/v1/transactional/generate/${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`, 
+                        'X-API-Key': apiKey,
+                        'Idempotency-Key': `test_${Date.now()}`
+                    },
+                    body: payload
+                });
+
+                const contentType = res.headers.get('content-type');
+                
+                if (res.ok && contentType && contentType.includes('application/pdf')) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    responseContent.className = 'p-4 rounded-xl text-xs font-mono overflow-auto max-h-40 border bg-green-500/10 border-green-500/50 text-green-400';
+                    responseContent.innerHTML = `SUCCESS: PDF Generated used ${blob.size} bytes.<br><a href="${url}" download="test_${type}.pdf" class="underline font-bold mt-2 inline-block">Download PDF</a>`;
+                } else {
+                    const data = await res.json();
+                    responseContent.className = 'p-4 rounded-xl text-xs font-mono overflow-auto max-h-40 border bg-red-500/10 border-red-500/50 text-red-400';
+                    responseContent.textContent = JSON.stringify(data, null, 2);
+                }
+
+            } catch (err) {
+                responseContent.className = 'p-4 rounded-xl text-xs font-mono overflow-auto max-h-40 border bg-red-500/10 border-red-500/50 text-red-400';
+                responseContent.textContent = `Error: ${err.message}`;
+            } finally {
+                runBtn.disabled = false;
+                runBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> POST';
+                lucide.createIcons();
+            }
+        });
+    }
+});
+</script>

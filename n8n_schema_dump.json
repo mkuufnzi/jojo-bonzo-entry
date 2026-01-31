@@ -1,0 +1,551 @@
+{
+  "Floovioo Operation Branding Tenant Brand Voice 1.0.xlsx::brand_basic_profile": {
+    "headers": [
+      "floovioo_id",
+      "brand_id",
+      "brand_name",
+      "brand_slogan",
+      "sector",
+      "sub_sector",
+      "business_type",
+      "niche",
+      "about",
+      "description"
+    ],
+    "example": [
+      "TechCorp",
+      "brand_T",
+      "TechCorp",
+      "TechCorp slogan",
+      "technology",
+      "software",
+      "saas"
+    ]
+  },
+  "Floovioo Operation Branding Tenant Brand Voice 1.0.xlsx::brand_marketing_profile": {
+    "headers": [
+      "marketing_profile_id",
+      "brand_id",
+      "upsell_rules",
+      "reorder_rules",
+      "support_rules",
+      "post_delivery_rules",
+      "content_rules",
+      "publishing_rules",
+      "human_in_the_loop_rules"
+    ],
+    "example": null
+  },
+  "Floovioo Operation Branding Tenant Brand Voice 1.0.xlsx::addresses": {
+    "headers": [
+      "brand_id"
+    ],
+    "example": null
+  },
+  "Floovioo Operation Branding Tenant Brand Voice 1.0.xlsx::online_presence": {
+    "headers": [
+      "brand_id",
+      "platform_id",
+      "platform",
+      "type",
+      "account_id",
+      "page_url",
+      "profile_url"
+    ],
+    "example": [
+      "TechCorp",
+      "fb"
+    ]
+  },
+  "Floovioo Operation Branding Tenant Brand Voice 1.0.xlsx::product_categories": {
+    "headers": [
+      "category_id",
+      "category",
+      "description"
+    ],
+    "example": null
+  },
+  "Floovioo Operation Branding Tenant Brand Voice 1.0.xlsx::brand_templates": {
+    "headers": [
+      "floovioo_id",
+      "brand_id",
+      "service_id",
+      "documentType",
+      "template_id",
+      "created_at",
+      "publish_status",
+      "version",
+      "previous_version",
+      "template_config_id"
+    ],
+    "example": [
+      "TechCorp",
+      "brand_T",
+      "service_id",
+      "invoice",
+      "template_id_1",
+      null,
+      "publshed"
+    ]
+  },
+  "Floovioo Operation Branding Tenant Brand Voice 1.0.xlsx::templates": {
+    "headers": [
+      "template_id",
+      "documentType",
+      "name",
+      "description",
+      "features",
+      "is_premium",
+      "design_id",
+      "is_active",
+      "publish_status",
+      "created_at",
+      "updated_at",
+      "version_history"
+    ],
+    "example": null
+  },
+  "Floovioo Operation Branding Tenant ERP DataMap 1.0.xlsx::Documentation": {
+    "headers": [
+      "Sheet Name",
+      "Purpose",
+      "Key Columns",
+      "Example Data Types",
+      "Notes"
+    ],
+    "example": [
+      "**Company Info**",
+      "Holds branding and essential company details for branding the output documents.",
+      "Company Name",
+      "Text",
+      "Used for headers/footers on branded output."
+    ]
+  },
+  "Floovioo Operation Branding Tenant ERP DataMap 1.0.xlsx::Company Info": {
+    "headers": [
+      "Company Name",
+      "Text Used for headers/footers on branded output",
+      "Logo URL",
+      "Logo Present",
+      "Address Line 1",
+      "City, State, Zip",
+      "Default Tax Rate (%)",
+      "Contact Email"
+    ],
+    "example": [
+      "Apex Solutions",
+      "Apex Solutions - Official",
+      "[URL]",
+      true,
+      "145 Corporate Drive",
+      "Denver, CO 80202",
+      7.5,
+      "info@apexsolutions.com"
+    ]
+  },
+  "Floovioo Operation Branding Tenant ERP DataMap 1.0.xlsx::Customers (Tenants)": {
+    "headers": [
+      "Customer ID",
+      "Company Name",
+      "Contact Person",
+      "Billing Address",
+      "Phone Number",
+      "Payment Terms"
+    ],
+    "example": [
+      "CUST001",
+      "Alpha Dynamics Corp.",
+      "Sarah Jenkins",
+      "450 Tech Park, Suite 100",
+      "(555) 123-4567",
+      "Net 30"
+    ]
+  },
+  "Floovioo Operation Branding Tenant ERP DataMap 1.0.xlsx::Inventory": {
+    "headers": [
+      "Product ID/SKU",
+      "Product Name",
+      "Description",
+      "Unit Cost (Standard)",
+      "Standard Sell Price",
+      "Current Stock Level",
+      "Supplier ID"
+    ],
+    "example": [
+      "SK-401",
+      "Premium Widget",
+      "High-quality general-purpose item",
+      15.5,
+      25.99,
+      450,
+      "SUPP10"
+    ]
+  },
+  "Floovioo Operation Branding Tenant ERP DataMap 1.0.xlsx::Source Invoices": {
+    "headers": [
+      "Source Invoice ID",
+      "Customer ID",
+      "Date Issued",
+      "Due Date",
+      "Total Amount",
+      "Raw File Uploaded",
+      "Source System (ERP)",
+      "Payment Status"
+    ],
+    "example": [
+      "INV-84321",
+      "CUST001",
+      45945,
+      45975,
+      2500,
+      true,
+      "QuickBooks",
+      "Paid"
+    ]
+  },
+  "Floovioo Operation Branding Tenant ERP DataMap 1.0.xlsx::Invoice Line Items": {
+    "headers": [
+      "Line Item ID",
+      "Source Invoice ID",
+      "Product ID/SKU",
+      "Quantity",
+      "Unit Price",
+      "Line Item Total",
+      "Discount Applied (%)",
+      "Fulfilled"
+    ],
+    "example": [
+      "LI-9001",
+      "INV-84321",
+      "SK-401",
+      100,
+      25,
+      2500,
+      0,
+      true
+    ]
+  },
+  "Floovioo Operation Branding Tenant ERP DataMap 1.0.xlsx::Branded Documents Output": {
+    "headers": [
+      "Branded Document ID",
+      "Source Invoice ID",
+      "Date Generated",
+      "Generated By",
+      "Output PDF [URL]",
+      "Delivery Status",
+      "Review Status"
+    ],
+    "example": [
+      "BRAND-2025-001",
+      "INV-84321",
+      45955.4375,
+      "John Doe",
+      "[URL]",
+      "Sent",
+      "Approved"
+    ]
+  },
+  "Floovioo Ops Branding Clients  1.0.xlsx::floovioo_crm": {
+    "headers": [
+      "floovioo_id",
+      "floovio_service_id",
+      "service_tenant_uuid",
+      "brand_id",
+      "subscription_id",
+      "erp_system_ids",
+      "crm_system_ids"
+    ],
+    "example": [
+      "TechCorp",
+      "floo_smb_01",
+      "uuid_smb_101",
+      "brand_T",
+      "sub_basic_1",
+      "erp_1001",
+      "['crm_2001']"
+    ]
+  },
+  "Floovioo Ops Branding Clients  1.0.xlsx::tenant_config": {
+    "headers": [
+      "floovioo_id",
+      "config_id",
+      "erp_system_ids",
+      "crm_system_ids"
+    ],
+    "example": [
+      "TechCorp",
+      "config_TC1",
+      "erp_1001",
+      "['crm_2001']"
+    ]
+  },
+  "Floovioo Ops Branding Clients  1.0.xlsx::tenant_data_sources": {
+    "headers": [
+      "floovioo_id",
+      "config_id",
+      "data_source_id",
+      "type",
+      "auth_url",
+      "username",
+      "access_token_hash"
+    ],
+    "example": [
+      "TechCorp",
+      "config_TC1",
+      "drive_source_1",
+      "Google Drive",
+      "<https://auth.googledrive.com>",
+      "techcorp_user",
+      "hash_gdrive_abc1"
+    ]
+  },
+  "Floovioo Ops Branding Clients  1.0.xlsx::tenant_data_resources": {
+    "headers": [
+      "floovioo_id",
+      "config_id",
+      "data_source_id",
+      "data_resource_id",
+      "type",
+      "folder_url",
+      "file_url",
+      "mime_type",
+      "hash"
+    ],
+    "example": [
+      "TechCorp",
+      "config_TC1",
+      "drive_source_1",
+      "resource_TC1a",
+      "Google Sheet",
+      "folder_TC1",
+      "<https://docs.google.com/spreadsheets/d/TC1a>",
+      "application/vnd.google-apps.spreadsheet",
+      "hash_TC1a"
+    ]
+  },
+  "Floovioo Ops Branding Clients  1.0.xlsx::tenant_data_source_resource_acc": {
+    "headers": [
+      "floovioo_id",
+      "config_id",
+      "data_source_id",
+      "data_resource_id",
+      "hash",
+      "timestamp",
+      "status_code",
+      "error",
+      "data"
+    ],
+    "example": null
+  },
+  "Floovioo Ops Branding State Maching Engine 1.0.xlsx::event_log": {
+    "headers": [
+      "floovioo_id",
+      "floovio_service_id",
+      "service_tenant_uuid",
+      "brand_id",
+      "event_log_id",
+      "event_id"
+    ],
+    "example": null
+  },
+  "Floovioo Ops Branding State Maching Engine 1.0.xlsx::event_queue": {
+    "headers": [
+      "floovioo_id",
+      "floovio_service_id",
+      "service_tenant_uuid",
+      "brand_id",
+      "event_log_id",
+      "event_id",
+      "event_queue_id",
+      "jobId",
+      "startedAt",
+      "completedAt",
+      "status"
+    ],
+    "example": null
+  },
+  "Floovioo Ops Branding State Maching Engine 1.0.xlsx::event_meta_data": {
+    "headers": [
+      "event_id",
+      "type",
+      "startedAt",
+      "completedAt",
+      "status",
+      "reason",
+      "requestData",
+      "responseData",
+      "metaData",
+      "computed_output"
+    ],
+    "example": null
+  },
+  "Floovioo Ops Branding State Maching Engine 1.0.xlsx::event_service_resource_usage": {
+    "headers": [
+      "event_id",
+      "service_resource_id",
+      "type",
+      "name",
+      "billable",
+      "api",
+      "endpoint",
+      "credentials",
+      "input_cost",
+      "output_cost",
+      "credits_used",
+      "credits_allocated",
+      "accessedAt",
+      "reponseSentAt",
+      "duration",
+      "status",
+      "status_code",
+      "status_message",
+      "error"
+    ],
+    "example": null
+  },
+  "Floovioo Ops Branding State Maching Engine 1.0.xlsx::workflow_event_log": {
+    "headers": [
+      "event_id",
+      "workflow_id",
+      "step_id",
+      "description",
+      "input",
+      "started_at",
+      "output",
+      "completed_at",
+      "service_resource_id",
+      "input_credits",
+      "output_credits"
+    ],
+    "example": null
+  },
+  "Floovioo Ops Branding Workflow Prompts 1.0.xlsx::services": {
+    "headers": [
+      "service_id",
+      "name",
+      "description",
+      "objective",
+      "inputs",
+      "output",
+      "owners",
+      "business_process_id"
+    ],
+    "example": [
+      "transaction_branding",
+      "Operations Branding",
+      "Add design layer to transaction documents",
+      null,
+      "generic_business_document",
+      "design"
+    ]
+  },
+  "Floovioo Ops Branding Workflow Prompts 1.0.xlsx::workflows": {
+    "headers": [
+      "workflow_id",
+      "name",
+      "description",
+      "usecases",
+      "Sub_Workflows",
+      "Objective",
+      "Owner",
+      "Status",
+      "Stakeholder"
+    ],
+    "example": [
+      "wf_generate_document",
+      "Document Generation Workflow",
+      "Automated process for generating documents from structured data.",
+      "Invoice Generation, Contract Drafting, Report Creation",
+      "swf_analyze, swf_outline, swf_draft, swf_review, swf_publish, swf_brand",
+      "Automate document creation from data inputs with applied branding.",
+      "Operations",
+      "Active",
+      "Product Lead"
+    ]
+  },
+  "Floovioo Ops Branding Workflow Prompts 1.0.xlsx::sub_wokflows": {
+    "headers": [
+      "workflow_id",
+      "sub_workflow_id",
+      "name",
+      "decription",
+      "Input",
+      "Output",
+      "Dependencies"
+    ],
+    "example": [
+      "wf_generate_document",
+      "swf_analyze",
+      "Analyze Request & Data",
+      "Extracts, validates, and structures input data for content generation.",
+      "Raw Request Details",
+      "Updated Structure Metadata",
+      "None"
+    ]
+  },
+  "Floovioo Ops Branding Workflow Prompts 1.0.xlsx::business_processes": {
+    "headers": [
+      "bpm_id",
+      "name",
+      "description",
+      "subprocesses",
+      "Objective",
+      "Owner",
+      "Key Metric"
+    ],
+    "example": [
+      "bpm_generate_document",
+      "bpm_generate_document",
+      "bpm_generate_document",
+      "bpm_generate_document_subprocesses",
+      "Automate document creation from data inputs",
+      "Operations",
+      "Document Generation Time (DGT)"
+    ]
+  },
+  "Floovioo Ops Branding Workflow Prompts 1.0.xlsx::business_process_sub_processes": {
+    "headers": [],
+    "example": [
+      "bmp_id",
+      "bpm_process_subprocess_id",
+      "name",
+      "input",
+      "instructions",
+      "milestones",
+      "output",
+      "metadata"
+    ]
+  },
+  "Floovioo Ops Branding Workflow Prompts 1.0.xlsx::process_steps": {
+    "headers": [
+      "process_step_id",
+      "name",
+      "description",
+      "inputDescription",
+      "input",
+      "outputDescription",
+      "ouput",
+      "dependecies",
+      "owners",
+      "instructions",
+      "context",
+      "dependecies",
+      "owners",
+      "instructions",
+      "context"
+    ],
+    "example": [
+      "doc_analyze_request",
+      "**Initial Request Analysis**",
+      "Understand the core purpose, target audience, and required contents of the document request.",
+      "Raw Request Details",
+      "JSON Request Data",
+      "Key Document Parameters",
+      "**Structure Metadata**",
+      "None",
+      "AI Core",
+      "Extract key requirements (doc type, data fields, audience, tone) from the raw JSON request.",
+      "Used for the first pass of request handling."
+    ]
+  }
+}

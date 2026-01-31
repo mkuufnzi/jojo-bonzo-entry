@@ -1,0 +1,173 @@
+<script nonce="<%= nonce %>">
+/**
+ * Sidebar Controller - Production Grade
+ * Uses data-attribute pattern for state management
+ * Single source of truth, CSS-driven transitions
+ */
+(function initSidebar() {
+    'use strict';
+
+    // DOM Elements
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const overlay = document.getElementById('sidebarOverlay');
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const openBtn = document.getElementById('openSidebar');
+    const closeBtn = document.getElementById('closeSidebar');
+    
+    if (!sidebar) return;
+
+    // Breakpoint thresholds
+    const BREAKPOINTS = {
+        tablet: 768,
+        desktop: 1024
+    };
+
+    // State
+    const state = {
+        get isCollapsed() {
+            return sidebar.dataset.collapsed === 'true';
+        },
+        set isCollapsed(value) {
+            sidebar.dataset.collapsed = String(value);
+            document.body.dataset.sidebarCollapsed = String(value);
+            localStorage.setItem('sidebarCollapsed', String(value));
+            
+            // Update ARIA
+            if (toggleBtn) {
+                toggleBtn.setAttribute('aria-expanded', String(!value));
+            }
+        },
+        get isMobileOpen() {
+            return sidebar.dataset.mobileOpen === 'true';
+        },
+        set isMobileOpen(value) {
+            sidebar.dataset.mobileOpen = String(value);
+            document.body.dataset.sidebarMobileOpen = String(value);
+            
+            if (overlay) {
+                overlay.dataset.visible = String(value);
+                overlay.setAttribute('aria-hidden', String(!value));
+            }
+            
+            // Prevent body scroll when open
+            document.body.style.overflow = value ? 'hidden' : '';
+        }
+    };
+
+    // Get current breakpoint
+    function getBreakpoint() {
+        const width = window.innerWidth;
+        if (width >= BREAKPOINTS.desktop) return 'desktop';
+        if (width >= BREAKPOINTS.tablet) return 'tablet';
+        return 'mobile';
+    }
+
+    // Initialize state from localStorage (for desktop)
+    function hydrateState() {
+        const breakpoint = getBreakpoint();
+        
+        if (breakpoint === 'desktop') {
+            const savedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            state.isCollapsed = savedCollapsed;
+        }
+        
+        // Ensure mobile sidebar is closed on init
+        if (breakpoint === 'mobile') {
+            state.isMobileOpen = false;
+        }
+    }
+
+    // Mobile sidebar functions
+    function openMobileSidebar() {
+        state.isMobileOpen = true;
+        
+        // Focus first focusable element for accessibility
+        setTimeout(() => {
+            const firstFocusable = sidebar.querySelector('a, button');
+            if (firstFocusable) firstFocusable.focus();
+        }, 100);
+    }
+
+    function closeMobileSidebar() {
+        state.isMobileOpen = false;
+        
+        // Return focus to trigger
+        if (openBtn) openBtn.focus();
+    }
+
+    // Desktop toggle
+    function toggleDesktopSidebar() {
+        state.isCollapsed = !state.isCollapsed;
+    }
+
+    // Handle resize with debounce
+    let resizeTimer;
+    function handleResize() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const breakpoint = getBreakpoint();
+            
+            // Close mobile sidebar when resizing to larger screens
+            if (breakpoint !== 'mobile' && state.isMobileOpen) {
+                state.isMobileOpen = false;
+            }
+            
+            // Apply saved desktop state when entering desktop
+            if (breakpoint === 'desktop') {
+                hydrateState();
+            }
+        }, 100);
+    }
+
+    // Keyboard handler
+    function handleKeydown(e) {
+        // Escape closes mobile sidebar
+        if (e.key === 'Escape' && state.isMobileOpen) {
+            closeMobileSidebar();
+        }
+    }
+
+    // Event Listeners
+    if (openBtn) {
+        openBtn.addEventListener('click', openMobileSidebar);
+    }
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeMobileSidebar);
+    }
+    
+    if (overlay) {
+        overlay.addEventListener('click', closeMobileSidebar);
+    }
+    
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleDesktopSidebar);
+    }
+    
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('keydown', handleKeydown);
+
+    // Initialize
+    hydrateState();
+
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    // Add active state based on current URL
+    const currentUrl = window.location.pathname;
+    document.querySelectorAll('#sidebar a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        const isActive = href === currentUrl || 
+                         (href !== '/' && href !== '/dashboard' && currentUrl.startsWith(href));
+        
+        if (isActive) {
+            link.classList.remove('text-slate-600', 'dark:text-slate-400');
+            link.classList.add('bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-600', 'dark:text-blue-400');
+            link.setAttribute('aria-current', 'page');
+        }
+    });
+})();
+</script>

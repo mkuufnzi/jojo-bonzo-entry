@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= service.name %> - Coming Soon - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+    <style nonce="<%= nonce %>">
+        #sidebar, #mainContent {
+            transition-property: width, margin-left, transform;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+
+    <%- include('../partials/sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        
+        <%- include('../partials/dashboard-header', { title: 'Coming Soon', user: user }) %>
+
+        <main class="flex-1 flex items-center justify-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex justify-center">
+                <div class="max-w-2xl w-full bg-white rounded-xl shadow-lg p-8 text-center">
+                <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 mb-6">
+                    <svg class="h-10 w-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                </div>
+                
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                    <%= service.name %> is Coming Soon!
+                </h1>
+                
+                <p class="text-lg text-gray-600 mb-8">
+                    Thanks for being a valued member, <strong><%= user.name || user.email %></strong>! <br>
+                    We are prioritizing this tool for our registered users. You'll be the first to know when it's live.
+                </p>
+
+                <div class="bg-blue-50 rounded-lg p-6 text-left">
+                    <h3 class="font-semibold text-blue-900 mb-2">What to expect:</h3>
+                    <ul class="list-disc list-inside text-blue-800 space-y-2">
+                        <li>High-performance processing</li>
+                        <li>API access included in your plan</li>
+                        <li>Priority support</li>
+                    </ul>
+                </div>
+
+                <div class="mt-8">
+                    <a href="/dashboard" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <%- include('../partials/footer') %>
+    </div>
+
+    <%- include('../partials/sidebar-script') %>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<% 
+    // Defaults
+    const s = typeof service !== 'undefined' ? service : { slug: 'default' }; 
+    const isSidebar = typeof type !== 'undefined' && type === 'sidebar';
+    const slug = s.slug;
+
+    // Icon Paths
+    const icons = {
+        'ai-doc-generator': {
+            path: 'M19 14l-7 7m0 0l-7-7m7 7V3m7 11V3m-14 11V3', // Just a placeholder, let's use a sparkle-like icon
+            path: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.262A1 1 0 0012 19v0a1 1 0 00.512.871l.548.262M9.663 17.02l.504-.504a3 3 0 114.666 0l.504.504', // Sparkles/Lightbulb
+            colorClass: 'text-indigo-400',
+            bgClass: 'bg-indigo-500/10'
+        },
+        'html-to-pdf': {
+            path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', // Document Code/Text
+            colorClass: 'text-red-600',
+            bgClass: 'bg-red-50'
+        },
+        'docx-to-pdf': {
+            path: 'M15.41 2H8.59a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6.82a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM12 17l-4-4h3V7h2v6h3l-4 4z', // Doc downloadish
+            colorClass: 'text-blue-600',
+            bgClass: 'bg-blue-50'
+        },
+        'compress-pdf': {
+            path: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z', // Squeeze / Pressure
+            colorClass: 'text-green-600',
+            bgClass: 'bg-green-50'
+        },
+        'image-to-pdf': {
+            path: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', // Image
+            colorClass: 'text-purple-600',
+            bgClass: 'bg-purple-50'
+        },
+        'merge-pdf': {
+            path: 'M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2', // Stacked docs
+            colorClass: 'text-orange-600',
+            bgClass: 'bg-orange-50'
+        },
+        'split-pdf': {
+            path: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z', // Scissors
+            colorClass: 'text-pink-600',
+            bgClass: 'bg-pink-50'
+        },
+        'protect-pdf': {
+            path: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', // Lock
+            colorClass: 'text-teal-600',
+            bgClass: 'bg-teal-50'
+        },
+        'pdf-to-image': {
+            path: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
+            colorClass: 'text-cyan-600',
+            bgClass: 'bg-cyan-50'
+        },
+        'n8n-echo-test': {
+            path: 'M13 10V3L4 14h7v7l9-11h-7z', // Lightning
+            colorClass: 'text-yellow-600',
+            bgClass: 'bg-yellow-50'
+        },
+        'browse': {
+            path: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z', // Grid
+            colorClass: 'text-purple-600',
+            bgClass: 'bg-purple-50'
+        },
+        // Fallback
+        'default': {
+            path: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10', // Box
+            colorClass: 'text-indigo-600',
+            bgClass: 'bg-indigo-50'
+        }
+    };
+
+    // Mapping known services to icons approx
+    let iconKey = 'default';
+    if (slug in icons) iconKey = slug;
+    else {
+        // Simple heuristics
+        if (slug.includes('html')) iconKey = 'html-to-pdf';
+        else if (slug.includes('docx') || slug.includes('word')) iconKey = 'docx-to-pdf';
+        else if (slug.includes('compress')) iconKey = 'compress-pdf';
+        else if (slug.includes('image')) iconKey = 'image-to-pdf';
+        else if (slug.includes('merge')) iconKey = 'merge-pdf';
+        else if (slug.includes('split')) iconKey = 'split-pdf';
+        else if (slug.includes('protect') || slug.includes('lock')) iconKey = 'protect-pdf';
+        else if (slug.includes('n8n')) iconKey = 'n8n-echo-test';
+    }
+
+    const def = icons[iconKey] || icons['default'];
+%>
+
+<% if (isSidebar) { %>
+    <!-- Sidebar Icon (Monochrome usually, or subtle) -->
+     <svg class="w-5 h-5 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= def.path %>"></path>
+    </svg>
+<% } else { %>
+    <!-- Grid/Dashboard Icon (Colorful) -->
+    <div class="w-10 h-10 <%= def.bgClass %> rounded-lg flex items-center justify-center <%= def.colorClass %> mb-2 group-hover:scale-110 transition-transform">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= def.path %>"></path>
+        </svg>
+    </div>
+<% } %>

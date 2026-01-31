@@ -1,0 +1,106 @@
+<% if (activeService === 'hub') { %>
+    <!-- Hub Navigation -->
+    <a href="/dashboard" class="<%= (activeService === 'hub' && locals.title === 'Dashboard') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+        <i data-lucide="layout-dashboard" class="mr-3 h-5 w-5 text-blue-500"></i>
+        Dashboard
+    </a>
+
+    <div class="mt-8 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Management</div>
+    <a href="/dashboard/apps" class="<%= activeService === 'apps' ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+        <i data-lucide="key" class="<%= activeService === 'apps' ? 'text-blue-500' : 'text-slate-500 group-hover:text-blue-400' %> mr-3 h-5 w-5"></i>
+        Apps
+    </a>
+    <a href="/dashboard/subscription" class="<%= activeService === 'subscription' ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+        <i data-lucide="zap" class="<%= activeService === 'subscription' ? 'text-amber-500' : 'text-slate-500 group-hover:text-amber-400' %> mr-3 h-5 w-5"></i>
+        Subscription
+    </a>
+    <a href="/dashboard/billing" class="<%= activeService === 'billing' ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+        <i data-lucide="credit-card" class="<%= activeService === 'billing' ? 'text-emerald-500' : 'text-slate-500 group-hover:text-emerald-400' %> mr-3 h-5 w-5"></i>
+        Billing
+    </a>
+
+    <div class="mt-8 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Services</div>
+    <a href="/dashboard/transactional" class="group flex items-center px-3 py-2 text-sm font-bold rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+        <span class="w-5 h-5 bg-blue-900/50 text-blue-200 border border-blue-800/50 rounded flex items-center justify-center text-[0.625rem] mr-3">T</span>
+        Transactional
+    </a>
+    <a href="/dashboard/retention" class="group flex items-center px-3 py-2 text-sm font-bold rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all mt-1">
+        <span class="w-5 h-5 bg-teal-900/50 text-teal-200 border border-teal-800/50 rounded flex items-center justify-center text-[0.625rem] mr-3">R</span>
+        Retention
+    </a>
+    <a href="/dashboard/sales" class="group flex items-center px-3 py-2 text-sm font-bold rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all mt-1">
+        <span class="w-5 h-5 bg-indigo-900/50 text-indigo-200 border border-indigo-800/50 rounded flex items-center justify-center text-[0.625rem] mr-3">S</span>
+        Sales Enablement
+    </a>
+    <a href="/dashboard/content" class="group flex items-center px-3 py-2 text-sm font-bold rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all mt-1">
+        <span class="w-5 h-5 bg-purple-900/50 text-purple-200 border border-purple-800/50 rounded flex items-center justify-center text-[0.625rem] mr-3">C</span>
+        Content Engine
+    </a>
+
+<% } else { %>
+    <!-- Service Specific Context -->
+    <a href="/dashboard" class="text-slate-400 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl mb-6 hover:bg-slate-800 transition-all">
+        <i data-lucide="arrow-left" class="mr-3 h-4 w-4"></i>
+        Back to Dashboard
+    </a>
+
+    <div class="px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2"><%= activeService %> Operations</div>
+    
+    <% if (activeService === 'transactional') { %>
+        <!-- Activity -->
+        <a href="/dashboard/transactional" class="<%= (locals.title === 'Transactional Branding') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+            <i data-lucide="activity" class="mr-3 h-5 w-5 text-blue-500"></i>
+            Live Activity
+        </a>
+
+        <!-- Setup -->
+        <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Setup</div>
+        <a href="/dashboard/connections" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="link" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
+            Connections
+        </a>
+        <a href="/dashboard/brand" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="palette" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
+            Brand Standards
+        </a>
+
+        <!-- Automation -->
+        <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Automation</div>
+        <a href="/dashboard/workflows?service=transactional" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="git-branch" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
+            Workflows
+        </a>
+
+        <!-- Developer -->
+        <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Developer</div>
+        <a href="/dashboard/transactional/templates" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="layers" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
+            Templates
+        </a>
+        <a href="/dashboard/transactional/api" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="terminal" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
+            API Keys
+        </a>
+    <% } else if (activeService === 'retention') { %>
+        <a href="/dashboard/retention" class="bg-slate-800 text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl shadow-sm shadow-black/20">
+            <i data-lucide="activity" class="mr-3 h-5 w-5 text-teal-500"></i>
+            Overview
+        </a>
+        <a href="/dashboard/retention/triggers" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="alert-circle" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-teal-400"></i>
+            Churn Triggers
+        </a>
+    <% } %>
+<% } %>
+
+<div class="mt-auto pt-8">
+    <div class="h-px bg-slate-800 mb-4 mx-3"></div>
+    <a href="/dashboard/settings" class="<%= activeService === 'settings' ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-400 hover:text-white hover:bg-slate-800' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+        <i data-lucide="settings" class="<%= activeService === 'settings' ? 'text-white' : 'text-slate-500 group-hover:text-white' %> mr-3 h-5 w-5"></i>
+        Settings
+    </a>
+    <a href="/auth/logout" class="text-slate-400 hover:text-red-400 group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all hover:bg-red-900/20 mt-1">
+        <i data-lucide="log-out" class="mr-3 h-5 w-5 text-red-900"></i>
+        Sign Out
+    </a>
+</div>

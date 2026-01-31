@@ -1,0 +1,784 @@
+<%- include('../partials/head', { title: 'HTML to PDF Converter - Floovioo ' }) %>
+
+    <body class="bg-gray-100 min-h-screen font-sans">
+
+        <%- include('../partials/sidebar') %>
+
+            <div id="mainContent" class="flex flex-col min-h-screen ">
+                <%- include('../partials/dashboard-header', {title: 'HTML to PDF Converter' , user: user }) %>
+
+                    <main class="flex-1">
+                        <div class="max-w-7xl mx-auto px-6 lg:px-8 sm:px-6 lg:px-8 py-8">
+                            <div class="mb-8">
+                                <p class="text-gray-600 mt-1">Convert URLs or raw HTML to PDF instantly.</p>
+                            </div>
+
+                            <!-- Service Navigation Tabs -->
+                            <div
+                                class="bg-white rounded-t-xl shadow-sm border-b border-gray-200 mb-6 flex flex-wrap gap-4 p-4">
+                                <nav class="flex flex-nowrap overflow-x-auto no-scrollbar -mb-px w-full gap-4">
+                                    <button data-service-tab="home" id="nav-home"
+                                        class="nav-tab-active flex-shrink-0 w-32 md:w-auto py-4 px-4 text-center border-b-2 font-medium text-sm transition-colors">
+                                        Converter
+                                    </button>
+                                    <button data-service-tab="history" id="nav-history"
+                                        class="flex-shrink-0 w-32 md:w-auto py-4 px-4 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
+                                        History
+                                    </button>
+                                    <button data-service-tab="usage" id="nav-usage"
+                                        class="flex-shrink-0 w-32 md:w-auto py-4 px-4 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
+                                        Usage & Billing
+                                    </button>
+                                    <button data-service-tab="apps" id="nav-apps"
+                                        class="flex-shrink-0 w-32 md:w-auto py-4 px-4 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
+                                        Connected Apps
+                                    </button>
+                                </nav>
+                            </div>
+
+                            <!-- Tab Content: Home (Converter) -->
+                            <div id="tab-content-home" class="service-tab-content">
+                                <!-- Error Alert -->
+                                <div id="errorAlert"
+                                    class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative"
+                                    role="alert">
+                                    <strong class="font-bold">Error!</strong>
+                                    <span class="block sm:inline" id="errorMessage">Something went wrong.</span>
+                                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3" id="closeErrorBtn">
+                                        <svg class="fill-current h-6 w-6 text-red-500" role="button"
+                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <title>Close</title>
+                                            <path
+                                                d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                                        </svg>
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                                    <!-- Input Section -->
+                                    <div class="bg-white rounded-[0.75rem] shadow-sm border border-gray-200 p-6">
+                                        <div class="flex border-b border-gray-200 mb-6">
+                                            <button id="tabUrl"
+                                                class="px-4 py-2 font-medium text-sm focus:outline-none tab-active"
+                                                data-input-tab="url">URL</button>
+                                            <button id="tabHtml"
+                                                class="px-4 py-2 font-medium text-sm text-gray-500 hover:text-gray-700 focus:outline-none"
+                                                data-input-tab="html">Raw HTML</button>
+                                        </div>
+
+                                        <form id="pdfForm" class="space-y-4">
+                                            <!-- App Context Selector -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Run as
+                                                    App</label>
+                                                <select name="appId"
+                                                    class="w-full rounded-lg border-gray-300 border p-2 text-sm">
+                                                    <% // Filter apps that have this service enabled AND are active
+                                                        const enabledApps=connectedApps.filter(item=> item.isEnabled &&
+                                                        item.app.isActive);
+                                                        %>
+                                                        <% if (enabledApps.length> 0) { %>
+                                                            <% enabledApps.forEach(item=> { %>
+                                                                <option value="<%= item.app.id %>"
+                                                                    data-api-key="<%= item.app.apiKey %>">
+                                                                    <%= item.app.name %>
+                                                                </option>
+                                                                <% }); %>
+                                                                    <% } else { %>
+                                                                        <option value="" disabled selected>No authorized
+                                                                            apps found</option>
+                                                                        <% } %>
+                                                </select>
+                                                <% if (enabledApps.length===0) { %>
+                                                    <p class="text-xs text-red-500 mt-1">Please enable this service for
+                                                        an
+                                                        active app in the "Connected Apps" tab.</p>
+                                                    <% } else { %>
+                                                        <p class="text-xs text-gray-500 mt-1">Usage will be logged to
+                                                            this
+                                                            app.</p>
+                                                        <% } %>
+                                            </div>
+
+                                            <div id="urlInputGroup">
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Website
+                                                    URL</label>
+                                                <input type="url" name="url" placeholder="https://example.com"
+                                                    class="w-full rounded-lg border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    <%=enabledApps.length===0 ? 'disabled' : '' %>>
+                                            </div>
+
+                                            <div id="htmlInputGroup" class="hidden">
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">HTML
+                                                    Content</label>
+                                                <textarea name="html" rows="10"
+                                                    class="w-full rounded-lg border-gray-300 border p-2 font-mono text-sm focus:ring-blue-500 focus:border-blue-500"
+                                                    placeholder="<h1>Hello World</h1>" <%=enabledApps.length===0
+                                                    ? 'disabled' : '' %>></textarea>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label
+                                                        class="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                                                    <select name="format"
+                                                        class="w-full rounded-lg border-gray-300 border p-2"
+                                                        <%=enabledApps.length===0 ? 'disabled' : '' %>>
+                                                        <option value="A4">A4</option>
+                                                        <option value="Letter">Letter</option>
+                                                        <option value="Legal">Legal</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        class="block text-sm font-medium text-gray-700 mb-1">Orientation</label>
+                                                    <select name="landscape"
+                                                        class="w-full rounded-lg border-gray-300 border p-2"
+                                                        <%=enabledApps.length===0 ? 'disabled' : '' %>>
+                                                        <option value="false">Portrait</option>
+                                                        <option value="true">Landscape</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="pt-4">
+                                                <button type="submit" id="convertBtn"
+                                                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center <%= enabledApps.length === 0 ? 'opacity-50 cursor-not-allowed' : '' %>"
+                                                    <%=enabledApps.length===0 ? 'disabled' : '' %>>
+                                                    <span id="btnText">Convert to PDF</span>
+                                                    <svg id="btnSpinner"
+                                                        class="animate-spin ml-2 h-5 w-5 text-white hidden"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                            stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                        </path>
+                                                    </svg>
+                                                </button>
+                                                <p class="text-xs text-gray-500 mt-2 text-center">Cost: $<%=
+                                                        service.pricePerRequest.toFixed(2) %> per request</p>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Preview Section -->
+                                    <div
+                                        class="bg-gray-50 rounded-[0.75rem] border border-gray-200 p-6 flex flex-col min-h-[37.5rem]">
+                                    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                                            <h2 class="text-lg font-semibold text-gray-800">Preview</h2>
+                                            <a id="openPdfBtn" href="#" target="_blank"
+                                                class="hidden text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                                                Open in New Tab
+                                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                                    </path>
+                                                </svg>
+                                            </a>
+                                        </div>
+
+                                        <div
+                                            class="flex-1 bg-white rounded-lg shadow-inner border border-gray-200 relative overflow-auto">
+                                            <div id="emptyState"
+                                                class="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                                    </path>
+                                                </svg>
+                                                <h3 class="mt-2 text-sm font-medium text-gray-900">No PDF generated</h3>
+                                                <p class="mt-1 text-sm text-gray-500">Enter a URL to see a live preview,
+                                                    or
+                                                    convert to PDF.</p>
+                                                <p class="mt-2 text-xs text-gray-400 max-w-xs">Note: Generating a
+                                                    preview
+                                                    may take a few seconds.</p>
+                                            </div>
+                                            <div id="loadingPreview"
+                                                class="absolute inset-0 flex flex-col items-center justify-center bg-white hidden z-10">
+                                                <svg class="animate-spin h-8 w-8 text-blue-600 mb-2"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                        stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                    </path>
+                                                </svg>
+                                                <p class="text-sm text-gray-500">Generating preview...</p>
+                                            </div>
+                                            <img id="pdfPreview" class="w-full h-auto hidden" src=""
+                                                alt="Website Preview">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: History -->
+                            <div id="tab-content-history" class="service-tab-content hidden">
+                                <div class="bg-white rounded-[0.75rem] shadow-sm border border-gray-200 overflow-hidden">
+                                    <div class="px-6 py-4 border-b border-gray-100">
+                                        <h2 class="text-lg font-semibold text-gray-800">Request History</h2>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th
+                                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Time</th>
+                                                    <th
+                                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        App / Key</th>
+                                                    <th
+                                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Action</th>
+                                                    <th
+                                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Status</th>
+                                                    <th
+                                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Cost</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                <% if (logs.length===0) { %>
+                                                    <tr>
+                                                        <td colspan="5"
+                                                            class="px-6 py-8 text-center text-gray-500 text-sm">
+                                                            No history available.
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                                        <% logs.forEach(log=> { %>
+                                                            <tr>
+                                                                <td
+                                                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                    <%= new Date(log.createdAt).toLocaleString() %>
+                                                                </td>
+                                                                <td
+                                                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                                    <% if (log.app) { %>
+                                                                        <span class="font-medium">
+                                                                            <%= log.app.name %>
+                                                                        </span>
+                                                                        <span
+                                                                            class="text-xs text-gray-400 block font-mono">...
+                                                                            <%= log.app.apiKey.slice(-4) %>
+                                                                        </span>
+                                                                        <% } else { %>
+                                                                            <span
+                                                                                class="text-gray-500 italic">Dashboard</span>
+                                                                            <% } %>
+                                                                </td>
+                                                                <td
+                                                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                                    <%= log.resourceType || 'PDF' %>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <% if (log.status==='success' ) { %>
+                                                                        <span
+                                                                            class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Success</span>
+                                                                        <% } else { %>
+                                                                            <span
+                                                                                class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Failed</span>
+                                                                            <% } %>
+                                                                </td>
+                                                                <td
+                                                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                                                    $<%= (log.cost || 0).toFixed(2) %>
+                                                                </td>
+                                                            </tr>
+                                                            <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: Usage -->
+                            <div id="tab-content-usage" class="service-tab-content hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-start">
+                                    <div class="bg-white rounded-[0.75rem] shadow-sm border border-gray-200 p-6">
+                                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">
+                                            Total
+                                            Cost (30 Days)</h3>
+                                        <% let totalCost=0; Object.values(dailyUsage).forEach(d=> totalCost += d.cost);
+                                            %>
+                                            <p class="text-3xl font-bold text-gray-900">$<%= totalCost.toFixed(2) %>
+                                            </p>
+                                    </div>
+                                    <div class="bg-white rounded-[0.75rem] shadow-sm border border-gray-200 p-6">
+                                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">
+                                            Total
+                                            Requests (30 Days)</h3>
+                                        <% let totalReqs=0; Object.values(dailyUsage).forEach(d=> totalReqs += d.count);
+                                            %>
+                                            <p class="text-3xl font-bold text-gray-900">
+                                                <%= totalReqs %>
+                                            </p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-[0.75rem] shadow-sm border border-gray-200 p-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Daily Usage</h3>
+                                    <div class="relative h-64 w-full">
+                                        <canvas id="usageChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: Connected Apps -->
+                            <div id="tab-content-apps" class="service-tab-content hidden">
+                                <div class="bg-white rounded-[0.75rem] shadow-sm border border-gray-200 overflow-hidden">
+                                    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                                        <h2 class="text-lg font-semibold text-gray-800">Connected Apps</h2>
+                                        <a href="/apps" class="text-sm text-blue-600 hover:underline">Manage Apps</a>
+                                    </div>
+                                    <div class="p-6">
+                                        <div class="space-y-4">
+                                            <% const activeConnectedApps=connectedApps.filter(ca=> ca.app.isActive); %>
+                                                <% if (activeConnectedApps.length===0) { %>
+                                                    <div class="text-center py-8">
+                                                        <p class="text-gray-500 mb-2">No apps are currently connected to
+                                                            this service.</p>
+                                                        <a href="/apps" class="text-blue-600 hover:underline text-sm">Go
+                                                            to
+                                                            Apps Dashboard to connect an app</a>
+                                                    </div>
+                                                    <% } %>
+                                                        <% activeConnectedApps.forEach(item=> {
+                                                            const app = item.app;
+                                                            %>
+                                                            <div
+                                                                class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                                <div>
+                                                                    <h3 class="font-semibold text-gray-900">
+                                                                        <%= app.name %>
+                                                                    </h3>
+                                                                    <p class="text-xs text-gray-500 font-mono">ID: <%=
+                                                                            app.id %>
+                                                                    </p>
+                                                                </div>
+                                                                <label
+                                                                    class="relative inline-flex items-center cursor-pointer">
+                                                                    <input type="checkbox"
+                                                                        class="sr-only peer app-toggle"
+                                                                        data-app-id="<%= app.id %>" <%=item.isEnabled
+                                                                        ? 'checked' : '' %>>
+                                                                    <div
+                                                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[0.125rem] after:left-[0.125rem] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+                                                                    </div>
+                                                                    <span
+                                                                        class="ml-3 text-sm font-medium text-gray-900">
+                                                                        <%= item.isEnabled ? 'Enabled' : 'Disabled' %>
+                                                                    </span>
+                                                                </label>
+                                                            </div>
+                                                            <% }); %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </main>
+            </div>
+
+            <script nonce="<%= nonce %>">
+                document.addEventListener('DOMContentLoaded', () => {
+                    // --- Tab Switching Logic ---
+                    const serviceTabs = document.querySelectorAll('[data-service-tab]');
+
+                    serviceTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            const tabName = tab.dataset.serviceTab;
+
+                            // Hide all contents
+                            document.querySelectorAll('.service-tab-content').forEach(el => el.classList.add('hidden'));
+                            // Show selected content
+                            document.getElementById('tab-content-' + tabName).classList.remove('hidden');
+
+                            // Reset all tabs styles
+                            serviceTabs.forEach(btn => {
+                                btn.classList.remove('nav-tab-active', 'border-b-2', 'border-blue-600');
+                                btn.classList.add('border-transparent', 'text-gray-500');
+                            });
+
+                            // Set active tab style
+                            tab.classList.add('nav-tab-active');
+                            tab.classList.remove('border-transparent', 'text-gray-500');
+                        });
+                    });
+
+                    // --- Chart.js for Usage Tab ---
+                    const dailyUsage = <%- JSON.stringify(dailyUsage || {}) %>; // Injected via EJS
+                    const ctx = document.getElementById('usageChart').getContext('2d');
+
+                    const labels = [];
+                    const dataCost = [];
+                    const dataCount = [];
+                    const today = new Date();
+
+                    for (let i = 29; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(today.getDate() - i);
+                        const dateStr = d.toISOString().split('T')[0];
+                        labels.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+
+                        const stat = dailyUsage[dateStr] || { count: 0, cost: 0 };
+                        dataCost.push(stat.cost);
+                        dataCount.push(stat.count);
+                    }
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Requests',
+                                    data: dataCount,
+                                    backgroundColor: '#93c5fd',
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    label: 'Cost ($)',
+                                    data: dataCost,
+                                    backgroundColor: '#2563eb',
+                                    yAxisID: 'y1',
+                                    type: 'line'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: { display: true, text: 'Requests' }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    grid: { drawOnChartArea: false },
+                                    title: { display: true, text: 'Cost ($)' }
+                                }
+                            }
+                        }
+                    });
+
+                    // --- App Toggle Logic ---
+                    document.querySelectorAll('.app-toggle').forEach(toggle => {
+                        toggle.addEventListener('change', async (e) => {
+                            const appId = e.target.dataset.appId;
+                            const enable = e.target.checked;
+                            const label = e.target.parentElement.querySelector('span');
+
+                            // Optimistic UI update
+                            label.textContent = enable ? 'Enabled' : 'Disabled';
+
+                            try {
+                                const response = await fetch('/services/html-to-pdf/toggle-app', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ appId, enable })
+                                });
+
+                                if (!response.ok) throw new Error('Failed to update');
+
+                                // Reload page to update dropdowns and lists if needed, or just handle silently
+                                // For now, we'll reload to ensure state consistency across tabs
+                                window.location.reload();
+                            } catch (error) {
+                                console.error(error);
+                                e.target.checked = !enable; // Revert
+                                label.textContent = !enable ? 'Enabled' : 'Disabled';
+                                showError('Failed to update app access.');
+                            }
+                        });
+                    });
+
+                    // --- PDF Converter Logic ---
+                    const urlGroup = document.getElementById('urlInputGroup');
+                    const htmlGroup = document.getElementById('htmlInputGroup');
+                    const tabUrl = document.getElementById('tabUrl');
+                    const tabHtml = document.getElementById('tabHtml');
+                    const urlInput = document.querySelector('input[name="url"]');
+                    const previewImg = document.getElementById('pdfPreview');
+                    const emptyState = document.getElementById('emptyState');
+                    const loadingPreview = document.getElementById('loadingPreview');
+                    const errorAlert = document.getElementById('errorAlert');
+                    const errorMessage = document.getElementById('errorMessage');
+                    const openPdfBtn = document.getElementById('openPdfBtn');
+                    const convertBtn = document.getElementById('convertBtn');
+                    const closeErrorBtn = document.getElementById('closeErrorBtn');
+
+                    // Input Tab Switching
+                    const inputTabs = document.querySelectorAll('[data-input-tab]');
+                    inputTabs.forEach(tab => {
+                        tab.addEventListener('click', (e) => {
+                            e.preventDefault(); // Prevent form submission if inside form
+                            const mode = tab.dataset.inputTab;
+                            switchTab(mode);
+                        });
+                    });
+
+                    function switchTab(tab) {
+                        if (tab === 'url') {
+                            urlGroup.classList.remove('hidden');
+                            htmlGroup.classList.add('hidden');
+
+                            tabUrl.classList.add('tab-active', 'text-blue-600');
+                            tabUrl.classList.remove('text-gray-500');
+
+                            tabHtml.classList.remove('tab-active', 'text-blue-600');
+                            tabHtml.classList.add('text-gray-500');
+
+                            // Restore preview if URL exists
+                            if (urlInput.value && urlInput.value.startsWith('http') && previewImg.src) {
+                                emptyState.classList.add('hidden');
+                                previewImg.classList.remove('hidden');
+                                convertBtn.disabled = false;
+                            } else {
+                                convertBtn.disabled = true;
+                            }
+                        } else {
+                            urlGroup.classList.add('hidden');
+                            htmlGroup.classList.remove('hidden');
+
+                            tabHtml.classList.add('tab-active', 'text-blue-600');
+                            tabHtml.classList.remove('text-gray-500');
+
+                            tabUrl.classList.remove('tab-active', 'text-blue-600');
+                            tabUrl.classList.add('text-gray-500');
+
+                            // Hide preview in HTML mode
+                            emptyState.classList.remove('hidden');
+                            previewImg.classList.add('hidden');
+                            convertBtn.disabled = false;
+                        }
+                    }
+
+                    // Error Handling
+                    function showError(msg) {
+                        errorMessage.textContent = msg;
+                        errorAlert.classList.remove('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+
+                    function hideError() {
+                        errorAlert.classList.add('hidden');
+                    }
+
+                    if (closeErrorBtn) {
+                        closeErrorBtn.addEventListener('click', hideError);
+                    }
+
+                    // Live URL Preview
+                    let lastPreviewUrl = '';
+                    const appIdSelect = document.querySelector('select[name="appId"]');
+
+                    async function updatePreview() {
+                        const url = urlInput.value;
+                        const appId = appIdSelect.value;
+
+                        if (!appId) {
+                            showError('Please select a connected App to generate a preview.');
+                            return;
+                        }
+
+                        if (!url || !url.startsWith('http')) {
+                            emptyState.classList.remove('hidden');
+                            previewImg.classList.add('hidden');
+                            convertBtn.disabled = true;
+                            return;
+                        }
+
+                        if (url === lastPreviewUrl) return;
+                        lastPreviewUrl = url;
+
+                        emptyState.classList.add('hidden');
+                        loadingPreview.classList.remove('hidden');
+                        previewImg.classList.add('hidden');
+                        convertBtn.disabled = true;
+                        hideError();
+
+                        try {
+                            const response = await fetch('/services/html-to-pdf/preview', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ url, appId })
+                            });
+
+                            if (!response.ok) {
+                                const errData = await response.json().catch(() => ({}));
+                                throw new Error(errData.error || 'Failed to load preview');
+                            }
+
+                            const blob = await response.blob();
+                            const imgUrl = URL.createObjectURL(blob);
+
+                            previewImg.src = imgUrl;
+                            previewImg.classList.remove('hidden');
+                            convertBtn.disabled = false;
+                        } catch (error) {
+                            console.error('Preview failed:', error);
+                            showError(error.message || 'Could not generate preview. Please check the URL or try again.');
+                            emptyState.classList.remove('hidden');
+                            convertBtn.disabled = true;
+                        } finally {
+                            loadingPreview.classList.add('hidden');
+                        }
+                    }
+
+                    // Initial state
+                    if (!urlInput.value || !appIdSelect.value) {
+                        convertBtn.disabled = true;
+                    }
+
+                    // Disable inputs if no app is available
+                    if (!appIdSelect.value) {
+                        urlInput.disabled = true;
+                        document.querySelector('textarea[name="html"]').disabled = true;
+                        document.querySelectorAll('select').forEach(s => s.disabled = true);
+                        convertBtn.disabled = true;
+                        convertBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+
+                    urlInput.addEventListener('blur', updatePreview);
+                    urlInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            updatePreview();
+                        }
+                    });
+
+                    document.getElementById('pdfForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        hideError();
+
+                        const btn = document.getElementById('convertBtn');
+                        const btnText = document.getElementById('btnText');
+                        const spinner = document.getElementById('btnSpinner');
+
+                        // UI Loading State
+                        btn.disabled = true;
+                        btnText.textContent = 'Starting Conversion...';
+                        spinner.classList.remove('hidden');
+
+                        const formData = new FormData(e.target);
+                        const data = Object.fromEntries(formData.entries());
+                        data.landscape = data.landscape === 'true';
+
+                        try {
+                            // 1. Submit Job
+                            const response = await fetch('/services/html-to-pdf/convert', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+
+                            if (!response.ok) {
+                                const errData = await response.json().catch(() => ({}));
+                                throw new Error(errData.error || 'Conversion failed at submission');
+                            }
+
+                            const initialRes = await response.json();
+
+                            if (initialRes.status === 'pending' && initialRes.jobId) {
+                                const appIdSelect = document.querySelector('select[name="appId"]');
+                                const selectedOption = appIdSelect.options[appIdSelect.selectedIndex];
+                                const apiKey = selectedOption.dataset.apiKey;
+
+                                btnText.textContent = 'Processing...';
+                                await pollJob(initialRes.jobId, apiKey);
+                            } else {
+                                throw new Error('Unexpected response format');
+                            }
+
+                        } catch (error) {
+                            showError(error.message);
+                            btn.disabled = false;
+                            btnText.textContent = 'Convert to PDF';
+                            spinner.classList.add('hidden');
+                        }
+                    });
+
+                    async function pollJob(jobId, apiKey) {
+                        const btn = document.getElementById('convertBtn');
+                        const btnText = document.getElementById('btnText');
+                        const spinner = document.getElementById('btnSpinner');
+                        const openPdfBtn = document.getElementById('openPdfBtn');
+
+                        const maxAttempts = 60; // 2 minutes approx
+                        let attempts = 0;
+
+                        while (attempts < maxAttempts) {
+                            try {
+                                const res = await fetch(`/api/jobs/${jobId}`, {
+                                    headers: {
+                                        'X-API-Key': apiKey
+                                    }
+                                });
+
+                                // If content-type is PDF, we are done!
+                                const contentType = res.headers.get('content-type');
+                                if (contentType && contentType.includes('application/pdf')) {
+                                    const blob = await res.blob();
+                                    const url = URL.createObjectURL(blob);
+
+                                    // Success UI
+                                    window.open(url, '_blank');
+
+                                    openPdfBtn.href = url;
+                                    openPdfBtn.classList.remove('hidden');
+                                    openPdfBtn.innerHTML = `
+                                Open Generated PDF
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            `;
+
+                                    // Reset Button
+                                    btn.disabled = false;
+                                    btnText.textContent = 'Convert to PDF';
+                                    spinner.classList.add('hidden');
+                                    return;
+                                }
+
+                                // Otherwise it's JSON status
+                                const data = await res.json();
+
+                                if (data.status === 'failed') {
+                                    throw new Error(data.error || 'Job failed during processing');
+                                }
+
+                                // Wait 2s before next poll
+                                attempts++;
+                                await new Promise(r => setTimeout(r, 2000));
+
+                            } catch (err) {
+                                throw err;
+                            }
+                        }
+                        throw new Error('Request timed out. Please check "History" later.');
+                    }
+                });
+            </script>
+
+                <%- include('../partials/sidebar-script') %>
+    </body>
+
+    </html>

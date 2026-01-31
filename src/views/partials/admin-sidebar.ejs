@@ -1,0 +1,124 @@
+<!-- Admin Sidebar -->
+<aside id="sidebar" class="bg-slate-900 border-r border-slate-800 fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 -translate-x-full lg:translate-x-0 h-full overflow-y-auto">
+    <% 
+       // Robust Permission Handling: logic handles both explicit render vars and res.locals
+       const perms = (typeof permissions !== 'undefined' ? permissions : (locals.permissions || {}));
+       const userRole = (typeof role !== 'undefined' ? role : (locals.role || 'USER'));
+       const currentUser = (typeof user !== 'undefined' ? user : (locals.user || {}));
+    %>
+
+    <!-- Logo -->
+    <div class="px-6 py-5 border-b border-slate-800 flex items-center justify-between">
+        <a href="/admin" class="flex items-center gap-3 group">
+            <div class="bg-orange-500 rounded-lg p-2">
+                <svg class="h-6 w-6 text-white transform group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-lg font-black text-white tracking-tight leading-none">ADMIN</span>
+                <span class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Console</span>
+            </div>
+        </a>
+        <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="px-3 py-6 space-y-1">
+        
+        <!-- Dashboard -->
+        <a href="/admin" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title === 'Admin Console' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            Overview
+        </a>
+
+        <!-- Management Section -->
+        <div class="pt-6 pb-2">
+            <p class="px-3 text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest">Management</p>
+        </div>
+
+        <% if (perms.view_users) { %>
+        <a href="/admin/users" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title.includes('Users') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            Users
+        </a>
+        <% } %>
+
+        <% if (perms.manage_services) { %>
+        <a href="/admin/services" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title.includes('Services') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            Services
+        </a>
+        <% } %>
+
+        <% if (perms.view_revenue) { %>
+        <a href="/admin/plans" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title.includes('Plans') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Plans
+        </a>
+        <% } %>
+
+        <% if (perms.view_features) { %>
+        <a href="/admin/features" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title.includes('Features') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            Features
+        </a>
+        <% } %>
+
+         <!-- Analytics Section -->
+        <% if (perms.view_billing || perms.view_subscriptions || perms.view_analytics) { %>
+        <div class="pt-6 pb-2">
+            <p class="px-3 text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest">Analytics</p>
+        </div>
+        <% } %>
+
+        <% if (perms.view_billing) { %>
+        <a href="/admin/billing" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title.includes('Billing') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path></svg>
+            Billing
+        </a>
+        <% } %>
+
+        <% if (perms.view_subscriptions) { %>
+        <a href="/admin/subscriptions" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title.includes('Subscriptions') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            Subscriptions
+        </a>
+        <% } %>
+
+        <% if (perms.view_analytics) { %>
+        <a href="/admin/analytics" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= typeof title !== 'undefined' && title === 'Usage Analytics' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' %>">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            Usage Analytics
+        </a>
+        <% } %>
+
+         <!-- System -->
+        <% if (perms.manage_system) { %>
+        <div class="pt-6 pb-2">
+            <p class="px-3 text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest">System</p>
+        </div>
+        <% } %>
+
+         <a href="/" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-400 hover:bg-white/5 hover:text-white">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to App
+        </a>
+
+    </nav>
+
+    <!-- User Profile Dropdown (Bottom) -->
+    <div class="absolute bottom-0 w-full border-t border-slate-800 p-4 bg-slate-900">
+         <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">
+                 <%= (currentUser.name || 'Admin').charAt(0).toUpperCase() %>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-white truncate"><%= currentUser.name || 'Administrator' %></p>
+                <p class="text-xs text-slate-500 truncate"><%= userRole %></p>
+            </div>
+         </div>
+    </div>
+</aside>

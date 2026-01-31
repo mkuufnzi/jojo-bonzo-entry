@@ -1,0 +1,74 @@
+# =============================================================================
+# VPS PRODUCTION DEPLOYMENT
+# =============================================================================
+# Run: docker-compose up -d --build
+# =============================================================================
+# This connects to external proxy_net (Nginx Proxy Manager) and db_net
+# Add to NPM: afs-tools.automation-for-smes.com -> http://afs_doc_tools:3002
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: afs_doc_tools
+    restart: always
+    env_file:
+      - .env.production
+    networks:
+      - proxy_net
+      - db_net
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      - NODE_ENV=production
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: afs_doc_tools_worker
+    restart: always
+    command: npm run worker:prod
+    env_file:
+      - .env.production
+    networks:
+      - db_net
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      - NODE_ENV=production
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    depends_on:
+      - app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  proxy_net:
+    external: true
+  db_net:
+    external: true

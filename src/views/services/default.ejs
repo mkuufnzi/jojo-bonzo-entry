@@ -1,0 +1,307 @@
+<%- include('../partials/head', { title: service.name + ' - Floovioo ' }) %>
+<body class="bg-gray-100 min-h-screen font-sans">
+
+                    <%- include('../partials/sidebar') %>
+
+                    <div id="mainContent" class="flex flex-col min-h-screen ">
+                        <%- include('../partials/dashboard-header', {title: service.name, user: user }) %>
+
+                        <main class="flex-1">
+                            <div class="max-w-7xl mx-auto px-6 lg:px-8 sm:px-6 lg:px-8 py-8">
+                                <div class="mb-8">
+                                    <p class="text-gray-600 mt-1"><%= service.description || 'Manage your access and usage for this service.' %></p>
+                                </div>
+
+                                <!-- Service Navigation Tabs -->
+                                <div class="bg-white rounded-t-xl shadow-sm border-b border-gray-200 mb-6">
+                                    <nav class="flex -mb-px">
+                                        <button data-service-tab="home" id="nav-home" class="nav-tab-active w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                                            Tool
+                                        </button>
+                                        <button data-service-tab="history" id="nav-history" class="w-1/4 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                            History
+                                        </button>
+                                        <button data-service-tab="usage" id="nav-usage" class="w-1/4 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                            Usage & Billing
+                                        </button>
+                                        <button data-service-tab="apps" id="nav-apps" class="w-1/4 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                            Connected Apps
+                                        </button>
+                                    </nav>
+                                </div>
+
+                                <!-- Tab Content: Home (Generic Tool Placeholder) -->
+                                <div id="tab-content-home" class="service-tab-content">
+                                    <% if (locals.accessDenied) { %>
+                                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 min-h-[400px] flex items-center justify-center">
+                                            <%- include('../partials/service-access-blocker') %>
+                                        </div>
+                                    <% } else { %>
+                                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                                        <div class="mx-auto h-24 w-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                                            <svg class="h-12 w-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-gray-900 mb-2">Coming Soon</h3>
+                                        <p class="text-gray-500 max-w-md mx-auto mb-8">
+                                            The web interface for <strong><%= service.name %></strong> is currently under development.
+                                            You can still access this service via our API using the Connected Apps tab.
+                                        </p>
+                                        <div class="flex justify-center space-x-4">
+                                            <a href="/docs" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                View API Documentation
+                                            </a>
+                                            <button onclick="document.querySelector('[data-service-tab=apps]').click()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                Connect an App
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab Content: History -->
+                                <div id="tab-content-history" class="service-tab-content hidden">
+                                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div class="px-6 py-4 border-b border-gray-100">
+                                            <h2 class="text-lg font-semibold text-gray-800">Recent Activity</h2>
+                                        </div>
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-full divide-y divide-gray-200">
+                                                <thead class="bg-gray-50">
+                                                    <tr>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">App</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="bg-white divide-y divide-gray-200">
+                                                    <% if (logs.length === 0) { %>
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-8 text-center text-gray-500 text-sm">
+                                                No usage history found for this service.
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                                    <% logs.forEach(log => { %>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= new Date(log.createdAt).toLocaleString() %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <% if (log.app) { %>
+                                                <span class="font-medium"><%= log.app.name %></span>
+                                                <span class="text-xs text-gray-400 block font-mono">...<%= log.app.apiKey.slice(-4) %></span>
+                                            <% } else { %>
+                                                <span class="text-gray-500 italic">Dashboard</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <%= log.resourceType || 'Request' %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <% if (log.status === 'success') { %>
+                                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Success</span>
+                                            <% } else { %>
+                                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Failed</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                            $<%= (log.cost || 0).toFixed(2) %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab Content: Usage -->
+                                <div id="tab-content-usage" class="service-tab-content hidden">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-start">
+                                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Total Cost (30 Days)</h3>
+                                            <%
+                                            let totalCost = 0;
+                                Object.values(dailyUsage).forEach(d => totalCost += d.cost);
+                            %>
+                                            <p class="text-3xl font-bold text-gray-900">$<%= totalCost.toFixed(2) %></p>
+                                        </div>
+                                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Total Requests (30 Days)</h3>
+                                            <%
+                                            let totalReqs = 0;
+                                Object.values(dailyUsage).forEach(d => totalReqs += d.count);
+                            %>
+                                            <p class="text-3xl font-bold text-gray-900"><%= totalReqs %></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Daily Usage</h3>
+                                        <div class="relative h-64 w-full">
+                                            <canvas id="usageChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab Content: Connected Apps -->
+                                <div id="tab-content-apps" class="service-tab-content hidden">
+                                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                                            <h2 class="text-lg font-semibold text-gray-800">Connected Apps</h2>
+                                            <a href="/apps" class="text-sm text-blue-600 hover:underline">Manage Apps</a>
+                                        </div>
+                                        <div class="p-6">
+                                            <div class="space-y-4">
+                                                <% 
+                                    const activeConnectedApps = connectedApps.filter(ca => ca.app.isActive);
+                                %>
+                                                <% if (activeConnectedApps.length === 0) { %>
+                                    <div class="text-center py-8">
+                                        <p class="text-gray-500 mb-2">No apps are currently connected to this service.</p>
+                                        <a href="/apps" class="text-blue-600 hover:underline text-sm">Go to Apps Dashboard to connect an app</a>
+                                    </div>
+                                <% } %>
+                                                <% activeConnectedApps.forEach(item => { 
+                                    const app = item.app;
+                                %>
+                                                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                                    <div>
+                                                        <h3 class="font-semibold text-gray-900"><%= app.name %></h3>
+                                                        <p class="text-xs text-gray-500 font-mono">ID: <%= app.id %></p>
+                                                    </div>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" class="sr-only peer app-toggle" data-app-id="<%= app.id %>" <%= item.isEnabled ? 'checked' : '' %>>
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[0.125rem] after:left-[0.125rem] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                        <span class="ml-3 text-sm font-medium text-gray-900"><%= item.isEnabled ? 'Enabled' : 'Disabled' %></span>
+                                                    </label>
+                                                </div>
+                                                <% }); %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </main>
+                    </div>
+
+                    <script nonce="<%= nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Tab Switching Logic ---
+            const serviceTabs = document.querySelectorAll('[data-service-tab]');
+            
+            serviceTabs.forEach(tab => {
+                            tab.addEventListener('click', () => {
+                                const tabName = tab.dataset.serviceTab;
+                                document.querySelectorAll('.service-tab-content').forEach(el => el.classList.add('hidden'));
+                                document.getElementById('tab-content-' + tabName).classList.remove('hidden');
+                                serviceTabs.forEach(btn => {
+                                    btn.classList.remove('nav-tab-active', 'border-b-2', 'border-blue-600');
+                                    btn.classList.add('border-transparent', 'text-gray-500');
+                                });
+                                tab.classList.add('nav-tab-active');
+                                tab.classList.remove('border-transparent', 'text-gray-500');
+                            });
+            });
+
+                        // --- Chart.js for Usage Tab ---
+                        const dailyUsage = <%- JSON.stringify(dailyUsage || { }) %>;
+                        const ctx = document.getElementById('usageChart').getContext('2d');
+
+                        const labels = [];
+                        const dataCost = [];
+                        const dataCount = [];
+                        const today = new Date();
+            
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                        d.setDate(today.getDate() - i);
+                        const dateStr = d.toISOString().split('T')[0];
+                        labels.push(d.toLocaleDateString(undefined, {month: 'short', day: 'numeric' }));
+
+                        const stat = dailyUsage[dateStr] || {count: 0, cost: 0 };
+                        dataCost.push(stat.cost);
+                        dataCount.push(stat.count);
+            }
+
+                        new Chart(ctx, {
+                            type: 'bar',
+                        data: {
+                            labels: labels,
+                        datasets: [
+                        {
+                            label: 'Requests',
+                        data: dataCount,
+                        backgroundColor: '#93c5fd',
+                        yAxisID: 'y',
+                        },
+                        {
+                            label: 'Cost ($)',
+                        data: dataCost,
+                        backgroundColor: '#2563eb',
+                        yAxisID: 'y1',
+                        type: 'line'
+                        }
+                        ]
+                },
+                        options: {
+                            responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                        intersect: false,
+                    },
+                        scales: {
+                            y: {
+                            type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {display: true, text: 'Requests' }
+                        },
+                        y1: {
+                            type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {drawOnChartArea: false },
+                        title: {display: true, text: 'Cost ($)' }
+                        }
+                    }
+                }
+            });
+
+            // --- App Toggle Logic ---
+            document.querySelectorAll('.app-toggle').forEach(toggle => {
+                            toggle.addEventListener('change', async (e) => {
+                                const appId = e.target.dataset.appId;
+                                const enable = e.target.checked;
+                                const label = e.target.parentElement.querySelector('span');
+
+                                label.textContent = enable ? 'Enabled' : 'Disabled';
+
+                                try {
+                                    const response = await fetch('/services/<%= service.slug %>/toggle-app', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ appId, enable })
+                                    });
+
+                                    if (!response.ok) throw new Error('Failed to update');
+                                    window.location.reload();
+                                } catch (error) {
+                                    console.error(error);
+                                    e.target.checked = !enable;
+                                    label.textContent = !enable ? 'Enabled' : 'Disabled';
+                                    showToast('Error', 'Failed to update app access.', 'error');
+                                }
+                            });
+            });
+        });
+                    </script>
+                    <%- include('../partials/toast') %>
+                    <%- include('../partials/sidebar-script') %>
+                </body>
+            </html>

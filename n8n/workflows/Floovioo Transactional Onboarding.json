@@ -1,0 +1,1639 @@
+{
+  "name": "Floovioo Transacational Oboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "floovioo_id"
+            },
+            {
+              "name": "service_id"
+            },
+            {
+              "name": "requestType"
+            },
+            {
+              "name": "requestId"
+            },
+            {
+              "name": "brandSettings",
+              "type": "object"
+            },
+            {
+              "name": "requestData",
+              "type": "object"
+            },
+            {
+              "name": "service_tenant_id"
+            }
+          ]
+        }
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -496,
+        912
+      ],
+      "executeOnce": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        304
+      ],
+      "id": "8bc3f730-3ed8-4750-9b04-dbfb9f24c48f",
+      "name": "GenerateUUID (Copy to Use)"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w",
+          "mode": "list",
+          "cachedResultName": "Floovioo Operation Branding Tenant Brand Voice 1.0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1368383037,
+          "mode": "list",
+          "cachedResultName": "brand_config",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit#gid=1368383037"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $json.floovioo_id }}",
+            "id": "={{ $json.uuid }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "brand_id",
+              "displayName": "brand_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "document_types",
+              "displayName": "document_types",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "integrations",
+              "displayName": "integrations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ui_theme",
+              "displayName": "ui_theme",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        1104
+      ],
+      "id": "82f1d551-b52a-4522-bdc3-14bf72c75df1",
+      "name": "saveBrandconfig",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sbja20JWnBXN7T8v",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w",
+          "mode": "list",
+          "cachedResultName": "Floovioo Operation Branding Tenant Brand Voice 1.0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "brand_basic_profile",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        1296
+      ],
+      "id": "d22c53d7-fb18-4865-b1ca-d8438745884e",
+      "name": "saveBrandVoiceTemplate",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sbja20JWnBXN7T8v",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0",
+          "mode": "list",
+          "cachedResultName": "Floovioo Operation Branding Template Designs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 696429724,
+          "mode": "list",
+          "cachedResultName": "templates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0/edit#gid=696429724"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "template_id",
+              "displayName": "template_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "documentType",
+              "displayName": "documentType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "design_theme_id",
+              "displayName": "design_theme_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "features",
+              "displayName": "features",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_premium",
+              "displayName": "is_premium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "design_id",
+              "displayName": "design_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_active",
+              "displayName": "is_active",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "publish_status",
+              "displayName": "publish_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "version_history",
+              "displayName": "version_history",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        912
+      ],
+      "id": "daa6d53a-c5e5-4e09-ba7b-8221f83dbc25",
+      "name": "saveBrandTemplate",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sbja20JWnBXN7T8v",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0",
+          "mode": "list",
+          "cachedResultName": "Floovioo Operation Branding Template Designs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "theme_designs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "design_id",
+              "lookupValue": "={{ $json.design_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        912
+      ],
+      "id": "f2c1db32-2e0c-4a73-bf8b-f7a9ab10f265",
+      "name": "saveBrandTemplateDesigns",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sbja20JWnBXN7T8v",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0",
+          "mode": "list",
+          "cachedResultName": "Floovioo Operation Branding Template Designs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1702586176,
+          "mode": "list",
+          "cachedResultName": "design_components",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TyL87VUZDQKxMsH7aUb9CLdR9SQ7bXLQ92j-v4eT6P0/edit#gid=1702586176"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "design_id",
+              "lookupValue": "={{ $json.design_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        912
+      ],
+      "id": "2ed505d4-8ae2-4cc1-be0f-ef8bf4f7b11b",
+      "name": "saveBrandTemplateDesignComps",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sbja20JWnBXN7T8v",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a337d912-2c80-415f-b854-e4f2007acb22",
+              "name": "profile",
+              "value": "={{ $('profileData').item.json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        720
+      ],
+      "id": "066b7e41-cd42-4fdc-baaf-d157856a47af",
+      "name": "profile"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "488a4dcf-a261-40cd-8c1f-0a236bf60e3d",
+              "name": "brandConfig",
+              "value": "={{ $('brandData').item.json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        912
+      ],
+      "id": "2477ff4b-eafe-4c69-8844-418c8eb8c426",
+      "name": "brand"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c3010f36-b012-4b5e-b7c1-da7faeeb83e8",
+              "name": "floovioo_id",
+              "value": "={{ $('brandConfigData').item.json.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "246516e2-0ff5-40b7-96fb-3a1d985f2315",
+              "name": "service_id",
+              "value": "={{ $('brandConfigData').item.json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6ea55e64-2577-4aae-887c-4e3a319062e9",
+              "name": "service_tenant_id",
+              "value": "={{ $('brandConfigData').item.json.service_tenant_id }}",
+              "type": "string"
+            },
+            {
+              "id": "bd735e0c-547a-4589-b899-839be1d1fccc",
+              "name": "config",
+              "value": "={{ $('brandConfigData').item.json.config }}",
+              "type": "object"
+            },
+            {
+              "id": "2428019a-ce26-4218-9f19-88bd919fd944",
+              "name": "requestType",
+              "value": "={{ $('brandConfigData').item.json.requestType }}",
+              "type": "string"
+            },
+            {
+              "id": "42799c88-b306-4c09-81fe-ae3f111f616b",
+              "name": "brandSettings",
+              "value": "={{ $('brandConfigData').item.json.brandSettings }}",
+              "type": "object"
+            },
+            {
+              "id": "85d5223f-365d-4576-a16e-778a34da44a1",
+              "name": "uuid",
+              "value": "={{ $json.uuid }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        1104
+      ],
+      "id": "93533053-ba7c-4846-a0a2-d2af8da36dbe",
+      "name": "config"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        176,
+        528
+      ],
+      "id": "44c703b2-14ea-4de8-ba5b-cab5343fb573",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        720
+      ],
+      "id": "a14332a7-126d-4742-b195-ca0a0a09c7ba",
+      "name": "GenerateBrandProfileUUID"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        912
+      ],
+      "id": "e44dc02a-afe7-485e-a056-601bb8d27621",
+      "name": "GenerateBrandUUID"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        1104
+      ],
+      "id": "1204c3c2-275d-44ca-8d1f-df1056605e22",
+      "name": "GenerateBrandConfigUUID"
+    },
+    {
+      "parameters": {
+        "jsCode": "let vv = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  const r = Math.random() * 16 | 0;\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\n  return v.toString(16);\n});\n\nreturn {'uuid': vv};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        1296
+      ],
+      "id": "07f350c5-4f7a-4ee3-96c2-25f5178c8f02",
+      "name": "GenerateBrandVoiceUUID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a5094e8-ad2e-4865-a226-9345ec9cbe02",
+              "name": "error",
+              "value": "Your previous attempt was interrupted. Restart the onboarding process.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        528
+      ],
+      "id": "3f65b722-54a4-41b7-b16a-b06d1fbd75d0",
+      "name": "RestartError"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w",
+          "mode": "list",
+          "cachedResultName": "Floovioo Operation Branding Tenant Brand Voice 1.0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "brand_basic_profile",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $('profile').item.json.profile.floovioo_id }}",
+            "brand_name": "={{ $('VallidateRequest').item.json.requestData.tenant.name }}",
+            "brand_slogan": "={{ $json.profile.tenant.slogan }}",
+            "sector": "={{ $json.profile.tenant.sector }}",
+            "sub_sector": "={{ $json.profile.tenant.slogan }}",
+            "business_type": "={{ $json.profile.tenant.niche }}",
+            "niche": "={{ $json.profile.tenant.niche }}",
+            "about": "={{ $json.profile.tenant.about }}",
+            "brand_id": "={{ $json.uuid }}"
+          },
+          "matchingColumns": [
+            "floovioo_id"
+          ],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "brand_id",
+              "displayName": "brand_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "brand_name",
+              "displayName": "brand_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "brand_slogan",
+              "displayName": "brand_slogan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sector",
+              "displayName": "sector",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sub_sector",
+              "displayName": "sub_sector",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_type",
+              "displayName": "business_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "niche",
+              "displayName": "niche",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "about",
+              "displayName": "about",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        720
+      ],
+      "id": "d63acab0-325d-4e3d-8066-366456fbde7f",
+      "name": "saveBasicProfile",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sbja20JWnBXN7T8v",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90512e59-f117-49e3-a3b2-3e8135bf0946",
+              "name": "floovioo_id",
+              "value": "={{ $json.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6a1993a6-a56c-4205-affc-b2897503c1d0",
+              "name": "service_id",
+              "value": "={{ $json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a719ee32-23c0-47aa-8254-25f0ce653f16",
+              "name": "service_tenant_id",
+              "value": "={{ $json.service_tenant_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3fe33372-da00-4f4e-b1ee-a2adf59793e7",
+              "name": "requestType",
+              "value": "={{ $json.requestType }}",
+              "type": "string"
+            },
+            {
+              "id": "2ebadaa0-996b-4a9f-a64d-b1001242cb38",
+              "name": "brandIdentity",
+              "value": "={{ $json.requestData.tenant.name }}",
+              "type": "string"
+            },
+            {
+              "id": "e72d3d3d-01cb-4ed3-b67f-cb99830ea41c",
+              "name": "visualBrand",
+              "value": "={{ $json.requestData.brand }}",
+              "type": "object"
+            },
+            {
+              "id": "4f19f6df-4cd5-47c9-9f32-623d568da072",
+              "name": "brandConfig",
+              "value": "={{ {config_id: $json.requestData.config_id , ...$json.requestData.config} }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -272,
+        912
+      ],
+      "id": "3a337c06-c7f0-410f-b9ed-0db393164d2b",
+      "name": "VallidateRequest"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5cd18cd6-3378-4903-a310-ccd3485a30db",
+              "name": "floovioo_id",
+              "value": "={{ $json.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6a1993a6-a56c-4205-affc-b2897503c1d0",
+              "name": "service_id",
+              "value": "={{ $json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a719ee32-23c0-47aa-8254-25f0ce653f16",
+              "name": "service_tenant_id",
+              "value": "={{ $json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "ab3b836f-3fa2-4a42-b608-646bf0beeb4b",
+              "name": "config_id",
+              "value": "={{ $json.requestData.config_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c04f558d-f19f-4451-be3d-ed2e35c49bf4",
+              "name": "requestId",
+              "value": "={{ $json.requestId }}",
+              "type": "string"
+            },
+            {
+              "id": "3fe33372-da00-4f4e-b1ee-a2adf59793e7",
+              "name": "requestType",
+              "value": "={{ $json.requestType }}",
+              "type": "string"
+            },
+            {
+              "id": "79791d37-fedc-4629-ad55-6c82da5d8933",
+              "name": "tenant",
+              "value": "={{ $json.requestData.tenant }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        720
+      ],
+      "id": "012c9ef1-2321-4225-9063-9f7cb10afe94",
+      "name": "profileData"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90512e59-f117-49e3-a3b2-3e8135bf0946",
+              "name": "floovioo_id",
+              "value": "={{ $json.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6a1993a6-a56c-4205-affc-b2897503c1d0",
+              "name": "service_id",
+              "value": "={{ $json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a719ee32-23c0-47aa-8254-25f0ce653f16",
+              "name": "service_tenant_id",
+              "value": "={{ $json.service_tenant_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3fe33372-da00-4f4e-b1ee-a2adf59793e7",
+              "name": "requestType",
+              "value": "={{ $json.requestType }}",
+              "type": "string"
+            },
+            {
+              "id": "f5c9e520-ca8b-4232-ac7d-02c69590d49d",
+              "name": "brandIdentity",
+              "value": "={{ $json.brandIdentity }}",
+              "type": "string"
+            },
+            {
+              "id": "116fc9f2-37c6-4cec-a7b7-4298047367a4",
+              "name": "visualBrand",
+              "value": "={{ $json.brandSettings }}",
+              "type": "object"
+            },
+            {
+              "id": "1258a2da-e906-47bc-a0b3-3f0761537018",
+              "name": "brandConfig",
+              "value": "={{ $json.brandConfig }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        912
+      ],
+      "id": "e41f0194-312f-41c3-9831-94ddab8dca58",
+      "name": "brandData"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3fd02450-3e27-409f-8e1d-ff10141521bd",
+              "name": "config",
+              "value": "={{ $json.requestData.config }}",
+              "type": "object"
+            },
+            {
+              "id": "90512e59-f117-49e3-a3b2-3e8135bf0946",
+              "name": "floovioo_id",
+              "value": "={{ $json.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6a1993a6-a56c-4205-affc-b2897503c1d0",
+              "name": "service_id",
+              "value": "={{ $json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3fe33372-da00-4f4e-b1ee-a2adf59793e7",
+              "name": "requestType",
+              "value": "={{ $json.requestType }}",
+              "type": "string"
+            },
+            {
+              "id": "a719ee32-23c0-47aa-8254-25f0ce653f16",
+              "name": "service_tenant_id",
+              "value": "={{ $json.service_tenant_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4f19f6df-4cd5-47c9-9f32-623d568da072",
+              "name": "brandSettings",
+              "value": "={{ $json.brandSettings }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        1104
+      ],
+      "id": "208a5230-c8ba-4e48-a3a1-7ab10b6ef275",
+      "name": "brandConfigData"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90512e59-f117-49e3-a3b2-3e8135bf0946",
+              "name": "floovioo_id",
+              "value": "={{ $json.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6a1993a6-a56c-4205-affc-b2897503c1d0",
+              "name": "service_id",
+              "value": "={{ $json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3fe33372-da00-4f4e-b1ee-a2adf59793e7",
+              "name": "requestType",
+              "value": "={{ $json.requestType }}",
+              "type": "string"
+            },
+            {
+              "id": "a719ee32-23c0-47aa-8254-25f0ce653f16",
+              "name": "service_tenant_id",
+              "value": "={{ $json.service_tenant_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4f19f6df-4cd5-47c9-9f32-623d568da072",
+              "name": "brandSettings",
+              "value": "={{ $json.brandSettings }}",
+              "type": "object"
+            },
+            {
+              "id": "26d26ca8-8554-4317-a593-0e288eff8fe3",
+              "name": "brandVoice",
+              "value": "={error: 'pending_ai_content'}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        1296
+      ],
+      "id": "e686a1ee-facb-40f0-93bf-b95d0dc7c84d",
+      "name": "brandVoice"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c1e3108-0943-416f-adf9-810c948cf0cf",
+              "name": "brandVoice",
+              "value": "={{ $('brandVoice').item.json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        1296
+      ],
+      "id": "ac1b8aed-45b4-4aec-9d0c-481ee79f26b9",
+      "name": "brandVoice1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79791d37-fedc-4629-ad55-6c82da5d8933",
+              "name": "tenant",
+              "value": "={{ $json.requestData.tenant }}",
+              "type": "string"
+            },
+            {
+              "id": "e72d3d3d-01cb-4ed3-b67f-cb99830ea41c",
+              "name": "brand",
+              "value": "={{ $json.requestData.brand }}",
+              "type": "string"
+            },
+            {
+              "id": "3fd02450-3e27-409f-8e1d-ff10141521bd",
+              "name": "config",
+              "value": "={{ $json.requestData.config }}",
+              "type": "string"
+            },
+            {
+              "id": "90512e59-f117-49e3-a3b2-3e8135bf0946",
+              "name": "floovioo_id",
+              "value": "={{ $json.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6a1993a6-a56c-4205-affc-b2897503c1d0",
+              "name": "service_id",
+              "value": "={{ $json.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3fe33372-da00-4f4e-b1ee-a2adf59793e7",
+              "name": "requestType",
+              "value": "={{ $json.requestType }}",
+              "type": "string"
+            },
+            {
+              "id": "a719ee32-23c0-47aa-8254-25f0ce653f16",
+              "name": "service_tenant_id",
+              "value": "={{ $json.service_tenant_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4f19f6df-4cd5-47c9-9f32-623d568da072",
+              "name": "brandSettings",
+              "value": "={{ $json.brandSettings }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        528
+      ],
+      "id": "91638581-753e-433d-92f3-39ff34de047b",
+      "name": "onboardingError"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w",
+          "mode": "list",
+          "cachedResultName": "Floovioo Operation Branding Tenant Brand Voice 1.0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1797355837,
+          "mode": "list",
+          "cachedResultName": "brand_marketing_profile",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YM_FbfluMCKkr6Hy2Zgypc7QcAnL_Sni9dmxx7OSZ0w/edit#gid=1797355837"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "marketing_profile_id",
+              "displayName": "marketing_profile_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "brand_id",
+              "displayName": "brand_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "upsell_rules",
+              "displayName": "upsell_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reorder_rules",
+              "displayName": "reorder_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "support_rules",
+              "displayName": "support_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "post_delivery_rules",
+              "displayName": "post_delivery_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content_rules",
+              "displayName": "content_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "publishing_rules",
+              "displayName": "publishing_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "human_in_the_loop_rules",
+              "displayName": "human_in_the_loop_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        912
+      ],
+      "id": "be62874d-3148-438a-855a-efebe24d7a74",
+      "name": "saveBrand",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sbja20JWnBXN7T8v",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "floovioo_id": "4d2398aa-7b03-4941-9fda-c94fd38d7371",
+          "service_id": "7b46d72f-d59e-488a-98c5-e36a7d0989b1",
+          "requestType": "onboarding_complete",
+          "requestId": "req_1769645633878",
+          "brandSettings": {
+            "colors": {
+              "primary": "#2563EB",
+              "secondary": "#1E293B"
+            },
+            "fonts": {
+              "body": "Inter",
+              "heading": "Inter"
+            },
+            "logo": "https://lh3.googleusercontent.com/a/ACg8ocLHGVH_sU1LxnqhPZlcyUs5hjQhv-dtiXI3uu54B0ho3hVOI2t7kP2IRb8lLa6qxt7u4LootDg3z5JXvcl07P10wDYb_2Y=s288-c-no",
+            "voice": {
+              "tone": "professional",
+              "upsellRule": "balanced",
+              "supportTone": "empathetic"
+            }
+          },
+          "requestData": {
+            "type": "onboarding_complete",
+            "timestamp": "2026-01-29T00:13:53.868Z",
+            "floovioo_id": "AIDocumentGenerator",
+            "config_id": "config_AIDocumentGenerator_1769645633868",
+            "status": "active",
+            "tenant": {
+              "name": "AI Document Generator",
+              "sector": "technology",
+              "tax_id": "A032433343R",
+              "website": "https://www.allbizdocs.com",
+              "niche": "",
+              "slogan": "fdsfds",
+              "about": "fsdfdsfdsf"
+            },
+            "brand": {
+              "colors": {
+                "primary": "#2563EB",
+                "secondary": "#1E293B"
+              },
+              "fonts": {
+                "body": "Inter",
+                "heading": "Inter"
+              },
+              "logo": "https://lh3.googleusercontent.com/a/ACg8ocLHGVH_sU1LxnqhPZlcyUs5hjQhv-dtiXI3uu54B0ho3hVOI2t7kP2IRb8lLa6qxt7u4LootDg3z5JXvcl07P10wDYb_2Y=s288-c-no",
+              "voice": {
+                "tone": "professional",
+                "upsellRule": "balanced",
+                "supportTone": "empathetic"
+              }
+            },
+            "config": {
+              "document_types": [
+                "invoice",
+                "receipt"
+              ],
+              "integrations": [
+                {
+                  "provider": "zoho",
+                  "source_id": "zoho_source_b30bf5ca",
+                  "status": "connected"
+                },
+                {
+                  "provider": "xero",
+                  "source_id": "xero_source_a7197b33",
+                  "status": "connected"
+                },
+                {
+                  "provider": "quickbooks",
+                  "source_id": "quickbooks_source_131c29cb",
+                  "status": "connected"
+                }
+              ],
+              "ui_theme": "Light"
+            }
+          },
+          "service_tenant_id": "unknown"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "VallidateRequest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "saveBrandconfig": {
+      "main": [
+        []
+      ]
+    },
+    "saveBrandVoiceTemplate": {
+      "main": [
+        []
+      ]
+    },
+    "saveBrandTemplate": {
+      "main": [
+        [
+          {
+            "node": "saveBrandTemplateDesigns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "saveBrandTemplateDesigns": {
+      "main": [
+        [
+          {
+            "node": "saveBrandTemplateDesignComps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "profile": {
+      "main": [
+        [
+          {
+            "node": "saveBasicProfile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "config": {
+      "main": [
+        [
+          {
+            "node": "saveBrandconfig",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "brand": {
+      "main": [
+        [
+          {
+            "node": "saveBrand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateBrandProfileUUID": {
+      "main": [
+        [
+          {
+            "node": "profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateBrandUUID": {
+      "main": [
+        [
+          {
+            "node": "brand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateBrandConfigUUID": {
+      "main": [
+        [
+          {
+            "node": "config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenerateBrandVoiceUUID": {
+      "main": [
+        [
+          {
+            "node": "brandVoice1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "RestartError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "saveBasicProfile": {
+      "main": [
+        []
+      ]
+    },
+    "VallidateRequest": {
+      "main": [
+        [
+          {
+            "node": "onboardingError",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "brandData",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "brandConfigData",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "brandVoice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "profileData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "profileData": {
+      "main": [
+        [
+          {
+            "node": "GenerateBrandProfileUUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "brandData": {
+      "main": [
+        [
+          {
+            "node": "GenerateBrandUUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "brandConfigData": {
+      "main": [
+        [
+          {
+            "node": "GenerateBrandConfigUUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "brandVoice": {
+      "main": [
+        [
+          {
+            "node": "GenerateBrandVoiceUUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "brandVoice1": {
+      "main": [
+        [
+          {
+            "node": "saveBrandVoiceTemplate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "onboardingError": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "saveBrand": {
+      "main": [
+        [
+          {
+            "node": "saveBrandTemplate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "225787ad-f739-471a-9bfb-0017720cd365",
+  "meta": {
+    "instanceId": "8fb05bee768a4bab0bd17c350a6dd4427e95a710f7b628ff5a4819a166b694ae"
+  },
+  "id": "n1w6bBfhjMuDoT7L",
+  "tags": [
+    {
+      "updatedAt": "2026-01-28T17:45:23.714Z",
+      "createdAt": "2026-01-28T17:45:23.714Z",
+      "id": "iN5oN1jCKWoCTjdy",
+      "name": "Floovioo"
+    }
+  ]
+}

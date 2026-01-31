@@ -1,0 +1,174 @@
+<%- include('../partials/head', { title: 'Notification Settings' }) %>
+<%- include('../partials/header') %>
+
+<div class="flex min-h-screen bg-gray-50">
+    <%- include('../partials/sidebar') %>
+
+    <main class="flex-1 py-10 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            
+            <div class="md:flex md:items-center md:justify-between mb-8">
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                        Notification Preferences
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Manage how and when you want to be notified.
+                    </p>
+                </div>
+                <div class="mt-4 flex md:mt-0 md:ml-4">
+                    <button type="submit" form="settings-form" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <!-- Heroicon name: solid/check -->
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        Save Preferences
+                    </button>
+                </div>
+            </div>
+
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div class="rounded-md bg-green-50 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <!-- Heroicon name: solid/check-circle -->
+                            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-green-800">
+                                Settings saved successfully.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <form id="settings-form" action="/notifications/settings" method="POST">
+                
+                <!-- Channels Card -->
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+                    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Notification Channels</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Global toggles for where you want to receive alerts.</p>
+                    </div>
+                    <div class="px-4 py-5 sm:p-6 space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="emailEnabled" name="emailEnabled" type="checkbox" <%= config.emailEnabled ? 'checked' : '' %> class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="emailEnabled" class="font-medium text-gray-700">Email Notifications</label>
+                                <p class="text-gray-500">Receive critical alerts and updates via email (<b><%= user.email %></b>).</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="inAppEnabled" name="inAppEnabled" type="checkbox" <%= config.inAppEnabled ? 'checked' : '' %> class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="inAppEnabled" class="font-medium text-gray-700">In-App Notifications</label>
+                                <p class="text-gray-500">Show alerts in the top notification bell within the dashboard.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories Card -->
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Event Configuration</h3>
+                         <p class="mt-1 max-w-2xl text-sm text-gray-500">Fine-tune which events trigger a notification.</p>
+                    </div>
+                    <div class="border-t border-gray-200">
+                        <dl class="divide-y divide-gray-200">
+                            
+                            <!-- Tool Execution Success -->
+                            <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 items-center">
+                                <dt class="text-sm font-medium text-gray-500">Tool Execution Success</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 flex justify-between items-center">
+                                    <span class="text-gray-600">Notify me when a tool finishes successfully.</span>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="toolSuccess" <%= config.toolSuccess ? 'checked' : '' %> class="toggle-checkbox h-6 w-11 rounded-full border-gray-300 bg-white border-2 appearance-none cursor-pointer checked:bg-blue-600 checked:border-blue-600 transition duration-200 relative">
+                                    </div>
+                                </dd>
+                            </div>
+
+                             <!-- Tool Execution Failure -->
+                             <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 items-center">
+                                <dt class="text-sm font-medium text-gray-500">Tool Execution Failed</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 flex justify-between items-center">
+                                    <span class="text-gray-600">Notify me if a tool fails to execute.</span>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="toolFailure" <%= config.toolFailure ? 'checked' : '' %> class="toggle-checkbox h-6 w-11 rounded-full border-gray-300 bg-white border-2 appearance-none cursor-pointer checked:bg-blue-600 checked:border-blue-600 transition duration-200 relative">
+                                    </div>
+                                </dd>
+                            </div>
+
+                            <!-- Billing Alerts -->
+                            <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 items-center">
+                                <dt class="text-sm font-medium text-gray-500">Billing Alerts</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 flex justify-between items-center">
+                                    <span class="text-gray-600">Notify me about limits, usage thresholds, and new invoices.</span>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="billingAlert" <%= config.billingAlert ? 'checked' : '' %> class="toggle-checkbox h-6 w-11 rounded-full border-gray-300 bg-white border-2 appearance-none cursor-pointer checked:bg-blue-600 checked:border-blue-600 transition duration-200 relative">
+                                    </div>
+                                </dd>
+                            </div>
+
+                            <!-- Payment Actions -->
+                            <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 items-center">
+                                <dt class="text-sm font-medium text-gray-500">Payment Methods</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 flex justify-between items-center">
+                                    <span class="text-gray-600">Notify when payment methods are added, removed, or updated.</span>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="paymentAction" <%= config.paymentAction ? 'checked' : '' %> class="toggle-checkbox h-6 w-11 rounded-full border-gray-300 bg-white border-2 appearance-none cursor-pointer checked:bg-blue-600 checked:border-blue-600 transition duration-200 relative">
+                                    </div>
+                                </dd>
+                            </div>
+
+                        </dl>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </main>
+</div>
+
+<style nonce="<%= nonce %>">
+/* Quick custom toggle mock - in real app, better to use proper Tailwind toggle classes */
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #2563EB;
+}
+.toggle-checkbox:checked:after {
+  content: "";
+  display: block;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 1.15rem; /* Slide to right */
+  background-color: white;
+  transition: 0.2s;
+  transform: translateY(1px);
+}
+.toggle-checkbox:after {
+    content: "";
+  display: block;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.1rem; /* Start left */
+  background-color: #9CA3AF;
+  transition: 0.2s;
+   transform: translateY(1px);
+}
+.toggle-checkbox:checked:after {
+    background-color: white;
+}
+</style>
+
+<%- include('../partials/sidebar-script') %>
+<%- include('../partials/footer') %>

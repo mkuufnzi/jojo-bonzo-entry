@@ -1,0 +1,212 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-3xl font-heading font-bold text-slate-900 tracking-tight">My Apps</h2>
+            <p class="mt-2 text-slate-500">Manage your application environments and API keys.</p>
+        </div>
+        <button id="openCreateAppModalBtn"
+            class="w-full sm:w-auto bg-brand-blue text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all flex items-center justify-center text-sm font-bold">
+            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
+            Add App
+        </button>
+    </div>
+
+    <% if (locals.error) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl relative mb-8 flex items-center gap-3" role="alert">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <span class="block sm:inline font-medium"><%= error %></span>
+        </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 gap-6">
+        <% user.apps.forEach(app => { %>
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden">
+                <!-- App Banner -->
+                <div class="h-2 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                
+                <div class="p-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-brand-blue shadow-sm">
+                                <i data-lucide="layers" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-900"><%= app.name %></h3>
+                                <p class="text-[0.6875rem] font-bold text-slate-400 uppercase tracking-[0.1em]">INSTANCE ID: <%= app.id %></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                             <% 
+                                const planFeatures = (user.subscription && user.subscription.plan && user.subscription.plan.planFeatures) ? user.subscription.plan.planFeatures : [];
+                                const hasAnalytics = planFeatures.some(pf => pf.isEnabled && pf.feature && (pf.feature.key === 'analytics' || pf.feature.name === 'Analytics'));
+                            %>
+                            <% if (hasAnalytics) { %>
+                                <a href="/analytics/apps/<%= app.id %>"
+                                    class="flex items-center gap-2 px-3 py-2 bg-blue-50 text-brand-blue rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors text-xs font-bold"
+                                    title="Analytics Overview">
+                                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                                    Insights
+                                </a>
+                            <% } %>
+                            
+                            <form action="/apps/toggle-active" method="POST" onsubmit="return handleConfirm(this);">
+                                <input type="hidden" name="confirmMsg" value="<%= app.isActive ? 'Suspend this application instance?' : 'Restore application access?' %>">
+                                <input type="hidden" name="appId" value="<%= app.id %>">
+                                <input type="hidden" name="isActive" value="<%= !app.isActive %>">
+                                <button type="submit"
+                                    class="p-2 rounded-lg border transition-all <%= app.isActive ? 'bg-amber-50 border-amber-100 text-amber-600 hover:bg-amber-100' : 'bg-green-50 border-green-100 text-green-600 hover:bg-green-100' %>"
+                                    title="<%= app.isActive ? 'Suspend' : 'Activate' %>">
+                                    <i data-lucide="<%= app.isActive ? 'shield-off' : 'shield-check' %>" class="w-4 h-4"></i>
+                                </button>
+                            </form>
+
+                            <form action="/apps/delete" method="POST" onsubmit="return handleConfirm(this);">
+                                <input type="hidden" name="confirmMsg" value="Permanently decommission this instance?">
+                                <input type="hidden" name="appId" value="<%= app.id %>">
+                                <button type="submit" class="p-2 bg-red-50 border border-red-100 text-red-500 rounded-lg hover:bg-red-100 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
+                        <!-- API Key Management -->
+                        <div>
+                            <label class="block text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-3">API Keys</label>
+                            <div class="flex items-center gap-2">
+                                <code class="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-200 text-sm font-mono break-all text-slate-600 select-all"><%= app.apiKey %></code>
+                                <div class="flex flex-col gap-1">
+                                    <button onclick="navigator.clipboard.writeText('<%= app.apiKey %>')"
+                                        class="p-2 bg-white border border-slate-200 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-brand-blue transition-all"
+                                        title="Copy Key">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                    </button>
+                                    <form action="/apps/regenerate-key" method="POST" onsubmit="return handleConfirm(this);">
+                                        <input type="hidden" name="confirmMsg" value="Rotating keys will break existing integrations. Proceed?">
+                                        <input type="hidden" name="appId" value="<%= app.id %>">
+                                        <button type="submit" class="p-2 bg-white border border-slate-200 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-all" title="Rotate Key">
+                                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <% if (!app.isActive) { %>
+                                <div class="mt-4 bg-amber-50 border border-amber-100 p-3 rounded-xl flex items-center gap-2 text-amber-700 text-xs font-bold">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                    App Suspended
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Service Access -->
+                        <div>
+                             <label class="block text-[0.625rem] font-bold text-slate-500 uppercase tracking-widest mb-3">Enabled Services</label>
+                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <% if (locals.services && services.length > 0) { %>
+                                    <% services.forEach(service => { %>
+                                            <% 
+                                                const isEnabled = app.services.some(s => s.serviceId === service.id && s.isEnabled);
+                                                const isLocked = service.isLocked;
+                                            %>
+                                            <div class="flex items-center justify-between bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 <%= isLocked ? 'opacity-50 grayscale' : '' %>">
+                                                <span class="text-[0.6875rem] font-bold text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                                                    <%= service.name %>
+                                                    <% if (isLocked) { %> <i data-lucide="lock" class="w-3 h-3 text-slate-500"></i> <% } %>
+                                                </span>
+                                                
+                                                <% if (!isLocked) { %>
+                                                <form action="/apps/toggle-service" method="POST" onsubmit="return handleConfirm(this);">
+                                                    <input type="hidden" name="confirmMsg" value="Modify permissions for <%= service.name %>?">
+                                                    <input type="hidden" name="appId" value="<%= app.id %>">
+                                                    <input type="hidden" name="serviceId" value="<%= service.id %>">
+                                                    <input type="hidden" name="enabled" value="<%= !isEnabled %>">
+                                                    <button type="submit"
+                                                        class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out <%= isEnabled ? 'bg-brand-blue' : 'bg-slate-300' %>">
+                                                        <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition duration-200 ease-in-out <%= isEnabled ? 'translate-x-4' : 'translate-x-0' %>"></span>
+                                                    </button>
+                                                </form>
+                                                <% } %>
+                                            </div>
+                                    <% }); %>
+                                <% } else { %>
+                                    <div class="col-span-full p-3 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-xl border border-dotted border-slate-200">
+                                        No services available
+                                    </div>
+                                <% } %>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+<!-- Modals & Scripts -->
+<%- include('../partials/dashboard/confirmation-modal') %>
+
+<!-- Create App Modal -->
+<div id="createAppModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div class="p-8">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 bg-blue-100 text-brand-blue rounded-2xl flex items-center justify-center shadow-sm">
+                    <i data-lucide="plus-square" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900 tracking-tight">Add App</h2>
+            </div>
+            
+            <form action="/apps/create" method="POST" class="space-y-6">
+                <div>
+                     <label class="block text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-2" for="name">Application Name</label>
+                     <input class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all placeholder:text-slate-300 placeholder:font-normal"
+                         id="name" name="name" type="text" placeholder="e.g. Production API" required>
+                </div>
+
+                <div>
+                    <label class="block text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-3">Enable Services</label>
+                    <div class="grid grid-cols-1 gap-2">
+                        <% if (locals.services) { %>
+                            <% services.forEach(service => { %>
+                                 <label class="flex items-center p-3 rounded-xl border border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors <%= service.isLocked ? 'opacity-40 grayscale cursor-not-allowed' : '' %>">
+                                     <input type="checkbox" name="services" value="<%= service.id %>" class="h-4 w-4 text-brand-blue rounded focus:ring-0" <%= service.isLocked ? 'disabled' : 'checked' %>>
+                                     <span class="ml-3 text-sm font-bold text-slate-700 uppercase tracking-tight flex items-center gap-2">
+                                         <%= service.name %>
+                                         <% if (service.isLocked) { %> <i data-lucide="lock" class="w-3 h-3"></i> <% } %>
+                                     </span>
+                                 </label>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-6">
+                    <button type="button" id="closeCreateAppModalBtn" class="px-6 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">Cancel</button>
+                    <button type="submit" class="bg-brand-blue text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all">Add App</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('createAppModal');
+    const openBtn = document.getElementById('openCreateAppModalBtn');
+    const closeBtn = document.getElementById('closeCreateAppModalBtn');
+
+    if (openBtn && modal) openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    if (closeBtn && modal) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+    });
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

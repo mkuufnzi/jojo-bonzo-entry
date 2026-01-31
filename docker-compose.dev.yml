@@ -1,0 +1,89 @@
+# =============================================================================
+# DEVELOPMENT IN DOCKER
+# Run: npm run docker:dev OR docker-compose -f docker-compose.dev.yml up --build
+# =============================================================================
+# Uses port 3003 to avoid conflict with local dev (3002)
+# Prisma client is regenerated on container startup to ensure schema sync
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: afs_doc_tools_dev
+    restart: unless-stopped
+    ports:
+      - "3003:3002"      # Docker dev on 3003, local dev on 3002
+      - "5556:5555"      # Prisma Studio on 5556
+    volumes:
+      # Mount source code for hot reload
+      - .:/usr/src/app
+      # Keep node_modules from container to avoid platform issues
+      - /usr/src/app/node_modules
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      # Override DB/Redis to point to shared services on db_net
+      # Using standard postgres/postgres credentials and 'n8n' db from shared container
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=n8n
+      - DB_HOST=postgres
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/n8n?schema=public
+      - REDIS_URL=redis://redis:6379
+      - APP_URL=http://localhost:3003
+    command: >
+      sh -c "
+        echo 'Waiting for DB...' &&
+        npx prisma generate &&
+        echo 'Deploying migrations...' &&
+        npx prisma migrate deploy &&
+        echo 'Seeding database...' &&
+        npx prisma db seed &&
+        echo 'Starting app...' &&
+        npm run dev
+      "
+    extra_hosts:
+      # Allow container to access host machine's services if needed
+      - "host.docker.internal:host-gateway"
+    networks:
+      - db_net
+
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: afs_doc_tools_worker_dev
+    restart: unless-stopped
+    command: >
+      sh -c "
+        npx prisma generate &&
+        echo 'Starting worker...' &&
+        npm run worker
+      "
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=n8n
+      - DB_HOST=postgres
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/n8n?schema=public
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - db_net
+
+networks:
+  db_net:
+    external: true
+

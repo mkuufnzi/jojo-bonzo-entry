@@ -1,0 +1,273 @@
+<%- include('../../partials/head', { title: 'Billing Analytics - Admin' }) %>
+
+<body class="bg-slate-50 min-h-screen font-sans">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div id="mainContent" class="flex flex-col min-h-screen ">
+        <%- include('../../partials/dashboard-header', {title: 'Billing Analytics', user: user }) %>
+
+        <main class="flex-1 p-6 pb-24 overflow-y-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto space-y-6">
+                
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600"></div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Revenue</div>
+                        <div class="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:scale-105 transition-transform origin-left">$<%= stats.totalRevenue.toFixed(2) %></div>
+                        <div class="text-[0.625rem] font-bold text-slate-400">IN SELECTED PERIOD</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-purple-500 to-purple-600"></div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Invoices</div>
+                        <div class="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:scale-105 transition-transform origin-left"><%= stats.totalInvoices %></div>
+                        <div class="text-[0.625rem] font-bold text-slate-400">PROCESSED TRANSACTIONS</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-emerald-500 to-emerald-600"></div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Average Invoice</div>
+                        <div class="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:scale-105 transition-transform origin-left">$<%= stats.avgInvoice.toFixed(2) %></div>
+                        <div class="text-[0.625rem] font-bold text-slate-400">REVENUE PER TRANSACTION</div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Revenue Trend -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm col-span-1 lg:col-span-2">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-6">Revenue Trend</h3>
+                        <div class="h-64 relative">
+                            <canvas id="revenueTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Revenue by Plan -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-6">Revenue by Plan</h3>
+                        <div class="h-64 relative">
+                            <canvas id="planRevenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Payment Methods & Status -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                         <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Payment Methods</h3>
+                            <div class="h-48 relative flex items-center justify-center">
+                                <canvas id="methodChart"></canvas>
+                            </div>
+                        </div>
+                         <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Payment Status</h3>
+                            <div class="h-48 relative flex items-center justify-center">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Invoices Table -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                        <h3 class="font-bold text-slate-900 dark:text-white">Recent Invoices</h3>
+                        <a href="#" class="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">View All</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
+                            <thead class="bg-slate-50 dark:bg-slate-800/50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-[0.625rem] font-bold text-slate-400 uppercase tracking-wider">User</th>
+                                    <th class="px-6 py-3 text-left text-[0.625rem] font-bold text-slate-400 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-[0.625rem] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-[0.625rem] font-bold text-slate-400 uppercase tracking-wider">Method</th>
+                                    <th class="px-6 py-3 text-left text-[0.625rem] font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-700 bg-white dark:bg-slate-800">
+                                <% if (invoices.length === 0) { %>
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">No invoices found for this period.</td>
+                                    </tr>
+                                <% } %>
+                                <% invoices.forEach(invoice => { %>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="px-6 py-3">
+                                        <div class="font-bold text-sm text-slate-700 dark:text-slate-200"><%= invoice.user?.name || 'N/A' %></div>
+                                        <div class="text-xs text-slate-500 dark:text-slate-400"><%= invoice.user?.email || '' %></div>
+                                    </td>
+                                    <td class="px-6 py-3 text-sm font-bold text-slate-900 dark:text-white">$<%= invoice.amount.toFixed(2) %></td>
+                                    <td class="px-6 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded textxs font-bold capitalize
+                                            <%= invoice.status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
+                                                invoice.status === 'pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 
+                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' %>">
+                                            <%= invoice.status %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3 text-xs text-slate-500 dark:text-slate-400 capitalize">
+                                        <%= invoice.paymentMethod?.provider || 'Stripe' %>
+                                    </td>
+                                    <td class="px-6 py-3 text-xs text-slate-500 dark:text-slate-400"><%= new Date(invoice.createdAt).toLocaleDateString() %></td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="<%= nonce %>"></script>
+        <script nonce="<%= nonce %>">
+            document.addEventListener('DOMContentLoaded', () => {
+                const stats = <%- JSON.stringify(stats) %>;
+                
+                // Common Options
+                Chart.defaults.font.family = "'Inter', sans-serif";
+                Chart.defaults.color = '#94a3b8';
+                
+                // 1. Revenue Trend (Total - Line)
+                new Chart(document.getElementById('revenueTrendChart'), {
+                    type: 'line',
+                    data: {
+                        labels: stats.revenueTrend.map(d => d.date),
+                        datasets: [{
+                            label: 'Total Revenue',
+                            data: stats.revenueTrend.map(d => d.total),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: { 
+                            legend: { display: true, position: 'top', align: 'end' },
+                            tooltip: { enabled: true }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                                ticks: { callback: (v) => '$' + v } 
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
+                // 2. Revenue by Plan Trend (Stacked Bar - "Billing by Service")
+                if (document.getElementById('planRevenueChart')) {
+                    new Chart(document.getElementById('planRevenueChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: stats.revenueByPlanTrend.dates,
+                            datasets: stats.revenueByPlanTrend.datasets.map((ds, i) => ({
+                                ...ds,
+                                backgroundColor: [
+                                    '#3b82f6', '#8b5cf6', '#06b6d4', '#ec4899', '#f59e0b', '#10b981'
+                                ][i % 6],
+                                borderRadius: 4
+                            }))
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            plugins: { 
+                                legend: { display: true, position: 'top', align: 'end' },
+                                tooltip: { 
+                                    enabled: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed.y !== null) {
+                                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { stacked: true, grid: { display: false } },
+                                y: { 
+                                    stacked: true,
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                                    ticks: { callback: (v) => '$' + v }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // 3. Payment Methods (Doughnut)
+                new Chart(document.getElementById('methodChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(stats.methodStats),
+                        datasets: [{
+                            data: Object.values(stats.methodStats),
+                            backgroundColor: ['#6366f1', '#10b981', '#f43f5e', '#f59e0b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { 
+                            legend: { display: true, position: 'right', labels: { boxWidth: 10, font: { size: 10 } } },
+                            tooltip: { enabled: true }
+                        }
+                    }
+                });
+
+                // 4. Status (Doughnut)
+                const statusCounts = {};
+                stats.statusBreakdown.forEach(s => statusCounts[s.status] = s._count);
+                
+                new Chart(document.getElementById('statusChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(statusCounts).map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+                        datasets: [{
+                            data: Object.values(statusCounts),
+                            backgroundColor: Object.keys(statusCounts).map(s => {
+                                if (s === 'paid') return '#10b981';
+                                if (s === 'pending') return '#f59e0b';
+                                return '#ef4444'; 
+                            }),
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { 
+                            legend: { display: true, position: 'right', labels: { boxWidth: 10, font: { size: 10 } } },
+                            tooltip: { enabled: true }
+                        }
+                    }
+                });
+            });
+        </script>
+    <%- include('../../partials/sidebar-script') %>
+</body>
+</html>

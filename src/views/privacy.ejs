@@ -1,0 +1,105 @@
+<%- include('partials/head', { title: 'Privacy Policy | Floovioo' }) %>
+<script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+<body class="bg-slate-50 font-sans text-slate-900 leading-relaxed">
+    <%- include('partials/navbar') %>
+
+    <div class="max-w-4xl mx-auto py-20 px-6 lg:px-8">
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+            <div class="bg-brand-blue px-8 py-10 text-white">
+                <h1 class="text-4xl font-extrabold tracking-tight">Privacy Policy</h1>
+                <p class="mt-2 text-blue-100 font-medium opacity-90">Effective Date: January 31, 2026</p>
+            </div>
+            
+            <div class="p-8 lg:p-12 space-y-10">
+                <!-- Introduction -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                        1. Introduction
+                    </h2>
+                    <p class="text-slate-600">
+                        At Floovioo ("we," "our," or "us"), we value your privacy. This Privacy Policy explains how we collect, use, and share information about you when you use our website, mobile application, and other online products and services (collectively, the "Services").
+                    </p>
+                </section>
+
+                <!-- Information Collection -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                       2. Information We Collect
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800">Information You Provide to Us</h3>
+                            <p class="text-slate-600">We collect information you provide directly to us, such as when you create an account, connect an integration (QuickBooks, Zoho, Google), or contact customer support. This may include your name, email address, business details, and connection credentials.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Automated Collection</h3>
+                            <p class="text-slate-600">When you access our Services, we automatically collect certain information about your device and usage, including your IP address, browser type, and interaction data.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Google API Disclosure -->
+                <section class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-blue-200 pb-2">
+                       3. Google API Data Usage
+                    </h2>
+                    <p class="text-slate-700 font-medium mb-3">
+                        Floovioo's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" class="text-brand-blue underline hover:text-blue-700">Google API Service: User Data Policy</a>, including the Limited Use requirements.
+                    </p>
+                    <p class="text-slate-600">
+                        We specifically use Google OAuth to allow you to log in to our Services and to process documents stored in your Google Drive or access data in Google Sheets as part of your automated workflows. We do not sell your Google API data to third parties.
+                    </p>
+                </section>
+
+                <!-- How We Use Information -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                       4. How We Use Information
+                    </h2>
+                    <ul class="list-disc pl-5 text-slate-600 space-y-2">
+                        <li>To provide, maintain, and improve our document automation services.</li>
+                        <li>To process transactions and send related information.</li>
+                        <li>To monitor and analyze trends, usage, and activities.</li>
+                        <li>To detect, investigate, and prevent fraudulent transactions and other illegal activities.</li>
+                    </ul>
+                </section>
+
+                <!-- Data Sharing -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                       5. Sharing of Information
+                    </h2>
+                    <p class="text-slate-600">
+                        We may share information about you with third-party vendors, consultants, and other service providers who need access to such information to carry out work on our behalf (e.g., Stripe for payments, OpenAI for document analysis). We do not share your private business data for marketing purposes.
+                    </p>
+                </section>
+
+                <!-- Security -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                       6. Security
+                    </h2>
+                    <p class="text-slate-600">
+                        We take reasonable measures to help protect information about you from loss, theft, misuse, and unauthorized access. This includes encryption of sensitive credentials (tokens) and use of secure Content Security Policies.
+                    </p>
+                </section>
+
+                <!-- Contact -->
+                <section>
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                       7. Contact Us
+                    </h2>
+                    <p class="text-slate-600">
+                        If you have any questions about this Privacy Policy, please contact us at:
+                    </p>
+                    <p class="mt-4 font-bold text-brand-blue">
+                        bonzocreatives@gmail.com
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

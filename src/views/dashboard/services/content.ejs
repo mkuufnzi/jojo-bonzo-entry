@@ -1,0 +1,165 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2 py-0.5 bg-purple-50 text-purple-600 text-[0.625rem] font-bold rounded-lg border border-purple-100 uppercase tracking-widest">Pillar IV</span>
+                <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">Content Engine</h1>
+            </div>
+            <p class="text-slate-500 font-medium">Scale your digital footprint with automated infographics, SEO assets, and data-to-content synthesis.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center">
+                <i data-lucide="layers" class="w-4 h-4 mr-2 text-purple-500"></i>
+                Asset Library
+            </button>
+            <button class="bg-purple-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-xl transition-all shadow-lg flex items-center">
+                <i data-lucide="plus" class="w-4 h-4 mr-2 text-purple-300"></i>
+                New Workflow
+            </button>
+        </div>
+    </div>
+
+    <!-- Synthesis Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:border-purple-500 transition-all group">
+            <div class="flex items-center justify-between mb-4">
+                 <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">Synthesized Units</p>
+                 <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+            </div>
+            <h3 class="text-3xl font-black text-slate-900 tracking-tight">8,402</h3>
+            <div class="mt-4 w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                <div class="bg-purple-500 h-full w-[85%] rounded-full"></div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:border-purple-500 transition-all group">
+            <div class="flex items-center justify-between mb-4">
+                 <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">SEO Impressions</p>
+                 <i data-lucide="globe" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <h3 class="text-3xl font-black text-slate-900 tracking-tight">1.2M</h3>
+            <p class="text-[0.625rem] font-bold text-emerald-600 uppercase tracking-widest mt-2">+24% Organic Growth</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:border-purple-500 transition-all group">
+            <div class="flex items-center justify-between mb-4">
+                 <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">Automation Depth</p>
+                 <i data-lucide="cog" class="w-4 h-4 text-slate-400"></i>
+            </div>
+            <h3 class="text-3xl font-black text-slate-900 tracking-tight">92%</h3>
+            <p class="text-[0.625rem] font-bold text-purple-600 uppercase tracking-widest mt-2">Policy: Full Auto</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:border-purple-500 transition-all group">
+            <div class="flex items-center justify-between mb-4">
+                 <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">API Call Success</p>
+                 <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+            </div>
+            <h3 class="text-3xl font-black text-slate-900 tracking-tight">99.9%</h3>
+            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-2">Zero Latency Drop</p>
+        </div>
+    </div>
+
+    <!-- Active Content Streams -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="play-circle" class="w-4 h-4 text-purple-600"></i>
+                        Active Content Workflows
+                    </h3>
+                    <div class="flex gap-1">
+                        <% [1,2,3,4,5].forEach(() => { %>
+                            <div class="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <% [
+                        { name: 'Weekly SEO Brief Synthesis', status: 'Running', load: '40%', icon: 'file-text', color: 'purple' },
+                        { name: 'Live Data Infographic Feed', status: 'Active', load: '12%', icon: 'image', color: 'blue' },
+                        { name: 'Social Post Data Extraction', status: 'Idle', load: '0%', icon: 'share-2', color: 'slate' }
+                    ].forEach(workflow => { %>
+                        <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between hover:border-purple-300 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-<%= workflow.color %>-600">
+                                    <i data-lucide="<%= workflow.icon %>" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900"><%= workflow.name %></h4>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-[0.5rem] font-black text-<%= workflow.color %>-600 uppercase tracking-widest"><%= workflow.status %></span>
+                                        <span class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-widest">• Load: <%= workflow.load %></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="p-2 text-slate-300 hover:text-purple-600 transition-colors">
+                                <i data-lucide="settings-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+
+            <!-- Global Distribution Map Placeholder -->
+            <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden h-64 flex flex-col justify-center items-center text-center">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#4f46e5_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="relative z-10">
+                    <i data-lucide="globe" class="w-16 h-16 text-purple-500 mb-4 animate-pulse"></i>
+                    <h3 class="text-xl font-black mb-2 tracking-tight">Global Content Distribution</h3>
+                    <p class="text-slate-400 text-sm font-medium">Monitoring edge delivery across 42 documentation nodes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Performance & Presets -->
+        <div class="space-y-8">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <h3 class="text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Synthesis Presets</h3>
+                <div class="space-y-3">
+                    <% [
+                        { name: 'High-Density Chart', desc: 'Financial infographics' },
+                        { name: 'SEO Cluster Map', desc: 'Contextual linking' },
+                        { name: 'Brand Voice Synthesis', desc: 'Tone adjustment' }
+                    ].forEach(preset => { %>
+                        <div class="p-4 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                            <p class="text-xs font-bold text-slate-900 group-hover:text-purple-600 transition-colors"><%= preset.name %></p>
+                            <p class="text-[0.5rem] font-medium text-slate-400 uppercase mt-1 tracking-widest"><%= preset.desc %></p>
+                        </div>
+                    <% }) %>
+                </div>
+                <button class="w-full mt-6 py-3 bg-slate-900 text-white rounded-2xl text-[0.625rem] font-bold uppercase tracking-widest hover:bg-purple-600 transition-all shadow-lg">New Custom Preset</button>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 rounded-3xl p-8 text-white relative overflow-hidden group">
+                <div class="absolute -right-12 -top-12 opacity-10 group-hover:scale-110 transition-transform">
+                    <i data-lucide="zap" class="w-56 h-56 text-white"></i>
+                </div>
+                <div class="relative z-10">
+                    <h3 class="text-2xl font-black tracking-tight mb-4">Content API <span class="text-purple-400 text-sm ml-2 font-mono">v3.4</span></h3>
+                    <div class="bg-black/30 p-4 rounded-xl font-mono text-[0.6875rem] text-purple-300 border border-white/5 mb-6">
+                        $ floovioo-content sync <br>
+                        --src ./data-lake <br>
+                        --target /seo/v4
+                    </div>
+                    <button class="w-full bg-white text-purple-900 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-purple-50 transition-all flex items-center justify-center">
+                        <i data-lucide="book-open" class="w-4 h-4 mr-2"></i>
+                        Read SDK Docs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

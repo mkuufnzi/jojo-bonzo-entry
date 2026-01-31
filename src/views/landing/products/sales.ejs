@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Enablement Automation | Floovioo</title>
+    <meta name="description" content="Auto-generate pitch decks, proposals, and case studies from your CRM data.">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="//unpkg.com/alpinejs" defer></script>
+</head>
+<body class="bg-off-white text-slate-600 font-sans antialiased">
+
+    <%- include('../../partials/landing-nav') %>
+
+    <main>
+        <!-- SALES ENABLEMENT CAROUSEL -->
+        <%- include('../../partials/components/hero-carousel', {
+            slides: [
+                {
+                    id: 'pitch',
+                    badge: { text: 'Automated Pitch Decks', classes: 'bg-indigo-50 text-indigo-600' },
+                    title: 'Turn CRM Data into',
+                    titleHighlight: 'Perfect Pitches.',
+                    titleHighlightColor: 'text-indigo-600',
+                    text: 'Stop manually updating slides. Auto-generate client-specific decks with their logo, industry stats, and relevant case studies pulled directly from Salesforce/HubSpot.',
+                    cta: { text: 'Start Automating Sales', link: '/dashboard/sales' },
+                    visuals: ['/assets/images/reports-mockup.png', '/assets/images/report-sample-1.jpg', '/assets/images/report-sample-2.jpg']
+                },
+                {
+                    id: 'proposal',
+                    badge: { text: 'Smart Proposals', classes: 'bg-blue-50 text-blue-600' },
+                    title: 'Proposals that',
+                    titleHighlight: 'Close themselves.',
+                    titleHighlightColor: 'text-blue-500',
+                    text: 'Embed e-signatures, interactive pricing tables, and "Book a Call" buttons directly inside the PDF proposal.',
+                    cta: { text: 'Create Smart Proposal', link: '/dashboard/sales/proposals' },
+                    visuals: ['/assets/images/smart-invoice-features.jpg', '/assets/images/report-sample-3.jpg', '/assets/images/report-sample-0.jpg']
+                },
+                {
+                    id: 'case_studies',
+                    badge: { text: 'Dynamic Proof', classes: 'bg-purple-50 text-purple-600' },
+                    title: 'Case Studies on',
+                    titleHighlight: 'Autopilot.',
+                    titleHighlightColor: 'text-purple-500',
+                    text: 'Don\'t send generic "Tech" case studies. Auto-assemble specific success stories that match your prospect\'s industry and size.',
+                    cta: { text: 'Match Case Studies', link: '/dashboard/sales/content' },
+                    visuals: ['/assets/images/report-sample-1.jpg', '/assets/images/report-sample-2.jpg', '/assets/images/report-sample-3.jpg']
+                }
+            ]
+        }) %>
+
+        <!-- Feature Grid (Sales Specific) -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-extrabold text-deep-ocean sm:text-4xl">
+                    Close deals faster with better docs.
+                </h2>
+                <div class="mt-12 grid gap-8 grid-cols-1 md:grid-cols-3">
+                    <div class="bg-indigo-50 rounded-2xl p-8">
+                        <div class="text-indigo-600 font-bold text-xl mb-4">CRM Integration</div>
+                        <p>Bi-directional sync with Salesforce, HubSpot, and Pipedrive.</p>
+                    </div>
+                    <div class="bg-indigo-50 rounded-2xl p-8">
+                        <div class="text-indigo-600 font-bold text-xl mb-4">E-Signature</div>
+                        <p>Legally binding signatures embedded right in the proposal.</p>
+                    </div>
+                    <div class="bg-indigo-50 rounded-2xl p-8">
+                        <div class="text-indigo-600 font-bold text-xl mb-4">Engagement Analytics</div>
+                        <p>See exactly which slides your prospect spent the most time on.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <%- include('../../partials/footer') %>
+
+</body>
+</html>

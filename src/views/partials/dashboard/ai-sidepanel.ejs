@@ -1,0 +1,82 @@
+<div id="aiSidepanel" 
+     x-show="aiPanelOpen" 
+     x-cloak
+     x-transition:enter="transition ease-in-out duration-300 transform"
+     x-transition:enter-start="translate-x-full"
+     x-transition:enter-end="translate-x-0"
+     x-transition:leave="transition ease-in-out duration-300 transform"
+     x-transition:leave-start="translate-x-0"
+     x-transition:leave-end="translate-x-full"
+     class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200"
+     @click.away="aiPanelOpen = false">
+    
+    <!-- Header -->
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+            <div class="p-1.5 bg-blue-600 rounded">
+                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-widest">AI Generator</h2>
+        </div>
+        <button @click="aiPanelOpen = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+        <!-- Templates Grid -->
+        <div class="space-y-3">
+            <label class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-[0.15em]">Quick Blueprints</label>
+            <div class="grid grid-cols-2 gap-2">
+                <% 
+                const sidebarBlueprints = [
+                    { id: 'resume', label: 'Resume', icon: 'UserCircle' },
+                    { id: 'cover_letter', label: 'Cover Letter', icon: 'FileText' },
+                    { id: 'invoice', label: 'Invoice', icon: 'ReceiptTax' },
+                    { id: 'proposal', label: 'Proposal', icon: 'Briefcase' }
+                ];
+                %>
+                <% sidebarBlueprints.forEach(bp => { %>
+                    <button type="button" 
+                            class="flex flex-col items-center justify-center p-3 border border-slate-100 rounded-lg hover:border-blue-200 hover:bg-blue-50/30 transition-all group active:scale-95">
+                        <span class="text-[0.625rem] font-bold text-slate-600 group-hover:text-blue-600 uppercase tracking-widest"><%= bp.label %></span>
+                    </button>
+                <% }) %>
+            </div>
+        </div>
+
+        <!-- Prompt Area -->
+        <div class="space-y-3">
+            <label class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-[0.15em]">What are we building?</label>
+            <textarea 
+                rows="8"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none placeholder:text-slate-400 text-sm"
+                placeholder="Describe your document in detail..."></textarea>
+        </div>
+
+        <!-- Settings Minimal -->
+        <div class="space-y-3">
+            <label class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-[0.15em]">Preferences</label>
+            <div class="flex flex-wrap gap-2">
+                <button class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[0.625rem] font-bold uppercase tracking-widest border border-slate-200">Professional</button>
+                <button class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[0.625rem] font-bold uppercase tracking-widest border border-slate-200">Modern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Action -->
+    <div class="p-4 border-t border-slate-100 bg-white">
+        <button class="w-full py-3 bg-blue-600 text-white rounded-lg font-bold text-[0.6875rem] uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-xl transition-all flex items-center justify-center group">
+            <span>Generate Document</span>
+            <svg class="ml-2 w-3.5 h-3.5 fill-white" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+            </svg>
+        </button>
+        <p class="mt-3 text-[0.5rem] text-center text-slate-400 font-bold uppercase tracking-widest">Powered by Floovioo Intelligence</p>
+    </div>
+</div>

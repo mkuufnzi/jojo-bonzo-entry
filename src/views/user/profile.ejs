@@ -1,0 +1,283 @@
+<%- include('../partials/head', { title: 'User Profile - Floovioo ' }) %>
+
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+
+        <%- include('../partials/sidebar', { path: '/user/profile' }) %>
+
+            <!-- Main Content -->
+            <div id="mainContent" class="flex-1 flex flex-col overflow-hidden  transition-all duration-300">
+                <%- include('../partials/dashboard-header', { title: 'Account Settings' , user: user }) %>
+
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                        
+                        <!-- Page Header -->
+                        <div class="mb-10">
+                            <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Account Settings</h2>
+                            <p class="text-sm text-slate-500 mt-1">Manage your profile information, business details, and security.</p>
+                        </div>
+
+                        <% if (typeof success !=='undefined' && success) { %>
+                            <div class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-6 py-4 rounded-xl relative mb-8 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300" role="alert">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                                    <span class="font-bold text-sm uppercase tracking-wider"><%= success %></span>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <% if (typeof error !=='undefined' && error) { %>
+                            <div class="bg-rose-50 border border-rose-100 text-rose-700 px-6 py-4 rounded-xl relative mb-8 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300" role="alert">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                                    <span class="font-bold text-sm uppercase tracking-wider"><%= error %></span>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                            <!-- Left Column: Personal Info & Business Info -->
+                            <form action="/user/profile" method="POST" enctype="multipart/form-data" class="lg:col-span-2 space-y-8">
+                                
+                                <!-- Personal Information -->
+                                <div class="bg-white rounded-3xl border border-slate-100 shadow-minimal overflow-hidden">
+                                    <div class="px-8 py-6 border-b border-slate-50 flex items-center justify-between bg-white">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center">
+                                                <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
+                                            </div>
+                                            <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Personal Information</h3>
+                                        </div>
+                                    </div>
+                                    <div class="p-8">
+                                        <!-- Profile Image Upload -->
+                                        <div class="flex items-center gap-6 mb-6">
+                                            <div class="relative group">
+                                                <% if (user.avatar) { %>
+                                                    <img src="<%= user.avatar %>" alt="Profile" class="w-20 h-20 rounded-2xl object-cover shadow-sm ring-4 ring-slate-50">
+                                                <% } else { %>
+                                                    <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center ring-4 ring-slate-50">
+                                                        <i data-lucide="user" class="w-8 h-8 text-blue-600"></i>
+                                                    </div>
+                                                <% } %>
+                                                <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-md border border-slate-100">
+                                                    <i data-lucide="camera" class="w-4 h-4 text-slate-400"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2">Profile Photo</label>
+                                                <input type="file" name="profileImage" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="firstName">First Name</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                                                    id="firstName" type="text" name="firstName" value="<%= (locals.userProfile && locals.userProfile.firstName) || '' %>" placeholder="Enter first name">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="lastName">Last Name</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                                                    id="lastName" type="text" name="lastName" value="<%= (locals.userProfile && locals.userProfile.lastName) || '' %>" placeholder="Enter last name">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="email">Email Address</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-400 text-sm font-medium bg-gray-100 cursor-not-allowed"
+                                                    id="email" type="email" value="<%= user.email %>" readonly disabled title="Email cannot be changed">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="phoneNumber">Phone Number</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                                                    id="phoneNumber" type="tel" name="phoneNumber" value="<%= (locals.userProfile && locals.userProfile.phoneNumber) || '' %>" placeholder="+1 (555) 000-0000">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="profession">Profession / Role</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                                                    id="profession" type="text" name="profession" value="<%= (locals.userProfile && locals.userProfile.profession) || '' %>" placeholder="e.g. Senior Developer">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="accountType">Account Type</label>
+                                                <select id="accountType" name="accountType" onchange="toggleBusinessSection()" class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
+                                                    <option value="INDIVIDUAL" <%= (!locals.userProfile || locals.userProfile.accountType === 'INDIVIDUAL') ? 'selected' : '' %>>Individual</option>
+                                                    <option value="BUSINESS" <%= (locals.userProfile && locals.userProfile.accountType === 'BUSINESS') ? 'selected' : '' %>>Business</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Business Information (Conditioned by Logic) -->
+                                <div id="businessSection" class="bg-white rounded-3xl border border-slate-100 shadow-minimal overflow-hidden <%= (locals.userProfile && locals.userProfile.accountType === 'BUSINESS') ? '' : 'hidden' %>">
+                                    <div class="px-8 py-6 border-b border-slate-50 flex items-center justify-between bg-white">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center">
+                                                <i data-lucide="briefcase" class="w-5 h-5 text-purple-600"></i>
+                                            </div>
+                                            <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Business Details</h3>
+                                        </div>
+                                        <span class="px-3 py-1 bg-purple-50 text-purple-600 text-[0.625rem] font-black rounded-lg border border-purple-100 uppercase tracking-widest">Business Account</span>
+                                    </div>
+                                    <div class="p-8">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="businessName">Company Name</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                                                    id="businessName" type="text" name="businessName" value="<%= (locals.userProfile && locals.userProfile.businessName) || '' %>" placeholder="Enter company name">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="businessSector">Industry Sector</label>
+                                                <select id="businessSector" name="businessSector" class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
+                                                    <option value="">Select industry</option>
+                                                    <option value="Technology" <%= (locals.userProfile && locals.userProfile.businessSector === 'Technology') ? 'selected' : '' %>>Technology</option>
+                                                    <option value="Healthcare" <%= (locals.userProfile && locals.userProfile.businessSector === 'Healthcare') ? 'selected' : '' %>>Healthcare</option>
+                                                    <option value="Finance" <%= (locals.userProfile && locals.userProfile.businessSector === 'Finance') ? 'selected' : '' %>>Finance</option>
+                                                    <option value="Education" <%= (locals.userProfile && locals.userProfile.businessSector === 'Education') ? 'selected' : '' %>>Education</option>
+                                                    <option value="Consulting" <%= (locals.userProfile && locals.userProfile.businessSector === 'Consulting') ? 'selected' : '' %>>Consulting</option>
+                                                    <option value="Other" <%= (locals.userProfile && locals.userProfile.businessSector === 'Other') ? 'selected' : '' %>>Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="businessAddress">Company Address</label>
+                                                <textarea class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none"
+                                                    id="businessAddress" name="businessAddress" rows="2" placeholder="Street, City, Country"><%= (locals.userProfile && locals.userProfile.businessAddress) || '' %></textarea>
+                                            </div>
+
+                                            <div class="flex items-center justify-end pt-4">
+                                                <!-- Internal button removed, using main one -->
+                                            </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Main Save Button -->
+                                <div class="flex justify-end pt-4">
+                                     <button class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-black py-4 px-10 rounded-2xl transition-all shadow-lg hover:shadow-blue-500/30 active:scale-95 uppercase tracking-widest"
+                                        type="submit">
+                                        Save All Changes
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <script nonce="<%= nonce %>">
+                                function toggleBusinessSection() {
+                                    const type = document.getElementById('accountType').value;
+                                    const section = document.getElementById('businessSection');
+                                    if (type === 'BUSINESS') {
+                                        section.classList.remove('hidden');
+                                        section.classList.add('animate-in', 'fade-in', 'slide-in-from-bottom-4');
+                                    } else {
+                                        section.classList.add('hidden');
+                                        section.classList.remove('animate-in', 'fade-in', 'slide-in-from-bottom-4');
+                                    }
+                                }
+                            </script>
+
+                            <!-- Right Column: Security & Stats -->
+                            <div class="space-y-8">
+                                <!-- Quick Stats Widget -->
+                                <div class="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/20 overflow-hidden relative group">
+                                    <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                                        <i data-lucide="shield-check" class="w-24 h-24"></i>
+                                    </div>
+                                    <h4 class="text-[0.625rem] font-black uppercase tracking-widest opacity-70 mb-2">Account Status</h4>
+                                    <p class="text-2xl font-black mb-6 flex items-center gap-2">
+                                        <%= (user.subscription && user.subscription.plan) ? user.subscription.plan.name : 'Free Library' %>
+                                        <i data-lucide="crown" class="w-5 h-5 text-yellow-400"></i>
+                                    </p>
+                                    <div class="space-y-4 relative z-10">
+                                        <div class="flex items-center justify-between text-xs font-bold py-2 border-b border-white/10">
+                                            <span class="opacity-70">Member Since</span>
+                                            <span><%= new Date(user.createdAt).toLocaleDateString() %></span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs font-bold py-2">
+                                            <span class="opacity-70">Verification</span>
+                                            <span class="px-2 py-1 rounded-lg bg-white/20 text-[0.5625rem] font-black uppercase">Verified</span>
+                                        </div>
+                                    </div>
+                                    <a href="/billing" class="mt-8 block text-center py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-[0.625rem] font-black uppercase tracking-widest transition-all">View Subscription</a>
+                                </div>
+
+                                <!-- Security: Two-Factor Auth & Password -->
+                                <div class="bg-white rounded-3xl border border-slate-100 shadow-minimal overflow-hidden">
+                                    <div class="px-8 py-6 border-b border-slate-50 flex items-center gap-4 bg-white">
+                                        <div class="w-10 h-10 bg-rose-50 rounded-2xl flex items-center justify-center">
+                                            <i data-lucide="lock" class="w-5 h-5 text-rose-600"></i>
+                                        </div>
+                                        <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Security</h3>
+                                    </div>
+                                    <div class="p-8 space-y-8">
+                                        
+                                        <!-- Two-Factor Authentication -->
+                                        <div>
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div>
+                                                    <h4 class="text-sm font-bold text-slate-900">Two-Factor Authentication</h4>
+                                                    <p class="text-xs text-slate-500 mt-1">Add an extra layer of security to your account.</p>
+                                                </div>
+                                                <form action="/user/2fa/toggle" method="POST">
+                                                    <button type="submit" 
+                                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 <%= user.isTwoFactorEnabled ? 'bg-blue-600' : 'bg-slate-200' %>" 
+                                                        role="switch" 
+                                                        aria-checked="<%= user.isTwoFactorEnabled %>">
+                                                        <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out <%= user.isTwoFactorEnabled ? 'translate-x-5' : 'translate-x-0' %>"></span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <% if (user.isTwoFactorEnabled) { %>
+                                                <div class="bg-blue-50 text-blue-700 text-xs px-4 py-3 rounded-xl border border-blue-100 flex items-center gap-2">
+                                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                                    2FA is currently <strong>enabled</strong> via Email.
+                                                </div>
+                                            <% } else { %>
+                                                <div class="bg-slate-50 text-slate-500 text-xs px-4 py-3 rounded-xl border border-slate-100 flex items-center gap-2">
+                                                    <i data-lucide="shield-off" class="w-4 h-4"></i>
+                                                    2FA is currently <strong>disabled</strong>.
+                                                </div>
+                                            <% } %>
+                                        </div>
+
+                                        <hr class="border-slate-100">
+
+                                        <!-- Change Password Form -->
+                                        <form action="/user/password" method="POST" class="space-y-5">
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="currentPassword">Current Password</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                                    id="currentPassword" type="password" name="currentPassword" required placeholder="••••••••">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="newPassword">New Password</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                                    id="newPassword" type="password" name="newPassword" required placeholder="••••••••">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-2" for="confirmPassword">Confirm Password</label>
+                                                <input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 text-sm font-medium focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                                    id="confirmPassword" type="password" name="confirmPassword" required placeholder="••••••••">
+                                            </div>
+                                            <button class="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 text-[0.625rem] font-black py-4 rounded-2xl transition-all uppercase tracking-widest"
+                                                type="submit">
+                                                Update Security
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+    </div>
+    <%- include('../partials/sidebar-script') %>
+</body>
+
+</html>

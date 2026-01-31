@@ -1,0 +1,1258 @@
+{
+  "name": "Floovioo Branding Automation Engine 1.0",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -1552,
+        304
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b5942df6-0160-4ef7-965d-57583acdc8aa",
+      "name": "Replace me with your logic",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "FafGTpVABGLQpA3u",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/FafGTpVABGLQpA3u",
+          "cachedResultName": "Floovioo Ops Branding Workflow ID_Inbound_Req_Handler V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $json.body.floovioo_id }}",
+            "requestId": "={{ $json.body.requestId }}",
+            "service_id": "=transactional",
+            "service_tenant_id": "={{ $json.body.service_id }}",
+            "requestBody": "={{ {...$json.body, documentType: $json.body.body.type} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_tenant_id",
+              "displayName": "service_tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestBody",
+              "displayName": "requestBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        688
+      ],
+      "id": "44b84ff8-b062-4c18-b2a0-29ced09e5925",
+      "name": "Call 'Floovioo Ops Branding Workflow ID_Inbound_Req_Handler V1.0'"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('ValidateRequest').first().json.body.type }}",
+                    "rightValue": "statement",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a4c92bdc-4f32-43a3-bcde-4b53a7636830"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "statement"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "612d80bb-e632-4f9e-8d4f-8618c26682dd",
+                    "leftValue": "={{ $('ValidateRequest').first().json.body.type }}",
+                    "rightValue": "invoice_created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "invoice_created"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c8e763fe-3a53-42ed-8de0-b1aab6de87ab",
+                    "leftValue": "={{ $('ValidateRequest').first().json.body.type }}",
+                    "rightValue": "receipt",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "receipt"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5d22c7c7-f38e-4425-9f69-5b0ec1c9402a",
+                    "leftValue": "={{ $('ValidateRequest').first().json.body.type }}",
+                    "rightValue": "order",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "order"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "606e255c-2dbc-4891-913c-703a3c91497f",
+                    "leftValue": "={{ $('ValidateRequest').first().json.body.type }}",
+                    "rightValue": "quote",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "quote"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -432,
+        256
+      ],
+      "id": "eed8e482-4028-4135-8eb7-30e8aca8e95b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7f61182f-8e9d-4aef-8ef3-163a60b671a8",
+              "name": "body",
+              "value": "={{ {floovioo_id: $('FlooviooRequest').item.json.body.floovioo_id, service_id: $('FlooviooRequest').item.json.body.service_id, requestId: $('FlooviooRequest').item.json.body.requestId, ...$('FlooviooRequest').item.json.body.body} }}",
+              "type": "object"
+            },
+            {
+              "id": "307bdb3b-5c43-42fd-9161-c3bfb14d123b",
+              "name": "params",
+              "value": "={{ $('FlooviooRequest').params }}",
+              "type": "object"
+            },
+            {
+              "id": "c9632aaa-d2ec-4d41-9a86-c899a87b972f",
+              "name": "query",
+              "value": "={{ $('FlooviooRequest').item.json.query }}",
+              "type": "object"
+            },
+            {
+              "id": "c32770b4-5c57-4b88-8105-29a0acb55972",
+              "name": "executionMode",
+              "value": "=production",
+              "type": "string"
+            },
+            {
+              "id": "d8a8b657-64dc-4577-83a1-fbaf10fec24e",
+              "name": "webhookUrl",
+              "value": "={{ $('FlooviooRequest').item.json.webhookUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "6a8f973c-632e-437f-89cd-ebc951910f3c",
+              "name": "pdfData",
+              "value": "={{ $('ExtractQBInvoicePDFV1.4').first().json }}",
+              "type": "object"
+            },
+            {
+              "id": "4a59d611-036f-4348-9ce1-26b31e90b830",
+              "name": "body.body.type",
+              "value": "={{ $('FlooviooRequest').item.json.body.body.type }}",
+              "type": "string"
+            },
+            {
+              "id": "4b83b61e-fc52-45b1-ba82-c16f336505d6",
+              "name": "body.body.timestamp",
+              "value": "={{ $('FlooviooRequest').item.json.body.body.timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "b390b9b1-e3d7-40a6-9cf3-35645ea3e29d",
+              "name": "body.body.realmId",
+              "value": "={{ $('FlooviooRequest').item.json.body.body.realmId }}",
+              "type": "string"
+            },
+            {
+              "id": "fcaf341c-d808-4e19-b905-a0c8b75915a4",
+              "name": "body.floovioo_id",
+              "value": "={{ $('FlooviooRequest').item.json.body.floovioo_id }}",
+              "type": "string"
+            },
+            {
+              "id": "655cafbe-47aa-4911-92cd-95477bca8651",
+              "name": "body.service_id",
+              "value": "={{ $('FlooviooRequest').item.json.body.service_id }}",
+              "type": "string"
+            },
+            {
+              "id": "ecd96c5e-5c56-48a3-9e28-4624c4de61fc",
+              "name": "body.requestId",
+              "value": "={{ $('FlooviooRequest').item.json.body.requestId }}",
+              "type": "string"
+            },
+            {
+              "id": "272e4498-2931-471a-a6f2-321338fa28e1",
+              "name": "body.body.realmId",
+              "value": "={{ $('FlooviooRequest').item.json.body.body.realmId }}",
+              "type": "string"
+            },
+            {
+              "id": "53f7775c-54e2-4ee4-9df6-62e05a1273f2",
+              "name": "body.body.source",
+              "value": "={{ $('FlooviooRequest').item.json.body.body.source }}",
+              "type": "string"
+            },
+            {
+              "id": "b6f88fc5-ea80-4b91-9c38-166fe2503387",
+              "name": "body.body.operation",
+              "value": "={{ $('FlooviooRequest').item.json.body.body.operation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -656,
+        304
+      ],
+      "id": "4cb2c355-6b32-4375-ae60-3d3028c5e5cd",
+      "name": "ValidateRequest"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e4d5dc9-a775-4b57-88b8-5af1e7aeac21",
+              "name": "html",
+              "value": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Payment Receipt</title>     <style>         * {             margin: 0;             padding: 0;             box-sizing: border-box;         }          body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             padding: 40px 20px;             min-height: 100vh;         }          .receipt-container {             max-width: 900px;             margin: 0 auto;             background: linear-gradient(to bottom, #F5E6D3 0%, #FAF0E6 100%);             border-radius: 20px;             overflow: hidden;             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);             position: relative;         }          .header-curve {             position: absolute;             top: 0;             left: 0;             right: 0;             height: 100px;             background: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 50%, #D4AF37 100%);             clip-path: ellipse(120% 100% at 50% 0%);             z-index: 1;         }          .content {             position: relative;             z-index: 2;             padding: 60px 60px 40px;         }          .logo {             width: 60px;             height: 60px;             border: 3px solid #D4AF37;             border-radius: 10px;             display: flex;             align-items: center;             justify-content: center;             background: white;             margin-bottom: 20px;         }          .logo-text {             font-size: 36px;             font-weight: bold;             color: #D4AF37;         }          h1 {             font-size: 48px;             font-weight: 900;             color: #1a1a1a;             margin-bottom: 30px;             letter-spacing: 1px;         }          .receipt-info {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 20px;             margin-bottom: 40px;         }          .info-item {             display: flex;             gap: 10px;         }          .info-label {             font-weight: 600;             color: #1a1a1a;         }          .info-value {             color: #333;         }          .divider {             height: 2px;             background: linear-gradient(to right, #D4AF37, transparent);             margin: 40px 0;         }          .details-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-bottom: 40px;         }          .section-title {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 15px;         }          .detail-row {             display: flex;             justify-content: space-between;             margin-bottom: 8px;             font-size: 15px;         }          .detail-label {             font-weight: 600;             color: #1a1a1a;         }          .detail-value {             color: #333;         }          .payment-table {             width: 100%;             border: 2px solid #D4AF37;             border-collapse: collapse;             margin: 40px 0;         }          .payment-table th,         .payment-table td {             padding: 20px;             text-align: left;             border: 2px solid #D4AF37;         }          .payment-table th {             background: transparent;             font-size: 20px;             font-weight: 700;             color: #1a1a1a;         }          .payment-table td {             font-size: 16px;             color: #333;         }          .payment-table .amount {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;         }          .footer-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-top: 40px;         }          .signature-box {             margin-top: 30px;         }          .signature-line {             border-bottom: 2px solid #D4AF37;             padding-bottom: 10px;             margin-top: 40px;             text-align: center;             color: #666;             font-size: 14px;         }          .thank-you {             font-size: 28px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 10px;         }          .contact-footer {             display: flex;             justify-content: space-between;             align-items: center;             padding: 30px 60px;             background: rgba(212, 175, 55, 0.1);             border-top: 2px solid #D4AF37;             flex-wrap: wrap;             gap: 20px;         }          .contact-item {             display: flex;             align-items: center;             gap: 8px;             color: #333;             font-size: 13px;         }          .icon {             width: 24px;             height: 24px;             background: #D4AF37;             border-radius: 50%;             display: flex;             align-items: center;             justify-content: center;             color: white;             font-size: 12px;         }          .footer-curve {             position: absolute;             bottom: 0;             left: 0;             right: 0;             height: 120px;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);         }          @media (max-width: 768px) {             .content {                 padding: 40px 30px;             }              h1 {                 font-size: 36px;             }              .details-section,             .footer-section {                 grid-template-columns: 1fr;                 gap: 30px;             }              .contact-footer {                 padding: 20px 30px;                 flex-direction: column;                 align-items: flex-start;             }         }     </style> </head> <body>     <div class=\"receipt-container\">         <div class=\"header-curve\"></div>                  <div class=\"content\">             <div class=\"logo\">                 <div class=\"logo-text\">G</div>             </div>              <h1>PAYMENT RECEIPT</h1>              <div class=\"receipt-info\">                 <div class=\"info-item\">                     <span class=\"info-label\">Receipt No:</span>                     <span class=\"info-value\">PR-005421</span>                 </div>                 <div class=\"info-item\">                     <span class=\"info-label\">Date:</span>                     <span class=\"info-value\">January 15, 2025</span>                 </div>             </div>              <div class=\"divider\"></div>              <div class=\"details-section\">                 <div>                     <h2 class=\"section-title\">Billed To:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Name:</span>                         <span class=\"detail-value\">Daniel Gallego</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Contact:</span>                         <span class=\"detail-value\">+123-456-7890</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Email:</span>                         <span class=\"detail-value\">hello@reallygreatsite.com</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Address:</span>                         <span class=\"detail-value\">123 Anywhere St., Any City</span>                     </div>                 </div>                  <div>                     <h2 class=\"section-title\">Payment Summary:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Total Paid</span>                         <span class=\"detail-value\">$499.00</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Payment Method:</span>                         <span class=\"detail-value\">Credit Card</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Transaction ID</span>                         <span class=\"detail-value\">TXN-89J4K2P1</span>                     </div>                 </div>             </div>              <table class=\"payment-table\">                 <thead>                     <tr>                         <th>Description</th>                         <th>Amount</th>                     </tr>                 </thead>                 <tbody>                     <tr>                         <td>Annual Subscription for Premium Marketing Tools</td>                         <td class=\"amount\">$499.00</td>                     </tr>                 </tbody>             </table>              <div class=\"footer-section\">                 <div>                     <h2 class=\"section-title\">Payment Terms:</h2>                     <p style=\"color: #333; line-height: 1.6;\">                         For inquiries, contact<br>                         hello@reallygreatsite.com or +123-456-7890                     </p>                 </div>                  <div>                     <h2 class=\"section-title\">Authorized By:</h2>                     <p style=\"font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px;\">Richard Sanchez</p>                     <p style=\"color: #666;\">Accounts Manager</p>                     <div class=\"signature-box\">                         <div class=\"signature-line\">Signature</div>                     </div>                 </div>             </div>              <div style=\"margin-top: 40px;\">                 <p class=\"thank-you\">Thank You for</p>                 <p class=\"thank-you\">Your Payment!</p>             </div>         </div>          <div class=\"contact-footer\">             <div class=\"contact-item\">                 <div class=\"icon\">📞</div>                 <span>+123-456-7890</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">🌐</div>                 <span>www.reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">✉️</div>                 <span>hello@reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">📍</div>                 <span>123 Anywhere St., Any City</span>             </div>         </div>          <div class=\"footer-curve\"></div>     </div> </body> </html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        688
+      ],
+      "id": "ea404e36-5df8-4306-a5cb-18af5332d4bf",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1104,
+        304
+      ],
+      "id": "a11b301d-61de-4d55-ba8e-001ae09f6e38",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "body.body.qbo_original_pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        304
+      ],
+      "id": "37f14788-6333-4a6a-aefe-4efe0282d17d",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = typeof $input.first().json.text === 'string' ? $input.first().json.text : '';\n\n// ------------------ Normalize ------------------\nconst lines = rawText\n  .replace(/\\r/g, '')\n  .split('\\n')\n  .map(l => (typeof l === 'string' ? l.trim() : ''))\n  .filter(l => l.length > 0);\n\nconst fullText = lines.join(' ');\n\n// ------------------ Helpers ------------------\nfunction safeExtract(regex) {\n  if (!regex || !fullText) return null;\n  const m = fullText.match(regex);\n  if (!m || !m[1]) return null;\n  return String(m[1]).trim();\n}\n\nfunction parseMoney(str) {\n  if (!str) return null;\n  const num = String(str).replace(/[^0-9.]/g, '');\n  const val = Number(num);\n  return isNaN(val) ? null : val;\n}\n\n// ------------------ Vendor ------------------\nlet vendorName = null;\nlet vendorEmail = null;\nlet vendorPhone = null;\nlet vendorAddressParts = [];\n\nfor (let i = 0; i < lines.length; i++) {\n  if (/^INVOICE$/i.test(lines[i])) {\n    vendorName = lines[i + 1] || null;\n    for (let j = i + 2; j < i + 7; j++) {\n      if (!lines[j]) continue;\n      if (/Bill to/i.test(lines[j])) break;\n\n      if (lines[j].match(/@/)) vendorEmail = lines[j];\n      else if (lines[j].match(/^\\+?\\d{9,}/)) vendorPhone = lines[j];\n      else vendorAddressParts.push(lines[j]);\n    }\n    break;\n  }\n}\n\nconst vendorAddress = vendorAddressParts.join(', ') || null;\n\n// ------------------ Bill To ------------------\nlet billToName = null;\nlet billToAddressParts = [];\n\nconst billToIndex = lines.findIndex(l => /^Bill to$/i.test(l));\n\nif (billToIndex >= 0) {\n  for (let i = billToIndex + 1; i < lines.length; i++) {\n    const line = lines[i];\n    if (/^Ship to$/i.test(line)) break;\n    if (/^Invoice details$/i.test(line)) break;\n\n    if (!billToName) {\n      billToName = line;\n    } else {\n      billToAddressParts.push(line);\n    }\n  }\n}\n\nconst billToAddress = billToAddressParts.join(', ') || null;\n\n// ------------------ Ship To ------------------\nlet shipToName = null;\nlet shipToAddressParts = [];\n\nconst shipToIndex = lines.findIndex(l => /^Ship to$/i.test(l));\n\nif (shipToIndex >= 0) {\n  for (let i = shipToIndex + 1; i < lines.length; i++) {\n    const line = lines[i];\n    if (/^Invoice details$/i.test(line)) break;\n\n    if (!shipToName) {\n      shipToName = line;\n    } else {\n      shipToAddressParts.push(line);\n    }\n  }\n}\n\nconst shipToAddress = shipToAddressParts.join(', ') || null;\n\n// ------------------ Invoice Meta ------------------\nconst invoiceNumber = safeExtract(/Invoice no\\.\\s*:?\\s*([A-Za-z0-9\\-]+)/i);\nconst terms = safeExtract(/Terms\\s*:?\\s*([A-Za-z0-9\\s]+)/i);\nconst invoiceDate = safeExtract(/Invoice date\\s*:?\\s*([0-9\\/\\-]+)/i);\nconst dueDate = safeExtract(/Due date\\s*:?\\s*([0-9\\/\\-]+)/i);\n\n// ------------------ Totals ------------------\nconst totalRaw = safeExtract(/Total\\s*Ksh\\s*([\\d,.]+)/i);\nconst total = parseMoney(totalRaw);\n\n// ------------------ Line Items ------------------\nconst lineItems = [];\n\nfor (let i = 0; i < lines.length; i++) {\n  // Example:\n  // 1. Customization Tailored to fit 1 Ksh 200.00 Ksh 200.00\n  const itemMatch = lines[i].match(\n    /^\\d+\\.\\s+(.+?)\\s+(\\d+)\\s+Ksh\\s*([\\d,.]+)\\s+Ksh\\s*([\\d,.]+)/i\n  );\n\n  if (!itemMatch) continue;\n\n  const description = itemMatch[1].trim();\n  const quantity = Number(itemMatch[2]);\n  const rate = parseMoney(itemMatch[3]);\n  const amount = parseMoney(itemMatch[4]);\n\n  if (!isNaN(quantity) && rate !== null && amount !== null) {\n    lineItems.push({\n      description,\n      quantity,\n      rate,\n      amount,\n      currency: 'KES'\n    });\n  }\n}\n\n// ------------------ Final Output ------------------\nreturn [\n  {\n    json: {\n      invoiceNumber,\n      invoiceDate,\n      dueDate,\n      terms,\n\n      total,\n      currency: 'KES',\n\n      vendor: {\n        name: vendorName,\n        address: vendorAddress,\n        email: vendorEmail,\n        phone: vendorPhone\n      },\n\n      billTo: {\n        name: billToName,\n        address: billToAddress\n      },\n\n      shipTo: {\n        name: shipToName,\n        address: shipToAddress\n      },\n\n      lineItems,\n\n      rawText\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -880,
+        304
+      ],
+      "id": "fcb8f221-d19a-47c5-9377-d06bb2b63832",
+      "name": "ExtractQBInvoicePDFV1.4"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tCj1x8YlDkhpKVhP",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tCj1x8YlDkhpKVhP",
+          "cachedResultName": "Floovioo Transactional - Invoice Branding V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $json.body.floovioo_id }}",
+            "requestId": "={{ $json.body.requestId }}",
+            "service_id": "=transactional",
+            "service_tenant_id": "={{ $json.body.service_id }}",
+            "requestBody": "={{ {...$json.body, documentType: $json.body.body.type} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_tenant_id",
+              "displayName": "service_tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestBody",
+              "displayName": "requestBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        304
+      ],
+      "id": "49fe7395-b7d4-4712-a4c6-88952202a830",
+      "name": "Call 'Floovioo Transactional - Invoice Branding V1.0'1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tCj1x8YlDkhpKVhP",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tCj1x8YlDkhpKVhP",
+          "cachedResultName": "Floovioo Transactional - Invoice Branding V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $json.body.floovioo_id }}",
+            "requestId": "={{ $json.body.requestId }}",
+            "service_id": "=transactional",
+            "service_tenant_id": "={{ $json.body.service_id }}",
+            "requestBody": "={{ {...$json.body, documentType: $json.body.body.type} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_tenant_id",
+              "displayName": "service_tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestBody",
+              "displayName": "requestBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        496
+      ],
+      "id": "069cee47-f0f2-4007-ae17-004fed08f462",
+      "name": "Call 'Floovioo Transactional - Invoice Branding V1.0'2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e4d5dc9-a775-4b57-88b8-5af1e7aeac21",
+              "name": "html",
+              "value": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Payment Receipt</title>     <style>         * {             margin: 0;             padding: 0;             box-sizing: border-box;         }          body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             padding: 40px 20px;             min-height: 100vh;         }          .receipt-container {             max-width: 900px;             margin: 0 auto;             background: linear-gradient(to bottom, #F5E6D3 0%, #FAF0E6 100%);             border-radius: 20px;             overflow: hidden;             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);             position: relative;         }          .header-curve {             position: absolute;             top: 0;             left: 0;             right: 0;             height: 100px;             background: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 50%, #D4AF37 100%);             clip-path: ellipse(120% 100% at 50% 0%);             z-index: 1;         }          .content {             position: relative;             z-index: 2;             padding: 60px 60px 40px;         }          .logo {             width: 60px;             height: 60px;             border: 3px solid #D4AF37;             border-radius: 10px;             display: flex;             align-items: center;             justify-content: center;             background: white;             margin-bottom: 20px;         }          .logo-text {             font-size: 36px;             font-weight: bold;             color: #D4AF37;         }          h1 {             font-size: 48px;             font-weight: 900;             color: #1a1a1a;             margin-bottom: 30px;             letter-spacing: 1px;         }          .receipt-info {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 20px;             margin-bottom: 40px;         }          .info-item {             display: flex;             gap: 10px;         }          .info-label {             font-weight: 600;             color: #1a1a1a;         }          .info-value {             color: #333;         }          .divider {             height: 2px;             background: linear-gradient(to right, #D4AF37, transparent);             margin: 40px 0;         }          .details-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-bottom: 40px;         }          .section-title {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 15px;         }          .detail-row {             display: flex;             justify-content: space-between;             margin-bottom: 8px;             font-size: 15px;         }          .detail-label {             font-weight: 600;             color: #1a1a1a;         }          .detail-value {             color: #333;         }          .payment-table {             width: 100%;             border: 2px solid #D4AF37;             border-collapse: collapse;             margin: 40px 0;         }          .payment-table th,         .payment-table td {             padding: 20px;             text-align: left;             border: 2px solid #D4AF37;         }          .payment-table th {             background: transparent;             font-size: 20px;             font-weight: 700;             color: #1a1a1a;         }          .payment-table td {             font-size: 16px;             color: #333;         }          .payment-table .amount {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;         }          .footer-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-top: 40px;         }          .signature-box {             margin-top: 30px;         }          .signature-line {             border-bottom: 2px solid #D4AF37;             padding-bottom: 10px;             margin-top: 40px;             text-align: center;             color: #666;             font-size: 14px;         }          .thank-you {             font-size: 28px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 10px;         }          .contact-footer {             display: flex;             justify-content: space-between;             align-items: center;             padding: 30px 60px;             background: rgba(212, 175, 55, 0.1);             border-top: 2px solid #D4AF37;             flex-wrap: wrap;             gap: 20px;         }          .contact-item {             display: flex;             align-items: center;             gap: 8px;             color: #333;             font-size: 13px;         }          .icon {             width: 24px;             height: 24px;             background: #D4AF37;             border-radius: 50%;             display: flex;             align-items: center;             justify-content: center;             color: white;             font-size: 12px;         }          .footer-curve {             position: absolute;             bottom: 0;             left: 0;             right: 0;             height: 120px;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);         }          @media (max-width: 768px) {             .content {                 padding: 40px 30px;             }              h1 {                 font-size: 36px;             }              .details-section,             .footer-section {                 grid-template-columns: 1fr;                 gap: 30px;             }              .contact-footer {                 padding: 20px 30px;                 flex-direction: column;                 align-items: flex-start;             }         }     </style> </head> <body>     <div class=\"receipt-container\">         <div class=\"header-curve\"></div>                  <div class=\"content\">             <div class=\"logo\">                 <div class=\"logo-text\">G</div>             </div>              <h1>PAYMENT RECEIPT</h1>              <div class=\"receipt-info\">                 <div class=\"info-item\">                     <span class=\"info-label\">Receipt No:</span>                     <span class=\"info-value\">PR-005421</span>                 </div>                 <div class=\"info-item\">                     <span class=\"info-label\">Date:</span>                     <span class=\"info-value\">January 15, 2025</span>                 </div>             </div>              <div class=\"divider\"></div>              <div class=\"details-section\">                 <div>                     <h2 class=\"section-title\">Billed To:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Name:</span>                         <span class=\"detail-value\">Daniel Gallego</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Contact:</span>                         <span class=\"detail-value\">+123-456-7890</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Email:</span>                         <span class=\"detail-value\">hello@reallygreatsite.com</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Address:</span>                         <span class=\"detail-value\">123 Anywhere St., Any City</span>                     </div>                 </div>                  <div>                     <h2 class=\"section-title\">Payment Summary:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Total Paid</span>                         <span class=\"detail-value\">$499.00</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Payment Method:</span>                         <span class=\"detail-value\">Credit Card</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Transaction ID</span>                         <span class=\"detail-value\">TXN-89J4K2P1</span>                     </div>                 </div>             </div>              <table class=\"payment-table\">                 <thead>                     <tr>                         <th>Description</th>                         <th>Amount</th>                     </tr>                 </thead>                 <tbody>                     <tr>                         <td>Annual Subscription for Premium Marketing Tools</td>                         <td class=\"amount\">$499.00</td>                     </tr>                 </tbody>             </table>              <div class=\"footer-section\">                 <div>                     <h2 class=\"section-title\">Payment Terms:</h2>                     <p style=\"color: #333; line-height: 1.6;\">                         For inquiries, contact<br>                         hello@reallygreatsite.com or +123-456-7890                     </p>                 </div>                  <div>                     <h2 class=\"section-title\">Authorized By:</h2>                     <p style=\"font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px;\">Richard Sanchez</p>                     <p style=\"color: #666;\">Accounts Manager</p>                     <div class=\"signature-box\">                         <div class=\"signature-line\">Signature</div>                     </div>                 </div>             </div>              <div style=\"margin-top: 40px;\">                 <p class=\"thank-you\">Thank You for</p>                 <p class=\"thank-you\">Your Payment!</p>             </div>         </div>          <div class=\"contact-footer\">             <div class=\"contact-item\">                 <div class=\"icon\">📞</div>                 <span>+123-456-7890</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">🌐</div>                 <span>www.reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">✉️</div>                 <span>hello@reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">📍</div>                 <span>123 Anywhere St., Any City</span>             </div>         </div>          <div class=\"footer-curve\"></div>     </div> </body> </html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        112
+      ],
+      "id": "d3a66a94-e180-41c5-9caa-22ff60c7d24c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e4d5dc9-a775-4b57-88b8-5af1e7aeac21",
+              "name": "html",
+              "value": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Payment Receipt</title>     <style>         * {             margin: 0;             padding: 0;             box-sizing: border-box;         }          body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             padding: 40px 20px;             min-height: 100vh;         }          .receipt-container {             max-width: 900px;             margin: 0 auto;             background: linear-gradient(to bottom, #F5E6D3 0%, #FAF0E6 100%);             border-radius: 20px;             overflow: hidden;             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);             position: relative;         }          .header-curve {             position: absolute;             top: 0;             left: 0;             right: 0;             height: 100px;             background: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 50%, #D4AF37 100%);             clip-path: ellipse(120% 100% at 50% 0%);             z-index: 1;         }          .content {             position: relative;             z-index: 2;             padding: 60px 60px 40px;         }          .logo {             width: 60px;             height: 60px;             border: 3px solid #D4AF37;             border-radius: 10px;             display: flex;             align-items: center;             justify-content: center;             background: white;             margin-bottom: 20px;         }          .logo-text {             font-size: 36px;             font-weight: bold;             color: #D4AF37;         }          h1 {             font-size: 48px;             font-weight: 900;             color: #1a1a1a;             margin-bottom: 30px;             letter-spacing: 1px;         }          .receipt-info {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 20px;             margin-bottom: 40px;         }          .info-item {             display: flex;             gap: 10px;         }          .info-label {             font-weight: 600;             color: #1a1a1a;         }          .info-value {             color: #333;         }          .divider {             height: 2px;             background: linear-gradient(to right, #D4AF37, transparent);             margin: 40px 0;         }          .details-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-bottom: 40px;         }          .section-title {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 15px;         }          .detail-row {             display: flex;             justify-content: space-between;             margin-bottom: 8px;             font-size: 15px;         }          .detail-label {             font-weight: 600;             color: #1a1a1a;         }          .detail-value {             color: #333;         }          .payment-table {             width: 100%;             border: 2px solid #D4AF37;             border-collapse: collapse;             margin: 40px 0;         }          .payment-table th,         .payment-table td {             padding: 20px;             text-align: left;             border: 2px solid #D4AF37;         }          .payment-table th {             background: transparent;             font-size: 20px;             font-weight: 700;             color: #1a1a1a;         }          .payment-table td {             font-size: 16px;             color: #333;         }          .payment-table .amount {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;         }          .footer-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-top: 40px;         }          .signature-box {             margin-top: 30px;         }          .signature-line {             border-bottom: 2px solid #D4AF37;             padding-bottom: 10px;             margin-top: 40px;             text-align: center;             color: #666;             font-size: 14px;         }          .thank-you {             font-size: 28px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 10px;         }          .contact-footer {             display: flex;             justify-content: space-between;             align-items: center;             padding: 30px 60px;             background: rgba(212, 175, 55, 0.1);             border-top: 2px solid #D4AF37;             flex-wrap: wrap;             gap: 20px;         }          .contact-item {             display: flex;             align-items: center;             gap: 8px;             color: #333;             font-size: 13px;         }          .icon {             width: 24px;             height: 24px;             background: #D4AF37;             border-radius: 50%;             display: flex;             align-items: center;             justify-content: center;             color: white;             font-size: 12px;         }          .footer-curve {             position: absolute;             bottom: 0;             left: 0;             right: 0;             height: 120px;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);         }          @media (max-width: 768px) {             .content {                 padding: 40px 30px;             }              h1 {                 font-size: 36px;             }              .details-section,             .footer-section {                 grid-template-columns: 1fr;                 gap: 30px;             }              .contact-footer {                 padding: 20px 30px;                 flex-direction: column;                 align-items: flex-start;             }         }     </style> </head> <body>     <div class=\"receipt-container\">         <div class=\"header-curve\"></div>                  <div class=\"content\">             <div class=\"logo\">                 <div class=\"logo-text\">G</div>             </div>              <h1>PAYMENT RECEIPT</h1>              <div class=\"receipt-info\">                 <div class=\"info-item\">                     <span class=\"info-label\">Receipt No:</span>                     <span class=\"info-value\">PR-005421</span>                 </div>                 <div class=\"info-item\">                     <span class=\"info-label\">Date:</span>                     <span class=\"info-value\">January 15, 2025</span>                 </div>             </div>              <div class=\"divider\"></div>              <div class=\"details-section\">                 <div>                     <h2 class=\"section-title\">Billed To:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Name:</span>                         <span class=\"detail-value\">Daniel Gallego</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Contact:</span>                         <span class=\"detail-value\">+123-456-7890</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Email:</span>                         <span class=\"detail-value\">hello@reallygreatsite.com</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Address:</span>                         <span class=\"detail-value\">123 Anywhere St., Any City</span>                     </div>                 </div>                  <div>                     <h2 class=\"section-title\">Payment Summary:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Total Paid</span>                         <span class=\"detail-value\">$499.00</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Payment Method:</span>                         <span class=\"detail-value\">Credit Card</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Transaction ID</span>                         <span class=\"detail-value\">TXN-89J4K2P1</span>                     </div>                 </div>             </div>              <table class=\"payment-table\">                 <thead>                     <tr>                         <th>Description</th>                         <th>Amount</th>                     </tr>                 </thead>                 <tbody>                     <tr>                         <td>Annual Subscription for Premium Marketing Tools</td>                         <td class=\"amount\">$499.00</td>                     </tr>                 </tbody>             </table>              <div class=\"footer-section\">                 <div>                     <h2 class=\"section-title\">Payment Terms:</h2>                     <p style=\"color: #333; line-height: 1.6;\">                         For inquiries, contact<br>                         hello@reallygreatsite.com or +123-456-7890                     </p>                 </div>                  <div>                     <h2 class=\"section-title\">Authorized By:</h2>                     <p style=\"font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px;\">Richard Sanchez</p>                     <p style=\"color: #666;\">Accounts Manager</p>                     <div class=\"signature-box\">                         <div class=\"signature-line\">Signature</div>                     </div>                 </div>             </div>              <div style=\"margin-top: 40px;\">                 <p class=\"thank-you\">Thank You for</p>                 <p class=\"thank-you\">Your Payment!</p>             </div>         </div>          <div class=\"contact-footer\">             <div class=\"contact-item\">                 <div class=\"icon\">📞</div>                 <span>+123-456-7890</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">🌐</div>                 <span>www.reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">✉️</div>                 <span>hello@reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">📍</div>                 <span>123 Anywhere St., Any City</span>             </div>         </div>          <div class=\"footer-curve\"></div>     </div> </body> </html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        496
+      ],
+      "id": "48a08236-afac-4d4b-9fbc-e9cba7de0f4e",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e4d5dc9-a775-4b57-88b8-5af1e7aeac21",
+              "name": "html",
+              "value": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Payment Receipt</title>     <style>         * {             margin: 0;             padding: 0;             box-sizing: border-box;         }          body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             padding: 40px 20px;             min-height: 100vh;         }          .receipt-container {             max-width: 900px;             margin: 0 auto;             background: linear-gradient(to bottom, #F5E6D3 0%, #FAF0E6 100%);             border-radius: 20px;             overflow: hidden;             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);             position: relative;         }          .header-curve {             position: absolute;             top: 0;             left: 0;             right: 0;             height: 100px;             background: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 50%, #D4AF37 100%);             clip-path: ellipse(120% 100% at 50% 0%);             z-index: 1;         }          .content {             position: relative;             z-index: 2;             padding: 60px 60px 40px;         }          .logo {             width: 60px;             height: 60px;             border: 3px solid #D4AF37;             border-radius: 10px;             display: flex;             align-items: center;             justify-content: center;             background: white;             margin-bottom: 20px;         }          .logo-text {             font-size: 36px;             font-weight: bold;             color: #D4AF37;         }          h1 {             font-size: 48px;             font-weight: 900;             color: #1a1a1a;             margin-bottom: 30px;             letter-spacing: 1px;         }          .receipt-info {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 20px;             margin-bottom: 40px;         }          .info-item {             display: flex;             gap: 10px;         }          .info-label {             font-weight: 600;             color: #1a1a1a;         }          .info-value {             color: #333;         }          .divider {             height: 2px;             background: linear-gradient(to right, #D4AF37, transparent);             margin: 40px 0;         }          .details-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-bottom: 40px;         }          .section-title {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 15px;         }          .detail-row {             display: flex;             justify-content: space-between;             margin-bottom: 8px;             font-size: 15px;         }          .detail-label {             font-weight: 600;             color: #1a1a1a;         }          .detail-value {             color: #333;         }          .payment-table {             width: 100%;             border: 2px solid #D4AF37;             border-collapse: collapse;             margin: 40px 0;         }          .payment-table th,         .payment-table td {             padding: 20px;             text-align: left;             border: 2px solid #D4AF37;         }          .payment-table th {             background: transparent;             font-size: 20px;             font-weight: 700;             color: #1a1a1a;         }          .payment-table td {             font-size: 16px;             color: #333;         }          .payment-table .amount {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;         }          .footer-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-top: 40px;         }          .signature-box {             margin-top: 30px;         }          .signature-line {             border-bottom: 2px solid #D4AF37;             padding-bottom: 10px;             margin-top: 40px;             text-align: center;             color: #666;             font-size: 14px;         }          .thank-you {             font-size: 28px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 10px;         }          .contact-footer {             display: flex;             justify-content: space-between;             align-items: center;             padding: 30px 60px;             background: rgba(212, 175, 55, 0.1);             border-top: 2px solid #D4AF37;             flex-wrap: wrap;             gap: 20px;         }          .contact-item {             display: flex;             align-items: center;             gap: 8px;             color: #333;             font-size: 13px;         }          .icon {             width: 24px;             height: 24px;             background: #D4AF37;             border-radius: 50%;             display: flex;             align-items: center;             justify-content: center;             color: white;             font-size: 12px;         }          .footer-curve {             position: absolute;             bottom: 0;             left: 0;             right: 0;             height: 120px;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);         }          @media (max-width: 768px) {             .content {                 padding: 40px 30px;             }              h1 {                 font-size: 36px;             }              .details-section,             .footer-section {                 grid-template-columns: 1fr;                 gap: 30px;             }              .contact-footer {                 padding: 20px 30px;                 flex-direction: column;                 align-items: flex-start;             }         }     </style> </head> <body>     <div class=\"receipt-container\">         <div class=\"header-curve\"></div>                  <div class=\"content\">             <div class=\"logo\">                 <div class=\"logo-text\">G</div>             </div>              <h1>PAYMENT RECEIPT</h1>              <div class=\"receipt-info\">                 <div class=\"info-item\">                     <span class=\"info-label\">Receipt No:</span>                     <span class=\"info-value\">PR-005421</span>                 </div>                 <div class=\"info-item\">                     <span class=\"info-label\">Date:</span>                     <span class=\"info-value\">January 15, 2025</span>                 </div>             </div>              <div class=\"divider\"></div>              <div class=\"details-section\">                 <div>                     <h2 class=\"section-title\">Billed To:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Name:</span>                         <span class=\"detail-value\">Daniel Gallego</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Contact:</span>                         <span class=\"detail-value\">+123-456-7890</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Email:</span>                         <span class=\"detail-value\">hello@reallygreatsite.com</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Address:</span>                         <span class=\"detail-value\">123 Anywhere St., Any City</span>                     </div>                 </div>                  <div>                     <h2 class=\"section-title\">Payment Summary:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Total Paid</span>                         <span class=\"detail-value\">$499.00</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Payment Method:</span>                         <span class=\"detail-value\">Credit Card</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Transaction ID</span>                         <span class=\"detail-value\">TXN-89J4K2P1</span>                     </div>                 </div>             </div>              <table class=\"payment-table\">                 <thead>                     <tr>                         <th>Description</th>                         <th>Amount</th>                     </tr>                 </thead>                 <tbody>                     <tr>                         <td>Annual Subscription for Premium Marketing Tools</td>                         <td class=\"amount\">$499.00</td>                     </tr>                 </tbody>             </table>              <div class=\"footer-section\">                 <div>                     <h2 class=\"section-title\">Payment Terms:</h2>                     <p style=\"color: #333; line-height: 1.6;\">                         For inquiries, contact<br>                         hello@reallygreatsite.com or +123-456-7890                     </p>                 </div>                  <div>                     <h2 class=\"section-title\">Authorized By:</h2>                     <p style=\"font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px;\">Richard Sanchez</p>                     <p style=\"color: #666;\">Accounts Manager</p>                     <div class=\"signature-box\">                         <div class=\"signature-line\">Signature</div>                     </div>                 </div>             </div>              <div style=\"margin-top: 40px;\">                 <p class=\"thank-you\">Thank You for</p>                 <p class=\"thank-you\">Your Payment!</p>             </div>         </div>          <div class=\"contact-footer\">             <div class=\"contact-item\">                 <div class=\"icon\">📞</div>                 <span>+123-456-7890</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">🌐</div>                 <span>www.reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">✉️</div>                 <span>hello@reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">📍</div>                 <span>123 Anywhere St., Any City</span>             </div>         </div>          <div class=\"footer-curve\"></div>     </div> </body> </html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        304
+      ],
+      "id": "0a92112b-c3f2-4023-a20d-5ee7ccb6dcd5",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e4d5dc9-a775-4b57-88b8-5af1e7aeac21",
+              "name": "html",
+              "value": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Payment Receipt</title>     <style>         * {             margin: 0;             padding: 0;             box-sizing: border-box;         }          body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             padding: 40px 20px;             min-height: 100vh;         }          .receipt-container {             max-width: 900px;             margin: 0 auto;             background: linear-gradient(to bottom, #F5E6D3 0%, #FAF0E6 100%);             border-radius: 20px;             overflow: hidden;             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);             position: relative;         }          .header-curve {             position: absolute;             top: 0;             left: 0;             right: 0;             height: 100px;             background: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 50%, #D4AF37 100%);             clip-path: ellipse(120% 100% at 50% 0%);             z-index: 1;         }          .content {             position: relative;             z-index: 2;             padding: 60px 60px 40px;         }          .logo {             width: 60px;             height: 60px;             border: 3px solid #D4AF37;             border-radius: 10px;             display: flex;             align-items: center;             justify-content: center;             background: white;             margin-bottom: 20px;         }          .logo-text {             font-size: 36px;             font-weight: bold;             color: #D4AF37;         }          h1 {             font-size: 48px;             font-weight: 900;             color: #1a1a1a;             margin-bottom: 30px;             letter-spacing: 1px;         }          .receipt-info {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 20px;             margin-bottom: 40px;         }          .info-item {             display: flex;             gap: 10px;         }          .info-label {             font-weight: 600;             color: #1a1a1a;         }          .info-value {             color: #333;         }          .divider {             height: 2px;             background: linear-gradient(to right, #D4AF37, transparent);             margin: 40px 0;         }          .details-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-bottom: 40px;         }          .section-title {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 15px;         }          .detail-row {             display: flex;             justify-content: space-between;             margin-bottom: 8px;             font-size: 15px;         }          .detail-label {             font-weight: 600;             color: #1a1a1a;         }          .detail-value {             color: #333;         }          .payment-table {             width: 100%;             border: 2px solid #D4AF37;             border-collapse: collapse;             margin: 40px 0;         }          .payment-table th,         .payment-table td {             padding: 20px;             text-align: left;             border: 2px solid #D4AF37;         }          .payment-table th {             background: transparent;             font-size: 20px;             font-weight: 700;             color: #1a1a1a;         }          .payment-table td {             font-size: 16px;             color: #333;         }          .payment-table .amount {             font-size: 24px;             font-weight: 700;             color: #1a1a1a;         }          .footer-section {             display: grid;             grid-template-columns: 1fr 1fr;             gap: 60px;             margin-top: 40px;         }          .signature-box {             margin-top: 30px;         }          .signature-line {             border-bottom: 2px solid #D4AF37;             padding-bottom: 10px;             margin-top: 40px;             text-align: center;             color: #666;             font-size: 14px;         }          .thank-you {             font-size: 28px;             font-weight: 700;             color: #1a1a1a;             margin-bottom: 10px;         }          .contact-footer {             display: flex;             justify-content: space-between;             align-items: center;             padding: 30px 60px;             background: rgba(212, 175, 55, 0.1);             border-top: 2px solid #D4AF37;             flex-wrap: wrap;             gap: 20px;         }          .contact-item {             display: flex;             align-items: center;             gap: 8px;             color: #333;             font-size: 13px;         }          .icon {             width: 24px;             height: 24px;             background: #D4AF37;             border-radius: 50%;             display: flex;             align-items: center;             justify-content: center;             color: white;             font-size: 12px;         }          .footer-curve {             position: absolute;             bottom: 0;             left: 0;             right: 0;             height: 120px;             background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);             clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);         }          @media (max-width: 768px) {             .content {                 padding: 40px 30px;             }              h1 {                 font-size: 36px;             }              .details-section,             .footer-section {                 grid-template-columns: 1fr;                 gap: 30px;             }              .contact-footer {                 padding: 20px 30px;                 flex-direction: column;                 align-items: flex-start;             }         }     </style> </head> <body>     <div class=\"receipt-container\">         <div class=\"header-curve\"></div>                  <div class=\"content\">             <div class=\"logo\">                 <div class=\"logo-text\">G</div>             </div>              <h1>PAYMENT RECEIPT</h1>              <div class=\"receipt-info\">                 <div class=\"info-item\">                     <span class=\"info-label\">Receipt No:</span>                     <span class=\"info-value\">PR-005421</span>                 </div>                 <div class=\"info-item\">                     <span class=\"info-label\">Date:</span>                     <span class=\"info-value\">January 15, 2025</span>                 </div>             </div>              <div class=\"divider\"></div>              <div class=\"details-section\">                 <div>                     <h2 class=\"section-title\">Billed To:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Name:</span>                         <span class=\"detail-value\">Daniel Gallego</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Contact:</span>                         <span class=\"detail-value\">+123-456-7890</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Email:</span>                         <span class=\"detail-value\">hello@reallygreatsite.com</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Address:</span>                         <span class=\"detail-value\">123 Anywhere St., Any City</span>                     </div>                 </div>                  <div>                     <h2 class=\"section-title\">Payment Summary:</h2>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Total Paid</span>                         <span class=\"detail-value\">$499.00</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Payment Method:</span>                         <span class=\"detail-value\">Credit Card</span>                     </div>                     <div class=\"detail-row\">                         <span class=\"detail-label\">Transaction ID</span>                         <span class=\"detail-value\">TXN-89J4K2P1</span>                     </div>                 </div>             </div>              <table class=\"payment-table\">                 <thead>                     <tr>                         <th>Description</th>                         <th>Amount</th>                     </tr>                 </thead>                 <tbody>                     <tr>                         <td>Annual Subscription for Premium Marketing Tools</td>                         <td class=\"amount\">$499.00</td>                     </tr>                 </tbody>             </table>              <div class=\"footer-section\">                 <div>                     <h2 class=\"section-title\">Payment Terms:</h2>                     <p style=\"color: #333; line-height: 1.6;\">                         For inquiries, contact<br>                         hello@reallygreatsite.com or +123-456-7890                     </p>                 </div>                  <div>                     <h2 class=\"section-title\">Authorized By:</h2>                     <p style=\"font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px;\">Richard Sanchez</p>                     <p style=\"color: #666;\">Accounts Manager</p>                     <div class=\"signature-box\">                         <div class=\"signature-line\">Signature</div>                     </div>                 </div>             </div>              <div style=\"margin-top: 40px;\">                 <p class=\"thank-you\">Thank You for</p>                 <p class=\"thank-you\">Your Payment!</p>             </div>         </div>          <div class=\"contact-footer\">             <div class=\"contact-item\">                 <div class=\"icon\">📞</div>                 <span>+123-456-7890</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">🌐</div>                 <span>www.reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">✉️</div>                 <span>hello@reallygreatsite.com</span>             </div>             <div class=\"contact-item\">                 <div class=\"icon\">📍</div>                 <span>123 Anywhere St., Any City</span>             </div>         </div>          <div class=\"footer-curve\"></div>     </div> </body> </html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        -80
+      ],
+      "id": "c2a59413-58c1-40c2-b02f-5486d7d5401a",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f8ecf51-015f-43fc-b06f-7cd2410c7a4c",
+              "name": "documentType",
+              "value": "={{ $json.body.type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -80
+      ],
+      "id": "13c2fa9d-049e-4623-90f0-20a1f96cb52c",
+      "name": "statementRequest"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f8ecf51-015f-43fc-b06f-7cd2410c7a4c",
+              "name": "documentType",
+              "value": "={{ $json.body.type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        112
+      ],
+      "id": "d43a13c1-8820-46c6-a98b-0bb47ed9558b",
+      "name": "invoiceRequest"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f8ecf51-015f-43fc-b06f-7cd2410c7a4c",
+              "name": "documentType",
+              "value": "={{ $json.body.type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        304
+      ],
+      "id": "61cc320b-270a-4239-81a0-caaf9e2d8adf",
+      "name": "receiptRequest"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f8ecf51-015f-43fc-b06f-7cd2410c7a4c",
+              "name": "documentType",
+              "value": "={{ $json.body.type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        496
+      ],
+      "id": "aaf7ff5f-7975-4c24-85b8-2371e72323fa",
+      "name": "orderRequest"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f8ecf51-015f-43fc-b06f-7cd2410c7a4c",
+              "name": "documentType",
+              "value": "={{ $json.body.type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        688
+      ],
+      "id": "3546fc34-28e8-433f-8ee0-c4cadb47e714",
+      "name": "quoteRequest"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tCj1x8YlDkhpKVhP",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tCj1x8YlDkhpKVhP",
+          "cachedResultName": "Floovioo Transactional - Invoice Branding V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $json.body.floovioo_id }}",
+            "requestId": "={{ $json.body.requestId }}",
+            "service_id": "=transactional",
+            "service_tenant_id": "={{ $json.body.service_id }}",
+            "requestBody": "={{ {...$json.body, documentType: $json.body.body.type} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_tenant_id",
+              "displayName": "service_tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestBody",
+              "displayName": "requestBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        112
+      ],
+      "id": "928a8480-0e27-4af3-b11c-31414eeffa33",
+      "name": "Call 'Floovioo Transactional - Invoice Branding V1.0'4"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "t2y4rqeU6MoZkc0M",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/t2y4rqeU6MoZkc0M",
+          "cachedResultName": "Floovioo Transactional - Statement Branding V1.0"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "floovioo_id": "={{ $json.body.floovioo_id }}",
+            "requestId": "={{ $json.body.requestId }}",
+            "service_id": "=transactional",
+            "service_tenant_id": "={{ $json.body.service_id }}",
+            "requestBody": "={{ {...$json.body, documentType: $json.body.body.type} }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "floovioo_id",
+              "displayName": "floovioo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "service_tenant_id",
+              "displayName": "service_tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "requestBody",
+              "displayName": "requestBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        -80
+      ],
+      "id": "679314b3-dd64-4d17-a9b8-2e08b3f136dc",
+      "name": "Call 'Floovioo Transactional - Statement Branding V1.0'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Floovioo Ops Branding Workflow ID_Inbound_Req_Handler V1.0'": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "statementRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "invoiceRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "receiptRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "orderRequest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "quoteRequest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ValidateRequest": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "ExtractQBInvoicePDFV1.4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtractQBInvoicePDFV1.4": {
+      "main": [
+        [
+          {
+            "node": "ValidateRequest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Floovioo Transactional - Invoice Branding V1.0'1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Floovioo Transactional - Invoice Branding V1.0'2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "statementRequest": {
+      "main": [
+        [
+          {
+            "node": "Call 'Floovioo Transactional - Statement Branding V1.0'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "invoiceRequest": {
+      "main": [
+        [
+          {
+            "node": "Call 'Floovioo Transactional - Invoice Branding V1.0'4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "receiptRequest": {
+      "main": [
+        [
+          {
+            "node": "Call 'Floovioo Transactional - Invoice Branding V1.0'1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "orderRequest": {
+      "main": [
+        [
+          {
+            "node": "Call 'Floovioo Transactional - Invoice Branding V1.0'2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "quoteRequest": {
+      "main": [
+        [
+          {
+            "node": "Call 'Floovioo Ops Branding Workflow ID_Inbound_Req_Handler V1.0'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Floovioo Transactional - Invoice Branding V1.0'4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Floovioo Transactional - Statement Branding V1.0'": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Replace me with your logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Replace me with your logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Replace me with your logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Replace me with your logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Replace me with your logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "2f3247cf-b17e-421e-9499-167ed1d61040",
+  "meta": {
+    "instanceId": "8fb05bee768a4bab0bd17c350a6dd4427e95a710f7b628ff5a4819a166b694ae"
+  },
+  "id": "6itBhrsI8ncOzobn",
+  "tags": []
+}

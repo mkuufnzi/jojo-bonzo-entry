@@ -1,0 +1,125 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Subscription Status Header -->
+    <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm mb-8 overflow-hidden relative">
+        <div class="absolute top-0 right-0 p-8 opacity-5">
+            <i data-lucide="zap" class="w-48 h-48 text-amber-600"></i>
+        </div>
+        
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-12 relative z-10">
+            <div class="flex items-center gap-6">
+                <div class="w-24 h-24 bg-amber-50 text-amber-600 rounded-3xl flex items-center justify-center shadow-inner scale-105 border border-amber-100">
+                    <i data-lucide="zap" class="w-12 h-12"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight"><%= user.subscription?.plan?.name || 'Free Tier' %></h2>
+                        <span class="px-2 py-0.5 bg-green-50 text-green-700 text-[0.625rem] font-bold rounded-lg border border-green-100 uppercase tracking-widest">Active System</span>
+                    </div>
+                    <p class="text-slate-500 font-medium">Enterprise-grade document infrastructure subscription.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="/subscription/plans" class="bg-slate-900 text-white px-8 py-3 rounded-2xl text-sm font-bold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">Modify Package</a>
+                <form action="/subscription/cancel" method="POST" onsubmit="return confirm('Dismantle subscription services?')">
+                    <button class="px-6 py-3 border border-slate-200 text-slate-500 rounded-2xl text-sm font-bold hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all">Terminate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Resource Allocation -->
+        <div class="lg:col-span-2 space-y-6">
+             <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest mb-8 flex items-center gap-2">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600"></i>
+                    Resource Usage
+                </h3>
+                
+                <div class="space-y-10">
+                    <!-- PDF -->
+                    <div>
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h4 class="text-xl font-bold text-slate-900">PDF Translation</h4>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Enterprise Conversion Engine</p>
+                            </div>
+                            <span class="text-sm font-black text-blue-600"><%= stats.pdf.used %> / <%= stats.pdf.limit %> Units</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                            <% const pdfPct = Math.min((stats.pdf.used / stats.pdf.limit) * 100, 100); %>
+                            <div class="bg-blue-600 h-3 rounded-full transition-all duration-1000" style="width: <%- pdfPct %>%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- AI -->
+                    <div>
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h4 class="text-xl font-bold text-slate-900">AI Intelligence</h4>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Automated Content Synthesis</p>
+                            </div>
+                            <span class="text-sm font-black text-indigo-600"><%= stats.ai.used %> / <%= stats.ai.limit %> Units</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                            <% const aiPct = Math.min((stats.ai.used / stats.ai.limit) * 100, 100); %>
+                            <div class="bg-indigo-600 h-3 rounded-full transition-all duration-1000" style="width: <%- aiPct %>%;"></div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+
+             <!-- API Management Link -->
+             <a href="/apps" class="block bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 text-white shadow-xl hover:shadow-2xl transition-all group overflow-hidden relative">
+                <div class="absolute -right-12 -bottom-12 opacity-10 group-hover:scale-110 transition-transform">
+                    <i data-lucide="terminal" class="w-48 h-48 text-white"></i>
+                </div>
+                <div class="relative z-10 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-black tracking-tight mb-2">Cryptographic Keys</h3>
+                        <p class="text-blue-100 font-medium opacity-80">Oversee your active application environment endpoints.</p>
+                    </div>
+                    <i data-lucide="arrow-right-circle" class="w-10 h-10 group-hover:translate-x-2 transition-transform"></i>
+                </div>
+             </a>
+        </div>
+
+        <!-- Sidebar / Recent Activity -->
+        <div class="space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <h3 class="text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Recent Activity</h3>
+                <div class="space-y-6">
+                    <% analytics.recentActivity.forEach(activity => { %>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="activity" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-slate-900 leading-tight"><%= activity.service %></p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[0.625rem] font-bold <%= activity.status === 'success' ? 'text-green-600' : 'text-red-600' %> uppercase tracking-widest"><%= activity.status %></span>
+                                    <span class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">• <%= activity.time %></span>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 rounded-3xl p-8 text-white shadow-xl">
+                <h3 class="text-[0.625rem] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Support</h3>
+                <p class="text-sm text-slate-400 font-medium mb-6">Need custom quotas or on-premise deployment?</p>
+                <button class="w-full bg-white text-slate-900 py-3 rounded-2xl font-bold text-sm hover:bg-blue-50 transition-colors">Contact Strategist</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>
