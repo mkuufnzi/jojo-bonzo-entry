@@ -194,9 +194,6 @@ export class BusinessController {
     }
   }
 
-    /**
-   * GET /api/business/integrations (Step 2 Data)
-   */
     static async listIntegrations(req: Request, res: Response, next: NextFunction) {
         res.json({ 
             available: ['quickbooks', 'xero', 'zoho'],
@@ -204,6 +201,10 @@ export class BusinessController {
         });
     }
 
+   /**
+    * POST /api/business/branding (Step 3)
+    * Accepts multipart/form-data with optional logo file upload
+    */
    /**
     * POST /api/business/branding (Step 3)
     * Accepts multipart/form-data with optional logo file upload
@@ -357,7 +358,11 @@ export class BusinessController {
 
             const state = Buffer.from(JSON.stringify({ userId, businessId: business.id, provider, nonce: Date.now() })).toString('base64');
             const providerInstance = ProviderRegistry.createInstance(provider);
-            const redirectUri = process.env[`${provider.toUpperCase()}_REDIRECT_URI`] || 
+            let envPrefix = provider.toUpperCase();
+            if (provider === 'quickbooks') {
+                envPrefix = 'QB';
+            }
+            const redirectUri = process.env[`${envPrefix}_REDIRECT_URI`] || 
                                 `${process.env.APP_URL}/onboarding/api/business/oauth/callback/${provider}`;
 
             const authUrl = providerInstance.getAuthUrl(state, redirectUri);
@@ -378,6 +383,9 @@ export class BusinessController {
         const { provider } = req.params;
         const { code, state } = req.query;
         
+        // Standardization: quickbooks is the standard. No mapping needed.
+        const dbProvider = provider;
+
         try {
             if (!state || !code) return res.status(400).send('Missing state or code');
 
@@ -385,7 +393,13 @@ export class BusinessController {
             const userId = stateData.userId;
 
             const providerInstance = ProviderRegistry.createInstance(provider);
-            const redirectUri = process.env[`${provider.toUpperCase()}_REDIRECT_URI`] || 
+            let envPrefix = provider.toUpperCase();
+            // Map quickbooks to QB env vars
+            if (provider === 'quickbooks') {
+                envPrefix = 'QB';
+            }
+
+            const redirectUri = process.env[`${envPrefix}_REDIRECT_URI`] || 
                                 `${process.env.APP_URL}/onboarding/api/business/oauth/callback/${provider}`;
 
             const { realmId } = req.query; // QBO specific
@@ -407,12 +421,13 @@ export class BusinessController {
             // Sync with N8N (Step 2: Connection)
             try {
                 const integrations = await integrationService.listIntegrations(userId);
-                const integration = integrations.find(i => i.provider === provider && i.status === 'connected');
+                // Lookup using dbProvider
+                const integration = integrations.find(i => i.provider === dbProvider && i.status === 'connected');
                 console.log(`[BusinessController] OAuth Success for ${provider}. Integration found:`, integration?.id || 'NO');
                 
                 if (integration) {
                     const { designEngineService } = await import('../services/design-engine.service');
-                    await designEngineService.syncIntegrationConnection(userId, integration.id, provider);
+                    await designEngineService.syncIntegrationConnection(userId, integration.id, dbProvider);
                     console.log(`[BusinessController] Synced Connection for ${userId}`);
                 } else {
                     console.warn(`[BusinessController] Could not find 'connected' integration for ${provider} after OAuth.`);
@@ -421,7 +436,7 @@ export class BusinessController {
                 console.error('[BusinessController] Failed to sync connection:', e);
             }
 
-            res.redirect('/onboarding/wizard?step=2&connected=' + provider);
+            res.redirect('/onboarding/wizard?step=2&connected=' + dbProvider);
 
         } catch (error: any) {
             console.error(`[BusinessController] OAuth Callback Failed for ${provider}:`, error);
@@ -475,6 +490,26 @@ export class BusinessController {
                 await designEngineService.syncOnboardingComplete(userId);
             } catch (e) {
                 console.error('[BusinessController] Failed to sync completion:', e);
+            }
+
+            // 4. [NEW] Automate Default Workflow Creation
+            try {
+                // Find primary provider
+                const integrations = await integrationService.listIntegrations(userId);
+                const connected = integrations.filter(i => i.status === 'connected' || i.status === 'active');
+                
+                // Priority: quickbooks > xero > zoho
+                let primaryProvider = connected.find(i => i.provider === 'quickbooks')?.provider;
+                if (!primaryProvider) primaryProvider = connected.find(i => i.provider === 'xero')?.provider;
+                if (!primaryProvider) primaryProvider = connected.find(i => i.provider === 'zoho')?.provider;
+
+                if (primaryProvider) {
+                    const { workflowService } = await import('../services/workflow.service');
+                    await workflowService.ensureDefaultWorkflow(userId, business.id, primaryProvider);
+                }
+            } catch (e) {
+                console.error('[BusinessController] Failed to auto-create workflow:', e);
+                // Non-blocking error
             }
 
             res.json({ success: true });

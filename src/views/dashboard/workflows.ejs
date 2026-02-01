@@ -21,15 +21,15 @@
         </div>
         <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
             <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Runs (24h)</p>
-            <h3 class="text-2xl font-black text-slate-900">42</h3>
+            <h3 class="text-2xl font-black text-slate-900"><%= stats.runs24h %></h3>
         </div>
         <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
             <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Success Rate</p>
-            <h3 class="text-2xl font-black text-emerald-600">98.2%</h3>
+            <h3 class="text-2xl font-black text-emerald-600"><%= stats.successRate %></h3>
         </div>
         <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Delivery Time</p>
-            <h3 class="text-2xl font-black text-blue-600">~1.2s</h3>
+            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Last Activity</p>
+            <h3 class="text-lg font-black text-blue-600"><%= stats.lastRun %></h3>
         </div>
     </div>
 
@@ -45,10 +45,10 @@
         <% if (workflows && workflows.length > 0) { %>
             <div class="divide-y divide-slate-50">
                 <% workflows.forEach(wf => { %>
-                    <div class="p-8 hover:bg-slate-50/50 transition-all group flex items-center justify-between">
+                    <div class="p-8 hover:bg-slate-50/50 transition-all group flex items-center justify-between cursor-pointer" onclick="window.location.href='/dashboard/workflows/<%= wf.id %>'">
                         <div class="flex items-center gap-6">
-                            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
-                                <i data-lucide="git-branch" class="w-6 h-6"></i>
+                            <div class="w-12 h-12 rounded-2xl <%= wf.isActive ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-100 text-slate-400 border-slate-200' %> flex items-center justify-center border group-hover:scale-110 transition-transform">
+                                <i data-lucide="<%= wf.isActive ? 'git-branch' : 'pause' %>" class="w-6 h-6"></i>
                             </div>
                             <div>
                                 <h4 class="text-lg font-black text-slate-900 leading-none mb-2"><%= wf.name %></h4>
@@ -59,20 +59,20 @@
                                     </div>
                                     <div class="flex items-center gap-1.5 border-l border-slate-200 pl-4">
                                         <span class="px-1.5 py-0.5 bg-blue-50 text-blue-500 rounded text-[0.625rem] font-bold uppercase tracking-widest">Action</span>
-                                        <span class="text-xs font-bold text-slate-700">Apply Brand & Email</span>
+                                        <span class="text-xs font-bold text-slate-700"><%= wf.actionConfig?.type || 'Apply Brand' %></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-6">
-                            <div class="text-right">
-                                <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Last Run</p>
-                                <p class="text-xs font-bold text-slate-900">12 minutes ago</p>
+                            <div class="text-right hidden md:block">
+                                <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                <p class="text-xs font-bold <%= wf.isActive ? 'text-emerald-600' : 'text-slate-500' %>"><%= wf.isActive ? 'Active' : 'Paused' %></p>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <button class="p-2 text-slate-400 hover:text-slate-900 transition-colors">
+                            <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+                                <a href="/dashboard/workflows/<%= wf.id %>" class="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                                     <i data-lucide="settings" class="w-5 h-5"></i>
-                                </button>
+                                </a>
                                 <form action="/dashboard/workflows/<%= wf.id %>/delete" method="POST" onsubmit="return confirm('Archive this automation?')" class="inline">
                                     <button class="p-2 text-slate-400 hover:text-red-600 transition-colors">
                                         <i data-lucide="trash-2" class="w-5 h-5"></i>

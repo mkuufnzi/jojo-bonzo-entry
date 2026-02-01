@@ -1,2 +1,2 @@
 id,tenant_id,source_id,name,email,lifetime_value,last_synced
-c-1,uuid-1,qbo-123,Acme Corp,billing@acme.com,5000.00,2024-01-29T10:00:00Z
+c-1,uuid-1,quickbooks-123,Acme Corp,billing@acme.com,5000.00,2024-01-29T10:00:00Z

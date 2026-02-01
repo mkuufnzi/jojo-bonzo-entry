@@ -16,6 +16,9 @@ export class IntegrationService {
     if (!user?.businessId) throw new Error('Business account required');
     const businessId = user.businessId;
 
+    // Standardization: Enforce 'quickbooks'
+    // if (provider === 'quickbooks') provider = 'quickbooks';
+
     const token = accessToken || 'mock_access_token_' + Date.now();
     const refresh = refreshToken || (accessToken ? undefined : 'mock_refresh_' + Date.now());
 
@@ -23,6 +26,29 @@ export class IntegrationService {
     const existing = await prisma.integration.findFirst({
       where: { businessId, provider }
     });
+
+    // Validations: Prevent duplicate connections (1:1 Enforcement)
+    // Extracts realmId (QBO), tenantId (Xero), or organization_id (Zoho)
+    const externalId = metadata.realmId || metadata.tenantId || metadata.organization_id;
+
+    if (externalId) {
+        // Find if ANY business (other than this one) already has this connection
+        const duplicate = await prisma.integration.findFirst({
+            where: {
+                provider,
+                businessId: { not: businessId }, // Don't block self-updates
+                metadata: {
+                    path: [provider === 'quickbooks' ? 'realmId' : (provider === 'xero' ? 'tenantId' : 'organization_id')],
+                    equals: externalId
+                }
+            },
+            include: { business: { select: { name: true } } }
+        });
+
+        if (duplicate) {
+            throw new Error(`This ${provider.toUpperCase()} account is already connected to business '${duplicate.business.name}'. Please disconnect it there first.`);
+        }
+    }
 
     if (existing) {
       return await prisma.integration.update({

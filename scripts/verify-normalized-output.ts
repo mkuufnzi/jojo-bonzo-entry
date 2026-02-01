@@ -29,12 +29,12 @@ async function verifyNormalization() {
     // 2. Simulate normalized event from QBO
     const payload = {
         type: 'invoice.created',
-        provider: 'qbo',
-        entityId: 'qbo_inv_123',
+        provider: 'quickbooks',
+        entityId: 'quickbooks_inv_123',
         entityType: 'invoice',
         normalizedEventType: 'transactional_branding_request',
         payload: {
-            id: 'qbo_inv_123',
+            id: 'quickbooks_inv_123',
             DocNumber: '1001',
             TotalAmt: 500.00,
             _enriched: true

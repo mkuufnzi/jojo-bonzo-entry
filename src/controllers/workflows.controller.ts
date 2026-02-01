@@ -8,27 +8,126 @@ export class WorkflowsController {
     const user = (req as any).user;
     const serviceFilter = req.query.service as string;
     
-    // TODO: Implement filtering in listWorkflows. For now, we fetch all.
-    // If we had a serviceId on workflows, we'd filter here.
-    // const workflows = await workflowService.listWorkflows(user.id, serviceFilter);
+    // Fetch workflows
     const workflows = await workflowService.listWorkflows(user.id);
     
-    // If filtering, we might want to change the title or activeService context
+    // Real Stats Aggregation
+    const prisma = (await import('../lib/prisma')).default;
+    
+    // 1. Total Runs (24h)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const totalRuns24h = await prisma.workflowExecutionLog.count({
+        where: {
+            workflow: { businessId: user.businessId },
+            createdAt: { gte: twentyFourHoursAgo }
+        }
+    });
+
+    // 2. Success Rate (All Time)
+    const totalRuns = await prisma.workflowExecutionLog.count({
+        where: { workflow: { businessId: user.businessId } }
+    });
+    const successfulRuns = await prisma.workflowExecutionLog.count({
+        where: { 
+            workflow: { businessId: user.businessId },
+            status: 'success'
+        }
+    });
+    const successRate = totalRuns > 0 ? ((successfulRuns / totalRuns) * 100).toFixed(1) : '100.0';
+
+    // 3. Last Run Time
+    const lastRun = await prisma.workflowExecutionLog.findFirst({
+        where: { workflow: { businessId: user.businessId } },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true }
+    });
+    
+    // Helper for "12 mins ago"
+    const timeAgo = (date: Date) => {
+        const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " years ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " months ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " days ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " hours ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " minutes ago";
+        return Math.floor(seconds) + " seconds ago";
+    };
+
+    const stats = {
+        runs24h: totalRuns24h,
+        successRate: successRate + '%',
+        avgTime: '~1.2s', // Still hardcoded until we avg duration column
+        lastRun: lastRun ? timeAgo(lastRun.createdAt) : 'Never'
+    };
+    
     const activeService = serviceFilter === 'transactional' ? 'transactional' : 'workflows';
     
     res.render('dashboard/workflows', {
       title: 'Automations',
       workflows,
-      activeService, // Dynamically set active sidebar item
+      stats,
+      activeService, 
       nonce: res.locals.nonce
     });
+  }
+
+  static async show(req: Request, res: Response) {
+      const user = (req as any).user;
+      const { id } = req.params;
+      
+      const prisma = (await import('../lib/prisma')).default;
+      
+      const workflow = await prisma.workflow.findUnique({
+          where: { id },
+          include: { 
+              executionLogs: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 50
+              }
+          }
+      });
+      
+      if (!workflow || workflow.businessId !== user.businessId) {
+          req.session.notification = { type: 'error', message: 'Workflow not found.' };
+          return res.redirect('/dashboard/workflows');
+      }
+      
+      res.render('dashboard/workflow-detail', {
+          title: workflow.name,
+          workflow,
+          logs: workflow.executionLogs,
+          activeService: 'workflows',
+          nonce: res.locals.nonce
+      });
+  }
+
+  static async toggle(req: Request, res: Response) {
+      const user = (req as any).user;
+      const { id } = req.params;
+      
+      const prisma = (await import('../lib/prisma')).default;
+      const workflow = await prisma.workflow.findUnique({ where: { id } });
+      
+      if (workflow && workflow.businessId === user.businessId) {
+          await prisma.workflow.update({
+              where: { id },
+              data: { isActive: !workflow.isActive }
+          });
+          req.session.notification = { type: 'success', message: `Workflow ${workflow.isActive ? 'paused' : 'activated'}.` };
+      }
+      
+      res.redirect(`/dashboard/workflows/${id}`);
   }
 
   static async create(req: Request, res: Response) {
     const user = (req as any).user;
     const { name, triggerEvent, actionType } = req.body;
 
-    // Simple simplified creation for MVP
     try {
       await workflowService.createWorkflow(user.id, {
         name,
@@ -64,13 +163,19 @@ export class WorkflowsController {
 
       try {
           const result = await workflowService.testWorkflow(user.id, id);
+          
+          // Enhanced Success Message with Data Preview if possible
+          const cleanData = JSON.stringify(result.data || result, null, 2);
+          
           req.session.notification = { 
               type: 'success', 
-              message: `Test successful! Response: ${JSON.stringify(result.data).substring(0, 100)}...` 
+              message: 'Test run initiated successfully.' 
           };
+          // We might want to pass the result to the view via flash or query param
+          // For now, redirect to details
       } catch (error: any) {
           req.session.notification = { type: 'error', message: `Test failed: ${error.message}` };
       }
-      res.redirect('/dashboard/workflows');
+      res.redirect(`/dashboard/workflows/${id}`);
   }
 }

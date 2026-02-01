@@ -6,6 +6,9 @@ import { UnifiedInvoice, UnifiedContact, UnifiedItem } from './v2/types';
 import { UnifiedInvoiceSchema } from './v2/schemas';
 import crypto from 'crypto';
 import { AppError } from '../lib/AppError';
+import { webhookService } from './webhook.service';
+import { n8nPayloadFactory } from './n8n/n8n-payload.factory';
+import { OnboardingEventTypes } from '../domain-events';
 
 /**
  * Sync Configuration Constants
@@ -62,7 +65,7 @@ export class DataSyncService {
         }
 
         // 2. Provider Initialization
-        // Factory pattern to get the correct adapter (Zoho, QBO, Xero)
+        // Factory pattern to get the correct adapter (Zoho, QuickBooks, Xero)
         const provider = ProviderRegistry.createInstance(integration.provider);
         try {
             await provider.initialize(integration);
@@ -91,6 +94,14 @@ export class DataSyncService {
 
         const totalDuration = Date.now() - startTime;
         logger.info({ businessId, duration: totalDuration, results }, '✅ [DataSyncService] Sync Completed');
+
+        // 5. Send Webhook to n8n with synced data
+        try {
+            await this._sendWebhookToN8n(businessId, integration, provider);
+        } catch (e: any) {
+            logger.error({ businessId, error: e.message }, '❌ [DataSyncService] Failed to send webhook to n8n');
+            // Don't fail the sync if webhook fails - data is still synced locally
+        }
 
         return { success: globalSuccess, results, duration: totalDuration };
     }
@@ -199,6 +210,84 @@ export class DataSyncService {
         });
 
         return existing ? 'updated' : 'created';
+    }
+
+    /**
+     * Send Webhook to n8n with synced data
+     * Builds a unified payload containing all synced entities and dispatches to n8n
+     */
+    private async _sendWebhookToN8n(businessId: string, integration: any, provider: IERPProvider) {
+        const business = await prisma.business.findUnique({
+            where: { id: businessId },
+            include: { users: { take: 1 } }
+        });
+
+        if (!business) {
+            logger.warn({ businessId }, '⚠️ [DataSyncService] Business not found for webhook');
+            return;
+        }
+
+        // Get the owner's ID for floovioo_id (stable identifier)
+        const owner = business.users[0];
+        const flooviooId = owner?.id || business.id;
+
+        // Fetch synced data from ExternalDocument table (where sync stores data)
+        const [contacts, items, invoices] = await Promise.all([
+            prisma.externalDocument.findMany({ where: { businessId, type: 'contact' }, take: 100 }),
+            prisma.externalDocument.findMany({ where: { businessId, type: 'item' }, take: 100 }),
+            prisma.externalDocument.findMany({ where: { businessId, type: 'invoice' }, take: 100 })
+        ]);
+
+        // Build service context with STABLE IDs
+        const context = {
+            serviceId: 'transactional-branding',
+            serviceTenantId: businessId, // Stable business ID
+            appId: 'system-sync',
+            requestId: `sync_${businessId.substring(0, 8)}_${Date.now()}`
+        };
+
+        // Convert ExternalDocument format to ERPDocument format for payload factory
+        const mapDoc = (doc: any) => ({
+            id: doc.id,
+            externalId: doc.externalId,
+            name: (doc.normalized as any)?.name || (doc.data as any)?.DisplayName || doc.externalId,
+            type: doc.type,
+            total: (doc.normalized as any)?.total || (doc.data as any)?.TotalAmt || 0,
+            date: (doc.normalized as any)?.date || doc.syncedAt,
+            status: (doc.normalized as any)?.status || 'active',
+            rawData: doc.data
+        });
+
+        const masterData = {
+            contacts: contacts.map(mapDoc),
+            items: items.map(mapDoc),
+            invoices: invoices.map(mapDoc),
+            payments: [],
+            salesorders: [],
+            purchaseorders: [],
+            estimates: []
+        };
+
+        const unifiedPayload = n8nPayloadFactory.createUnifiedPayload(
+            masterData,
+            business,
+            integration,
+            flooviooId,
+            context
+        );
+
+        // Send to n8n
+        await webhookService.sendTrigger('transactional-branding', OnboardingEventTypes.DATA_SYNC, unifiedPayload);
+        
+        logger.info({ 
+            businessId, 
+            flooviooId,
+            entityCounts: {
+                contacts: contacts.length,
+                items: items.length,
+                invoices: invoices.length
+            }
+        }, '📤 [DataSyncService] Webhook sent to n8n');
     }
 
     /**

@@ -587,7 +587,9 @@ export class IntegrationController {
         // Dispatch background job
         const job = await syncQueue.add('onboarding-sync-job', {
             userId,
+            businessId: user.businessId, // [FIX] Add missing businessId
             provider: normalizedProvider,
+            product: 'transactional', // Default product
             selection // Pass explicit selection
         });
             

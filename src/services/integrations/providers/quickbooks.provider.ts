@@ -186,7 +186,7 @@ export class QBOProvider implements IERPProvider {
 
                     events.push({
                         type,
-                        provider: 'qbo',
+                        provider: 'quickbooks',
                         originalEvent: op,
                         entityId: entity.id,
                         entityType,
@@ -261,7 +261,7 @@ export class QBOProvider implements IERPProvider {
 
                 events.push({
                     type,
-                    provider: 'qbo',
+                    provider: 'quickbooks',
                     originalEvent: op,
                     entityId,
                     entityType,

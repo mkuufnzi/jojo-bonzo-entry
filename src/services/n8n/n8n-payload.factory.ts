@@ -85,7 +85,7 @@ export class N8nPayloadFactory {
      * Schema: Floovioo Ops Branding Clients 1.0 (Approx)
      */
     createProfilePayload(business: Business, flooviooId: string, context: ServiceContext) {
-        const configId = `config_${business.id}_${Date.now()}`;
+        const configId = `config_${business.id}`;
 
         // Pick only Step 1 relevant metadata to avoid leaking future step data (e.g. documentTypes)
         const businessMetadata = (business.metadata as any) || {};
@@ -199,7 +199,7 @@ export class N8nPayloadFactory {
         };
 
         return this._wrap(OnboardingEventTypes.COMPLETE, data, flooviooId, context, {
-            config_id: `config_${business.id}_${Date.now()}`,
+            config_id: `config_${business.id}`,
             timestamp: new Date().toISOString()
         });
     }

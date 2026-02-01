@@ -657,7 +657,7 @@ model ProcessedDocument {
   userId             String
   
   // Source
-  provider           String   // qbo, xero, zoho
+  provider           String   // quickbooks, xero, zoho
   resourceType       String   // invoice, estimate, contact, etc.
   resourceId         String   // External ID from ERP
   

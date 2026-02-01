@@ -15,7 +15,7 @@ async function main() {
           notification: {
             url: '/api/v1/webhooks/quickbooks/notification',
             label: 'Event Notification',
-            description: 'Receives Invoice/Customer updates from QBO'
+            description: 'Receives Invoice/Customer updates from QuickBooks'
           }
         }
       }
@@ -32,7 +32,7 @@ async function main() {
           notification: {
             url: '/api/v1/webhooks/quickbooks/notification',
             label: 'Event Notification',
-            description: 'Receives Invoice/Customer updates from QBO'
+            description: 'Receives Invoice/Customer updates from QuickBooks'
           }
         }
       }

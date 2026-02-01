@@ -5,7 +5,7 @@
  * This decouples the core logic from provider-specific schemas.
  */
 
-export type ProviderType = 'zoho' | 'qbo' | 'xero' | 'manual';
+export type ProviderType = 'zoho' | 'quickbooks' | 'xero' | 'manual';
 
 export interface UnifiedEntity {
     id: string;              // Internal UUID or Hash

@@ -48,39 +48,41 @@ describe('TransactionalService (V2)', () => {
             results: { status: 'queued' }
         });
 
-        const result = await service.send({
+        const result = await service.send(
             userId,
-            channel: 'email',
-            eventType: 'invoice.created',
-            payload: { invoiceId, amount: 100 }
-        });
+            invoiceId,
+            'email'
+        );
 
-        expect(result.success).toBe(true);
-        expect(result.traceId).toBe('trace-123');
+        // Result is DispatchResult
+        expect((result as any).success).toBe(true);
+        expect((result as any).traceId).toBe('trace-123');
+        expect((result as any).results?.status).toBe('queued');
         expect(DeliveryService.prototype.dispatch).toHaveBeenCalledTimes(1);
     });
 
     test('Send with Idempotency Key should return cached result', async () => {
         const userId = uuidv4();
+        const invoiceId = uuidv4();
         const idempotencyKey = 'idem-key-123';
 
         // Mock Redis Cache Hit
         mockRedis.get.mockResolvedValue(JSON.stringify({
-            success: true,
+            status: 'completed',
             traceId: 'cached-trace-id',
             timestamp: new Date().toISOString()
         }));
 
-        const result = await service.send({
+        const result = await service.send(
             userId,
-            channel: 'email',
-            eventType: 'invoice.created',
-            payload: {},
+            invoiceId,
+            'email',
             idempotencyKey
-        });
+        );
 
-        expect(result.success).toBe(true);
-        expect(result.traceId).toBe('cached-trace-id');
+        // Result is { status: 'skipped', reason: '...' }
+        expect((result as any).status).toBe('skipped');
+        expect((result as any).reason).toBe('idempotent_replay');
         expect(DeliveryService.prototype.dispatch).not.toHaveBeenCalled();
     });
 });

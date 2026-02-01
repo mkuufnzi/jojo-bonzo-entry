@@ -50,7 +50,7 @@ async function testTriggerCompat() {
     // 3. Simulate invoice.updated payload
     const payload = {
         type: 'invoice.updated',
-        provider: 'qbo',
+        provider: 'quickbooks',
         entityId: 'test_123',
         entityType: 'invoice',
         payload: {

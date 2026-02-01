@@ -217,8 +217,8 @@ export class WebhookController {
     }
 
     try {
-      // 1. Initialize Provider (Normalize 'quickbooks' to 'qbo')
-      const normalizedProvider = provider.toLowerCase() === 'quickbooks' ? 'qbo' : provider.toLowerCase();
+      // 1. Initialize Provider
+      const normalizedProvider = provider.toLowerCase();
       const { ProviderRegistry } = await import('../services/integrations/providers'); 
       const providerInstance = ProviderRegistry.createInstance(normalizedProvider);
 
@@ -247,21 +247,23 @@ export class WebhookController {
            // 4. Resolve Context (User/App/Integration)
            let integration: any = null;
            if (event.tenantId) {
-                let metadataKey = 'realmId';
-                if (provider === 'xero') metadataKey = 'tenantId';
-                else if (provider === 'zoho') metadataKey = 'organization_id';
+                // Standardization: provider is valid (quickbooks)
+                const metadataKey = provider === 'quickbooks' ? 'realmId' : 
+                                   (provider === 'xero' ? 'tenantId' : 'organization_id');
                 
                 integration = await prisma.integration.findFirst({
                     where: { 
-                        provider: normalizedProvider,
+                        provider: provider,
                         metadata: {
                             path: [metadataKey], 
                             equals: event.tenantId 
                         }
                     },
-                    include: { business: { include: { users: true } } }
+                    // Accept ANY user role (including 'USER') to ensure we resolve a valid context
+                    include: { business: { include: { users: { take: 1 } } } }
                 });
 
+                // Use the first found user (effectively the "Owner" or primary contact)
                 if (integration && !userId && integration.business?.users?.length) {
                     userId = integration.business.users[0].id;
                 }

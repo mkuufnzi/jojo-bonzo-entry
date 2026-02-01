@@ -1,5 +1,5 @@
 
-import { QBOProvider } from '../../services/integrations/providers/qbo.provider';
+import { QBOProvider } from '../../services/integrations/providers/quickbooks.provider';
 import { Integration } from '@prisma/client';
 
 // Mock Fetch Global

@@ -91,9 +91,9 @@ export class SyncWorker {
                     requestId: `sync_${businessId.substring(0, 8)}_${Date.now()}`
                 };
 
-                // Fetch Business Owner for Floovioo ID
+                // Fetch Primary User for Floovioo ID (Any role)
                 const owner = await prisma.user.findFirst({
-                    where: { businessId: business.id, role: 'OWNER' }
+                    where: { businessId: business.id }
                 });
 
                 if (!owner) {

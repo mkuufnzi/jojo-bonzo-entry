@@ -10,5 +10,7 @@ router.get('/', WorkflowsController.index);
 router.post('/', WorkflowsController.create);
 router.post('/:id/delete', WorkflowsController.delete);
 router.post('/:id/test', WorkflowsController.test);
+router.get('/:id', WorkflowsController.show);
+router.post('/:id/toggle', WorkflowsController.toggle);
 
 export default router;

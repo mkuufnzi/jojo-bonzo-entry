@@ -319,6 +319,33 @@ export class SeederService {
                 }
             },
             {
+                name: 'Transactional Branding',
+                slug: 'transactional-branding',
+                description: 'Automatic branding and delivery of transactional documents (invoices, estimates, etc.) from connected ERPs.',
+                pricePerRequest: 0.00, // Usage tracked at plan level
+                requiredFeatureKey: 'ai_generation',
+                config: {
+                    webhooks: {
+                        default: {
+                            url: process.env.N8N_WEBHOOK_TRANSACTIONAL_DEFAULT || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
+                            label: 'Default Transactional Router'
+                        },
+                        data_sync: {
+                            url: process.env.N8N_WEBHOOK_DATA_SYNC || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
+                            label: 'ERP Data Sync'
+                        },
+                        apply_invoice: {
+                            url: process.env.N8N_WEBHOOK_APPLY_INVOICE || '',
+                            label: 'Apply Branding to Invoice'
+                        },
+                        apply_estimate: {
+                            url: process.env.N8N_WEBHOOK_APPLY_ESTIMATE || '',
+                            label: 'Apply Branding to Estimate'
+                        }
+                    }
+                }
+            },
+            {
                 name: 'AI Document Generator',
                 slug: 'ai-doc-generator',
                 description: 'Generate GDPR notices, Employment Contracts, and Health & Safety policies instantly.',

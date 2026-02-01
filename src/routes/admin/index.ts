@@ -69,4 +69,8 @@ router.get('/subscriptions', requireRole([ROLES.ROOT, ROLES.CEO, ROLES.COO]), Ad
 router.post('/billing/sync-invoices', requireRole([ROLES.ROOT, ROLES.CEO]), auditLog('SYNC_INVOICES'), AdminController.syncInvoices);
 router.get('/analytics', requireRole([ROLES.ROOT, ROLES.CEO, ROLES.COO, ROLES.DEVOPS, ROLES.MARKETING]), AdminController.listAnalytics);
 
+// [V2] Transactional Branding Analytics
+import { TransactionalAnalyticsController } from '../../controllers/analytics/transactional-analytics.controller';
+router.get('/analytics/transactional', requireRole([ROLES.ROOT, ROLES.CEO, ROLES.COO, ROLES.DEVOPS]), TransactionalAnalyticsController.dashboard);
+
 export default router;

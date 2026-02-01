@@ -4,6 +4,8 @@ import { brandingService } from './branding.service';
 import { webhookService } from './webhook.service';
 import { ServiceRepository } from '../repositories/service.repository';
 import { ServiceSlugs } from '../types/service.types';
+import { pdfService } from './pdf.service';
+import { storageService } from './storage.service';
 import { n8nPayloadFactory } from './n8n/n8n-payload.factory';
 import axios from 'axios';
 import { v4 as uuid } from 'uuid';
@@ -81,11 +83,14 @@ export class WorkflowService {
       }
     });
 
+    console.log(`[WorkflowService Debug] User: ${userId}, Business: ${user.businessId}. Found ${workflows.length} active webhook workflows.`);
+
     const results: any[] = [];
 
     for (const wf of workflows) {
       // Check if payload matches trigger criteria
       const config = wf.triggerConfig as any;
+      console.log(`[WorkflowService Debug] Checking Workflow ${wf.id}. Config: ${JSON.stringify(config)} vs Event: ${payload.normalizedEventType || payload.type} Provider: ${payload.provider}`);
       
       // Filter by Event Type (Supports exact match or wildcard like 'invoice.*')
       if (config?.event) {
@@ -113,14 +118,18 @@ export class WorkflowService {
           }
 
           if (!matches) {
+              console.log(`[WorkflowService Debug] Mismatch Event. Config: ${config.event} vs Event: ${eventToMatch}`);
               continue;
           }
       }
       
       // Filter by Provider (e.g. "zoho")
       if (payload.provider && config?.provider && payload.provider !== config.provider) {
+          console.log(`[WorkflowService Debug] Mismatch Provider. Payload: ${payload.provider} vs Config: ${config.provider}`);
           continue;
       }
+      
+
 
       // Execute Action
       try {
@@ -300,12 +309,69 @@ export class WorkflowService {
         const duration = Date.now() - startTime;
         logger.info({ workflowId, duration, status: response.status }, '✅ [WorkflowService] n8n Dispatch Successful');
 
-        // 4. Return Data
+        // 7. Process Response & Generate Artifacts
+        let brandedUrl: string | undefined;
+        let outputHtml: string | undefined;
+
+        try {
+            const resultData = Array.isArray(response.data) ? response.data[0] : response.data;
+            if (resultData && resultData.html) {
+                outputHtml = resultData.html;
+                logger.info({ workflowId }, '📄 [WorkflowService] PDF Generation Started');
+                
+                // Generate PDF
+                const pdfBuffer = await pdfService.generatePdfFromHtml(resultData.html);
+                
+                // Save to Storage
+                const filename = `branded-${payload.entityId || 'doc'}-${Date.now()}.pdf`;
+                brandedUrl = await storageService.saveFile(userId, pdfBuffer, filename, 'processed');
+                
+                logger.info({ workflowId, brandedUrl }, '💾 [WorkflowService] PDF Saved');
+            }
+        } catch (processError: any) {
+            logger.error({ workflowId, error: processError.message }, '⚠️ [WorkflowService] Failed to process n8n artifacts');
+            // We don't fail the whole execution, but we log it
+        }
+
+        // 8. Update ProcessedDocument
+        await prisma.processedDocument.update({
+            where: { id: processedDoc.id },
+            data: {
+                status: 'completed',
+                processingTimeMs: duration,
+                brandedUrl: brandedUrl, 
+                updatedAt: new Date()
+            }
+        });
+
+        // 9. Success Audit Log
+        await createAuditLog({
+            userId,
+            appId: context.appId,
+            businessId: user?.business?.id,
+            actionType: 'n8n_response',
+            serviceId: ServiceSlugs.TRANSACTIONAL_BRANDING,
+            eventType: payload.normalizedEventType,
+            responseStatus: response.status,
+            durationMs: duration,
+            success: true,
+            requestId: flooviooId,
+            // We store the result summary, not the full HTML
+            responseData: {
+                 generatedUrl: brandedUrl,
+                 hasHtml: !!outputHtml
+            }
+        });
+
+        // 10. Return Data
         return {
             source: 'n8n',
             statusCode: response.status,
             data: response.data,
-            duration
+            duration,
+            artifacts: {
+                pdfUrl: brandedUrl
+            }
         };
     }
     
@@ -357,6 +423,60 @@ export class WorkflowService {
           });
           throw error;
       }
+  }
+
+  /**
+   * Automates the creation of a default workflow for a given provider.
+   * Used during onboarding completion.
+   */
+  async ensureDefaultWorkflow(userId: string, businessId: string, provider: string) {
+      if (!businessId || !provider) return;
+      
+      logger.info({ userId, businessId, provider }, '🔍 [WorkflowService] Ensuring default workflow exists');
+
+      // 1. Check if ANY webhook workflow exists for this provider
+      const existing = await prisma.workflow.findFirst({
+          where: {
+              businessId,
+              triggerType: 'webhook',
+              isActive: true, // Only care if there is an active one
+              // We can't query JSON loosely easily in Prisma, so we fetch and filter if needed
+              // or just rely on the fact that if they have *any* webhook workflow, they are probably set.
+          }
+      });
+
+      if (existing) {
+          logger.info({ userId, workflowId: existing.id }, '✅ [WorkflowService] Workflow already exists. Skipping default creation.');
+          return;
+      }
+
+      // 2. Create Default Workflow
+      // Name: "Auto-Brand New Invoices ({Provider})"
+      const providerLabel = provider.charAt(0).toUpperCase() + provider.slice(1);
+      
+      const workflowName = `Auto-Brand New Invoices (${providerLabel})`;
+      
+      const wf = await prisma.workflow.create({
+          data: {
+              id: uuid(),
+              businessId,
+              name: workflowName,
+              description: `Automatically applies branding when an invoice is created in ${providerLabel}`,
+              isActive: true,
+              triggerType: 'webhook',
+              triggerConfig: {
+                  provider: provider, // 'quickbooks', 'xero', etc.
+                  event: 'invoice.*'
+              },
+              actionConfig: {
+                  type: 'apply_branding',
+                  profileId: 'default'
+              }
+          }
+      });
+
+      logger.info({ userId, workflowId: wf.id }, '🚀 [WorkflowService] Created Default Workflow');
+      return wf;
   }
 }
 

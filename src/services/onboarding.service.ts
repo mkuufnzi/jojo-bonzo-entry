@@ -45,7 +45,7 @@ export class OnboardingService {
    * Triggers the initial data pull for a new integration.
    * 
    * @param userId - Initiating User
-   * @param provider - Integration Type (zoho, qbo)
+   * @param provider - Integration Type (zoho, quickbooks)
    * @param product - Target Product Context (transactional, sales)
    */
   async startSync(userId: string, provider: string, product: string = 'transactional') {
