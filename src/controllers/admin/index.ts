@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import passport from 'passport';
+import { ServiceRegistry } from '../../services/service-registry.service'; // [V2]
 import prisma from '../../lib/prisma';
+import { createQueue, QUEUES } from '../../lib/queue'; // [V2] Queue Health
+
+const serviceRegistry = ServiceRegistry.getInstance(); // [V2] Singleton
 
 export class AdminController {
   
@@ -35,6 +39,35 @@ export class AdminController {
           default: startDate.setDate(endDate.getDate() - 30); // Default 30d
       }
       return { startDate, endDate };
+  }
+
+  /**
+   * [V2] Get Queue Health Stats
+   */
+  private static async getQueueHealth() {
+      const queueNames = [
+          { name: 'PDF Generation', key: QUEUES.PDF_GENERATION },
+          { name: 'AI Generation', key: QUEUES.AI_GENERATION },
+          { name: 'Webhooks', key: QUEUES.WEBHOOKS },
+          { name: 'Onboarding', key: QUEUES.ONBOARDING_SYNC },
+          { name: 'Revenue Engine', key: QUEUES.REVENUE_ENGINE }
+      ];
+
+      const health = await Promise.all(queueNames.map(async (q) => {
+          try {
+              const queue = createQueue(q.key);
+              const [waiting, active, completed, failed] = await Promise.all([
+                  queue.getWaitingCount(),
+                  queue.getActiveCount(),
+                  queue.getCompletedCount(),
+                  queue.getFailedCount()
+              ]);
+              return { name: q.name, key: q.key, waiting, active, completed, failed, status: failed > 10 ? 'warning' : 'healthy' };
+          } catch (e) {
+              return { name: q.name, key: q.key, waiting: 0, active: 0, completed: 0, failed: 0, status: 'error' };
+          }
+      }));
+      return health;
   }
 
   /**
@@ -118,9 +151,11 @@ export class AdminController {
 
       // Calculate error rate (last 24h)
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const [totalLogs24h, errorLogs24h] = await Promise.all([
+      const [totalLogs24h, errorLogs24h, queueHealth] = await Promise.all([
         prisma.usageLog.count({ where: { createdAt: { gte: oneDayAgo } } }),
-        prisma.usageLog.count({ where: { createdAt: { gte: oneDayAgo }, status: 'error' } })
+        prisma.usageLog.count({ where: { createdAt: { gte: oneDayAgo }, status: 'error' } }),
+        // [V2] Queue Health
+        AdminController.getQueueHealth()
       ]);
 
       const errorRate = totalLogs24h > 0 ? ((errorLogs24h / totalLogs24h) * 100).toFixed(1) : '0.0';
@@ -155,6 +190,7 @@ export class AdminController {
         role: res.locals.role,
         permissions: res.locals.permissions,
         stats,
+        queueHealth, // [V2]
         currentPeriod: period // Pass period to view
       });
     } catch (error) {
@@ -662,11 +698,22 @@ export class AdminController {
         }
       });
 
+      // [V2] Merge with Registry Data
+      const enrichedServices = services.map(s => {
+          const manifest = serviceRegistry.getManifest(s.slug);
+          return {
+              ...s,
+              registryStatus: manifest ? { isRegistered: true, version: manifest.version } : { isRegistered: false, version: 'N/A' },
+              tier: (s as any).tier || 'Standard', // Fallback or Schema field
+              config: (s as any).config || {} 
+          };
+      });
+
       res.render('admin/services/index', {
         user: res.locals.user,
         role: res.locals.role,
         permissions: res.locals.permissions,
-        services,
+        services: enrichedServices,
       });
     } catch (error) {
       console.error('Error listing services:', error);
@@ -792,26 +839,54 @@ export class AdminController {
                    } else {
                        config.dependencies.push(data);
                    }
-               }
-          }
+                }
+           } else if (type === 'scaling') {
+                // [V2] Scaling Config (Concurrency, Tier)
+                config.scaling = config.scaling || {};
+                config.scaling = { ...config.scaling, ...data };
+           }
 
-          // 3. Save
-          await prisma.service.update({
-              where: { id },
-              data: { config }
-          });
+           // 3. Save
+           await prisma.service.update({
+               where: { id },
+               data: { config }
+           });
 
-          // 4. Refresh Cache
-          const { webhookService } = await import('../../services/webhook.service');
-          await webhookService.refreshConfig();
+           // 4. Refresh Cache
+           const { webhookService } = await import('../../services/webhook.service');
+           await webhookService.refreshConfig();
 
-          res.json({ success: true });
+           res.json({ success: true });
 
-      } catch (error) {
-          console.error('Error updating service config:', error);
-          res.status(500).json({ error: 'Internal Server Error' });
-      }
-  }
+       } catch (error) {
+           console.error('Error updating service config:', error);
+           res.status(500).json({ error: 'Internal Server Error' });
+       }
+   }
+
+    // [V2] Test Webhook Trigger
+    static async testWebhook(req: Request, res: Response) {
+        try {
+            const { url, method } = req.body;
+            
+             // Simple Fire & Forget Request
+             try {
+                 const response = await fetch(url, {
+                     method: method || 'POST',
+                     headers: { 'Content-Type': 'application/json', 'X-Test-Trigger': 'true' },
+                     body: method === 'POST' ? JSON.stringify({ test: true, timestamp: new Date().toISOString() }) : undefined
+                 });
+                 
+                 res.json({ success: response.ok, status: response.status });
+             } catch (netError) {
+                 res.json({ success: false, error: (netError as Error).message });
+             }
+
+        } catch (error) {
+             console.error('Test Webhook Error:', error);
+             res.status(500).json({ error: 'Failed to trigger webhook' });
+        }
+    }
 
   /**
    * Service Management - Update Service Config (With Versioning)

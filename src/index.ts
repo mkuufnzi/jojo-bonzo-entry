@@ -343,10 +343,37 @@ apiRouter.use('/', apiRoutes);       // /api/me, /api/usage, /api/services
 apiRouter.use('/pdf', pdfRoutes);    // /api/pdf/convert
 apiRouter.use('/ai', aiRoutes);      // /api/ai/generate
 apiRouter.use('/jobs', jobsRoutes);  // /api/jobs/status
-apiRouter.use('/v1/transactional', transactionalRoutesV1); // Enterprise V1
+  apiRouter.use('/v1/transactional', transactionalRoutesV1); // Enterprise V1
+// Mount API router
 // Mount API router
 app.use('/api/v1/webhooks', webhookRoutes); // Public Webhooks (Signature Verification handled inside)
-app.use('/api', apiRouter);
+
+import v2Router from './routes/v2';
+
+if (config.ARCHITECTURE_VERSION === 'v2') {
+    logger.warn('🚀 [BOOT] V2 Architecture (Service Composition) ENABLED. V1 API Suspended.');
+    
+    // Create V2 specific router to inherit middleware
+    const v2ApiRouter = express.Router();
+    
+    // Apply Schema/Security Middleware Stack (Same as V1 for now)
+    v2ApiRouter.use(cors(corsOptions));
+    v2ApiRouter.use(apiLimiter);
+    v2ApiRouter.use(publicAuthMiddleware);
+    v2ApiRouter.use(apiKeyAuth);         // Enforce API Key / App ID
+    v2ApiRouter.use(checkStorageLimit);
+    v2ApiRouter.use(requireSubscriptionValid);
+    v2ApiRouter.use(checkQuota);
+    v2ApiRouter.use(logUsage);
+
+    // Mount V2 Routes
+    v2ApiRouter.use('/', v2Router);
+    
+    app.use('/api/v2', v2ApiRouter);
+} else {
+    app.use('/api', apiRouter);
+}
+
 
 /**
  * Health Check Endpoint

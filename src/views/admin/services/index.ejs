@@ -31,6 +31,7 @@
                                             <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Slug</th>
                                             <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                             <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Apps Connected</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Registry (V2)</th>
                                             <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Usage (Logs)</th>
                                             <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
                                         </tr>
@@ -38,7 +39,7 @@
                                     <tbody class="bg-white divide-y divide-slate-200">
                                         <% if (services.length === 0) { %>
                                             <tr>
-                                                <td colspan="6" class="px-6 py-8 text-center text-slate-500 text-sm italic">
+                                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 text-sm italic">
                                                     No services found.
                                                 </td>
                                             </tr>
@@ -69,6 +70,17 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">
                                                     <%= service._count ? service._count.apps : 0 %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                     <% if (service.registryStatus && service.registryStatus.isRegistered) { %>
+                                                         <span class="flex items-center gap-1 px-2 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-800">
+                                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                                             V2 Registered
+                                                         </span>
+                                                         <span class="text-[10px] text-slate-400 block mt-1 ml-1">v<%= service.registryStatus.version %></span>
+                                                     <% } else { %>
+                                                         <span class="text-xs text-slate-400 font-mono">Legacy (V1)</span>
+                                                     <% } %>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">
                                                     <%= service._count ? service._count.logs : 0 %>

@@ -19,6 +19,11 @@ export const ServiceSlugs = {
     // Branding & Core
     TRANSACTIONAL_BRANDING: 'transactional-branding',
     DESIGN_ENGINE: 'design-engine',
+    
+    // V2 Services
+    ONBOARDING: 'onboarding-service',
+    DATA_SYNC: 'floovioo_transactional_data-sync',
+
 } as const;
 
 export const EventSegments = {

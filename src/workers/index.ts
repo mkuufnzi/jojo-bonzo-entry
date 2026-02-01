@@ -80,8 +80,9 @@ aiWorker.on('failed', (job, err) => {
 });
 
 // Initialize Onboarding Worker
+// Initialize Onboarding Worker
 import { onboardingProcessor } from './onboarding.processor';
-const onboardingWorker = createWorker(QUEUES.ONBOARDING_SYNC, onboardingProcessor, {
+const onboardingWorker = createWorker(QUEUES.ONBOARDING_SYNC as string, onboardingProcessor, {
     concurrency: config.NODE_ENV === 'production' ? 2 : 1
 });
 

@@ -1,38 +1,34 @@
 import { Job } from 'bullmq';
 import { logger } from '../lib/logger';
 import prisma from '../lib/prisma';
-import { ProviderRegistry } from '../services/integrations/providers';
+import { dataSyncService } from '../services/data-sync.service';
 
 interface OnboardingJobData {
     userId: string;
     provider: string;
+    product: string;
+    businessId: string;
+    integrationId: string;
 }
 
 export const onboardingProcessor = async (job: Job<OnboardingJobData>) => {
-    const { userId, provider } = job.data;
-    logger.info(`[OnboardingWorker] Starting sync for user ${userId}, provider ${provider}`);
+    const { userId, provider, product, businessId } = job.data;
+    logger.info({ userId, provider, product, jobId: job.id }, '⚙️ [OnboardingWorker] Processing Sync Job');
 
     try {
-        const user = await prisma.user.findUnique({
-             where: { id: userId },
-             select: { businessId: true }
-        });
+        // Validation (Double check)
+        const business = await prisma.business.findUnique({ where: { id: businessId } });
+        if (!business) throw new Error(`Business ${businessId} not found`);
 
-        if (!user?.businessId) {
-            throw new Error(`Business not found for user ${userId}`);
-        }
-
-        const { syncWorker } = await import('../services/integrations/sync.worker');
+        // Execute Sync via DataSyncService (The Worker Logic)
+        const result = await dataSyncService.syncBusiness(businessId);
         
-        // Use the centralized syncWorker for consistent logic
-        const result = await syncWorker.syncBusiness(user.businessId);
-        
-        logger.info(`[OnboardingWorker] Sync complete for business ${user.businessId}. Result: ${JSON.stringify(result)}`);
+        logger.info({ businessId, result }, '✅ [OnboardingWorker] Sync Completed Successfully');
 
         return result;
 
     } catch (error: any) {
-        logger.error(`[OnboardingWorker] Failed: ${error.message}`);
-        throw error;
+        logger.error({ userId, businessId, error: error.message }, '❌ [OnboardingWorker] Job Failed');
+        throw error; // Triggers BullMQ retry
     }
 };

@@ -46,6 +46,12 @@ export class FeatureSeeder {
         category: 'enterprise',
       },
       {
+        key: 'branded_workflows',
+        name: 'Branded Workflows',
+        description: 'Access to custom branded document workflows',
+        category: 'pro'
+      },
+      {
         key: 'sla',
         name: 'SLA Guarantee',
         description: 'Service Level Agreement',
@@ -75,6 +81,7 @@ export class FeatureSeeder {
       Starter: ['pdf_conversion', 'ai_generation', 'api_access'],
       Pro: ['pdf_conversion', 'ai_generation', 'api_access', 'priority_support', 'analytics'],
       Enterprise: ['pdf_conversion', 'ai_generation', 'api_access', 'priority_support', 'analytics', 'custom_integrations', 'sla'],
+      'BrandWithJojo - Branded Document Creation and Management Workflows': ['ai_generation', 'branded_workflows', 'priority_support', 'api_access']
     };
 
     // Assign features to plans

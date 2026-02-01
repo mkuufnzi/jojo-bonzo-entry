@@ -178,6 +178,47 @@
                             </div>
                         </div>
 
+                        <!-- 4. Queue Health (V2) -->
+                        <% if (typeof queueHealth !== 'undefined' && queueHealth.length > 0) { %>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    System Health (V2 Queues)
+                                </h3>
+                                <span class="text-xs text-slate-400">Real-time BullMQ Status</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                                <% queueHealth.forEach(q => { %>
+                                <div class="p-4 border border-slate-200 rounded-lg <%= q.status === 'warning' ? 'bg-amber-50 border-amber-200' : (q.status === 'error' ? 'bg-red-50 border-red-200' : 'bg-slate-50') %>">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs font-bold text-slate-500 uppercase"><%= q.name %></span>
+                                        <span class="w-2 h-2 rounded-full <%= q.status === 'healthy' ? 'bg-green-500' : (q.status === 'warning' ? 'bg-amber-500' : 'bg-red-500') %>"></span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 text-sm">
+                                        <div>
+                                            <span class="text-slate-400">Active:</span>
+                                            <span class="font-bold text-slate-700 ml-1"><%= q.active %></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400">Waiting:</span>
+                                            <span class="font-bold text-slate-700 ml-1"><%= q.waiting %></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400">Done:</span>
+                                            <span class="font-bold text-green-600 ml-1"><%= q.completed %></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400">Failed:</span>
+                                            <span class="font-bold <%= q.failed > 0 ? 'text-red-600' : 'text-slate-500' %> ml-1"><%= q.failed %></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <% } %>
+
                     </div>
                 </div>
 

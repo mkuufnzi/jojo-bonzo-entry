@@ -124,6 +124,11 @@
                                             <input type="text" placeholder="URL" value="<%= webhook.url || '' %>" class="webhook-url w-full rounded-lg border-slate-300 text-sm font-mono">
                                         </div>
                                         <div class="flex justify-end gap-2 pt-2">
+                                            <button onclick="testWebhook('<%= webhook.url %>', '<%= webhook.method %>')" class="text-sm text-slate-500 hover:text-purple-600 font-medium flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                                Test Fire
+                                            </button>
+                                            <span class="text-slate-300">|</span>
                                             <button onclick="triggerDeleteConfig('webhook', '<%= key %>')" class="text-sm text-red-600 hover:text-red-800 font-medium">Delete</button>
                                             <button onclick="triggerSaveConfig('webhook', '<%= key %>', this.closest('.webhook-row'))" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700">Save Item</button>
                                         </div>
@@ -166,7 +171,42 @@
                                 </div>
                             </div>
 
-                            <!-- 4. Dependencies Configuration (Atomic) -->
+                            <!-- 4. V2 Scaling & Performance (Atomic) -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        Scaling & Performance (V2)
+                                    </h3>
+                                    <button type="button" onclick="triggerSaveConfig('scaling', 'update', this.closest('.scaling-row'))" class="px-3 py-1.5 bg-purple-600 text-white text-sm font-bold rounded hover:bg-purple-700">
+                                        Update Scaling
+                                    </button>
+                                </div>
+                                <div class="scaling-row grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <% 
+                                        const scaling = (service.config && service.config.scaling) || {};
+                                    %>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Max Concurrency</label>
+                                        <input type="number" class="scaling-concurrency w-full rounded-lg border-slate-300 focus:ring-purple-500 focus:border-purple-500" value="<%= scaling.maxConcurrency || 5 %>">
+                                        <p class="text-xs text-slate-400 mt-1">Workers per instance</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Service Tier</label>
+                                        <select class="scaling-tier w-full rounded-lg border-slate-300 focus:ring-purple-500 focus:border-purple-500">
+                                            <option value="Standard" <%= scaling.tier === 'Standard' ? 'selected' : '' %>>Standard (Shared)</option>
+                                            <option value="Premium" <%= scaling.tier === 'Premium' ? 'selected' : '' %>>Premium (Dedicated)</option>
+                                            <option value="Enterprise" <%= scaling.tier === 'Enterprise' ? 'selected' : '' %>>Enterprise (Isolated)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Timeout (ms)</label>
+                                        <input type="number" class="scaling-timeout w-full rounded-lg border-slate-300 focus:ring-purple-500 focus:border-purple-500" value="<%= scaling.timeout || 30000 %>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. Dependencies Configuration (Atomic) -->
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="text-lg font-bold text-slate-900">Dependencies</h3>
@@ -355,6 +395,13 @@
                      billable: rowElement.querySelector('.path-billable').checked
                  };
                  key = data.path; // Update by path
+             } else if (type === 'scaling') {
+                 data = {
+                     maxConcurrency: parseInt(rowElement.querySelector('.scaling-concurrency').value) || 5,
+                     tier: rowElement.querySelector('.scaling-tier').value,
+                     timeout: parseInt(rowElement.querySelector('.scaling-timeout').value) || 30000
+                 };
+                 key = 'global'; // Scaling is global for the service
              } else if (type === 'dependency') {
                  data = {
                      service: rowElement.querySelector('.dep-service').value,
@@ -375,6 +422,34 @@
             triggerAction((code) => {
                  saveConfigItem(type, 'delete', key, {}, code);
             });
+        }
+
+        async function testWebhook(url, method) {
+            if (!url) return alert('No URL provided');
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Testing...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/admin/services/test-webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, method })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (window.showToast) window.showToast('Success', `Webhook fired! Status: ${data.status}`, 'success');
+                } else {
+                    if (window.showToast) window.showToast('Error', 'Failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                 if (window.showToast) window.showToast('Error', 'Network error', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         async function saveConfigItem(type, action, key, data, code) {

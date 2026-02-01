@@ -61,6 +61,7 @@ router.get('/services/:id/edit', requireRole(SERVICE_ROLES), AdminController.edi
 router.post('/services/:id/update', requireRole(SERVICE_ROLES), auditLog('UPDATE_SERVICE'), AdminController.updateService);
 router.post('/services/:id/config', requireRole(SERVICE_ROLES), auditLog('UPDATE_SERVICE_CONFIG'), AdminController.updateServiceConfig);
 router.post('/services/:id/rollback/:versionId', requireRole(SERVICE_ROLES), auditLog('ROLLBACK_SERVICE'), AdminController.rollbackService);
+router.post('/services/test-webhook', requireRole(SERVICE_ROLES), AdminController.testWebhook); // [V2] Test Fire
 
 // Analytics Routes (Permission-based access)
 router.get('/billing', requireRole([ROLES.ROOT, ROLES.CEO]), AdminController.listBilling);

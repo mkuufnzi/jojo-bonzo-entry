@@ -1,36 +1,27 @@
-FAIL src/tests/unit/qbo.provider.test.ts
-  QBOProvider
-    initialize
-      ΓêÜ should properly set baseUrl and realmId form metadata (3 ms)
-      ΓêÜ should use sandbox url by default (2 ms)
-    getContacts
-      ΓêÜ should fetch customers using correct query (4 ms)
-      ΓêÜ should handle empty response gracefully (1 ms)
-    getItems
-      ├ù should fetch items (Inventory/Service) using correct query (4 ms)
 
-  ΓùÅ QBOProvider ΓÇ║ getItems ΓÇ║ should fetch items (Inventory/Service) using correct query
+> afs_doc_tools@1.0.0 test
+> jest tests/v2/services/transactional.service.test.ts
 
-    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+FAIL tests/v2/services/transactional.service.test.ts
+  ΓùÅ Test suite failed to run
 
-    Expected: StringContaining "select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory',%20'Service')", Anything
-    Received: "https://sandbox-quickbooks.api.intuit.com/v3/company/realm_123/query?query=select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory'%2C%20'Service')%20MAXRESULTS%20100", {"headers": {"Accept": "application/json", "Authorization": "Bearer valid_token", "Content-Type": "application/json"}}
+    src/services/v2/transactional.service.ts:169:14 - error TS2741: Property 'externalId' is missing in type '{ name: string; }' but required in type '{ externalId: string; name: string; id?: string | undefined; metadata?: Record<string, unknown> | undefined; email?: string | undefined; billingAddress?: { line1: string; city: string; postalCode: string; country: string; line2?: string | undefined; state?: string | undefined; } | undefined; shippingAddress?: { ...;...'.
 
-    Number of calls: 1
+    169              customer: {
+                     ~~~~~~~~
 
-      109 |             const items = await provider.getItems();
-      110 |
-    > 111 |             expect(mockFetch).toHaveBeenCalledWith(
-          |                               ^
-      112 |                 expect.stringContaining("select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory',%20'Service')"),
-      113 |                 expect.anything()
-      114 |             );
-
-      at Object.<anonymous> (src/tests/unit/qbo.provider.test.ts:111:31)
+      src/services/v2/schemas.ts:56:3
+        56   externalId: z.string().describe('ID in External ERP/CRM'),
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        'externalId' is declared here.
+      src/services/v2/schemas.ts:139:3
+        139   customer: CustomerSchema,
+              ~~~~~~~~~~~~~~~~~~~~~~~~
+        The expected type comes from property 'customer' which is declared here on type '{ number: string; type: "invoice"; status: "unknown" | "draft" | "sent" | "viewed" | "paid" | "partial" | "overdue" | "voided" | "disputed"; date: string; externalId: string; currency: string; ... 13 more ...; normalizedAt?: string | ... 1 more ... | undefined; }'
 
 Test Suites: 1 failed, 1 total
-Tests:       1 failed, 4 passed, 5 total
+Tests:       0 total
 Snapshots:   0 total
-Time:        4.49 s, estimated 5 s
-Ran all test suites matching src/tests/unit/qbo.provider.test.ts.
+Time:        10.572 s
+Ran all test suites matching tests/v2/services/transactional.service.test.ts.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

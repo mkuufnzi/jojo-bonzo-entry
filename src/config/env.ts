@@ -31,6 +31,9 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().default('3002'),
   APP_URL: z.string().url('Invalid APP_URL').default('http://localhost:3002'),
+  
+  // Feature Flags
+  ARCHITECTURE_VERSION: z.enum(['v1', 'v2']).default('v1'),
 
   // Database (PostgreSQL)
   // Database (PostgreSQL)

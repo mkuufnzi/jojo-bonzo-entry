@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma';
+import { logger } from '../lib/logger';
 
 export class BrandingService {
   
@@ -59,6 +60,8 @@ export class BrandingService {
     const business = await (prisma as any).business.findUnique({
         where: { id: profile.businessId }
     });
+
+    logger.info({ profileId, documentType }, '🖌️ [BrandingService] Generating Preview...');
 
     // 2. Data Preparation (Variables) - Moved to top to avoid ReferenceError
     const mockData = this.getMockData(documentType);
@@ -173,21 +176,18 @@ export class BrandingService {
     // 5. Render (Inject Variables into HTML)
     let rendered = templateHtml
         .replace(/{{businessName}}/g, businessName)
-        // ... (other replaces)
+        // ... (other replaces implicitly handled if I don't touch them, but I need to be careful about what I'm replacing)
+        // Actually I should just do the scalar replacement block since that's where it broke
         .replace(/{{items_table}}/g, itemsTableHtml)
-        .replace(/{{personal_message}}/g, personalMessageHtml) // Inject Smart Msg
-        .replace(/{{upsell_section}}/g, upsellHtml);         // Inject Smart Upsells
-
-    // Replace scalar variables
-    rendered = rendered
-        .replace(/{{businessName}}/g, businessName)
+        .replace(/{{personal_message}}/g, personalMessageHtml) 
+        .replace(/{{upsell_section}}/g, upsellHtml)
+        .replace(/{{businessName}}/g, businessName) // Redundant but safe
         .replace(/{{logoUrl}}/g, logoUrl ? `<img src="${logoUrl}" style="max-height: 50px;" />` : '')
         .replace(/{{addressHtml}}/g, addressHtml)
         .replace(/{{contactHtml}}/g, contactHtml)
         .replace(/{{primaryColor}}/g, colors.primary)
         .replace(/{{secondaryColor}}/g, colors.secondary)
         .replace(/{{font}}/g, font)
-        // Data
         .replace(/{{customerName}}/g, mockData.customer.name)
         .replace(/{{customerAddress}}/g, mockData.customer.address)
         .replace(/{{docNumber}}/g, mockData.number)
@@ -198,13 +198,12 @@ export class BrandingService {
         .replace(/{{total}}/g, mockData.total)
         .replace(/{{currency}}/g, mockData.currency);
     
-    return `
+    const result = `
       <!DOCTYPE html>
       <html>
       <head>
         <style>
           body { font-family: ${font}, sans-serif; padding: 40px; color: #333; max-width: 800px; margin: 0 auto; }
-          /* Standard CSS fallback */
           .header { border-bottom: 3px solid ${colors.primary}; padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
           .logo { max-height: 50px; margin-right: 15px; }
           .brand-area { display: flex; align-items: center; }
@@ -224,11 +223,7 @@ export class BrandingService {
       </head>
       <body>
         ${rendered}
-        
-        <!-- Standard Items Table (Injected ONLY if not present in custom template) -->
         ${!templateHtml.includes('{{items_table}}') && !templateId.startsWith('custom:') ? itemsTableHtml : ''}
-        
-        <!-- Standard Footer -->
          <div class="footer">
             ${contactHtml} <br>
             Thank you for your business!
@@ -236,6 +231,9 @@ export class BrandingService {
       </body>
       </html>
     `;
+    
+    logger.info({ size: result.length, documentType }, '✅ [BrandingService] Preview Generated Successfully');
+    return result;
   }
 
   // New Helper Methods for Controller

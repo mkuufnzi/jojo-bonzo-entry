@@ -34,6 +34,11 @@ export class BootManager {
       // 4. Sync Stripe Price IDs (if Stripe is configured)
       await this.syncStripePriceIds();
 
+      // 5. Initialize V2 Architecture (Enterprise Services)
+      logger.info('🚀 Initializing V2 Services...');
+      const { transactionServiceV2, deliveryServiceV2, dataSyncServiceV2, onboardingServiceV2 } = await this.initializeV2Services();
+      logger.info('✅ V2 Architecture Active.');
+
       logger.info('✅ Boot Sequence Completed Successfully.');
     } catch (error: any) {
       logger.error({ msg: '❌ Boot Sequence Failed', error: error.message });
@@ -207,5 +212,27 @@ export class BootManager {
     } catch (error) {
       logger.error({ err: error }, '   ⚠️  Service registry initialization failed');
     }
+  }
+
+  /**
+   * Explicitly Initialize V2 Enterprise Services
+   * This ensures they are loaded, connected, and ready before traffic is accepted.
+   */
+  private static async initializeV2Services() {
+      // Import them to trigger instantiation (Singleton Pattern)
+      const { transactionalService } = await import('../services/v2/transactional.service');
+      const { deliveryService } = await import('../services/v2/delivery.core');
+      const { dataSyncService } = await import('../services/data-sync.service');
+      const { onboardingService } = await import('../services/onboarding.service');
+
+      // Optional: Run a health check or strictly typed initialization if methods exist
+      // e.g. await transactionalService.healthCheck(); 
+
+      return {
+          transactionServiceV2: transactionalService,
+          deliveryServiceV2: deliveryService,
+          dataSyncServiceV2: dataSyncService,
+          onboardingServiceV2: onboardingService
+      };
   }
 }
