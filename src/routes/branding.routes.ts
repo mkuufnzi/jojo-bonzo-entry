@@ -19,6 +19,7 @@ router.use(async (req, res, next) => {
 // Settings & Preview
 router.get('/', BrandingController.renderEditor);
 router.post('/update', BrandingController.updateSettings);
+router.post('/config', BrandingController.saveConfig);
 router.get('/preview', BrandingController.getPreview);
 router.post('/preview', BrandingController.getPreview);
 // AI Extraction

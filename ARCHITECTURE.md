@@ -1,79 +1,69 @@
-# System Architecture: Integration Config & n8n
+# Floovioo System Architecture
 
-This document explains the architecture for managing 3rd-party integrations and how creating a data pipeline with n8n fits into the system.
+> **Note**: For detailed technical specifications, database schemas, and API reference, please see [TECHNICAL_SPEC.md](./TECHNICAL_SPEC.md).
 
-## 1. Data-Driven Configuration
-Instead of hardcoding provider URLs and scopes in the codebase, we store them in the database.
+## 1. The "Branded House" Vision
+Floovioo is a multi-product Enterprise Platform designed to unify business automation under one brand identity.
 
-**Table:** `IntegrationDefinition`
-| Column | Type | Description |
-|--------|------|-------------|
-| `slug` | String | Unique identifier (e.g., `zoho`, `quickbooks`) |
-| `config` | JSON | Stores auth URLs, scopes, and environment variable mapping keys. |
+### The 4 Pillars
+*   **Transactional**: Financial document automation (Invoices, Quotes).
+*   **Sales**: Proposal generation and deal rooms.
+*   **Content**: Marketing asset creation.
+*   **Retention**: Dunning and support automation.
 
-**Example Config (`config` column):**
-```json
-{
-  "provider": "zoho",
-  "authUrl": "https://accounts.zoho.com/oauth/v2/auth",
-  "tokenUrl": "https://accounts.zoho.com/oauth/v2/token",
-  "scope": "ZohoBooks.invoices.READ",
-  "env": {
-    "clientId": "ZOHO_CLIENT_ID",
-    "clientSecret": "ZOHO_CLIENT_SECRET",
-    "redirectUri": "ZOHO_REDIRECT_URI"
-  }
-}
+---
+
+## 2. Core Patterns
+
+### 2.1 Modular Monolith
+The system is built as a single Express.js application (`src/app.ts`) but logical components are separated by "Services" (`src/services/`). 
+*   **Shared Core**: Auth, Billing, Logging, Integration.
+*   **Feature Modules**: Each product pillar is a set of Services + Routes.
+
+### 2.2 Filter-Dispatch-Sync (The "Brain")
+We do not hardcode complex business logic in Node.js. Instead, we use a delegation pattern:
+
+1.  **Filter (Node.js)**:
+    *   Ingests signals (`webhook.service.ts`).
+    *   Checks Entitlements (`quota.service.ts`, `subscription.service.ts`).
+    *   Loads Context (`Business`, `App`).
+2.  **Dispatch (n8n)**:
+    *   Sends a standardized "Envelope" to n8n Webhooks.
+    *   n8n executes the logic (e.g., "If Amount > $1k, add 'VIP' sticker").
+3.  **Sync (Node.js)**:
+    *   n8n calls back to `/api/internal/*` with results.
+    *   Node.js creates the final immutable record (`ProcessedDocument`).
+
+---
+
+## 3. Data Flow Diagram
+
+```mermaid
+graph TD
+    User((User/ERP)) -->|Webhook/Action| API[API Gateway / WebhookReceiver]
+    
+    subgraph "Level 1: Core Platform"
+        API --> Auth[Auth Service]
+        Auth --> Workflow[Workflow Service]
+        Workflow --> Quota[Quota Check]
+    end
+    
+    subgraph "Level 2: Engines"
+        Workflow -->|Dispatch| N8N[n8n Orchestrator]
+        
+        N8N -->|Request PDF| PDF[Brand Engine / Puppeteer]
+        N8N -->|Request Copy| AI[Revenue Engine / LLM]
+        
+        PDF -->|Return Buffer| N8N
+        AI -->|Return Text| N8N
+    end
+    
+    N8N -->|Sync Result| DB[(Postgres / ProcessedDocument)]
+    DB --> Dashboard[Dashboard UI]
 ```
-**Benefits:**
-- You can update scopes or URLs without redeploying code.
-- The UI handles any integration generically.
 
-## 2. Token Storage
-When a user connects, we store the credentials in the `Integration` table, linked to their `Business`.
-
-**Table:** `Integration`
-| Column | Type | Description |
-|--------|------|-------------|
-| `businessId` | UUID | The business that owns the connection. |
-| `provider` | String | Matches `IntegrationDefinition.slug` (e.g., `zoho`). |
-| `accessToken` | String | The short-lived token for API calls. |
-| `refreshToken` | String | The long-lived token used to get new access tokens. |
-| `metadata` | JSON | Extra data like `api_domain` or `realmId`. |
-
-## 3. n8n Integration Strategy
-Your n8n workflows need to fetch data (e.g., Invoices) on behalf of a specific business.
-
-### Option A: Database Query (Direct)
-n8n connects directly to your Postgres database to fetch the tokens.
-
-**Generic Workflow Logic:**
-1. **Trigger**: Webhook or Schedule.
-2. **Postgres Node**: Execute SQL:
-   ```sql
-   SELECT "accessToken", "refreshToken", "metadata" 
-   FROM "Integration" 
-   WHERE "businessId" = $json["businessId"] AND "provider" = 'zoho';
-   ```
-3. **HTTP Request Node**: Use the `accessToken` to call Zoho API.
-   - *Error Handling*: If 401 Unauthorized, use `refreshToken` to refresh, update DB, and retry.
-
-### Option B: Internal API (Recommended)
-Create a secure internal API endpoint in this app that n8n calls. This keeps encryption logic centralized.
-
-**Endpoint:** `GET /api/internal/integrations/:businessId/:provider`
-**Headers:** `x-internal-api-key: <your-secure-key>`
-**Response:**
-```json
-{
-  "accessToken": "...",
-  "apiDomain": "..."
-}
-```
-*(The backend handles token refreshing automatically before returning).*
-
-## 4. How to Add New Integrations
-1. Add rows to `IntegrationDefinition` (via Seeder or Admin UI).
-2. Add secrets to `.env`.
-3. The UI automatically renders the new tile.
-4. The generic Controller handles the OAuth flow using the JSON config.
+## 4. Key Infrastructure
+*   **App**: Node.js v18 (Express + TypeScript).
+*   **Queue**: BullMQ (Redis) for async PDF generation and heavy jobs.
+*   **Database**: PostgreSQL (Prisma ORM).
+*   **Browser**: Puppeteer (Headless Chrome) for rendering.

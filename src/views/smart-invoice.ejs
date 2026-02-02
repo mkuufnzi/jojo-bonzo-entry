@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #INV-2025-0847</title>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Georgia:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-gray-100 text-slate-800 font-sans" x-data="smartInvoice()">
+
+    <!-- BACKGROUND -->
+    <div class="fixed inset-0 pointer-events-none z-0" :style="'background: ' + theme.pattern"></div>
+
+    <div class="relative z-10 max-w-3xl mx-auto py-12 px-4">
+        
+        <!-- CARD -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            
+            <!-- HEADER -->
+            <div class="p-8 relative overflow-hidden text-white" :style="'background: ' + theme.gradient">
+                 <div class="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white bg-opacity-10"></div>
+                 <div class="flex justify-between items-start relative z-10">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl" x-text="theme.logo"></span>
+                        <div>
+                            <div class="text-xl font-bold tracking-wide" x-text="theme.name"></div>
+                            <div class="text-[10px] tracking-[0.15em] uppercase opacity-70" x-text="theme.tagline"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] uppercase tracking-widest opacity-60">Invoice</div>
+                        <div class="text-2xl font-bold">#INV-2025-0847</div>
+                        <div class="text-[11px] mt-1 opacity-60">Feb 1, 2025</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DETAILS -->
+            <div class="p-8">
+                 <div class="flex justify-between border-b pb-8 mb-8">
+                    <div>
+                        <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-50">Bill To</div>
+                        <div class="font-bold">Sarah Mitchell</div>
+                        <div class="text-xs text-gray-500">sarah.mitchell@email.com</div>
+                    </div>
+                    <div>
+                         <span class="px-3 py-1 rounded-full text-xs font-bold" 
+                               :style="'background: ' + theme.accent + '; color: ' + theme.primary">Paid ✓</span>
+                    </div>
+                </div>
+
+                <!-- ITEMS -->
+                <table class="w-full mb-8">
+                    <thead>
+                        <tr class="border-b-2" :style="'border-color: ' + theme.accent">
+                            <th class="text-left py-2 text-xs uppercase opacity-50">Item</th>
+                            <th class="text-right py-2 text-xs uppercase opacity-50">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b" x-for="item in items">
+                             <td class="py-4">
+                                 <div class="font-bold" x-text="item.name"></div>
+                                 <div class="text-xs text-gray-400" x-text="item.category"></div>
+                             </td>
+                             <td class="py-4 text-right" x-text="'$' + item.price"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- TOTALS -->
+                <div class="flex justify-end">
+                    <div class="w-1/2">
+                         <div class="flex justify-between text-sm py-1 border-t pt-4 font-bold text-lg">
+                             <span>Total</span>
+                             <span :style="'color: ' + theme.primary">$148.45</span>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPSELL MODULAR BLOCK -->
+        <div x-show="config.upsellEnabled" class="mt-8">
+             <div class="flex items-center justify-between mb-4">
+                 <h3 class="font-bold text-lg">Recommended for You</h3>
+                 <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">AI Selected</span>
+             </div>
+             <div class="grid grid-cols-2 gap-4">
+                 <template x-for="rec in recommendations" :key="rec.id">
+                     <div class="bg-white p-4 rounded-xl shadow-sm border border-transparent hover:shadow-md transition cursor-pointer"
+                          :class="addedItems.includes(rec.id) ? 'ring-2 ring-offset-1' : ''"
+                          :style="addedItems.includes(rec.id) ? 'ring-color: ' + theme.primary : ''">
+                         <div class="flex gap-3 mb-2">
+                             <div class="text-2xl" x-text="rec.img"></div>
+                             <div>
+                                 <div class="font-bold text-sm" x-text="rec.name"></div>
+                                 <div class="text-xs font-bold" :style="'color: ' + theme.primary" x-text="'$' + rec.price"></div>
+                             </div>
+                         </div>
+                         <button @click="toggleAdd(rec.id)" class="w-full py-2 rounded text-xs font-bold uppercase"
+                                 :style="addedItems.includes(rec.id) ? 'background: ' + theme.accent : 'background: ' + theme.light">
+                             <span x-text="addedItems.includes(rec.id) ? 'Added' : 'Add to Shipment'"></span>
+                         </button>
+                     </div>
+                 </template>
+             </div>
+        </div>
+
+    </div>
+
+    <script>
+        function smartInvoice() {
+            return {
+                // Injected by Server
+                theme: <%- JSON.stringify(branding.themeData || {}) %>,
+                config: <%- JSON.stringify(branding.config || { upsellEnabled: false }) %>,
+                
+                items: [
+                    { name: "Organic Matcha", price: 69.98, category: "Beverages" },
+                    { name: "Almond Butter", price: 38.97, category: "Spreads" }
+                ],
+                recommendations: [
+                    { id: 1, name: "Matcha Kit", price: 54.99, img: "🍵" },
+                    { id: 2, name: "MCT Oil", price: 22.99, img: "💧" }
+                ],
+                addedItems: [],
+                
+                toggleAdd(id) {
+                    if (this.addedItems.includes(id)) {
+                        this.addedItems = this.addedItems.filter(i => i !== id);
+                        // In real app: Call API to remove from order
+                    } else {
+                        this.addedItems.push(id);
+                        // In real app: Call API to update order
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

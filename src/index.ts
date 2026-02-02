@@ -33,6 +33,7 @@ import workflowsRoutes from './routes/workflows.routes';
 
 import adminRoutes from './routes/admin';
 import passport from './config/passport';
+import docRoutes from './routes/doc.routes';
 
 
 const app = express();
@@ -285,6 +286,7 @@ import businessRoutes from './routes/business.routes';
 app.use('/', landingRoutes);
 
 app.use('/auth', authRoutes);                   // Login, register, social auth
+app.use('/invoice', docRoutes);                 // Public Smart Invoice Viewer
 
 // Dashboard & App Routes - Protected + Onboarding Check
 // Dashboard & App Routes - Protected

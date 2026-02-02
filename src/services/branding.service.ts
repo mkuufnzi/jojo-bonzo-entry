@@ -379,7 +379,8 @@ export class BrandingService {
   validateConfig(data: any) {
       // Basic validation
       if (data.upsellConfig?.enabled && !data.upsellConfig.coupon) {
-          throw new Error('Coupon code is required when upsell is enabled');
+          // Warning only or allow empty for now
+          // throw new Error('Coupon code is required when upsell is enabled');
       }
       return true;
   }
