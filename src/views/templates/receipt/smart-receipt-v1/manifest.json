@@ -1,0 +1,39 @@
+{
+    "id": "smart_receipt_v1",
+    "name": "Smart Receipt",
+    "type": "RECEIPT",
+    "description": "Professional A4 receipt with loyalty points, review requests, referral program, and next-purchase incentives.",
+    "version": "1.0.0",
+    "features": [
+        {
+            "id": "loyalty_points",
+            "name": "Loyalty Points Balance",
+            "type": "toggle",
+            "defaultEnabled": true
+        },
+        {
+            "id": "next_purchase_discount",
+            "name": "Next Purchase Discount",
+            "type": "toggle",
+            "defaultEnabled": true
+        },
+        {
+            "id": "review_request",
+            "name": "Review Request CTA",
+            "type": "toggle",
+            "defaultEnabled": true
+        },
+        {
+            "id": "referral_program",
+            "name": "Referral Program",
+            "type": "toggle",
+            "defaultEnabled": false
+        },
+        {
+            "id": "customer_support",
+            "name": "Support Access",
+            "type": "toggle",
+            "defaultEnabled": true
+        }
+    ]
+}

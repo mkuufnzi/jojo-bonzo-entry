@@ -1,0 +1,174 @@
+<%- layout('layouts/dashboard-layout') -%>
+<div class="space-y-8">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Template Library</h1>
+            <p class="text-slate-500 mt-1 font-medium">Browse and configure your document designs.</p>
+        </div>
+        <div class="flex gap-3">
+             <!-- Actions -->
+        </div>
+    </div>
+
+    <!-- Active Template -->
+    <div class="bg-indigo-900 rounded-3xl p-8 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20 -mr-16 -mt-16"></div>
+        
+        <div class="relative z-10 flex items-start justify-between">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-800/50 border border-indigo-700/50 text-indigo-200 text-xs font-bold uppercase tracking-wider mb-4">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    Active Design
+                </div>
+                <% const active = templates.find(t => t.id === activeTemplateId) || templates[0]; %>
+                <h2 class="text-3xl font-black mb-2"><%= active.name %></h2>
+                <p class="text-indigo-200 max-w-xl text-lg"><%= active.description %></p>
+                
+                <div class="mt-8 flex gap-4">
+                    <a href="/dashboard/brand?templateId=<%= active.id %>" class="px-6 py-3 bg-white text-indigo-900 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        Edit Design
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Preview Mock (Simplistic) -->
+            <div class="hidden lg:block w-64 h-80 bg-white rounded-lg shadow-2xl opacity-90 transform rotate-3 border-4 border-white/20">
+                <div class="h-4 bg-slate-100 full w-full border-b border-slate-100 mb-4"></div>
+                <!-- Lines -->
+                <div class="space-y-3 px-4">
+                    <div class="h-2 bg-slate-100 w-3/4 rounded"></div>
+                    <div class="h-2 bg-slate-100 w-1/2 rounded"></div>
+                    <div class="h-24 bg-slate-50 w-full rounded mt-4 border border-slate-100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Library Layout -->
+    <div class="flex flex-col lg:flex-row gap-8" x-data="{ 
+        activeFilter: 'ALL',
+        activeType: 'ALL',
+        search: ''
+    }">
+        
+        <!-- Sidebar Filters -->
+        <div class="w-full lg:w-64 flex-shrink-0 space-y-8">
+            <!-- Search -->
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" x-model="search" placeholder="Search templates..." 
+                       class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+            </div>
+
+            <!-- Type Filter -->
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">Document Type</h3>
+                <div class="space-y-1">
+                    <button @click="activeType = 'ALL'" 
+                            :class="activeType === 'ALL' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'"
+                            class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between">
+                        All Templates
+                        <span class="text-xs opacity-50"><%= templates.length %></span>
+                    </button>
+                    <% ['INVOICE', 'RECEIPT', 'QUOTE', 'CREDIT_MEMO'].forEach(type => { 
+                        const count = templates.filter(t => t.type === type).length;
+                        if (count > 0) {
+                    %>
+                    <button @click="activeType = '<%= type %>'" 
+                            :class="activeType === '<%= type %>' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'"
+                            class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between">
+                        <%= type.charAt(0) + type.slice(1).toLowerCase().replace('_', ' ') %>s
+                        <span class="text-xs opacity-50"><%= count %></span>
+                    </button>
+                    <% } }); %>
+                </div>
+            </div>
+
+            <!-- Tags/Tone (Future) -->
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">Style & Tone</h3>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase rounded hover:bg-slate-200 cursor-pointer">Modern</span>
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase rounded hover:bg-slate-200 cursor-pointer">Classic</span>
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase rounded hover:bg-slate-200 cursor-pointer">Minimal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="flex-1">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                <% templates.forEach(t => { %>
+                    <div x-show="(activeType === 'ALL' || activeType === '<%= t.type %>') && ('<%= t.name %>'.toLowerCase().includes(search.toLowerCase()) || '<%= t.description %>'.toLowerCase().includes(search.toLowerCase()))"
+                         x-transition.duration.300ms
+                         class="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:border-indigo-200 transition-all duration-300 flex flex-col h-full">
+                        
+                        <!-- Preview Thumbnail -->
+                        <div class="aspect-[3/4] bg-slate-100 relative overflow-hidden group-hover:bg-indigo-50/10 transition-colors">
+                             <!-- Mock Preview Image based on Type -->
+                             <% 
+                                let previewIcon = 'file-text';
+                                if(t.type === 'INVOICE') previewIcon = 'receipt';
+                                if(t.type === 'RECEIPT') previewIcon = 'shopping-bag';
+                                if(t.type === 'QUOTE') previewIcon = 'briefcase';
+                             %>
+                             <div class="absolute inset-0 flex items-center justify-center">
+                                 <i data-lucide="<%= previewIcon %>" class="w-16 h-16 text-slate-300 group-hover:text-indigo-400 group-hover:scale-110 transition-all duration-500 transform"></i>
+                             </div>
+                             
+                             <!-- Overlay Actions -->
+                             <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 gap-3">
+                                 <a href="/dashboard/brand?templateId=<%= t.id %>" class="px-4 py-2 bg-white rounded-lg shadow-lg font-bold text-xs text-slate-900 hover:scale-105 transition-transform">
+                                     Preview
+                                 </a>
+                             </div>
+
+                             <% if (t.id === activeTemplateId) { %>
+                                <div class="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md">
+                                    ACTIVE
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <!-- Card Footer -->
+                        <div class="p-5 flex flex-col flex-1 border-t border-slate-100">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider"><%= t.type %></span>
+                                <span class="text-[10px] font-medium text-slate-400">v<%= t.version %></span>
+                            </div>
+                            <h4 class="text-base font-bold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors"><%= t.name %></h4>
+                            <p class="text-xs text-slate-500 line-clamp-2 mb-4 flex-1"><%= t.description %></p>
+                            
+                            <!-- Action Button -->
+                            <% if (t.id !== activeTemplateId) { %>
+                                <form action="/dashboard/templates/activate" method="POST">
+                                    <input type="hidden" name="templateId" value="<%= t.id %>">
+                                    <button type="submit" class="w-full py-2 rounded-lg border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
+                                        Activate Design
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <button disabled class="w-full py-2 rounded-lg bg-green-50 border border-green-100 text-green-600 text-xs font-bold cursor-default">
+                                    Selected
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+            
+            <!-- Empty State -->
+            <div x-show="document.querySelectorAll('.grid > div[x-show]:not([style*=\'display: none\'])').length === 0" class="text-center py-20" style="display: none;">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                    <i data-lucide="search-x" class="w-8 h-8 text-slate-300"></i>
+                </div>
+                <h3 class="text-slate-900 font-bold">No templates found</h3>
+                <p class="text-slate-500 text-sm">Try adjusting your search or filters.</p>
+            </div>
+        </div>
+    </div>
+
+</div>

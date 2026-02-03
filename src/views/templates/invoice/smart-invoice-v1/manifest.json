@@ -1,0 +1,11 @@
+{
+    "id": "smart_invoice_v1",
+    "name": "Smart Invoice (Default)",
+    "type": "INVOICE",
+    "tags": ["clean", "professional", "default"],
+    "features": [
+        { "id": "upsell", "name": "Upsell Widget", "type": "toggle", "default": true },
+        { "id": "banner", "name": "Promo Banner", "type": "toggle", "default": true }
+    ],
+    "author": "Floovioo"
+}

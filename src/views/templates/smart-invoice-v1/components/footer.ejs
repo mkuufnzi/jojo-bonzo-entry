@@ -1,0 +1,23 @@
+<!-- FOOTER -->
+<div class="mt-7 bg-white rounded-xl p-6 text-center shadow-sm font-sans">
+    <div class="text-lg" x-text="theme.logo"></div>
+    <div class="text-[13px] font-bold mt-1.5" :style="'color: ' + theme.text">Thank you for your order, Sarah!</div>
+    <div class="text-[11px] text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed">
+        You're earning <strong :style="'color: ' + theme.primary">47 loyalty points</strong> with this purchase.
+    </div>
+    
+    <div class="flex justify-center gap-2.5 mt-4 flex-wrap">
+        <button class="px-4 py-2 rounded-lg text-[11px] font-bold text-white border-0"
+                :style="'background: ' + theme.gradient">
+            <span x-text="addedItems.length > 0 ? 'Place Order (+$' + addedTotal.toFixed(2) + ')' : 'Browse Store'"></span>
+        </button>
+        <button class="px-4 py-2 rounded-lg text-[11px] font-bold bg-transparent border-2"
+                :style="'border-color: ' + theme.accent + '; color: ' + theme.primary">
+            Share & Earn
+        </button>
+    </div>
+</div>
+
+<div class="text-center mt-5 text-[9.5px] text-gray-400 font-sans">
+     Smart Invoice Engine v2.1 · Personalized recommendations · Brand-themed delivery
+</div>

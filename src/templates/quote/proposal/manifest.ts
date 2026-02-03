@@ -1,0 +1,21 @@
+export const ModernProposalManifest = {
+    id: "quote_proposal",
+    name: "Modern Proposal",
+    type: "QUOTE",
+    description: "High-impact proposal layout with cover page and pricing tables.",
+    version: "1.0.0",
+    features: [
+        {
+            id: "cover_page",
+            name: "Cover Page",
+            type: "toggle",
+            defaultEnabled: true
+        },
+        {
+            id: "signatures",
+            name: "Digital Signatures",
+            type: "toggle",
+            defaultEnabled: true
+        }
+    ]
+};

@@ -24,16 +24,21 @@ export class BrandingService {
       where: { businessId, isDefault: true }
     });
     
+    // Clean up incoming data to ensure proper JSON types
+    const components = data.components || {};
+
     if (existing) {
       return await (prisma as any).brandingProfile.update({
         where: { id: existing.id },
         data: {
           brandColors: data.brandColors,
           fontSettings: data.fontSettings,
-          logoUrl: data.logoUrl || existing.logoUrl, // Only update if new
+          logoUrl: data.logoUrl || existing.logoUrl,
           upsellConfig: data.upsellConfig,
           supportConfig: data.supportConfig,
-          templates: data.templates
+          templates: data.templates,
+          components: components, // New Field
+          activeTemplateId: data.activeTemplateId // New Field
         }
       });
     }
@@ -48,7 +53,9 @@ export class BrandingService {
         fontSettings: data.fontSettings,
         logoUrl: data.logoUrl,
         upsellConfig: data.upsellConfig || {},
-        supportConfig: data.supportConfig || {}
+        supportConfig: data.supportConfig || {},
+        components: components,
+        activeTemplateId: data.activeTemplateId || 'smart_invoice_v1'
       }
     });
   }

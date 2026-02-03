@@ -15,6 +15,7 @@ const transactionalGuard = requireServiceAccess('transactional-branding');
 
 router.get('/transactional', transactionalGuard, DashboardController.dashboardTransactional);
 router.get('/transactional/templates', transactionalGuard, DashboardController.dashboardTransactionalTemplates);
+router.get('/transactional/legacy-templates', transactionalGuard, DashboardController.dashboardTransactionalTemplatesLegacy);
 router.get('/transactional/api', transactionalGuard, DashboardController.dashboardTransactionalApi);
 router.get('/transactional/analytics', transactionalGuard, BusinessAnalyticsController.showOverview);
 router.get('/transactional/analytics/:integrationId', BusinessAnalyticsController.showIntegrationDetail);
@@ -32,5 +33,18 @@ router.get('/billing', DashboardController.billing);
 router.get('/subscription', DashboardController.subscription);
 router.get('/profile', DashboardController.profile);
 router.get('/settings', DashboardController.settings);
+
+import { BrandingController } from '../controllers/branding.controller';
+import { TemplateController } from '../controllers/template.controller';
+
+// ... existing imports ...
+
+// Brand / Template Routes
+router.get('/brand', BrandingController.renderEditor);
+router.post('/brand', BrandingController.updateSettings);
+
+// Template Registry
+router.get('/templates', TemplateController.listTemplates);
+router.post('/templates/activate', TemplateController.activateTemplate);
 
 export default router;

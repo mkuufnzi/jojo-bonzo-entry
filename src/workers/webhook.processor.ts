@@ -14,6 +14,10 @@ export const webhookProcessor = async (job: Job) => {
 
     try {
         // Cast to any to access internal logic for this refactor to avoid massive architectural changes
+
+        // TODO:
+        // USER -> IF THESE ARE THE GLOBAL WORKFLOWS, THEN THIS FILE IS TOO THIN FOR A REAL-WROLD ENTERPRISE APPLICATION
+        // WE NEED A MORE STRUCTURED IMPLEMENTATION HERE TO HANDLE 100S OF WORKFLOWS FROM ACROSS MULTIPLE FLOOVIOO SREVICES
         switch (eventType) {
             case 'customer.subscription.created':
             case 'customer.subscription.updated':

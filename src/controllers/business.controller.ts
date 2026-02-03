@@ -440,7 +440,11 @@ export class BusinessController {
 
         } catch (error: any) {
             console.error(`[BusinessController] OAuth Callback Failed for ${provider}:`, error);
-            res.status(500).send(`Failed to handle OAuth callback for ${provider}: ${error.message}`);
+            
+            // Redirect to wizard with error context instead of raw text
+            const errorType = error.message.includes('already connected') ? 'duplicate_connection' : 'oauth_failed';
+            const errorContext = encodeURIComponent(error.message);
+            res.redirect(`/onboarding/wizard?step=2&error=${errorType}&context=${errorContext}`);
         }
     }
 

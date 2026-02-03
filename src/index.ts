@@ -61,6 +61,10 @@ logger.info('------------------------------------------------');
 logger.info(`[Startup] APP_URL Configured as: '${config.APP_URL}'`);
 logger.info('------------------------------------------------');
 
+// Body Parsers
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 // Static Assets - Quick Handling (Before heavy middleware)
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/robots.txt', (req, res) => res.status(204).end());
@@ -452,4 +456,5 @@ server.on('error', (err) => {
 setInterval(() => {
   // logger.debug('Heartbeat');
 }, 10000);
+ 
  

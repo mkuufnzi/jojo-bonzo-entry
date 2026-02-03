@@ -1,6 +1,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
+import { integrationService } from '../services/integration.service';
+import { logger } from '../lib/logger';
 
 export class IntegrationController {
   
@@ -282,9 +284,11 @@ export class IntegrationController {
               provider,
               integration,
               integrationDefinition,
+              settings: (integration.settings as any) || { tables: [] },
               serviceConfig: serviceRecord?.config || {},
               title: `${integrationDefinition?.name} Settings`,
               activeService: 'integrations',
+              user: req.user || { email: 'user@example.com', name: 'User' },
               nonce: res.locals.nonce
           });
 
@@ -348,6 +352,40 @@ export class IntegrationController {
 
       } catch (error) {
           next(error);
+      }
+  }
+
+  /**
+   * POST /dashboard/connections/:provider/disconnect
+   * Disconnect an integration by provider
+   */
+  static async disconnect(req: Request, res: Response, next: NextFunction) {
+      try {
+          const { provider } = req.params;
+          const userId = req.user?.id || req.session.userId!;
+          const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
+          
+          if (!user?.businessId) {
+              return res.redirect('/dashboard/connections?error=no_business');
+          }
+          
+          // Find integration by provider
+          const integration = await prisma.integration.findFirst({
+              where: { businessId: user.businessId, provider }
+          });
+          
+          if (!integration) {
+              return res.redirect('/dashboard/connections?error=not_found');
+          }
+          
+          await integrationService.disconnectProvider(userId, integration.id);
+          logger.info({ userId, provider, integrationId: integration.id }, '[IntegrationController] Disconnected integration');
+          
+          // Redirect back to connections list
+          res.redirect('/dashboard/connections?disconnected=' + provider);
+      } catch (error: any) {
+          logger.error({ error }, '[IntegrationController] Disconnect failed');
+          res.redirect('/dashboard/connections?error=disconnect_failed');
       }
   }
 

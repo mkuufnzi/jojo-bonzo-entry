@@ -358,11 +358,23 @@ export class DashboardController {
     }
 
     static async dashboardTransactionalTemplates(req: Request, res: Response) {
+        // [V2 MIGRATION] This route is still used by legacy links, but UI links now point to /dashboard/brand
         const userId = (req.session as any).userId;
         const user = await prisma.user.findUnique({ where: { id: userId } });
         res.render('dashboard/services/templates', { 
             user, 
             title: 'Templates', 
+            activeService: 'transactional',
+            nonce: res.locals.nonce
+        });
+    }
+
+    static async dashboardTransactionalTemplatesLegacy(req: Request, res: Response) {
+        const userId = (req.session as any).userId;
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        res.render('dashboard/services/templates', { 
+            user, 
+            title: 'Legacy Templates', 
             activeService: 'transactional',
             nonce: res.locals.nonce
         });

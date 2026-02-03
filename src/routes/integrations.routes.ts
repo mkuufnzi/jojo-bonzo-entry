@@ -15,7 +15,7 @@ router.get('/:provider/preview', IntegrationController.previewData);
 
 // Actions
 router.post('/:provider/sync', IntegrationController.executeSync);
+router.post('/:provider/disconnect', IntegrationController.disconnect);
 // router.get('/:provider/connect', IntegrationsController.connect); // Handled by /api/integrations/:slug/connect now
-// router.post('/:id/disconnect', IntegrationsController.disconnect);
 
 export default router;

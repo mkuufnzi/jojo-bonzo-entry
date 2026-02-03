@@ -1,0 +1,22 @@
+{
+    "id": "invoice_classic",
+    "name": "Classic Invoice",
+    "type": "INVOICE",
+    "description": "Traditional serif layout suitable for legal and professional services.",
+    "version": "1.0.0",
+    "features": [
+        {
+            "id": "header",
+            "name": "Header",
+            "type": "toggle",
+            "defaultEnabled": true
+        },
+        {
+            "id": "watermark",
+            "name": "Background Watermark",
+            "type": "toggle",
+            "defaultEnabled": false,
+            "description": "Display company logo as a subtle watermark."
+        }
+    ]
+}

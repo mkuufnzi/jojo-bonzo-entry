@@ -1,4 +1,4 @@
-<%- layout('layouts/dashboard-layout') -%>
+<%- layout('layouts/dashboard-layout') %>
 
 <div class="px-6 py-8">
     
@@ -26,9 +26,12 @@
             <a href="/onboarding/api/integrations/<%= provider %>/connect" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-block">
                 Re-connect
             </a>
-            <button class="bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Disconnect
-            </button>
+            <form method="POST" action="/dashboard/connections/<%= provider %>/disconnect" 
+                  onsubmit="return confirm('Are you sure you want to disconnect <%= integrationDefinition.name %>? This action cannot be undone.');" class="inline">
+                <button type="submit" class="bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    Disconnect
+                </button>
+            </form>
         </div>
     </div>
 

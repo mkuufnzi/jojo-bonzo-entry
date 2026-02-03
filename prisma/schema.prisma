@@ -43,6 +43,7 @@ model User {
   business             Business?           @relation(fields: [businessId], references: [id])
   devices              UserDevice[]
   profile              UserProfile?
+  smartDocuments       SmartDocument[]
 }
 
 model Business {
@@ -178,6 +179,12 @@ model BrandingProfile {
   faviconUrl    String?
   brandColors   Json?
   fontSettings  Json?
+  
+  // Template Configuration
+  activeTemplateId String  @default("smart_invoice_v1")
+  components       Json?   // Stores feature states: { "header": { "enabled": true }, ... }
+  
+  // Legacy / Deprecated
   templates     Json?
   upsellConfig  Json?
   supportConfig Json?
@@ -643,6 +650,37 @@ enum OnboardingStatus {
 enum AccountType {
   INDIVIDUAL
   BUSINESS
+}
+
+
+model SmartDocument {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  
+  type            String   // 'INVOICE', 'RECEIPT', 'ESTIMATE'
+  status          String   @default("DRAFT") // 'DRAFT', 'GENERATED', 'SENT', 'VIEWED'
+  
+  // Identifying info
+  documentNumber  String
+  issuedAt        DateTime @default(now())
+  
+  // The Core Data (Line items, Customer info, Totals)
+  data            Json
+  
+  // The Visual Theme applied (Snapshot of branding at generation time)
+  theme           Json
+  
+  // Feature Configuration (Toggles for Upsells, Tutorials, etc.)
+  config          Json
+  
+  // Metadata for AI/System
+  metadata        Json?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, type])
 }
 
 // ===================================

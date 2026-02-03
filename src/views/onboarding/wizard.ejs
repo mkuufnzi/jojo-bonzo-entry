@@ -779,7 +779,29 @@ function onboardingWizard(initialData) {
             
             // Check for error query param
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('error') === 'business_required') {
+            const errorType = urlParams.get('error');
+            const errorContext = urlParams.get('context');
+            
+            if (errorType === 'duplicate_connection') {
+                // Show detailed error about which business has the connection
+                const message = errorContext 
+                    ? decodeURIComponent(errorContext) 
+                    : 'This account is already connected to another Floovioo business.';
+                this.notify(message, 'error');
+                // Clean URL
+                url.searchParams.delete('error');
+                url.searchParams.delete('context');
+                window.history.replaceState({}, '', url.toString());
+            } else if (errorType === 'oauth_failed') {
+                const message = errorContext 
+                    ? decodeURIComponent(errorContext) 
+                    : 'Connection failed. Please try again.';
+                this.notify(message, 'error');
+                // Clean URL
+                url.searchParams.delete('error');
+                url.searchParams.delete('context');
+                window.history.replaceState({}, '', url.toString());
+            } else if (errorType === 'business_required') {
                 this.notify('Please save your business profile before connecting integrations.', 'error');
                 // Clean URL
                 window.history.replaceState({}, '', '/onboarding/wizard?step=1');

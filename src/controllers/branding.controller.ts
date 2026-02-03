@@ -1,92 +1,286 @@
-
 import { Request, Response } from 'express';
-import { BrandingService } from '../services/branding.service';
 import { brandingService } from '../services/branding.service';
+import { templateRegistry } from '../services/template-registry.service';
+import { SmartInvoice } from '../models/smart-documents/smart-invoice.model';
+import { smartDocumentService } from '../services/smart-document.service';
 import { logger } from '../lib/logger';
 import prisma from '../lib/prisma';
+import { SmartInvoiceManifest } from '../templates/smart-invoice-v1/manifest';
 
 export class BrandingController {
   
   static async renderEditor(req: Request, res: Response) {
-      const userId = req.session.userId!;
-      
-      // Get current profile
-      const profile = await brandingService.getProfile(userId);
-      
-      // If no profile exists yet, create a default one implicitly or handle in view
-      // But getProfile returns null if no business, so check that
-      if (!profile) {
-           // Maybe redirect to onboarding if no business?
-           // For now assuming business exists from middleware check
-           // If business exists but no profile, service.getProfile returns defaults if create logic triggers or null
-           // Actually service.getProfile currently returns default/first. 
-           // If null, it means no business linked for user usually.
-      }
-
-      res.render('dashboard/brand', {
-          title: 'Brand Identity',
-          activeService: 'transactional',
-          profile: profile || {},
-          user: res.locals.user,
-          nonce: res.locals.nonce
-      });
-  }
-
-  static async updateSettings(req: Request, res: Response) {
-      const userId = req.session.userId!;
-      const data = req.body;
-      
       try {
-          brandingService.validateConfig(data);
-          await brandingService.updateProfile(userId, data);
+          const userId = (req as any).session?.userId;
+          if (!userId) return res.redirect('/auth/login');
           
-          if (req.xhr || req.headers.accept?.includes('json')) {
-              return res.json({ success: true });
-          }
-          res.redirect('/dashboard/brand?success=Branding updated');
+          // Get current profile
+          const profile = await brandingService.getProfile(userId);
+          
+          // Get Requested Template ID from query or default
+          // Support both 'template' and 'templateId' params
+          const requestedId = (req.query.templateId as string) || (req.query.template as string);
+          
+          // If no specific template requested, use the active one from profile, or default
+          const templateId = requestedId || profile?.activeTemplateId || 'smart_invoice_v1';
+                    const manifest = templateRegistry.getById(templateId);
+
+            if (!manifest) {
+                logger.warn({ templateId, userId }, 'Template manifest not found');
+                return res.status(404).send(`Template not found: ${templateId}`);
+            }
+
+            logger.info({ 
+                templateId, 
+                featureCount: manifest.features?.length, 
+                userId 
+            }, 'Rendering Brand Editor');
+
+            res.render('dashboard/brand', {
+              title: `Configure ${manifest.name}`,
+              activeService: 'transactional', // update activeService to match sidebar
+              profile: profile || {},
+              manifest,
+              features: manifest.features, // Pass features for view
+              user: res.locals.user,
+              nonce: res.locals.nonce
+          });
       } catch (error: any) {
-          if (req.xhr || req.headers.accept?.includes('json')) {
-            return res.status(400).json({ error: error.message });
-          }
-          res.redirect(`/dashboard/brand?error=${encodeURIComponent(error.message)}`);
+          logger.error({ error, userId: (req as any).session?.userId }, 'Error rendering brand editor');
+          res.status(500).send('Error loading brand configuration');
       }
   }
 
-  static async getPreview(req: Request, res: Response) {
+
+
+    static async getPreview(req: Request, res: Response) {
       const isPost = req.method === 'POST';
+      const nonce = res.locals.nonce; // Extract nonce from locals
       let html = '';
       
       try {
         if (isPost) {
-            // Preview ephemeral/unsaved data (Not yet implemented in service fully, service currently fetches by ID)
-            // But we can create a temporary profile object or mock logic in service.
-            // For MVP, lets just Save then Preview? No, that defeats "preview".
-            // Let's modify service.generatePreview to accept overrides OR we do simple construction here.
-            // Actually, best pattern: Service accepts (profileId, overrides?)
-            // Or simpler: We save the profile first via AJAX on change, then request preview. 
-            // "Live Preview" usually implies saving state or sending state to render.
-            // Let's assume we Save on 'Apply' and Preview fetches saved.
-            // OR: We send the config to `generatePreviewFromConfig`.
-            // Let's stick to: Update Profile -> Fetch Preview for now to speed up.
+            // Preview ephemeral/unsaved data (from Request Body)
+            // This enables "Live Preview" without saving to DB first
             
-            // Wait, standard `generatePreview` fetches from DB.
-            // Let's just return the service's generation.
+            // Construct Theme Data from body
+            const themeData: any = {
+                name: req.body.theme?.name || 'Preview',
+                primary: req.body.brandColors?.primary || '#6366F1',
+                secondary: req.body.brandColors?.secondary || '#8B5CF6',
+                accent: req.body.brandColors?.accent || '#C4B5FD', // Optional if provided
+                light: '#F5F3FF', // Static for now
+                text: '#1e293b',
+                pattern: '', 
+                logo: req.body.logoUrl || '⚡', // Use Emoji if no URL for now, or text
+                tagline: req.body.tagline || 'Power your workflow.',
+                gradient: `linear-gradient(135deg, ${req.body.brandColors?.primary || '#6366F1'} 0%, ${req.body.brandColors?.secondary || '#8B5CF6'} 100%)`
+            };
+
+            const config: any = {
+                 upsellEnabled: req.body.upsellConfig?.enabled === 'true' || req.body.upsellConfig?.enabled === true,
+                 contentConfig: {} // Add more if needed
+            };
+
+            // Get Manifest - Dynamic (Support GET via query params)
+            const templateId = req.body.templateId || (req.query.templateId as string) || 'smart_invoice_v1';
+            const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1')!;
+
+            // Calculate Components State based on Manifest & Input
+            const components: any = {};
+                  
+            // If body has direct components config (New UI), use it
+            if (req.body.components) {
+                 // console.log('[DEBUG] getPreview: req.body.components present:', JSON.stringify(req.body.components, null, 2));
+                 manifest.features.forEach(f => {
+                     // Check if passed in body
+                     const passed = req.body.components[f.id];
+                     if (passed) {
+                         components[f.id] = { enabled: passed.enabled === true || passed.enabled === 'true' };
+                     } else {
+                         // Default enabled if not explicit
+                         components[f.id] = { enabled: f.defaultEnabled ?? true };
+                     }
+                 });
+            } else {
+                 // console.log('[DEBUG] getPreview: No req.body.components, using legacy/defaults');
+                 // Fallback / Legacy behavior
+                 manifest.features.forEach(f => {
+                      components[f.id] = { enabled: f.defaultEnabled ?? true };
+                      // Override for upsell legacy config if it exists
+                      if (f.id === 'product_recommendations' && config.upsellEnabled !== undefined) {
+                          components[f.id].enabled = config.upsellEnabled;
+                      }
+                 });
+            }
+
+            // Instantiate SmartInvoice Model with MOCK DATA
+            const smartInvoice = new SmartInvoice(
+                'PREVIEW-123',
+                themeData,
+                config,
+                [], // Items
+                [], // Recs
+                [], // Tutorials
+                [], // Nurture
+                {}
+            );
+
+            // Mock Data Injection for Thermal Receipt (if applicable)
+            if (manifest.type === 'RECEIPT') {
+                 smartInvoice.addItem({ id: 1, name: 'Premium Matcha', sku: 'MAT-001', qty: 1, price: 34.50, img: '', category: 'Bev' });
+                 smartInvoice.addItem({ id: 2, name: 'Whisk Set', sku: 'ACC-004', qty: 1, price: 29.99, img: '', category: 'Acc' });
+            } else {
+                 // Classic Invoice / Smart Invoice Mock Items
+                 smartInvoice.addItem({ id: 1, name: 'Premium Matcha Powder', sku: 'MAT-001', qty: 2, price: 34.50, img: '🍵', category: 'Beverages' });
+                 smartInvoice.addItem({ id: 2, name: 'Ceremonial Whisk Set', sku: 'ACC-004', qty: 1, price: 29.99, img: '🎋', category: 'Accessories' });
+                 smartInvoice.addItem({ id: 3, name: 'Glass Serving Bowl', sku: 'GLS-102', qty: 4, price: 18.00, img: '🥣', category: 'Kitchenware' });
+            }
+
+            // Determine View Path from Manifest
+            const viewPath = manifest?.viewPath || 'templates/invoice/smart-invoice-v1/index';
             
-            // If the user wants to preview *pending* changes, we'd need to pass the body to the service.
-            // Let's update the service signature in next step if needed, but for now assuming we save first.
-             const userId = req.session.userId!;
-             const profile = await brandingService.getProfile(userId);
-             const type = req.query.type as string || 'invoice';
-             if (profile) {
-                 html = await brandingService.generatePreview(profile.id, type);
-             }
+            html = await new Promise((resolve, reject) => {
+                 res.render(viewPath, {
+                     branding: { 
+                        themeData: smartInvoice.theme,
+                        config: smartInvoice.config,
+                        components,
+                        model: smartInvoice.toJSON().data,
+                        manifest // Pass manifest for context if needed
+                     },
+                     nonce, 
+                     layout: false 
+                 }, (err, str) => {
+                     if (err) reject(err);
+                     else resolve(str);
+                 });
+            });
+
         } else {
-             // GET: Fetch existing
-             const userId = req.session.userId!;
+             // GET: Fetch existing details from DB
+             const userId = (req as any).session.userId;
              const profile = await brandingService.getProfile(userId);
-             const type = req.query.type as string || 'invoice';
+             
              if (profile) {
-                 html = await brandingService.generatePreview(profile.id, type);
+                  const metadata: any = profile.metadata || {};
+                  const colors: any = profile.brandColors || {};
+                  
+                  const themeData = {
+                      name: profile.name || 'Your Brand',
+                      primary: colors.primary || '#6366F1',
+                      secondary: colors.secondary || '#8B5CF6',
+                      accent: colors.accent || '#C4B5FD',
+                      light: '#F5F3FF',
+                      text: '#1e293b',
+                      pattern: '',
+                      logo: profile.logoUrl || '⚡',
+                      tagline: 'Power your workflow.',
+                      gradient: `linear-gradient(135deg, ${colors.primary || '#6366F1'} 0%, ${colors.secondary || '#8B5CF6'} 100%)`
+                  };
+
+                  const config = {
+                      upsellEnabled: (profile.upsellConfig as any)?.active || false,
+                      contentConfig: metadata.contentConfig || {}
+                  };
+
+                  // Calculate Components State based on Manifest & Profile
+                  const savedComponents = (profile as any).components || {}; // Access the new JSON field
+
+                  const components: any = {};
+                  SmartInvoiceManifest.features.forEach(c => {
+                        // 1. Start with Default
+                        let isEnabled = c.defaultEnabled ?? true;
+
+                        // 2. Override with Saved State if present
+                        if (savedComponents[c.id]) {
+                            isEnabled = savedComponents[c.id].enabled;
+                        }
+
+                        // 3. (Legacy) partial override for upsell if old config exists & no new component state
+                        if (c.id === 'product_recommendations' && config.upsellEnabled !== undefined && !savedComponents[c.id]) {
+                             isEnabled = config.upsellEnabled;
+                        }
+
+                        components[c.id] = { enabled: isEnabled };
+                  });
+
+            // Instantiate SmartInvoice Model to ensure consistent structure
+            // In a POST (Preview), we don't save to DB yet, but we use the Model logic
+            const smartInvoice = new SmartInvoice(
+                'preview-id',
+                themeData,
+                config,
+                [], // No items for basic preview unless mocked
+                [], // No recs yet
+                [], // No tutorials yet
+                [], // No nurture yet
+                {}
+            );
+
+            // Mock Data for Preview if empty - USER REQUEST: 5 Sample Products
+            if (smartInvoice.items.length === 0) {
+                 smartInvoice.addItem({ id: 1, name: 'Premium Matcha Powder', sku: 'MAT-001', qty: 2, price: 34.50, img: '🍵', category: 'Beverages' });
+                 smartInvoice.addItem({ id: 2, name: 'Ceremonial Whisk Set', sku: 'ACC-004', qty: 1, price: 29.99, img: '🎋', category: 'Accessories' });
+                 smartInvoice.addItem({ id: 3, name: 'Glass Serving Bowl', sku: 'GLS-102', qty: 4, price: 18.00, img: '🥣', category: 'Kitchenware' });
+                 smartInvoice.addItem({ id: 4, name: 'Organic Almond Milk', sku: 'BVG-202', qty: 6, price: 4.50, img: '🥛', category: 'Dairy' });
+                 smartInvoice.addItem({ id: 5, name: 'Subscription Box: Zen', sku: 'SUB-ZEN', qty: 1, price: 45.00, img: '📦', category: 'Subscription' });
+            }
+
+            if (smartInvoice.recommendations.length === 0) {
+                 smartInvoice.recommendations = [
+                    { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "🎌", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },
+                    { id: 102, name: "MCT Oil Drops", price: 22.99, img: "💧", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" },
+                    { id: 103, name: "Organic Honey (Raw)", price: 18.99, img: "🍯", reason: "Enhances your Almond Butter smoothies", match: 81, badge: "New", sales: "4.9 ★ rated" },
+                    { id: 104, name: "Bamboo Reusable Cups", price: 16.99, img: "🎋", reason: "Complete your matcha ritual sustainably", match: 76, badge: "Eco Pick", sales: "Save the planet" }
+                 ];
+            }
+
+
+
+            // Determine View Path based on Manifest
+            // Priorities: 1. Query Param (Live Preview Selection) 2. DB Metadata (Saved State) 3. Default
+            const requestedId = (req.query.templateId as string);
+            const savedId = metadata?.id; // From fetched profile
+            const targetId = requestedId || savedId || 'smart_invoice_v1';
+            
+            const pManifest = templateRegistry.getById(targetId);
+            const viewPath = pManifest?.viewPath || 'templates/invoice/smart-invoice-v1/index';
+            
+            // Log for debugging
+            logger.info({ targetId, viewPath, requestedId }, 'Preview View Lookup');
+
+            html = await new Promise((resolve, reject) => {
+                 res.render(viewPath, {
+                     branding: { 
+                        themeData: smartInvoice.theme,
+                        config: smartInvoice.config,
+                        components,
+                        // Pass the calculated model data
+                        model: smartInvoice.toJSON().data 
+                     },
+                     nonce, 
+                     layout: false 
+                 }, (err, str) => {
+                     if (err) {
+                         console.error('Render Error:', err);
+                         reject(err);
+                     }
+                     else resolve(str);
+                 });
+            });
+             } else {
+                 // Return default
+                 html = await new Promise((resolve, reject) => {
+                    res.render('smart-invoice', {
+                        branding: { themeData: {}, config: {} },
+                        nonce, // Pass nonce
+                        layout: false
+                    }, (err, str) => {
+                        if (err) reject(err);
+                        else resolve(str);
+                    });
+                 });
              }
         }
         
@@ -101,7 +295,7 @@ export class BrandingController {
           return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      const userId = req.session.userId!;
+      const userId = (req as any).session.userId;
       
       try {
           const result = await brandingService.extractFromPdf(userId, req.file);
@@ -110,6 +304,40 @@ export class BrandingController {
       logger.error({ err: error }, 'Brand extraction failed');
       res.status(500).json({ error: error.message });
     }
+  }
+
+  static async updateSettings(req: Request, res: Response) {
+      const userId = (req as any).session.userId;
+      
+      try {
+          const accept = req.headers.accept || '';
+          const isJson = req.xhr || accept.indexOf('json') > -1;
+          
+          logger.info({ userId, body: req.body, isJson }, 'updateSettings called');
+
+          await brandingService.updateProfile(userId, {
+              ...req.body,
+              // Explicitly capture components
+              components: req.body.components 
+          });
+
+          if (isJson) {
+              return res.json({ success: true });
+          }
+
+          // Redirect back to the requesting template page if possible, or default
+          const referer = req.get('Referer') || '/dashboard/brand';
+          res.redirect(referer);
+      } catch (error: any) {
+          logger.error({ error, userId }, 'Failed to update brand settings');
+          
+          const accept = req.headers.accept || '';
+          if (req.xhr || accept.indexOf('json') > -1) {
+              return res.status(400).json({ error: error.message });
+          }
+          
+          res.redirect('/dashboard/brand?error=update_failed');
+      }
   }
 
   /**
@@ -166,7 +394,7 @@ export class BrandingController {
 
   static async saveConfig(req: Request, res: Response) {
       try {
-          const userId = req.session.userId!;
+          const userId = (req as any).session.userId;
           const { theme, upsellConfig, contentConfig, brandColors } = req.body; // Expecting resolved colors
 
           // Basic validation or mapping

@@ -1,0 +1,23 @@
+<!-- Header Banner -->
+<div class="relative p-8 overflow-hidden" :style="'background: ' + theme.gradient">
+    <!-- Decorative Circles -->
+    <div class="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10"></div>
+    <div class="absolute -bottom-5 left-16 w-24 h-24 rounded-full bg-white/5"></div>
+    
+    <div class="relative flex justify-between items-start text-white z-10">
+        <div>
+            <div class="flex items-center gap-3 mb-1.5">
+                <span class="text-3xl" x-text="theme.logo"></span>
+                <div>
+                    <div class="text-xl font-bold tracking-wide font-sans" x-text="theme.name"></div>
+                    <div class="text-[10.5px] tracking-[0.15em] uppercase opacity-70 font-sans" x-text="theme.tagline"></div>
+                </div>
+            </div>
+        </div>
+        <div class="text-right">
+            <div class="text-[10px] uppercase tracking-[0.15em] opacity-60 font-sans">Invoice</div>
+            <div class="text-2xl font-bold font-sans">#INV-2025-0847</div>
+            <div class="text-[10.5px] mt-0.5 opacity-60 font-sans">Feb 1, 2025</div>
+        </div>
+    </div>
+</div>

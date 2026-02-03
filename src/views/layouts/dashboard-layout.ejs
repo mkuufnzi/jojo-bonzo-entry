@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %> | Floovioo Enterprise</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/enterprise-theme.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="//unpkg.com/alpinejs" defer nonce="<%= nonce %>"></script>
     <style nonce="<%= nonce %>">
@@ -13,6 +12,7 @@
     </style>
 </head>
 <body class="h-full font-sans antialiased text-slate-600" x-data="{ sidebarOpen: false, aiPanelOpen: false }">
+    <% const currentService = typeof activeService !== 'undefined' ? activeService : 'hub'; %>
 
     <!-- Mobile sidebar backdrop -->
     <div x-show="sidebarOpen" x-cloak class="fixed inset-0 z-40 flex md:hidden" role="dialog" aria-modal="true">
@@ -31,7 +31,7 @@
             </div>
             <div class="mt-5 flex-1 h-0 overflow-y-auto">
                 <nav class="px-2 space-y-1">
-                    <%- include('../partials/dashboard/sidebar-items', { activeService: activeService }) %>
+                    <%- include('../partials/dashboard/sidebar-items', { activeService: currentService }) %>
                 </nav>
             </div>
         </div>
@@ -47,7 +47,7 @@
             </div>
             <div class="flex-1 flex flex-col overflow-y-auto">
                 <nav class="flex-1 px-2 py-4 space-y-1">
-                     <%- include('../partials/dashboard/sidebar-items', { activeService: activeService }) %>
+                     <%- include('../partials/dashboard/sidebar-items', { activeService: currentService }) %>
                 </nav>
             </div>
             <a href="/dashboard/profile" class="flex-shrink-0 flex border-t border-slate-800 p-4 hover:bg-slate-800 transition-colors group">

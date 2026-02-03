@@ -1,0 +1,47 @@
+<!-- SUPPORT / TUTORIALS -->
+<div class="mt-7">
+     <div class="mb-3">
+         <div class="text-[13px] font-bold font-sans" :style="'color: ' + theme.text">📚 Get More From Your Products</div>
+         <div class="text-[10px] text-gray-400 font-sans">Tutorials & recipes matched to your order</div>
+     </div>
+     
+     <div class="flex flex-col gap-2.5 font-sans">
+         <template x-for="tut in tutorials" :key="tut.id">
+             <div class="bg-white rounded-xl shadow-sm border transition-all overflow-hidden"
+                  :style="'border-color: ' + (expandedTutorial === tut.id ? theme.accent : 'transparent')">
+                 
+                 <!-- Header -->
+                 <div class="flex items-center gap-3 p-3.5 cursor-pointer" @click="expandedTutorial = expandedTutorial === tut.id ? null : tut.id">
+                     <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0" :style="'background: ' + theme.light" x-text="tut.thumb"></div>
+                     <div class="flex-1">
+                         <div class="flex items-center gap-1.5">
+                             <span class="text-[12px] font-semibold" :style="'color: ' + theme.text" x-text="tut.title"></span>
+                             <span class="text-[8.5px] font-bold uppercase px-1.5 py-0.5 rounded"
+                                   :style="tut.type === 'recipe' ? 'background: #FEF3C7; color: #D97706' : 'background: ' + theme.light + '; color: ' + theme.primary"
+                                   x-text="tut.type"></span>
+                         </div>
+                         <div class="text-[10px] text-gray-400 mt-0.5">
+                             For: <span x-text="tut.forProduct"></span> · ⏱ <span x-text="tut.duration"></span> read
+                         </div>
+                     </div>
+                     <div class="text-gray-400 transition-transform text-sm font-bold" :class="expandedTutorial === tut.id ? 'rotate-90' : ''">›</div>
+                 </div>
+
+                 <!-- Details -->
+                 <div x-show="expandedTutorial === tut.id" class="border-t px-4 py-3" :style="'background: ' + theme.light + '; border-color: ' + theme.light">
+                     <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 opacity-60" :style="'color: ' + theme.muted">Steps</div>
+                     <template x-for="(step, i) in tut.steps" :key="i">
+                         <div class="flex items-start gap-2.5 mb-2 last:mb-0">
+                             <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" :style="'background: ' + theme.primary" x-text="i + 1"></div>
+                             <span class="text-[11.5px] leading-snug pt-0.5" :style="'color: ' + theme.text" x-text="step"></span>
+                         </div>
+                     </template>
+                     <button class="w-full mt-3 py-1.5 rounded-lg text-[11px] font-semibold border bg-transparent"
+                             :style="'border-color: ' + theme.primary + '; color: ' + theme.primary">
+                         📺 Watch Full Tutorial →
+                     </button>
+                 </div>
+             </div>
+         </template>
+     </div>
+</div>

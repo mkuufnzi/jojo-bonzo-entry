@@ -1,0 +1,52 @@
+<!-- RECOMMENDATIONS (UPSELL) -->
+<div class="mt-6">
+    <div class="flex justify-between items-center mb-3">
+        <div>
+            <div class="text-[13px] font-bold font-sans" :style="'color: ' + theme.text">🎯 Recommended for You</div>
+            <div class="text-[10px] text-gray-400 font-sans">Personalized based on your order & purchase history</div>
+        </div>
+        <span class="text-[9px] font-bold px-2 py-0.5 rounded-lg font-sans" :style="'color: ' + theme.primary + '; background: ' + theme.light">AI-Powered</span>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-3">
+        <template x-for="rec in recommendations" :key="rec.id">
+            <div class="bg-white rounded-xl p-4 shadow-sm border-2 transition-all relative overflow-hidden font-sans group"
+                 :style="'border-color: ' + (addedItems.includes(rec.id) ? theme.primary : 'transparent')">
+                 
+                 <!-- Match Score -->
+                 <div class="absolute top-2.5 right-2.5 w-9 h-9">
+                     <svg width="36" height="36" viewBox="0 0 38 38">
+                        <circle cx="19" cy="19" r="15" fill="none" stroke="#F3F4F6" stroke-width="4"></circle>
+                        <circle cx="19" cy="19" r="15" fill="none" :stroke="theme.primary" stroke-width="4"
+                                :stroke-dasharray="(rec.match / 100) * 94.25 + ' 94.25'" stroke-linecap="round" transform="rotate(-90 19 19)"></circle>
+                        <text x="19" y="23" text-anchor="middle" font-size="9" font-weight="bold" :fill="theme.primary" x-text="rec.match + '%'"></text>
+                     </svg>
+                 </div>
+
+                <div class="flex items-center gap-2.5 mb-2">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl bg-gray-50" :style="'background: ' + theme.light" x-text="rec.img"></div>
+                    <div class="flex-1 pr-6">
+                        <div class="text-[12px] font-bold leading-tight" :style="'color: ' + theme.text" x-text="rec.name"></div>
+                        <div class="text-[11px] font-bold mt-0.5" :style="'color: ' + theme.primary" x-text="'$' + rec.price.toFixed(2)"></div>
+                    </div>
+                </div>
+
+                <div class="text-[10px] text-gray-500 bg-gray-50 rounded-md px-2 py-1.5 mb-2 leading-snug">
+                    💡 <span x-text="rec.reason"></span>
+                </div>
+
+                <div class="flex justify-between items-center mb-2.5">
+                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md uppercase" 
+                          :style="'background: ' + theme.accent + '; color: ' + theme.primary" x-text="rec.badge"></span>
+                    <span class="text-[9px] text-gray-400" x-text="rec.sales"></span>
+                </div>
+
+                <button @click="toggleAdd(rec.id)" 
+                        class="w-full py-2 rounded-lg text-[11px] font-bold transition-all border-none cursor-pointer"
+                        :style="addedItems.includes(rec.id) ? 'background: ' + theme.accent + '; color: ' + theme.primary : 'background: ' + theme.gradient + '; color: #fff'">
+                    <span x-text="addedItems.includes(rec.id) ? '✓ Added' : '+ Add to Order'"></span>
+                </button>
+            </div>
+        </template>
+    </div>
+</div>
