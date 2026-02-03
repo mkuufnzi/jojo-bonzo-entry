@@ -171,15 +171,16 @@
                 
                 <!-- Scaled Iframe Wrapper -->
                 <!-- We want the container to fill the column width, and height to match A4 aspect ratio relative to that width -->
-                <div id="previewContainer" class="relative w-full bg-gray-100 overflow-hidden" style="aspect-ratio: 210/297;">
-                    <!-- Iframe is fixed at A4 Resolution (794px x 1123px at 96 DPI) -->
-                    <!-- We use JS to scale it down to fit the container -->
-                    <!-- Removed allow-same-origin to prevent iframe from navigating parent (framebusting) -->
+                <!-- Scaled Iframe Wrapper -->
+                <!-- Container height is set via JS based on scaled content height -->
+                <div id="previewContainer" class="relative w-full bg-gray-100 overflow-hidden origin-top-left transition-all duration-200">
+                    <!-- Iframe is fixed at A4 Width (794px). Height adjusts to content. -->
+                    <!-- Added allow-same-origin to enable height detection (auto-resize) -->
                     <iframe id="previewFrame" 
                             src="/dashboard/brand/preview?templateId=<%= manifest.id %>&type=<%= manifest.type %>" 
-                            class="absolute top-0 left-0 origin-top-left border-none shadow-lg"
-                            style="width: 794px; height: 1123px; transform: scale(0.4);" 
-                            sandbox="allow-scripts allow-forms"></iframe>
+                            class="absolute top-0 left-0 origin-top-left border-none shadow-lg bg-white"
+                            style="width: 794px; min-height: 1123px;" 
+                            sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
                 </div>
             </div>
             <p class="text-center text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-4">
@@ -571,17 +572,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- SCALED PREVIEW LOGIC ---
+    // --- SCALED PREVIEW LOGIC ---
     function updatePreviewScale() {
         const container = document.getElementById('previewContainer');
         const iframe = document.getElementById('previewFrame');
         if (!container || !iframe) return;
 
+        // Force A4 Ratio on Content Check
+        const targetWidth = 794; 
         const containerWidth = container.offsetWidth;
-        const targetWidth = 794; // A4 Width in Pixels (96 DPI)
         const scale = containerWidth / targetWidth;
-
+        
         iframe.style.transform = `scale(${scale})`;
-        // Also update height to match aspect ratio if needed, but we rely on fixed 1448px height being scaled down
+
+        // Re-check height if content is already loaded
+        resizePreviewHeight();
+    }
+
+    function resizePreviewHeight() {
+        const container = document.getElementById('previewContainer');
+        const iframe = document.getElementById('previewFrame');
+        if (!container || !iframe) return;
+        
+        try {
+            // Try to get content height
+            // Note: This requires allow-same-origin in sandbox
+            const doc = iframe.contentWindow?.document;
+            if(doc && doc.body) {
+                const contentHeight = Math.max(doc.body.scrollHeight, 1123); // Min A4 Height
+                
+                // 1. Set Iframe Height to full content
+                iframe.style.height = contentHeight + 'px';
+                
+                // 2. Set Container Height to Scaled Height
+                const targetWidth = 794;
+                const containerWidth = container.offsetWidth;
+                const scale = containerWidth / targetWidth;
+                
+                container.style.height = (contentHeight * scale) + 'px';
+            }
+        } catch(e) {
+            // Fallback if blocked
+            // console.warn('Preview resize blocked:', e);
+            // Default to A4 ratio
+             const targetWidth = 794;
+             const containerWidth = container.offsetWidth;
+             container.style.height = ((1123/794) * containerWidth) + 'px'; 
+        }
+    }
+
+    // Listen for iframe load to adjust height
+    const iframe = document.getElementById('previewFrame');
+    if(iframe) {
+        iframe.onload = resizePreviewHeight;
     }
 
     // Run on load and resize
