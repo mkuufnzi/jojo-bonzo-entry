@@ -172,18 +172,18 @@
                 <!-- Scaled Iframe Wrapper -->
                 <!-- We want the container to fill the column width, and height to match A4 aspect ratio relative to that width -->
                 <div id="previewContainer" class="relative w-full bg-gray-100 overflow-hidden" style="aspect-ratio: 210/297;">
-                    <!-- Iframe is fixed at specific desktop resolution (e.g. 1024px width) -->
+                    <!-- Iframe is fixed at A4 Resolution (794px x 1123px at 96 DPI) -->
                     <!-- We use JS to scale it down to fit the container -->
                     <!-- Removed allow-same-origin to prevent iframe from navigating parent (framebusting) -->
                     <iframe id="previewFrame" 
                             src="/dashboard/brand/preview?templateId=<%= manifest.id %>&type=<%= manifest.type %>" 
                             class="absolute top-0 left-0 origin-top-left border-none shadow-lg"
-                            style="width: 1024px; height: 1448px; transform: scale(0.4);" 
+                            style="width: 794px; height: 1123px; transform: scale(0.4);" 
                             sandbox="allow-scripts allow-forms"></iframe>
                 </div>
             </div>
             <p class="text-center text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-4">
-                Desktop View • Scaled to Fit
+                A4 Printable View • Scaled to Fit
             </p>
         </div>
     </div>
@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container || !iframe) return;
 
         const containerWidth = container.offsetWidth;
-        const targetWidth = 1024; // Desktop standard
+        const targetWidth = 794; // A4 Width in Pixels (96 DPI)
         const scale = containerWidth / targetWidth;
 
         iframe.style.transform = `scale(${scale})`;
