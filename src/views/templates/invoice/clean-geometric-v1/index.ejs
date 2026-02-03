@@ -69,9 +69,10 @@
 <body class="w-full h-full min-h-[1123px] bg-white text-slate-800 selection:bg-cyan-100" x-data="invoiceData()">
 
     <!-- Rigid A4 Container: 794px x 1123px -->
-    <!-- Do not use percentage widths or aspect-ratio here. The dashboard previewer handles the scaling of this fixed box. -->
-    <div class="flex flex-row relative mx-auto shadow-2xl overflow-hidden bg-white" 
-         style="width: 794px; height: 1123px; min-width: 794px; min-height: 1123px;"> 
+    <!-- Rigid A4 Container: 794px Width, Infinite Height -->
+    <!-- Width is locked to A4 (794px). Height grows with content. -->
+    <div class="flex flex-row relative mx-auto shadow-2xl bg-white" 
+         style="width: 794px; min-height: 1123px; height: auto;"> 
         <!-- Fixed A4 Dimensions -->
 
         <!-- Left Sidebar (Clean - No Text) -->
