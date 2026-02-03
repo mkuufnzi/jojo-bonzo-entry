@@ -1,0 +1,37 @@
+<style>
+    .nurture-section {
+        margin: 0 40px 30px 40px;
+        background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+    }
+    .cta-button {
+        display: inline-block;
+        padding: 10px 30px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        color: var(--secondary-color);
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 13px;
+        margin-top: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+</style>
+
+<div class="nurture-section">
+    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center text-2xl mb-3 text-white shadow-sm" 
+         style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%)">
+        💎
+    </div>
+    <h3 class="font-bold text-lg brand-font" style="color: var(--secondary-color)">Join the VIP Club</h3>
+    <p class="text-sm text-gray-500 mt-1 max-w-sm mx-auto">
+        Unlock free shipping, <strong>20% off</strong> future orders, and exclusive access to new releases.
+    </p>
+    <a href="#" class="cta-button brand-font" @click.prevent="alert('VIP Join Flow Triggered')">
+        Activate VIP Status
+    </a>
+</div>

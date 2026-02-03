@@ -1,0 +1,25 @@
+<style>
+    .invoice-footer {
+        background: var(--secondary-color);
+        color: white;
+        padding: 25px 40px;
+        font-size: 13px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+</style>
+
+<div class="invoice-footer">
+    <div class="flex gap-6 opacity-80">
+        <div>
+            <span class="block text-[10px] uppercase tracking-wider opacity-60">Website</span>
+            <span class="font-medium"><%= branding.profile?.website || 'www.example.com' %></span>
+        </div>
+        <div>
+            <span class="block text-[10px] uppercase tracking-wider opacity-60">Email</span>
+            <span class="font-medium"><%= branding.profile?.email || 'support@example.com' %></span>
+        </div>
+    </div>
+    <div class="text-xs opacity-60">
+        Thank you for your business!
+    </div>
+</div>

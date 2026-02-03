@@ -248,7 +248,51 @@ export class BrandingService {
       return await (prisma as any).userTemplate.findUnique({ where: { id } });
   }
 
-  async updateUserTemplate(id: string, data: { htmlContent: string }) {
+  /**
+   * Clones a standard template into a customized UserTemplate.
+   * This is the entry point for "Document Specific" configurations.
+   */
+  async cloneTemplate(userId: string, sourceId: string, name?: string) {
+      const user = await (prisma as any).user.findUnique({ where: { id: userId }, select: { businessId: true } });
+      if (!user?.businessId) throw new Error('User does not belong to a business');
+      
+      // 1. Get Source Manifest
+      // We need to access the registry. For now, we'll lazily require it to avoid circular deps if any, 
+      // or improved dependency injection later.
+      const { templateRegistry } = require('./template-registry.service');
+      const manifest = templateRegistry.getById(sourceId);
+      
+      if (!manifest) {
+          throw new Error(`Template ${sourceId} not found`);
+      }
+
+      // 2. Prepare Config Defaults from Manifest
+      const initialComponents: any = {};
+      if (manifest.features) {
+          manifest.features.forEach((f: any) => {
+              initialComponents[f.id] = { enabled: f.defaultEnabled ?? true };
+          });
+      }
+
+      // 3. Create UserTemplate
+      return await (prisma as any).userTemplate.create({
+          data: {
+              businessId: user.businessId,
+              name: name || `${manifest.name} (Custom)`,
+              documentType: manifest.type,
+              baseTemplateId: sourceId,
+              source: 'system', // 'system' means it relies on the filesystem view, but has DB config
+              config: {
+                  components: initialComponents,
+                  theme: {} // Can store specific theme overrides here later
+              },
+              isDefault: false
+          }
+      });
+  }
+
+  async updateUserTemplate(id: string, data: any) {
+      // Logic generic enough for both html updates and config updates
       return await (prisma as any).userTemplate.update({
           where: { id },
           data

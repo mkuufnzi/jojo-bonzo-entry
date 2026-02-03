@@ -102,7 +102,7 @@
         <div class="flex-1">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                 <% templates.forEach(t => { %>
-                    <div x-show="(activeType === 'ALL' || activeType === '<%= t.type %>') && ('<%= t.name %>'.toLowerCase().includes(search.toLowerCase()) || '<%= t.description %>'.toLowerCase().includes(search.toLowerCase()))"
+                    <div x-show="(activeType === 'ALL' || activeType === '<%= t.type %>') && ('<%= t.name %>'.toLowerCase().includes(search.toLowerCase()) || '<%= t.description.replace(/'/g, "\\\'") %>'.toLowerCase().includes(search.toLowerCase()))"
                          x-transition.duration.300ms
                          class="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:border-indigo-200 transition-all duration-300 flex flex-col h-full">
                         

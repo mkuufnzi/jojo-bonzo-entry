@@ -36,7 +36,7 @@
             <%- include('./components/line_items') %>
 
             <!-- Debug: Components Keys: <%= Object.keys(branding.components || {}).join(',') %> -->
-            <% if (branding.components?.recommendations?.enabled || branding.components?.product_recommendations?.enabled) { %>
+            <% if (branding.components?.product_recommendations?.enabled) { %>
                 <%- include('./components/upsell') %>
             <% } %>
 
@@ -74,6 +74,7 @@
         window.INVOICE_DATA = {
             theme: <%- JSON.stringify(branding.themeData || {}) %>,
             config: <%- JSON.stringify(branding.config || {}) %>,
+            components: <%- JSON.stringify(branding.components || {}) %>,
             items: <%- JSON.stringify((branding.model?.items?.length) ? branding.model.items : []) %>,
             recommendations: <%- JSON.stringify((branding.model?.recommendations?.length) ? branding.model.recommendations : [
                 { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "🎌", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },

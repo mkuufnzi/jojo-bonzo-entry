@@ -366,7 +366,7 @@ export class IntegrationController {
           const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
           
           if (!user?.businessId) {
-              return res.redirect('/dashboard/connections?error=no_business');
+              return res.redirect('/dashboard/apps?error=no_business');
           }
           
           // Find integration by provider
@@ -375,17 +375,17 @@ export class IntegrationController {
           });
           
           if (!integration) {
-              return res.redirect('/dashboard/connections?error=not_found');
+              return res.redirect('/dashboard/apps?error=not_found');
           }
           
           await integrationService.disconnectProvider(userId, integration.id);
           logger.info({ userId, provider, integrationId: integration.id }, '[IntegrationController] Disconnected integration');
           
           // Redirect back to connections list
-          res.redirect('/dashboard/connections?disconnected=' + provider);
+          res.redirect('/dashboard/apps?disconnected=' + provider);
       } catch (error: any) {
           logger.error({ error }, '[IntegrationController] Disconnect failed');
-          res.redirect('/dashboard/connections?error=disconnect_failed');
+          res.redirect('/dashboard/apps?error=disconnect_failed');
       }
   }
 

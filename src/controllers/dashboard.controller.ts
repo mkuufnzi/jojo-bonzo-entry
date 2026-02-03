@@ -118,7 +118,7 @@ export class DashboardController {
         
         // 1. Fetch Real Blueprints (UserTemplates)
         const activeBlueprints = business ? await prisma.userTemplate.findMany({
-            where: { businessId: business.id, status: 'active' },
+            where: { businessId: business.id },
             orderBy: { updatedAt: 'desc' }
         }) : [];
 

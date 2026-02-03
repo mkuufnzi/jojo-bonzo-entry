@@ -29,7 +29,7 @@
                 Configuration
             </h3>
             
-            <form action="/dashboard/brand/update" method="POST" id="brandForm" class="space-y-10">
+            <form id="brandForm" class="space-y-10">
                 
                  <!-- Active Template -->
                  <div>
@@ -40,8 +40,8 @@
                         </h2>
                     </div>
 
-                    <!-- Template ID Hidden Input (Defaulting to 'smart_invoice_v1' for now) -->
-                    <input type="hidden" name="templates[invoice]" id="invoiceTemplateId" value="smart_invoice_v1">
+                    <!-- Template ID Hidden Input -->
+                    <input type="hidden" name="activeTemplateId" id="invoiceTemplateId" value="<%= manifest.id %>">
 
                      <div class="grid grid-cols-1">
                         <div class="border-2 border-indigo-500 bg-indigo-50/20 rounded-xl p-4 flex items-center gap-4 cursor-default relative overflow-hidden">
@@ -68,6 +68,8 @@
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- Template Features Widget -->
                 <div>
@@ -136,10 +138,11 @@
                 <!-- End of Configuration Widgets -->
 
                 <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">
-                    <button type="button" id="refreshBtn" class="px-6 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 uppercase tracking-widest hover:bg-slate-50 transition-all">
+                    <button type="button" id="refreshBtn" onclick="refreshPreview()" class="px-6 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 uppercase tracking-widest hover:bg-slate-50 transition-all">
                         Refresh Preview
                     </button>
-                    <button type="submit" class="px-8 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 hover:shadow-lg transition-all shadow-md">
+                    <!-- IMPORTANT: preventDefault in onsubmit is crucial to avoid double submission -->
+                    <button type="button" onclick="saveAndRefresh()" class="px-8 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 hover:shadow-lg transition-all shadow-md">
                         Save Changes
                     </button>
                 </div>
@@ -156,7 +159,7 @@
                              <div class="w-3 h-3 rounded-full bg-amber-500"></div>
                              <div class="w-3 h-3 rounded-full bg-green-500"></div>
                          </div>
-                         <span class="ml-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Live Preview</span>
+                         <span class="ml-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Document Preview</span>
                     </div>
                     <select id="previewTypeSelect" class="bg-slate-800 text-slate-300 text-xs font-bold uppercase border border-slate-600 rounded px-2 py-1 outline-none focus:border-blue-500">
                         <option value="invoice" <%= manifest.type === 'INVOICE' ? 'selected' : '' %>>Invoice</option>
@@ -165,13 +168,22 @@
                         <option value="credit_memo" <%= manifest.type === 'CREDIT_MEMO' ? 'selected' : '' %>>Credit Memo</option>
                     </select>
                 </div>
-                <!-- Iframe Wrapper for Aspect Ratio -->
-                <div class="relative w-full aspect-[1/1.4] bg-white">
-                    <iframe id="previewFrame" src="/dashboard/brand/preview?templateId=<%= manifest.id %>&type=<%= manifest.type %>" class="absolute inset-0 w-full h-full" sandbox="allow-same-origin allow-scripts allow-forms"></iframe>
+                
+                <!-- Scaled Iframe Wrapper -->
+                <!-- We want the container to fill the column width, and height to match A4 aspect ratio relative to that width -->
+                <div id="previewContainer" class="relative w-full bg-gray-100 overflow-hidden" style="aspect-ratio: 210/297;">
+                    <!-- Iframe is fixed at specific desktop resolution (e.g. 1024px width) -->
+                    <!-- We use JS to scale it down to fit the container -->
+                    <!-- Removed allow-same-origin to prevent iframe from navigating parent (framebusting) -->
+                    <iframe id="previewFrame" 
+                            src="/dashboard/brand/preview?templateId=<%= manifest.id %>&type=<%= manifest.type %>" 
+                            class="absolute top-0 left-0 origin-top-left border-none shadow-lg"
+                            style="width: 1024px; height: 1448px; transform: scale(0.4);" 
+                            sandbox="allow-scripts allow-forms"></iframe>
                 </div>
             </div>
             <p class="text-center text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-4">
-                Changes may require a save to reflect in preview
+                Desktop View • Scaled to Fit
             </p>
         </div>
     </div>
@@ -239,6 +251,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
     const form = document.getElementById('brandForm');
+    if(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            console.log('Form submission intercepted');
+        });
+    }
     const previewFrame = document.getElementById('previewFrame');
     const saveBtn = document.querySelector('button[type="submit"]'); // Define globally for this scope
 
@@ -426,13 +444,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // The visual identity (colors/fonts) is deprecated/moved to Theme settings (not here).
             // The manifesto drives what "components" (or features) are active.
             
+            activeTemplateId: document.getElementById('invoiceTemplateId').value, // CRITICAL: Tell backend WHICH template
             components, // { [featureId]: { enabled: true/false } }
             
             // Legacy/Fallback for any direct profile props if needed, but for now we are clean.
         };
 
         try {
-            const response = await fetch('/dashboard/brand/update', {
+            const response = await fetch('/dashboard/brand/settings?format=json', { // Explicitly request JSON to prevent redirect logic
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -550,5 +569,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if(typeSelect) {
         typeSelect.addEventListener('change', refreshPreview);
     }
+
+    // --- SCALED PREVIEW LOGIC ---
+    function updatePreviewScale() {
+        const container = document.getElementById('previewContainer');
+        const iframe = document.getElementById('previewFrame');
+        if (!container || !iframe) return;
+
+        const containerWidth = container.offsetWidth;
+        const targetWidth = 1024; // Desktop standard
+        const scale = containerWidth / targetWidth;
+
+        iframe.style.transform = `scale(${scale})`;
+        // Also update height to match aspect ratio if needed, but we rely on fixed 1448px height being scaled down
+    }
+
+    // Run on load and resize
+    updatePreviewScale();
+    window.addEventListener('resize', updatePreviewScale);
+    
+    // --- URL PERSISTENCE ---
+    // Ensure if user refreshes, they stay on this template
+    const currentTemplateId = document.getElementById('invoiceTemplateId').value;
+    if (currentTemplateId) {
+        const url = new URL(window.location);
+        url.searchParams.set('templateId', currentTemplateId);
+        window.history.replaceState({}, '', url);
+    }
+
 });
 </script>

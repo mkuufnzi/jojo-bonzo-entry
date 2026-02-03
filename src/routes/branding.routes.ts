@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import express from 'express';
 import multer from 'multer';
 import { BrandingController } from '../controllers/branding.controller';
 
@@ -16,10 +16,18 @@ router.use(async (req, res, next) => {
     }
 });
 
+// Feature Toggle / Config Updates
+router.post('/settings', BrandingController.updateSettings);
+router.post('/config', BrandingController.saveConfig); // Keeping this as it was not explicitly removed, just reordered/renamed in the snippet
+
+// Enterprise Template - Clone/Duplicate
+router.post('/templates/clone', BrandingController.cloneTemplate);
+
+// File Uploads
+router.post('/upload-logo', upload.single('logo'), BrandingController.uploadLogo);
+
 // Settings & Preview
 router.get('/', BrandingController.renderEditor);
-router.post('/update', BrandingController.updateSettings);
-router.post('/config', BrandingController.saveConfig);
 router.get('/preview', BrandingController.getPreview);
 router.post('/preview', BrandingController.getPreview);
 // AI Extraction

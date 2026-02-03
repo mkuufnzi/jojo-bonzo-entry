@@ -1,0 +1,71 @@
+<style>
+    .invoice-title-section {
+        background: white;
+        padding: 30px 40px;
+        border-bottom: 3px solid var(--primary-color);
+    }
+    .invoice-title {
+        font-size: 36px; /* Compacted */
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .customer-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        padding: 30px 40px;
+        background: #FAFAFA;
+    }
+    .meta-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #666;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="invoice-title-section">
+    <div class="flex justify-between items-start">
+        <div>
+            <div class="invoice-title brand-font">INVOICE</div>
+            <p class="text-sm text-gray-500 mt-1">
+                Reference: #<%= branding.model?.id || 'INV-001' %>
+            </p>
+        </div>
+        <div class="text-right">
+            <div class="meta-label">Total Amount</div>
+            <div class="text-3xl font-bold brand-font" style="color: var(--secondary-color)">
+                $<%= (branding.model?.total || 0).toFixed(2) %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="customer-grid">
+    <div>
+        <h3 class="font-bold text-lg mb-3 brand-font" style="color: var(--secondary-color)">Billed To</h3>
+        <p class="font-bold text-gray-800"><%= branding.model?.customerName || 'Valued Customer' %></p>
+        <p class="text-sm text-gray-600"><%= branding.model?.customerEmail || 'customer@example.com' %></p>
+        <% if (branding.model?.customerAddress) { %>
+            <p class="text-sm text-gray-600 mt-1"><%= branding.model.customerAddress %></p>
+        <% } %>
+    </div>
+    <div class="text-right sm:text-left">
+        <h3 class="font-bold text-lg mb-3 brand-font" style="color: var(--secondary-color)">Details</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <div class="meta-label">Issued</div>
+                <div class="text-sm font-medium"><%= new Date().toLocaleDateString() %></div>
+            </div>
+            <div>
+                <div class="meta-label">Due Date</div>
+                <div class="text-sm font-medium"><%= new Date(Date.now() + 12096e5).toLocaleDateString() %></div>
+            </div>
+        </div>
+    </div>
+</div>

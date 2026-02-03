@@ -1,0 +1,69 @@
+<style>
+    .recommendations-section {
+        padding: 30px 40px;
+        background: white;
+        border-top: 3px solid var(--primary-color);
+    }
+    .rec-card {
+        background: #FAFAFA;
+        border: 1px solid #E5E5E5;
+        border-radius: 12px;
+        padding: 15px;
+        transition: transform 0.2s;
+    }
+    .rec-card:hover { transform: translateY(-3px); border-color: var(--primary-color); }
+    .add-btn {
+        background: var(--secondary-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 10px;
+        transition: background 0.2s;
+    }
+    .add-btn:hover { background: var(--accent-color); }
+    
+    .match-bar { height: 4px; background: #E5E5E5; border-radius: 2px; overflow: hidden; margin-top: 4px; }
+    .match-fill { height: 100%; background: var(--success); }
+</style>
+
+<div class="recommendations-section">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style="background: var(--primary-color); color: var(--secondary-color)">🎯</div>
+        <div>
+            <h3 class="font-bold text-lg brand-font" style="color: var(--secondary-color)">Recommended For You</h3>
+            <p class="text-xs text-gray-500">Based on your recent purchases</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Alpine Loop over Logic -->
+        <template x-for="rec in window.INVOICE_DATA.recommendations" :key="rec.id">
+            <div class="rec-card">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-bold text-white px-2 py-0.5 rounded-full" 
+                          style="background: var(--accent-color)" 
+                          x-text="rec.badge || 'Recommended'"></span>
+                </div>
+                <div class="font-bold text-gray-800 text-sm mb-1" x-text="rec.name"></div>
+                
+                <div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                    <span>Match:</span>
+                    <div class="flex-1 match-bar">
+                        <div class="match-fill" :style="'width: ' + (rec.match || 80) + '%'"></div>
+                    </div>
+                    <span x-text="(rec.match || 80) + '%'"></span>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="font-bold text-lg" x-text="'$' + rec.price.toFixed(2)"></span>
+                </div>
+                <button class="add-btn" @click="addRecommendation(rec.id)">
+                    Add to Cart
+                </button>
+            </div>
+        </template>
+    </div>
+</div>

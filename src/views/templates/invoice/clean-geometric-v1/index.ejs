@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700;800;900&display=swap');
+
+        :root {
+            /* 
+               Design Match:
+               Primary: #00bcd4 (Cyan) for Sidebar
+               Secondary: #1a237e (Dark Navy) for Text/Headers
+               Accent: #ff9800 (Orange) for Geometric Elements
+            */
+            --primary: <%= branding.theme.primary || '#00bdd6' %>; 
+            --secondary: <%= branding.theme.secondary || '#0f172a' %>; 
+            --accent: <%= branding.theme.accent || '#fd9c0a' %>;
+            --text-main: var(--secondary);
+            --font-main: 'Jost', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--text-main);
+            background: #e2e8f0; /* Darker bg for preview contrast */
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+    </style>
+    <script nonce="<%= nonce %>">
+        function invoiceData() {
+            return {
+                customer: {
+                    name: 'DILUC STEINER',
+                    address: '8901 Marmalade Road, New York, NY 10012'
+                },
+                items: <%- JSON.stringify(branding.model.items && branding.model.items.length > 0 ? branding.model.items : []) %>,
+                get subtotal() {
+                    return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                },
+                get tax() {
+                    return this.subtotal * 0.10;
+                },
+                get total() {
+                    return this.subtotal + this.tax;
+                },
+                formatCurrency(value) {
+                    if(value === undefined || value === null) return '$0.00';
+                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+                },
+                init() {
+                    if(this.items.length === 0) {
+                        // Default Data from Image
+                        this.items = [
+                            { name: 'Creative Strategy Session', price: 500, qty: 1 },
+                            { name: 'Logo Design & Branding', price: 900, qty: 1 },
+                            { name: 'Social Media Assets', price: 100, qty: 1 }
+                        ];
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="w-full h-full min-h-[1123px] bg-white text-slate-800 selection:bg-cyan-100" x-data="invoiceData()">
+
+    <div class="flex flex-row h-full min-h-[1123px] relative mx-auto shadow-2xl overflow-hidden bg-white" style="max-width: 794px; width: 100%; aspect-ratio: 210/297;"> 
+        <!-- Fixed A4 Dimensions -->
+
+        <!-- Left Sidebar (Clean - No Text) -->
+        <% if (branding.components?.sidebar?.enabled !== false) { %>
+        <aside class="relative h-full flex-shrink-0 z-10" style="width: 80px; background-color: var(--primary);">
+             <!-- Sidebar Geometry -->
+            <div class="absolute top-0 left-0 w-full h-48 bg-accent z-20" 
+                 style="background-color: var(--accent); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 35%);">
+            </div>
+
+            <!-- Logo (In Sidebar) -->
+            <div class="absolute top-12 left-8 z-30">
+               <% if (branding.theme.logo && branding.theme.logo !== '⚡') { %>
+                   <img src="<%= branding.theme.logo %>" class="w-32 h-auto object-contain brightness-0 invert" alt="Logo">
+               <% } else { %>
+                  <!-- Geometric Logo Placeholder -->
+                  <div class="relative w-16 h-16 opacity-90">
+                      <div class="absolute top-0 left-0 w-8 h-8 bg-white/90" style="clip-path: polygon(100% 0, 0% 100%, 100% 100%);"></div>
+                      <div class="absolute top-0 right-0 w-8 h-8 bg-white/70" style="clip-path: polygon(0 0, 0% 100%, 100% 100%);"></div>
+                      <div class="absolute bottom-0 left-0 w-8 h-8 bg-white/50" style="clip-path: polygon(100% 0, 0 0, 100% 100%);"></div>
+                  </div>
+               <% } %>
+            </div>
+        </aside>
+        <% } %>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col relative px-16 py-16 pl-24"> <!-- Increased left padding since sidebar is narrower or just for spacing -->
+            
+            <!-- Company Name Header -->
+            <div class="mb-20">
+                 <h1 class="text-4xl font-black uppercase text-secondary tracking-tight leading-none" style="color: var(--secondary);">
+                    <%= branding.theme.name || 'TYNHK' %><br/>
+                    <%= branding.theme.tagline || 'UNLIMITED' %>
+                 </h1>
+                 <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-500 mt-2">Creative Company</p>
+            </div>
+
+            <!-- HUGE INVOICE TITLE -->
+            <div class="flex justify-end mb-16">
+                <h2 class="text-[5rem] font-black uppercase text-secondary tracking-tighter leading-none" 
+                    style="color: var(--secondary);">
+                    INVOICE
+                </h2>
+            </div>
+
+            <!-- Details Grid -->
+            <% if (branding.components?.header_details?.enabled !== false) { %>
+            <div class="flex justify-between items-start mb-16">
+                
+                <!-- Invoice To -->
+                <div class="w-1/3">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900 mb-2">Invoice To :</p>
+                    <h3 class="text-2xl font-black text-secondary uppercase leading-none mb-1" x-text="customer.name" style="color: var(--secondary);">
+                        DILUC STEINER
+                    </h3>
+                     <!-- Thick Underline -->
+                    <div class="w-12 h-1.5 bg-secondary my-3" style="background-color: var(--secondary);"></div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider" x-text="customer.address">
+                         123 Mondstadt Lane
+                    </p>
+                </div>
+
+                <!-- Date / Invoice No -->
+                <div class="w-1/3 text-center">
+                    <div class="inline-block text-left text-xs uppercase font-bold text-slate-900 space-y-4">
+                        <div class="flex gap-4">
+                             <span class="w-24 text-right">Date :</span>
+                             <span class="text-slate-600"><%= branding.model.date || '12/07/2021' %></span>
+                        </div>
+                        <div class="flex gap-4">
+                             <span class="w-24 text-right">Invoice No :</span>
+                             <span class="text-slate-600"><%= branding.model.invoiceNumber || '123456789' %></span>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Total Due Top -->
+                 <div class="w-1/3 text-right">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900 mb-2">Total Due :</p>
+                    <h3 class="text-2xl font-black text-secondary tracking-tight" x-text="formatCurrency(total)" style="color: var(--secondary);">
+                        USD: $ 1,500
+                    </h3>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Table -->
+            <% if (branding.components?.line_items?.enabled !== false) { %>
+            <div class="w-full mb-8">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-white" style="background-color: var(--secondary);">
+                            <th class="py-4 px-6 text-left font-bold uppercase text-sm tracking-widest w-[45%]">Description</th>
+                            <th class="py-4 px-4 text-center font-bold uppercase text-sm tracking-widest">Qty</th>
+                            <th class="py-4 px-4 text-center font-bold uppercase text-sm tracking-widest">Price</th>
+                            <th class="py-4 px-6 text-right font-bold uppercase text-sm tracking-widest">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-600 text-sm font-semibold">
+                        <template x-for="(item, index) in items" :key="index">
+                            <tr :class="index % 2 === 0 ? 'bg-slate-100' : 'bg-white'"> 
+                                <td class="py-4 px-6" x-text="item.name"></td>
+                                <td class="py-4 px-4 text-center" x-text="item.qty"></td>
+                                <td class="py-4 px-4 text-center" x-text="formatCurrency(item.price)"></td>
+                                <td class="py-4 px-6 text-right font-bold text-slate-800" x-text="formatCurrency(item.price * item.qty)"></td>
+                            </tr>
+                        </template>
+                         <template x-if="items.length < 3">
+                            <tr class="bg-gray-100 h-12"><td colspan="4"></td></tr>
+                         </template>
+                         <template x-if="items.length < 2">
+                            <tr class="bg-white h-12"><td colspan="4"></td></tr>
+                         </template>
+                    </tbody>
+                </table>
+            </div>
+            <% } %>
+            
+            <!-- Horizontal Divider -->
+            <div class="w-full border-t border-slate-300 my-8"></div>
+
+             <!-- Footer Section: Payment (Left) & Totals/Sig (Right) -->
+             <div class="flex items-start justify-between mt-auto mb-16">
+                
+                <% if (branding.components?.payment_info?.enabled !== false) { %>
+                <!-- Payment Footer (Left) -->
+                 <div class="w-1/3 text-slate-600">
+                    <h4 class="font-bold text-secondary text-sm mb-2" style="color: var(--primary);">Payment Method</h4> <!-- Primary Color Title -->
+                    <p class="font-bold text-sm text-slate-700 mb-1">Bank Transfer</p>
+                    <p class="text-xs font-bold text-slate-500 italic mb-0.5">Bank Name : Reallygreatsite</p>
+                    <p class="text-xs font-bold text-slate-500 italic">Account No : 1234567890</p>
+                 </div>
+                 <% } else { %>
+                 <div class="w-1/3"></div> <!-- Spacer to keep alignments if payment info hidden -->
+                 <% } %>
+
+                 <!-- Totals (Right) -->
+                 <div class="w-1/2 flex flex-col items-end">
+                     
+                     <% if (branding.components?.totals?.enabled !== false) { %>
+                     <div class="w-64 space-y-2 mb-6 text-right">
+                         <div class="flex justify-between text-xs font-bold uppercase text-slate-900 tracking-wider">
+                             <span class="w-24">Sub-total :</span>
+                             <span x-text="formatCurrency(subtotal)"></span>
+                         </div>
+                         <div class="flex justify-between text-xs font-bold uppercase text-slate-900 tracking-wider">
+                             <span class="w-24">Tax :</span>
+                             <span x-text="formatCurrency(tax)"></span>
+                         </div>
+                     </div>
+    
+                     <!-- Total Box -->
+                     <div class="w-64 py-3 px-6 text-white flex justify-between items-center shadow-lg" 
+                          style="background-color: var(--secondary);">
+                         <span class="font-bold uppercase tracking-widest text-sm">Total :</span>
+                         <span class="font-bold text-xl" x-text="formatCurrency(total)"></span>
+                     </div>
+                     <% } %>
+                     
+                     <% if (branding.components?.footer_signature?.enabled !== false) { %>
+                     <!-- Signature -->
+                     <div class="mt-16 text-center w-48 self-end mr-8"> <!-- Increased margin top for spacing -->
+                         <p class="font-semibold text-secondary mb-0.5" style="color: var(--primary);">Diluc Steiner</p> <!-- Signature Name might be secondary or primary? Ref seems dark. -->
+                         <p class="text-[10px] uppercase tracking-widest text-slate-400">Administrator</p>
+                     </div>
+                     <% } %>
+
+                 </div>
+
+             </div>
+
+        </main>
+    </div>
+</body>
+</html>

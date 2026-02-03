@@ -1,0 +1,36 @@
+<style>
+    .payment-section {
+        padding: 0 40px 30px 40px;
+    }
+    .payment-box {
+        background: #F9FAFB;
+        border-left: 4px solid var(--primary-color);
+        border-radius: 8px;
+        padding: 20px;
+    }
+    .pay-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+</style>
+
+<div class="payment-section">
+    <div class="payment-box">
+        <h4 class="font-bold text-sm uppercase tracking-wide mb-3" style="color: var(--secondary-color)">Payment Method</h4>
+        <div class="pay-grid">
+            <div>
+                <span class="block text-xs text-gray-500 uppercase">Provider</span>
+                <span class="font-semibold text-sm">Stripe / Credit Card</span>
+            </div>
+            <div>
+                <span class="block text-xs text-gray-500 uppercase">Reference</span>
+                <span class="font-semibold text-sm">•••• 4242</span>
+            </div>
+            <div>
+                <span class="block text-xs text-gray-500 uppercase">Status</span>
+                <span class="font-bold text-sm" style="color: var(--success)">PAID</span>
+            </div>
+        </div>
+    </div>
+</div>

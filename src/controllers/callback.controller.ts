@@ -24,8 +24,7 @@ export class CallbackController {
                     name: name || `Imported Template ${new Date().toISOString()}`,
                     documentType: type || 'invoice',
                     htmlContent: html,
-                    source: source || 'n8n_auto',
-                    status: 'active'
+                    source: source || 'n8n_auto'
                 }
             });
 

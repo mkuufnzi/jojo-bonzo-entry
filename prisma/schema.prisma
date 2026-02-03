@@ -236,18 +236,25 @@ model Product {
 }
 
 model UserTemplate {
-  id           String   @id @default(uuid())
-  businessId   String
-  name         String
-  documentType String
-  htmlContent  String
-  thumbnailUrl String?
-  source       String   @default("system")
-  status       String   @default("active")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  businessId     String
+  name           String
+  documentType   String   // INVOICE, RECEIPT, QUOTE
+  
+  // Cloning Architecture
+  baseTemplateId String?  // e.g. "smart_invoice_v1" (Null if custom HTML)
+  config         Json?    // Stores overrides { theme:..., components:... }
+  isDefault      Boolean  @default(false) 
+  
+  // Legacy / Advanced Custom
+  htmlContent    String?  // Optional: For fully custom templates
+  source         String   @default("system") // "system" (cloned) or "custom"
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  business       Business @relation(fields: [businessId], references: [id])
 
+  @@index([businessId])
   @@index([businessId, documentType])
 }
 

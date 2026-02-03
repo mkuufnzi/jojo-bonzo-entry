@@ -1,0 +1,80 @@
+{
+    "id": "invoice_revenue_machine_v1",
+    "name": "Revenue Machine Invoice",
+    "description": "High-conversion layout with Arrow branding, bold typography, and integrated VIP nurture modules.",
+    "version": "1.0.0",
+    "type": "INVOICE",
+    "features": [
+        {
+            "id": "header",
+            "name": "Arrow Brand Header",
+            "type": "toggle",
+            "required": true,
+            "description": "Distinctive arrow-shaped header with logo and tagline."
+        },
+        {
+            "id": "customer_info",
+            "name": "Customer Details",
+            "type": "toggle",
+            "required": true,
+            "description": "Bill-to information and Invoice Metadata."
+        },
+        {
+            "id": "smart_banner",
+            "name": "Smart Insights Banner",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "AI",
+            "description": "Status banner highlighted with purchase context."
+        },
+        {
+            "id": "line_items",
+            "name": "Line Items Table",
+            "type": "toggle",
+            "required": true,
+            "description": "Itemized list with integrated tutorials and loyalty tags."
+        },
+        {
+            "id": "totals",
+            "name": "Totals Section",
+            "type": "toggle",
+            "required": true,
+            "description": "Subtotal, Tax, and Grand Total block."
+        },
+        {
+            "id": "recommendations",
+            "name": "Upsell Recommendations",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Conversion",
+            "description": "Cross-sell grid based on purchase history."
+        },
+        {
+            "id": "nurture_section",
+            "name": "Marketing Nurture Card",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Retention",
+            "description": "VIP Club invite or Loyalty functionality."
+        },
+        {
+            "id": "payment_info",
+            "name": "Payment Details",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "description": "Bank details and payment method summary."
+        },
+        {
+            "id": "footer",
+            "name": "Footer",
+            "type": "toggle",
+            "required": true,
+            "description": "Contact info and thank you message."
+        }
+    ],
+    "author": "Floovioo"
+}

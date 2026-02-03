@@ -1,0 +1,78 @@
+<style>
+    .items-section { padding: 30px 40px; background: white; }
+    .items-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .items-table th {
+        background: var(--secondary-color);
+        color: white;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+    .items-table th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .items-table th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; text-align: right; }
+    
+    .items-table td {
+        padding: 15px;
+        border-bottom: 1px solid #E5E5E5;
+        font-size: 14px;
+    }
+    .items-table tr:last-child td { border-bottom: none; }
+    
+    .item-tag {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 2px 8px;
+        background: #F3F4F6;
+        color: #4B5563;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+    .item-tag.highlight {
+        background: #FFF9E6;
+        color: #B45309; /* Dark yellow/orange */
+    }
+</style>
+
+<div class="items-section">
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 50%">Description</th>
+                <th style="width: 15%">Price</th>
+                <th style="width: 15%">Qty</th>
+                <th style="text-align: right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="item in items" :key="item.id || item.name">
+                <tr>
+                    <td>
+                        <div class="font-bold text-gray-900" x-text="item.name"></div>
+                        <div class="text-xs text-gray-500" x-text="item.description || item.category || ''"></div>
+                        
+                        <!-- Dynamic Tags (Example of smart features) -->
+                        <div class="flex gap-2 mt-1">
+                            <span class="item-tag highlight" x-show="item.price > 50">
+                                <span>⭐</span> Loyalty Item
+                            </span>
+                        </div>
+                    </td>
+                    <td x-text="'$' + item.price.toFixed(2)"></td>
+                    <td x-text="item.qty"></td>
+                    <td class="text-right font-bold" x-text="'$' + (item.price * item.qty).toFixed(2)"></td>
+                </tr>
+            </template>
+            
+            <% if (!branding.model?.items?.length) { %>
+                <!-- Fallback for empty state (Preview) -->
+                <tr>
+                   <td class="text-gray-400 italic" colspan="4">No items loaded.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
