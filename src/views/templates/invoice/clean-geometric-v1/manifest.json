@@ -22,6 +22,15 @@
             "description": "Invoice number, date, and due date."
         },
         {
+            "id": "smart_banner",
+            "name": "Smart Insights Banner",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "AI",
+            "description": "Status banner highlighted with purchase context."
+        },
+        {
             "id": "line_items",
             "name": "Line Item Table",
             "type": "group",
@@ -36,6 +45,24 @@
             "required": false,
             "defaultEnabled": true,
             "description": "Subtotal, tax, and total summary with background highlight."
+        },
+        {
+            "id": "recommendations",
+            "name": "Upsell Recommendations",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Conversion",
+            "description": "Cross-sell grid based on purchase history."
+        },
+        {
+            "id": "nurture_section",
+            "name": "Marketing Nurture Card",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Retention",
+            "description": "VIP Club invite or Loyalty functionality."
         },
         {
             "id": "payment_info",
