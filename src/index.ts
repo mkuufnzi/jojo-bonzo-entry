@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
+import fs from 'fs';
 import session from 'express-session';
 import compression from 'compression';
 import morgan from 'morgan';
@@ -36,8 +37,11 @@ import passport from './config/passport';
 import docRoutes from './routes/doc.routes';
 
 
-const app = express();
+const app: Express = express();
 const PORT = config.PORT;
+
+// [Security] Trust Proxy - Required for ngrok/Cloudflare/Heroku to detect HTTPS correctly
+app.set('trust proxy', 1);
 
 // Initialize Sentry (Observability)
 import { initSentry } from './config/sentry';
@@ -59,11 +63,9 @@ app.set('trust proxy', 1);
 
 logger.info('------------------------------------------------');
 logger.info(`[Startup] APP_URL Configured as: '${config.APP_URL}'`);
+const redactedDbUrl = config.DATABASE_URL.replace(/:([^:@]+)@/, ':****@');
+logger.info(`[Startup] DATABASE_URL Configured as: '${redactedDbUrl}'`);
 logger.info('------------------------------------------------');
-
-// Body Parsers
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static Assets - Quick Handling (Before heavy middleware)
 app.get('/favicon.ico', (req, res) => res.status(204).end());
@@ -74,15 +76,23 @@ app.use((req, res, next) => {
     const originalStatus = res.status;
     res.status = function(code) {
         if (code === 400) {
-            const rawBodyStr = (req as any).rawBody ? (req as any).rawBody.toString('utf8').substring(0, 1000) : 'N/A';
-            logger.warn({
+            const debugInfo = {
+                timestamp: new Date().toISOString(),
                 method: req.method,
                 url: req.originalUrl || req.url,
                 headers: req.headers,
                 body: req.body,
-                rawBody: rawBodyStr,
-                rawBodyLength: (req as any).rawBody?.length || 0
-            }, `[400 DEBUG] Bad Request Detection`);
+                params: req.params,
+                query: req.query
+            };
+            logger.warn(debugInfo, `[400 DEBUG] Bad Request Detection`);
+            console.warn('[400 DEBUG] Request intercepted:', JSON.stringify(debugInfo, null, 2));
+            // Also write to a file we can easily read
+            try {
+                fs.appendFileSync(path.join(process.cwd(), 'debug_400.log'), JSON.stringify(debugInfo, null, 2) + '\n---\n');
+            } catch (e: any) {
+                console.error('[400 DEBUG] Failed to write to debug_400.log:', e.message);
+            }
         }
         return originalStatus.call(this, code);
     };
@@ -136,6 +146,8 @@ app.use(helmet({
       frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com", "blob:", config.APP_URL],
     },
   },
+  crossOriginEmbedderPolicy: false, // [FIX] allow iframes to load subresources (avoids NotSameOrigin error)
+  originAgentCluster: false,       // [FIX] resolve origin-keyed cluster mismatch warning
   hsts: process.env.COOKIE_SECURE !== 'false', // Disable HSTS if secure cookies are disabled
 }));
 logger.info('CSP Configured');
@@ -200,10 +212,6 @@ if (config.NODE_ENV === 'development') {
     });
 }
 
-
-// ============================================================================
-// Body Parsers
-// ============================================================================
 // Capture raw body for webhook verification
 const rawBodySaver = (req: any, res: any, buf: Buffer, encoding: string) => {
   if (buf && buf.length) {
@@ -291,6 +299,9 @@ app.use('/', landingRoutes);
 
 app.use('/auth', authRoutes);                   // Login, register, social auth
 app.use('/invoice', docRoutes);                 // Public Smart Invoice Viewer
+import templateRoutes from './routes/template.routes';
+app.use('/templates', templateRoutes);          // New Portable Template Loader
+
 
 // Dashboard & App Routes - Protected + Onboarding Check
 // Dashboard & App Routes - Protected

@@ -1,0 +1,13 @@
+<!-- Next Purchase Discount Widget -->
+<div class="mx-8 mt-6 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-6 border border-violet-100">
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="font-semibold text-violet-800 mb-1">Thank you for your business!</div>
+            <div class="text-sm text-violet-700">Use code <span class="font-mono bg-violet-200 px-2 py-0.5 rounded font-bold">THANKYOU15</span> for 15% off your next order</div>
+            <div class="text-xs text-violet-500 mt-1">Valid until <%= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString() %></div>
+        </div>
+        <button class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors no-print">
+            Shop Now
+        </button>
+    </div>
+</div>

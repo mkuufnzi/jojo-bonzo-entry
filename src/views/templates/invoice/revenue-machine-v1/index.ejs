@@ -1,27 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #<%= branding.model?.id || 'DRAFT' %></title>
-    
-    <!-- Alpine.js & Tailwind (Utility + Logic) -->
-    <script src="//unpkg.com/alpinejs" defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Fonts: Outfit & DM Sans as requested -->
+<% layout('layouts/document-master') %>
+
+<% block('head').append(`
+    <!-- Fonts: Outfit & DM Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        [x-cloak] { display: none !important; }
-
-        /* Dynamic Brand Theming */
+        /* Template Specific CSS */
         :root {
-            /* Map Branding Profile Colors to Template Variables */
-            --primary-color: <%= branding.theme.primary || '#FFC800' %>;
-            --secondary-color: <%= branding.theme.secondary || '#2D2D2D' %>;
-            --accent-color: <%= branding.theme.accent || '#FF6B00' %>;
-            --text-main: <%= branding.theme.text || '#1A1A1A' %>;
+            --primary-color: ${branding.theme.primary || '#FFC800'};
+            --secondary-color: ${branding.theme.secondary || '#2D2D2D'};
+            --accent-color: ${branding.theme.accent || '#FF6B00'};
+            --text-main: ${branding.theme.text || '#1A1A1A'};
             --bg-body: #F5F5F5;
             --bg-card: #FFFFFF;
             --success: #00C853;
@@ -29,136 +18,102 @@
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: linear-gradient(135deg, #F5F5F5 0%, #E8E8E8 100%);
             color: var(--text-main);
             line-height: 1.6;
-            padding: 20px;
+            background: var(--bg-body);
         }
 
-        /* Typography Override */
         h1, h2, h3, h4, .brand-font {
             font-family: 'Outfit', sans-serif;
         }
-
-        .invoice-container {
-            max-width: 900px; /* More compact as requested */
-            margin: 0 auto;
-            background: var(--bg-card);
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-            overflow: hidden;
-            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Utility Helpers for Alpine components to use */
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: var(--secondary-color);
-            transition: transform 0.2s;
-        }
-        .btn-primary:hover {
-            transform: scale(1.02);
-            filter: brightness(1.05); /* slightly lighter */
-        }
     </style>
-</head>
-<body x-data="smartInvoice()" x-cloak>
+`) %>
 
-    <div class="invoice-container">
-        
-        <!-- Header -->
-        <% if (branding.components?.header?.enabled) { %>
+<!-- Standard Document Configuration -->
+<div id="doc-config" 
+    data-page-size="A4" 
+    data-orientation="portrait" 
+    data-margin-top="50" 
+    data-margin-bottom="50"
+    class="hidden"></div>
+
+<%- include('../../../components/logic/smart-document-logic') %>
+
+<!-- Template Interface -->
+<div class="font-sans text-slate-800 antialiased">
+    
+    <!-- Section: Header (Full Width) -->
+    <% if (branding.components?.header?.enabled) { %>
+        <div class="doc-section mb-8">
             <%- include('./components/header') %>
-        <% } %>
+        </div>
+    <% } %>
 
-        <!-- Title & Customer Meta -->
+    <!-- Container for Constrained Content -->
+    <div class="max-w-[850px] mx-auto px-8 pb-12">
+        
+        <!-- Section: Title & Customer Meta -->
         <% if (branding.components?.customer_info?.enabled) { %>
-            <%- include('./components/customer_info') %>
+            <div class="doc-section mb-6">
+                <%- include('./components/customer_info') %>
+            </div>
         <% } %>
 
-        <!-- Smart Banner -->
-        <% if (branding.components?.smart_banner?.enabled) { %>
-            <%- include('./components/banner') %>
+        <!-- Section: Smart Banner -->
+        <% if (branding.components?.marketing_banner?.enabled) { %>
+            <div class="doc-section mb-8">
+                <%- include('./components/banner') %>
+            </div>
         <% } %>
 
-        <!-- Line Items -->
+        <!-- Section: Line Items (Splittable) -->
         <% if (branding.components?.line_items?.enabled) { %>
-            <%- include('./components/line_items') %>
+            <div class="doc-section mb-8" data-split="true">
+                <%- include('./components/line_items') %>
+            </div>
         <% } %>
 
-        <!-- Totals -->
+        <!-- Section: Totals -->
         <% if (branding.components?.totals?.enabled) { %>
-            <%- include('./components/totals') %>
+            <div class="doc-section mb-8">
+                <%- include('./components/totals') %>
+            </div>
         <% } %>
 
-        <!-- Upsell Recommendations -->
-        <% if (branding.components?.recommendations?.enabled) { %>
-            <%- include('./components/upsell') %>
+        <!-- Section: Upsell Recommendations (Splittable) -->
+        <% if (branding.components?.product_recommendations?.enabled) { %>
+            <div class="doc-section mb-8" data-split="true">
+                <%- include('./components/upsell') %>
+            </div>
         <% } %>
 
-        <!-- Marketing Nurture -->
-        <% if (branding.components?.nurture_section?.enabled) { %>
-            <%- include('./components/nurture') %>
+        <!-- Section: Product Support (Splittable) -->
+        <% if (branding.components?.product_support?.enabled) { %>
+            <div class="doc-section mb-8" data-split="true">
+                <%- include('./components/nurture') %>
+            </div>
         <% } %>
 
-        <!-- Payment Info -->
-        <% if (branding.components?.payment_info?.enabled) { %>
-            <%- include('./components/payment_info') %>
+        <!-- Section: Payment Details -->
+        <% if (branding.components?.payment_details?.enabled) { %>
+             <div class="doc-section mb-8">
+                <%- include('./components/payment_info') %>
+             </div>
         <% } %>
 
-        <!-- Footer -->
+        <!-- Section: Customer Support Widget -->
+        <% if (branding.components?.customer_support?.enabled) { %>
+            <div class="doc-section mb-8">
+                <%- include('../../../components/smart-widgets/support-card') %>
+            </div>
+        <% } %>
+
+        <!-- Section: Footer -->
         <% if (branding.components?.footer?.enabled) { %>
-            <%- include('./components/footer') %>
+            <div class="doc-section mt-auto">
+                <%- include('./components/footer') %>
+            </div>
         <% } %>
-
     </div>
+</div>
 
-    <!-- Data Injection & Alpine Logic -->
-    <script nonce="<%= nonce %>">
-        window.INVOICE_DATA = {
-            theme: <%- JSON.stringify(branding.theme || {}) %>,
-            config: <%- JSON.stringify(branding.config || {}) %>,
-            items: <%- JSON.stringify((branding.model?.items?.length) ? branding.model.items : []) %>,
-            // Default Mocks if model data missing (for preview)
-            recommendations: <%- JSON.stringify((branding.model?.recommendations?.length) ? branding.model.recommendations : [
-                { id: 101, name: "Espresso Machine Pro", price: 249.00, match: 92, badge: "92% Match" },
-                { id: 102, name: "Coffee Subscription", price: 29.00, match: 88, badge: "Hot Deal 🔥" }
-            ]) %>,
-            backendTotals: {
-                subtotal: <%- JSON.stringify(branding.model?.subtotal || 0) %>,
-                tax: <%- JSON.stringify(branding.model?.tax || 0) %>,
-                total: <%- JSON.stringify(branding.model?.total || 0) %>
-            }
-        };
-
-        function smartInvoice() {
-            return {
-                items: (window.INVOICE_DATA.items.length) ? window.INVOICE_DATA.items : [
-                    { name: 'Service Retainer', description: 'Standard Monthly Fee', price: 1000, qty: 1 }
-                ],
-                
-                // Totals Calculation Logic
-                get subtotal() {
-                    return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                },
-                get tax() {
-                    return this.subtotal * 0.08;
-                },
-                get total() {
-                    return this.subtotal + this.tax;
-                },
-
-                // Actions
-                addRecommendation(id) {
-                    alert('Item ' + id + ' added to cart (Simulation)');
-                }
-            }
-        }
-    </script>
-</body>
-</html>

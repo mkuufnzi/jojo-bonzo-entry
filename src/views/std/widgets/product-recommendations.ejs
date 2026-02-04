@@ -1,5 +1,5 @@
 <!-- RECOMMENDATIONS (UPSELL) -->
-<div class="mt-6">
+<div class="mt-6" data-split="true">
     <div class="flex justify-between items-center mb-3">
         <div>
             <div class="text-[13px] font-bold font-sans" :style="'color: ' + theme.text">🎯 Recommended for You</div>
@@ -8,7 +8,7 @@
         <span class="text-[9px] font-bold px-2 py-0.5 rounded-lg font-sans" :style="'color: ' + theme.primary + '; background: ' + theme.light">AI-Powered</span>
     </div>
     
-    <div class="grid grid-cols-2 gap-3">
+    <div class="grid grid-cols-2 gap-3" data-split="true">
         <template x-for="rec in recommendations" :key="rec.id">
             <div class="bg-white rounded-xl p-4 shadow-sm border-2 transition-all relative overflow-hidden font-sans group"
                  :style="'border-color: ' + (addedItems.includes(rec.id) ? theme.primary : 'transparent')">

@@ -6,16 +6,44 @@
     "version": "1.0.0",
     "features": [
         {
-            "id": "cover_page",
-            "name": "Cover Page",
+            "id": "header",
+            "name": "Proposal Header",
             "type": "toggle",
-            "defaultEnabled": true
+            "required": true
         },
         {
-            "id": "signatures",
-            "name": "Digital Signatures",
+            "id": "customer_info",
+            "name": "Client Details",
             "type": "toggle",
-            "defaultEnabled": true
+            "required": true
+        },
+        {
+            "id": "line_items",
+            "name": "Pricing Table",
+            "type": "toggle",
+            "required": true,
+            "description": "Breakdown of proposal items."
+        },
+        {
+            "id": "product_recommendations",
+            "name": "Optional Extras",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Upsell"
+        },
+        {
+            "id": "marketing_banner",
+            "name": "Marketing Message",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": false
+        },
+        {
+            "id": "footer",
+            "name": "Proposal Footer",
+            "type": "toggle",
+            "required": true
         }
     ]
 }

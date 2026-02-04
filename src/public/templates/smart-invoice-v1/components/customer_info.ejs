@@ -1,0 +1,20 @@
+<!-- Customer & Status Row -->
+<div class="flex flex-wrap justify-between gap-4 p-5 px-8 border-b border-gray-100 font-sans">
+    <div>
+        <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Bill To</div>
+        <div class="text-sm font-bold text-slate-900" :style="'color: ' + theme.text">Sarah Mitchell</div>
+        <div class="text-[11px] text-gray-500">sarah.mitchell@email.com</div>
+        <div class="text-[11px] text-gray-500">Member since 2023 · 14 orders</div>
+    </div>
+    <div class="flex gap-6">
+        <div class="text-right">
+            <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Status</div>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold" 
+                  :style="'background: ' + theme.accent + '; color: ' + theme.primary">Paid ✓</span>
+        </div>
+        <div class="text-right">
+             <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Loyalty</div>
+             <span class="bg-amber-100 text-amber-600 px-2.5 py-0.5 rounded-full text-[11px] font-bold">★ Gold</span>
+        </div>
+    </div>
+</div>

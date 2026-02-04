@@ -39,10 +39,6 @@ import { TemplateController } from '../controllers/template.controller';
 
 // ... existing imports ...
 
-// Brand / Template Routes
-router.get('/brand', BrandingController.renderEditor);
-router.post('/brand', BrandingController.updateSettings);
-
 // Template Registry
 router.get('/templates', TemplateController.listTemplates);
 router.post('/templates/activate', TemplateController.activateTemplate);

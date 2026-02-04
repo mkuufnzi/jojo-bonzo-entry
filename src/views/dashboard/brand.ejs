@@ -1,6 +1,6 @@
 <%- layout('layouts/dashboard-layout') %>
 
-<div class="max-w-6xl mx-auto">
+<div class="max-w-[1920px] mx-auto px-6">
     <!-- Header -->
     <div class="flex justify-between items-center mb-10">
         <div>
@@ -171,20 +171,28 @@
                 
                 <!-- Scaled Iframe Wrapper -->
                 <!-- We want the container to fill the column width, and height to match A4 aspect ratio relative to that width -->
-                <!-- Scaled Iframe Wrapper -->
-                <!-- Container height is set via JS based on scaled content height -->
-                <div id="previewContainer" class="relative w-full bg-gray-100 overflow-hidden origin-top-left transition-all duration-200">
-                    <!-- Iframe is fixed at A4 Width (794px). Height adjusts to content. -->
-                    <!-- Added allow-same-origin to enable height detection (auto-resize) -->
+                <div id="previewContainer" class="relative w-full bg-gray-50 overflow-hidden h-[800px]">
                     <iframe id="previewFrame" 
+                            name="previewFrame"
                             src="/dashboard/brand/preview?templateId=<%= manifest.id %>&type=<%= manifest.type %>" 
-                            class="absolute top-0 left-0 origin-top-left border-none shadow-lg bg-white"
-                            style="width: 794px; min-height: 1123px;" 
+                            class="absolute top-0 left-0 origin-top-left border-none shadow-lg"
+                            style="width: 100%; height: 100%;" 
                             sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
                 </div>
             </div>
+            
+            <!-- Hidden form for CSP-safe POST previews -->
+             <form id="previewHiddenForm" action="/dashboard/brand/preview" method="POST" target="previewFrame" class="hidden">
+                 <input type="hidden" name="templateId" id="previewFormTemplateId">
+                 <input type="hidden" name="type" id="previewFormType">
+                 <input type="hidden" name="components" id="previewFormComponents">
+                 <input type="hidden" name="brandColors" id="previewFormColors">
+                 <input type="hidden" name="tagline" id="previewFormTagline">
+                 <input type="hidden" name="companyName" id="previewFormCompanyName">
+            </form>
+            </div>
             <p class="text-center text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-4">
-                A4 Printable View • Scaled to Fit
+                Desktop View • Scaled to Fit
             </p>
         </div>
     </div>
@@ -411,29 +419,62 @@ document.addEventListener('DOMContentLoaded', () => {
     // LIVE PREVIEW LOGIC
     // ============================================================
     let debounceTimer;
+    let previewDebounce;
     
     function triggerAutoSave() {
-        // Visual indicator
-        if(saveBtn) saveBtn.textContent = 'Saving...';
+        // 1. Instant Visual Feedback
+        if(saveBtn) saveBtn.innerHTML = '<i class="animate-spin w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full mr-2"></i>Syncing...';
         
+        // 2. Refresh Preview via POST (Live State)
+        clearTimeout(previewDebounce);
+        previewDebounce = setTimeout(() => {
+            updateLivePreview();
+        }, 300); // Fast feedback for UI
+
+        // 3. Persist to DB (Debounced)
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            saveAndRefresh();
-        }, 800); // 800ms debounce
+            saveToDatabase();
+        }, 1500); // Slower for DB persistence
     }
 
-    async function saveAndRefresh() {
-        if(!form) return;
+    async function updateLivePreview() {
+        if(!previewFrame) return;
 
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+        const components = {};
+        document.querySelectorAll('.component-toggle').forEach(toggle => {
+             const id = toggle.getAttribute('data-id');
+             components[id] = { enabled: toggle.checked };
+        });
+
+        const templateId = document.getElementById('invoiceTemplateId').value;
+        const type = document.getElementById('previewTypeSelect').value || 'invoice';
+
+        // Gather All UI State for Live Sync
+        const brandColors = {
+            primary: document.getElementById('primaryColorText')?.value,
+            secondary: document.getElementById('secondaryColorText')?.value,
+            accent: document.getElementById('accentColorText')?.value
+        };
+        const tagline = document.getElementById('brandTagline')?.value;
+        const companyName = document.getElementById('companyName')?.value;
+
+        // Update hidden form and submit to iframe
+        const hiddenForm = document.getElementById('previewHiddenForm');
+        document.getElementById('previewFormTemplateId').value = templateId;
+        document.getElementById('previewFormType').value = type;
+        document.getElementById('previewFormComponents').value = JSON.stringify(components);
+        document.getElementById('previewFormColors').value = JSON.stringify(brandColors);
+        document.getElementById('previewFormTagline').value = tagline || '';
+        document.getElementById('previewFormCompanyName').value = companyName || '';
         
-        // Construct Payload
-        // We'll trust the form data structure for components: components[id][enabled]
-        // But for nested JSON logic in backend, it's safer to struct it here if needed.
-        // The backend BrandingController.updateSettings likely just takes req.body.
+        hiddenForm.submit();
+        console.log('[App] Live Preview triggered with full UI state.');
+    }
+
+    async function saveToDatabase() {
+        if(!form) return;
         
-        // Let's gather the components manually to be sure
         const components = {};
         document.querySelectorAll('.component-toggle').forEach(toggle => {
              const id = toggle.getAttribute('data-id');
@@ -441,18 +482,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const payload = {
-            // "Template Ecosystem" Mode: We only send the feature configuration.
-            // The visual identity (colors/fonts) is deprecated/moved to Theme settings (not here).
-            // The manifesto drives what "components" (or features) are active.
-            
-            activeTemplateId: document.getElementById('invoiceTemplateId').value, // CRITICAL: Tell backend WHICH template
-            components, // { [featureId]: { enabled: true/false } }
-            
-            // Legacy/Fallback for any direct profile props if needed, but for now we are clean.
+            activeTemplateId: document.getElementById('invoiceTemplateId').value,
+            components,
+            brandColors: {
+                primary: document.getElementById('primaryColorText')?.value,
+                secondary: document.getElementById('secondaryColorText')?.value,
+                accent: document.getElementById('accentColorText')?.value
+            },
+            tagline: document.getElementById('brandTagline')?.value,
+            companyName: document.getElementById('companyName')?.value
         };
 
         try {
-            const response = await fetch('/dashboard/brand/settings?format=json', { // Explicitly request JSON to prevent redirect logic
+            const response = await fetch('/dashboard/brand/settings?format=json', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -465,13 +507,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 if(saveBtn) saveBtn.textContent = 'Saved';
                 setTimeout(() => { if(saveBtn) saveBtn.textContent = 'Save Changes'; }, 2000);
-                refreshPreview();
             } else {
-                console.error('Save failed');
-                if(saveBtn) saveBtn.textContent = 'Error';
+                // If 400 happens here, we at least have the Live Preview working!
+                console.warn('Persistence failed (400), but live preview active.');
+                if(saveBtn) saveBtn.textContent = 'Sync Only';
             }
         } catch (e) {
-            console.error('Auto-save error', e);
+            console.error('Database Save Error', e);
         }
     }
 
@@ -572,64 +614,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- SCALED PREVIEW LOGIC ---
-    // --- SCALED PREVIEW LOGIC ---
     function updatePreviewScale() {
         const container = document.getElementById('previewContainer');
         const iframe = document.getElementById('previewFrame');
         if (!container || !iframe) return;
 
-        // Force A4 Ratio on Content Check
-        const targetWidth = 794; 
+        // Desired Width for Desktop View (matches CSS A4 width with padding)
+        const baseWidth = 1024; // Paginator target width (approx) or just a standard desktop width
+        // Actually, A4 is ~794px at 96dpi. But we want to simulate a full desktop view.
+        
         const containerWidth = container.offsetWidth;
-        const scale = containerWidth / targetWidth;
+        const scale = Math.min(1, containerWidth / baseWidth); // Shrink only, don't pixelate if larger? Or just scale.
         
+        // Apply Scale
+        iframe.style.width = `${baseWidth}px`;
+        iframe.style.height = `${(container.offsetHeight / scale)}px`; // Compensate height
         iframe.style.transform = `scale(${scale})`;
-
-        // Re-check height if content is already loaded
-        resizePreviewHeight();
-    }
-
-    function resizePreviewHeight() {
-        const container = document.getElementById('previewContainer');
-        const iframe = document.getElementById('previewFrame');
-        if (!container || !iframe) return;
         
-        try {
-            // Try to get content height
-            // Note: This requires allow-same-origin in sandbox
-            const doc = iframe.contentWindow?.document;
-            if(doc && doc.body) {
-                const contentHeight = Math.max(doc.body.scrollHeight, 1123); // Min A4 Height
-                
-                // 1. Set Iframe Height to full content
-                iframe.style.height = contentHeight + 'px';
-                
-                // 2. Set Container Height to Scaled Height
-                const targetWidth = 794;
-                const containerWidth = container.offsetWidth;
-                const scale = containerWidth / targetWidth;
-                
-                container.style.height = (contentHeight * scale) + 'px';
-            }
-        } catch(e) {
-            // Fallback if blocked
-            // console.warn('Preview resize blocked:', e);
-            // Default to A4 ratio
-             const targetWidth = 794;
-             const containerWidth = container.offsetWidth;
-             container.style.height = ((1123/794) * containerWidth) + 'px'; 
-        }
+        // Center it if needed, or stick to top-left (origin-top-left class)
     }
-
-    // Listen for iframe load to adjust height
-    const iframe = document.getElementById('previewFrame');
-    if(iframe) {
-        iframe.onload = resizePreviewHeight;
-    }
-
-    // Run on load and resize
+    
+    // Initial and Resize
     updatePreviewScale();
-    window.addEventListener('resize', updatePreviewScale);
+    window.addEventListener('resize', updatePreviewScale); 
+    // Also update on load of iframe to be sure?
+    previewFrame.addEventListener('load', updatePreviewScale);
     
     // --- URL PERSISTENCE ---
     // Ensure if user refreshes, they stay on this template

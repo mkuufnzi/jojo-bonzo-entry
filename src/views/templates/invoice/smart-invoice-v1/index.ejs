@@ -1,197 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #INV-2025-0847</title>
-    <!-- Alpine.js & Tailwind -->
-    <script src="//unpkg.com/alpinejs" defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Georgia:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Georgia', serif; }
-        .font-sans { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-gray-100 min-h-screen relative overflow-x-hidden text-slate-800"
-      x-data="smartInvoice()" x-cloak>
+<% layout('layouts/document-master') %>
 
-    <!-- Dynamic Background Pattern -->
-    <div class="fixed inset-0 pointer-events-none z-0" 
+<!-- Standard Document Configuration -->
+<div id="doc-config" 
+    data-page-size="A4" 
+    data-orientation="portrait" 
+    data-margin-top="50" 
+    data-margin-bottom="50"
+    class="hidden"></div>
+
+<%- include('../../../components/logic/smart-document-logic') %>
+
+<!-- Template Interface -->
+<div class="font-sans text-slate-800 antialiased">
+    
+    <!-- Page Overlay: Fixed background ignored by Paginator flow -->
+    <div data-page-overlay class="fixed inset-0 pointer-events-none z-0" 
          :style="'background: ' + theme.pattern"></div>
 
-    <!-- Main Container -->
-    <div class="relative z-10 max-w-[780px] mx-auto pt-6 pb-12 px-4">
-        
-        <!-- INVOICE CARD -->
-        <div class="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.08)] overflow-hidden">
-            
-            <%- include('./components/header') %>
-
-            <%- include('./components/customer_info') %>
-
-            <%- include('./components/line_items') %>
-
-            <!-- Debug: Components Keys: <%= Object.keys(branding.components || {}).join(',') %> -->
-            <% if (branding.components?.product_recommendations?.enabled) { %>
-                <%- include('./components/upsell') %>
-            <% } %>
-
-            <%- include('./components/footer') %>
-
-        </div>
-
-        <% if (branding.components?.marketing_banner?.enabled) { %>
-            <%- include('./components/banner') %>
-        <% } %>
-
-        <% if (branding.components?.product_support?.enabled) { %>
-            <%- include('./components/tutorials') %>
-        <% } %>
-
-        <% if (branding.components?.customer_support?.enabled) { %>
-            <%- include('./components/support') %>
-        <% } %>
-
-        <div class="text-center mt-5 text-[9.5px] text-gray-400 font-sans">
-             Smart Invoice Engine v2.1 · Personalized recommendations · Brand-themed delivery
-        </div>
-        
-        <!-- DEBUG OUTPUT (Remove in Prod) -->
-        <div class="mt-8 p-4 bg-slate-900 text-green-400 font-mono text-xs rounded-lg overflow-x-auto">
-            <strong>DEBUG STATE:</strong>
-            <pre><%= JSON.stringify(branding.components, null, 2) %></pre>
-        </div>
-
+    <!-- Section: Header (Full Width) -->
+    <div class="doc-section relative z-10 w-full mb-8 shadow-sm">
+        <%- include('./components/header') %>
     </div>
 
-    <!-- Data Injection Script -->
-    <script nonce="<%= nonce %>">
-        // Inject Server Data cleanly
-        window.INVOICE_DATA = {
-            theme: <%- JSON.stringify(branding.themeData || {}) %>,
-            config: <%- JSON.stringify(branding.config || {}) %>,
-            components: <%- JSON.stringify(branding.components || {}) %>,
-            items: <%- JSON.stringify((branding.model?.items?.length) ? branding.model.items : []) %>,
-            recommendations: <%- JSON.stringify((branding.model?.recommendations?.length) ? branding.model.recommendations : [
-                { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "🎌", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },
-                { id: 102, name: "MCT Oil Drops", price: 22.99, img: "💧", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" },
-                { id: 103, name: "Organic Honey (Raw)", price: 18.99, img: "🍯", reason: "Enhances your Almond Butter smoothies", match: 81, badge: "New", sales: "4.9 ★ rated" },
-                { id: 104, name: "Bamboo Reusable Cups", price: 16.99, img: "🎋", reason: "Complete your matcha ritual sustainably", match: 76, badge: "Eco Pick", sales: "Save the planet" }
-            ]) %>,
-            tutorials: <%- JSON.stringify((branding.model?.tutorials?.length) ? branding.model.tutorials : [
-                { id: 1, title: "Perfect Matcha Latte", duration: "3 min", type: "recipe", thumb: "🍵", steps: ["Heat milk to 70°C", "Whisk 1 tsp matcha", "Combine & pour"], forProduct: "Matcha Powder" },
-                { id: 2, title: "Deep Hair Mask", duration: "5 min", type: "tutorial", thumb: "💆", steps: ["Warm oil gently", "Apply to roots", "Leave 30 min"], forProduct: "Coconut Oil" },
-                { id: 3, title: "Power Bowl Recipe", duration: "8 min", type: "recipe", thumb: "🥗", steps: ["Toast almonds", "Blend almond butter", "Assemble bowl"], forProduct: "Almond Butter" },
-            ]) %>,
-            nurtureMessages: <%- JSON.stringify((branding.model?.nurtureMessages?.length) ? branding.model.nurtureMessages : [
-                { icon: "🔥", headline: "Your ritual awaits.", body: "87% of matcha lovers upgrade to ceremonial grade within 30 days." },
-                { icon: "💡", headline: "Smart combo detected.", body: "This bundle saves you 18% and ships free. Limited offer." },
-                { icon: "⭐", headline: "Join 12,400 happy customers.", body: "\"The MCT drops transformed my morning routine.\" — Sarah K." },
-            ]) %>,
-            backendTotals: {
-                updated: <%- JSON.stringify(!!branding.model?.total) %>,
-                subtotal: <%- JSON.stringify(branding.model?.subtotal || 0) %>,
-                tax: <%- JSON.stringify(branding.model?.tax || 0) %>,
-                total: <%- JSON.stringify(branding.model?.total || 0) %>
-            }
-        };
+    <!-- Container for Constrained Content -->
+    <div class="doc-section max-w-[780px] mx-auto px-8 pb-12">
+        
+        <!-- Section: Marketing Banner -->
+        <% if (branding.components?.marketing_banner?.enabled) { %>
+            <div class="doc-section mb-8">
+                <%- include('../../../components/smart-widgets/banner') %>
+            </div>
+        <% } %>
 
-        function smartInvoice() {
-            return {
-                theme: window.INVOICE_DATA.theme,
-                config: window.INVOICE_DATA.config,
-                // Fallback Items if empty
-                items: (window.INVOICE_DATA.items && window.INVOICE_DATA.items.length) ? window.INVOICE_DATA.items : [
-                    { id: 1, name: 'Premium Widget', sku: 'WDG-001', qty: 2, price: 29.99, img: '📦', category: 'Hardware' },
-                    { id: 2, name: 'Installation Service', sku: 'SVC-INST', qty: 1, price: 49.00, img: '🛠️', category: 'Service' }
-                ],
-                
-                nurtureMsgIdx: 0,
-                backendTotals: {
-                    updated: false, // Default
-                    subtotal: 0,
-                    tax: 0,
-                    total: 0
-                },
-                
-                subtotal: 0,
-                tax: 0,
-                total: 0,
-                
-                addedItems: [],
-                expandedTutorial: null,
-                nurtureMsgIdx: 0,
-                
-                init() {
-                     // Initial calculation or hydration
-                     this.calculateTotals();
-                     
-                     // Start nurture cycle
-                     setInterval(() => this.cycleNurture(), 5000);
-                },
+        <!-- Section: Customer Info -->
+        <div class="doc-section mb-6">
+            <%- include('./components/customer_info') %>
+        </div>
 
-                calculateTotals() {
-                    // Start with backend/base values
-                    let baseSubtotal = 0;
-                    
-                    if (window.INVOICE_DATA.backendTotals && window.INVOICE_DATA.backendTotals.updated) {
-                         baseSubtotal = window.INVOICE_DATA.backendTotals.subtotal;
-                         this.tax = window.INVOICE_DATA.backendTotals.tax; // Tax logic might need re-eval if added items change tax
-                    } else {
-                        // Client-side calc for mock/draft
-                        baseSubtotal = this.items.reduce((acc, item) => acc + (item.price * item.qty), 0);
-                        this.tax = (baseSubtotal + this.addedTotal) * 0.08;
-                    }
+        <!-- Section: Line Items -->
+        <div class="doc-section mb-8">
+            <%- include('./components/line_items') %>
+        </div>
 
-                    this.subtotal = baseSubtotal;
-                    
-                    // Add Upsells
-                    // Note: Simplified logic. In real app, tax might apply to upsells too.
-                    // Here we assume tax is 8% flat on everything for client-side demo
-                    if (!window.INVOICE_DATA.backendTotals?.updated) {
-                         this.tax = (this.subtotal + this.addedTotal) * 0.08;
-                    }
-                    
-                    this.total = this.subtotal + this.tax + this.addedTotal;
-                },
+        <!-- Section: Recommendations (Splittable) -->
+        <% if (branding.components?.product_recommendations?.enabled) { %>
+            <div class="doc-section mb-8" data-split="true">
+                <%- include('../../../components/smart-widgets/product-recommendations') %>
+            </div>
+        <% } %>
 
-                get addedTotal() {
-                     return this.addedItems.reduce((acc, id) => {
-                         const item = this.getRec(id);
-                         return acc + (item ? item.price : 0);
-                     }, 0);
-                },
-                
-                toggleAdd(id) {
-                    if (this.addedItems.includes(id)) {
-                        this.addedItems = this.addedItems.filter(i => i !== id);
-                    } else {
-                        this.addedItems.push(id);
-                    }
-                    this.calculateTotals(); // Recalculate including added items
-                },
-                
-                // ... Helpers ...
-                getRec(id) { return this.recommendations.find(r => r.id === id); },
-                
-                recommendations: window.INVOICE_DATA.recommendations, // Use injected
-                tutorials: window.INVOICE_DATA.tutorials,
-                nurtureMessages: window.INVOICE_DATA.nurtureMessages,
-                
-                get nurtureMsg() {
-                    return this.nurtureMessages[this.nurtureMsgIdx] || { icon: '✨', headline: 'Welcome', body: 'Thanks for your business' };
-                },
-                cycleNurture() {
-                    if (this.nurtureMessages.length > 0) {
-                        this.nurtureMsgIdx = (this.nurtureMsgIdx + 1) % this.nurtureMessages.length;
-                    }
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+        <!-- Section: Product Support (Splittable) -->
+        <% if (branding.components?.product_support?.enabled) { %>
+            <div class="doc-section mb-8" data-split="true">
+                <%- include('../../../components/smart-widgets/tutorials') %>
+            </div>
+        <% } %>
+
+        <!-- Section: Payment Details -->
+        <% if (branding.components?.payment_details?.enabled) { %>
+             <div class="doc-section mb-8">
+                <%- include('../../../components/smart-widgets/payment-details') %>
+             </div>
+        <% } %>
+
+        <!-- Section: Feedback/Support -->
+        <% if (branding.components?.customer_support?.enabled) { %>
+            <div class="doc-section mb-8">
+                <%- include('../../../components/smart-widgets/support-card') %>
+            </div>
+        <% } %>
+
+        <!-- Section: Footer -->
+        <div class="doc-section mt-auto">
+            <%- include('./components/footer') %>
+        </div>
+    </div>
+</div>

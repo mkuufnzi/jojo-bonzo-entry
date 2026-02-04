@@ -1,0 +1,17 @@
+<!-- Financial Summary -->
+<div class="p-8 border-b border-gray-100 bg-gray-50">
+    <div class="max-w-xs ml-auto space-y-2 text-sm">
+        <div class="flex justify-between">
+            <span class="text-gray-500">Subtotal</span>
+            <span>$<%= (branding.model.subtotal || 1750).toFixed(2) %></span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Tax (8%)</span>
+            <span>$<%= (branding.model.tax || 140).toFixed(2) %></span>
+        </div>
+        <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+            <span>Total Paid</span>
+            <span class="text-emerald-600">$<%= (branding.model.total || 1890).toFixed(2) %></span>
+        </div>
+    </div>
+</div>

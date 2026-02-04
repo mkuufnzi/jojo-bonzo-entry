@@ -1,0 +1,57 @@
+<!-- Universal Smart Document Logic -->
+<!-- Injects Data and Loads the Smart Engine -->
+<script nonce="<%= nonce %>">
+    window.DOC_DATA = {
+        theme: <%- JSON.stringify(branding.themeData || {}) %>,
+        config: <%- JSON.stringify(branding.config || {}) %>,
+        items: <%- JSON.stringify((branding.model?.items?.length) ? branding.model.items : []) %>,
+        
+        // Standardized Features Data (Matched to Manifest IDs)
+        features: {
+            marketing_banner: <%- JSON.stringify((branding.model?.nurtureMessages?.length) ? branding.model.nurtureMessages : []) %>,
+            product_recommendations: <%- JSON.stringify((branding.model?.recommendations?.length) ? branding.model.recommendations : []) %>,
+            product_support: <%- JSON.stringify((branding.model?.tutorials?.length) ? branding.model.tutorials : []) %>,
+            customer_support: <%- JSON.stringify((branding.model?.supportLinks?.length) ? branding.model.supportLinks : []) %>,
+            payment_details: <%- JSON.stringify(branding.model?.paymentDetails || null) %>,
+            reviews: <%- JSON.stringify((branding.model?.reviews?.length) ? branding.model.reviews : []) %>
+        },
+
+        totals: {
+            updated: <%- JSON.stringify(!!branding.model?.total) %>,
+            subtotal: <%- JSON.stringify(branding.model?.subtotal || 0) %>,
+            tax: <%- JSON.stringify(branding.model?.tax || 0) %>,
+            total: <%- JSON.stringify(branding.model?.total || 0) %>
+        }
+    };
+
+    // Compatibility Layer for Revenue Machine & V1 Templates
+    window.INVOICE_DATA = {
+        theme: window.DOC_DATA.theme,
+        config: window.DOC_DATA.config,
+        items: window.DOC_DATA.items,
+        recommendations: window.DOC_DATA.features.product_recommendations,
+        nurtureMessages: window.DOC_DATA.features.marketing_banner,
+        backendTotals: window.DOC_DATA.totals
+    };
+
+    // Helper for templates to trigger re-pagination after state changes
+    window.rePaginate = function() {
+        console.log('[App] Re-pagination triggered...');
+        const p = new Paginator('#source-document', '#preview-stage');
+        p.paginate();
+    };
+</script>
+
+<!-- Load the Smart Engine (Logic) -->
+<script src="/engines/smart-engine-v1.js" nonce="<%= nonce %>"></script>
+
+<script nonce="<%= nonce %>">
+    // Signal that engine is ready after data is injected AND assets loaded
+    window.addEventListener('load', () => {
+        // Give Alpine a moment to finish its DOM manipulations
+        setTimeout(() => {
+            console.log('[App] Page assets loaded & Alpine initialized. Triggering Paginator.');
+            window.dispatchEvent(CustomEvent ? new CustomEvent('smart-engine:ready') : { type: 'smart-engine:ready' });
+        }, 300);
+    });
+</script>

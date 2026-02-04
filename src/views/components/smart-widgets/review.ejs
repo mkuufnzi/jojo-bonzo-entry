@@ -1,0 +1,18 @@
+<!-- Review Request Widget -->
+<div class="mx-8 mt-6 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-6 border border-sky-100">
+    <div class="text-center">
+        <div class="font-semibold text-sky-800 mb-2">How was your experience?</div>
+        <!-- Alpine Rating if enabled, or just static links -->
+        <div class="flex justify-center gap-1 mb-3" x-data="{ rating: 0 }">
+            <% for(let i = 0; i < 5; i++) { %>
+            <button class="text-3xl hover:scale-110 transition-transform no-print" @click="rating = <%= i + 1 %>">
+                <span :class="rating > <%= i %> ? 'text-yellow-400' : 'text-gray-300'">★</span>
+            </button>
+            <% } %>
+        </div>
+        <div class="text-sm text-sky-600">Your feedback helps us improve</div>
+        <button class="mt-3 text-sky-700 hover:text-sky-800 text-sm font-semibold underline no-print">
+            Write a detailed review →
+        </button>
+    </div>
+</div>

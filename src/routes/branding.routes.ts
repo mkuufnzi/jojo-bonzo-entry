@@ -1,42 +1,36 @@
 import express from 'express';
 import multer from 'multer';
 import { BrandingController } from '../controllers/branding.controller';
+import { validate } from '../middleware/validate.middleware';
+import { updateSettingsSchema, saveConfigSchema, getPreviewSchema } from '../schemas/branding.schema';
+import { logUsage } from '../middleware/logging.middleware';
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() }); // Store in memory for immediate processing
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Middleware to inject branding profile
-router.use(async (req, res, next) => {
-    try {
-        // ... (existing middleware logic if any, or just pass through)
-        // Actually, let's keep it simple.
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
+// Applying enterprise audit logging to ALL branding routes
+router.use(logUsage);
 
-// Feature Toggle / Config Updates
-router.post('/settings', BrandingController.updateSettings);
-router.post('/config', BrandingController.saveConfig); // Keeping this as it was not explicitly removed, just reordered/renamed in the snippet
+// Settings & Main Editor (Dashboard Protected)
+router.get('/', BrandingController.renderEditor);
+
+// Feature Toggle / Config Updates - Validated
+router.post('/settings', validate(updateSettingsSchema), BrandingController.updateSettings);
+router.post('/config', validate(saveConfigSchema), BrandingController.saveConfig);
 
 // Enterprise Template - Clone/Duplicate
 router.post('/templates/clone', BrandingController.cloneTemplate);
 
+// Preview System - Dual-mode (GET/POST)
+router.get('/preview', validate(getPreviewSchema), BrandingController.getPreview);
+router.post('/preview', validate(getPreviewSchema), BrandingController.getPreview);
+
 // File Uploads
 router.post('/upload-logo', upload.single('logo'), BrandingController.uploadLogo);
 
-// Settings & Preview
-router.get('/', BrandingController.renderEditor);
-router.get('/preview', BrandingController.getPreview);
-router.post('/preview', BrandingController.getPreview);
-// AI Extraction
-// POST /api/branding/extract
-router.post('/extract', upload.single('file'), (req, res) => BrandingController.extract(req, res));
-
-// AI Template Generation
-// POST /api/branding/generate-template
-router.post('/generate-template', (req, res) => BrandingController.generateTemplate(req, res));
+// AI & Enterprise Tools
+router.post('/extract', upload.single('file'), BrandingController.extract);
+router.post('/generate-template', BrandingController.generateTemplate);
 
 // Template Source Editor
 router.get('/template/:id/source', BrandingController.getTemplateSource);

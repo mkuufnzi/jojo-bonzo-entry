@@ -1,0 +1,110 @@
+{
+    "id": "smart_invoice_v1",
+    "name": "Smart Invoice (Ceremonial)",
+    "description": "AI-Optimized layout with dynamic upsells and modern typography.",
+    "version": "1.0.0",
+    "type": "invoice",
+    "engine": "ejs-v1",
+    "author": "Floovioo",
+    "features": [
+        {
+            "id": "document_header",
+            "name": "Document Header",
+            "type": "toggle",
+            "required": true,
+            "defaultEnabled": true,
+            "description": "Standard issuer branding, invoice number, and status indicators."
+        },
+        {
+            "id": "customer_info",
+            "name": "Customer Details",
+            "type": "toggle",
+            "required": true,
+            "defaultEnabled": true,
+            "description": "Bill-to/Ship-to information and Loyalty Status badge."
+        },
+        {
+            "id": "line_items",
+            "name": "Line Items Table",
+            "type": "toggle",
+            "required": true,
+            "defaultEnabled": true,
+            "description": "Detailed breakdown of purchased products, quantities, and totals."
+        },
+        {
+            "id": "marketing_banner",
+            "name": "Promotional Banner Widget",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Marketing",
+            "description": "Sliding offers, announcements, and referral codes."
+        },
+        {
+            "id": "product_recommendations",
+            "name": "Product Recommendations Widget",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Conversion",
+            "description": "AI-driven cross-sell suggestions based on purchase history."
+        },
+        {
+            "id": "product_support",
+            "name": "Marketing Nurture Card (Tutorials)",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Retention",
+            "description": "Dynamic tutorials, recipes, or setup guides for purchased items."
+        },
+        {
+            "id": "tutorials",
+            "name": "Tutorials",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "description": "Video or text tutorials."
+        },
+        {
+            "id": "payment_details",
+            "name": "Payment Details Widget",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": false,
+            "description": "Bank details and payment method summary."
+        },
+        {
+            "id": "payment_confirmation",
+            "name": "Payment Confirmation",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": false,
+            "description": "Receipt confirmation details."
+        },
+        {
+            "id": "reviews",
+            "name": "Review Request",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": false,
+            "description": "Request for feedback."
+        },
+        {
+            "id": "customer_support",
+            "name": "Customer Support Widget",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "description": "Direct contact options and help resources."
+        },
+        {
+            "id": "footer",
+            "name": "Document Footer",
+            "type": "toggle",
+            "required": true,
+            "defaultEnabled": true,
+            "description": "Terms, legal disclaimers, and page numbering."
+        }
+    ]
+}

@@ -40,7 +40,7 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <!-- Alpine Loop over Logic -->
-        <template x-for="rec in window.INVOICE_DATA.recommendations" :key="rec.id">
+        <template x-for="rec in recommendations" :key="rec.id">
             <div class="rec-card">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-xs font-bold text-white px-2 py-0.5 rounded-full" 

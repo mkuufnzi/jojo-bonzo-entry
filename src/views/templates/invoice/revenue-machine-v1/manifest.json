@@ -1,7 +1,7 @@
 {
     "id": "invoice_revenue_machine_v1",
     "name": "Revenue Machine Invoice",
-    "description": "High-conversion layout with Arrow branding, bold typography, and integrated VIP nurture modules.",
+    "description": "High-conversion layout with \"Arrow\" branding, bold typography, and integrated VIP nurture modules.",
     "version": "1.0.0",
     "type": "INVOICE",
     "features": [
@@ -20,7 +20,7 @@
             "description": "Bill-to information and Invoice Metadata."
         },
         {
-            "id": "smart_banner",
+            "id": "marketing_banner",
             "name": "Smart Insights Banner",
             "type": "toggle",
             "required": false,
@@ -43,7 +43,7 @@
             "description": "Subtotal, Tax, and Grand Total block."
         },
         {
-            "id": "recommendations",
+            "id": "product_recommendations",
             "name": "Upsell Recommendations",
             "type": "toggle",
             "required": false,
@@ -52,8 +52,8 @@
             "description": "Cross-sell grid based on purchase history."
         },
         {
-            "id": "nurture_section",
-            "name": "Marketing Nurture Card",
+            "id": "product_support",
+            "name": "Product Support",
             "type": "toggle",
             "required": false,
             "defaultEnabled": true,
@@ -61,12 +61,20 @@
             "description": "VIP Club invite or Loyalty functionality."
         },
         {
-            "id": "payment_info",
+            "id": "payment_details",
             "name": "Payment Details",
             "type": "toggle",
             "required": false,
             "defaultEnabled": true,
             "description": "Bank details and payment method summary."
+        },
+        {
+            "id": "customer_support",
+            "name": "Customer Support Widget",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "description": "Direct contact options and help resources."
         },
         {
             "id": "footer",

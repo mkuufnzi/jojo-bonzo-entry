@@ -22,16 +22,20 @@
     .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
 </style>
 
-<div class="nurture-section">
-    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center text-2xl mb-3 text-white shadow-sm" 
-         style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%)">
-        💎
+<div class="doc-section nurture-section overflow-hidden" x-show="nurtureMsg">
+    <div class="flex items-center gap-6">
+        <div class="shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg transform -rotate-3" 
+             style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%)">
+             <span x-text="nurtureMsg.icon"></span>
+        </div>
+        <div class="flex-1 text-left">
+            <h3 class="font-bold text-xl brand-font leading-tight" style="color: var(--secondary-color)" x-text="nurtureMsg.headline"></h3>
+            <p class="text-sm text-gray-600 mt-1" x-text="nurtureMsg.body"></p>
+        </div>
+        <div class="shrink-0">
+            <a href="#" class="cta-button brand-font" @click.prevent="alert('VIP Join Flow Triggered')">
+                Join VIP Club
+            </a>
+        </div>
     </div>
-    <h3 class="font-bold text-lg brand-font" style="color: var(--secondary-color)">Join the VIP Club</h3>
-    <p class="text-sm text-gray-500 mt-1 max-w-sm mx-auto">
-        Unlock free shipping, <strong>20% off</strong> future orders, and exclusive access to new releases.
-    </p>
-    <a href="#" class="cta-button brand-font" @click.prevent="alert('VIP Join Flow Triggered')">
-        Activate VIP Status
-    </a>
 </div>

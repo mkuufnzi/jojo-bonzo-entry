@@ -1,0 +1,62 @@
+<% layout('layouts/document-master') %>
+
+<!-- Document Configuration -->
+<!-- Defines how the Universal Paginator interacts with this specific template -->
+<div id="doc-config" 
+    data-page-size="A4" 
+    data-orientation="portrait" 
+    data-margin-top="0" 
+    data-margin-bottom="0"
+    class="hidden"></div>
+
+<%- include('components/logic/smart-document-logic') %>
+
+<!-- Template Content -->
+<div class="font-sans text-slate-800">
+    <!-- Dynamic Background Pattern -->
+    <div class="fixed inset-0 pointer-events-none z-0" 
+         :style="'background: ' + theme.pattern"></div>
+
+    <!-- Header - Full Bleed -->
+    <div class="relative z-10 w-full mb-8 shadow-sm">
+        <%- include('./components/header') %>
+    </div>
+
+    <!-- Main Content - Constrained -->
+    <div class="relative z-10 max-w-[780px] mx-auto px-8 pb-12" data-split="true">
+        
+        <!-- Smart Insights Banner (Marketing Banner) -->
+        <% if (branding.components?.marketing_banner?.enabled) { %>
+            <div class="mb-8">
+                <%- include('std/widgets/banner') %>
+            </div>
+        <% } %>
+
+        <%- include('./components/customer_info') %>
+
+        <%- include('./components/line_items') %>
+
+        <!-- Debug: Components Keys: <%= Object.keys(branding.components || {}).join(',') %> -->
+        <% if (branding.components?.product_recommendations?.enabled) { %>
+            <%- include('std/widgets/product-recommendations') %>
+        <% } %>
+
+        <% if (branding.components?.product_support?.enabled) { %>
+            <%- include('std/widgets/tutorials') %>
+        <% } %>
+
+        <% if (branding.components?.payment_details?.enabled) { %>
+            <!-- Payment Details Widget (Optional) -->
+             <%- include('std/widgets/payment-details') %>
+        <% } %>
+
+        <% if (branding.components?.customer_support?.enabled) { %>
+            <%- include('std/widgets/support-card') %>
+        <% } %>
+
+        <%- include('./components/footer') %>
+
+
+
+    </div>
+</div>

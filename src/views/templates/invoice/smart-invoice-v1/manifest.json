@@ -37,7 +37,7 @@
         },
         {
             "id": "product_support",
-            "name": "Product Support Widget",
+            "name": "Product Support",
             "type": "toggle",
             "required": false,
             "defaultEnabled": true,
@@ -52,6 +52,14 @@
             "defaultEnabled": true,
             "badge": "Marketing",
             "description": "Sliding offers, announcements, and referral codes."
+        },
+        {
+            "id": "payment_details",
+            "name": "Payment Details Widget",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": false,
+            "description": "Bank details and payment method summary."
         },
         {
             "id": "customer_support",

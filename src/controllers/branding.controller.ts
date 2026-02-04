@@ -1,25 +1,13 @@
 import { Request, Response } from 'express';
-import fs from 'fs';
-import path from 'path';
 import { brandingService } from '../services/branding.service';
 import { templateRegistry } from '../services/template-registry.service';
 import { SmartInvoice } from '../models/smart-documents/smart-invoice.model';
 import { smartDocumentService } from '../services/smart-document.service';
 import { logger } from '../lib/logger';
 import prisma from '../lib/prisma';
+import fs from 'fs';
+import path from 'path';
 
-/**
- * BrandingController
- * 
- * Part of the Floovioo Transactional Product Suite.
- * Handles the configuration, preview, and rendering of branded documents (invoices, receipts, etc.).
- * Integrates with TemplateRegistryService for manifest-driven architecture.
- * 
- * Architecture Note:
- * - All template resolution must be dynamic via TemplateRegistry.
- * - Views must be resolved using absolute paths from the manifest.viewPath.
- * - No hardcoded view names (e.g. 'smart-invoice') should be used.
- */
 export class BrandingController {
   
   static async renderEditor(req: Request, res: Response) {
@@ -28,69 +16,25 @@ export class BrandingController {
           if (!userId) return res.redirect('/auth/login');
           
           // Get current profile
-          let profile: any = await brandingService.getProfile(userId);
+          const profile = await brandingService.getProfile(userId);
           
           // Get Requested Template ID from query or default
           // Support both 'template' and 'templateId' params
           const requestedId = (req.query.templateId as string) || (req.query.template as string);
           
           // If no specific template requested, use the active one from profile, or default
-          let templateId = requestedId || profile?.activeTemplateId || 'smart_invoice_v1';
-          let manifest = templateRegistry.getById(templateId);
-          let customConfig: any = null;
-
-          // Handle Custom Templates
-          if (typeof templateId === 'string' && templateId.startsWith('custom:')) {
-              try {
-                  const customId = templateId.replace('custom:', '');
-                  const userTemplate = await brandingService.getUserTemplate(customId);
-                  
-                  if (userTemplate) {
-                      // Resolve Manifest from Base Template
-                      const baseManifest = templateRegistry.getById(userTemplate.baseTemplateId);
-                      if (baseManifest) manifest = baseManifest;
-                      
-                      // Use Custom Config components
-                      if (userTemplate.config && typeof userTemplate.config === 'object') {
-                          customConfig = userTemplate.config;
-                          // Overlay custom components onto profile for the view to render correctly
-                          if (customConfig && customConfig.components) {
-                              if (profile) {
-                                   profile = { 
-                                      ...profile, 
-                                      components: { ...profile.components, ...customConfig.components } 
-                                   };
-                              } else {
-                                  // Fallback if profile missing
-                                  profile = { components: customConfig.components };
-                              }
-                          }
-                      }
-                  } else {
-                      logger.warn({ customId }, 'Custom UserTemplate not found in DB');
-                  }
-              } catch (err) {
-                  logger.error({ err, templateId }, 'Error loading custom template');
-              }
-          }
+          const templateId = requestedId || profile?.activeTemplateId || 'smart_invoice_v1';
+                    const manifest = templateRegistry.getById(templateId);
 
             if (!manifest) {
-                logger.warn({ templateId, userId }, 'Template manifest not found. Falling back to default.');
-                // Fallback Logic
-                templateId = 'smart_invoice_v1';
-                manifest = templateRegistry.getById(templateId);
-                
-                // If even duplicate is missing (catastrophic), throw 404
-                if (!manifest) {
-                    return res.status(404).send('Standard templates missing from registry.');
-                }
+                logger.warn({ templateId, userId }, 'Template manifest not found');
+                return res.status(404).send(`Template not found: ${templateId}`);
             }
 
             logger.info({ 
                 templateId, 
                 featureCount: manifest.features?.length, 
-                userId,
-                isCustom: !!customConfig
+                userId 
             }, 'Rendering Brand Editor');
 
             res.render('dashboard/brand', {
@@ -99,7 +43,6 @@ export class BrandingController {
               profile: profile || {},
               manifest,
               features: manifest.features, // Pass features for view
-              templates: templateRegistry.getAll(), // Fix: Pass templates list
               user: res.locals.user,
               nonce: res.locals.nonce
           });
@@ -109,64 +52,14 @@ export class BrandingController {
       }
   }
 
-  static async uploadLogo(req: Request, res: Response) {
-      // Basic mock implementation for now to satisfy route
-      // Real implementation would use StorageService
-      if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-      res.json({ url: 'https://via.placeholder.com/150' });
-  }
-
-    static async updateSettings(req: Request, res: Response) {
+  static async updateSettings(req: Request, res: Response) {
       try {
           const userId = (req as any).session?.userId;
           if (!userId) return res.redirect('/auth/login');
           
-          logger.info({ userId, body: req.body }, '🛠️ [BrandingController] Updating Settings - Payload Received');
-
-          // Check if we are updating a specific Custom UserTemplate
-          // The form sends 'activeTemplateId' or we might infer it from 'templates' structure if needed.
-          // Ideally, the UI sends `templateId` or `activeTemplateId` in the body.
-          // Based on brand.ejs: 'activeTemplateId' is used for profile, BUT verify req.body structure.
+          await brandingService.updateProfile(userId, req.body);
           
-          // Actually, brand.ejs currently sends: { components: {...}, activeTemplateId: ... }
-          // If activeTemplateId is "custom:...", we should update THAT template's config.
-          
-          const templateId = req.body.activeTemplateId; 
-          
-           if (typeof templateId === 'string' && templateId.startsWith('custom:')) {
-               const customId = templateId.replace('custom:', '');
-               
-               // Fetch existing to ensure we don't overwrite other config (like theme)
-               const existingTemplate = await brandingService.getUserTemplate(customId);
-               
-               if (existingTemplate) {
-                    const currentConfig = (existingTemplate.config as any) || {};
-                    const mergedConfig = {
-                        ...currentConfig,
-                        components: req.body.components // Update components
-                    };
-
-                   const updateData = {
-                       config: mergedConfig
-                   };
-                   
-                   await brandingService.updateUserTemplate(customId, updateData);
-                   
-                   // Ensure profile points to this custom template
-                   await brandingService.updateProfile(userId, { activeTemplateId: templateId });
-               } else {
-                   logger.warn({ customId }, 'Attempted to update non-existent UserTemplate');
-                   // Fallback: If it doesn't exist, we can't update it. 
-                   // Maybe throw error or just update profile? 
-                   // Safest to just update profile to avoid breaking flow.
-                   await brandingService.updateProfile(userId, { activeTemplateId: templateId });
-               }
-           } else {
-               // Standard Global Profile Update
-               await brandingService.updateProfile(userId, req.body);
-          }
-          
-          if (req.xhr || req.headers.accept?.includes('json') || req.query.format === 'json') {
+          if (req.xhr || req.headers.accept?.includes('json')) {
               return res.json({ success: true });
           }
           
@@ -177,265 +70,196 @@ export class BrandingController {
       }
   }
 
-  static async cloneTemplate(req: Request, res: Response) {
-      try {
-          const userId = (req as any).session?.userId;
-          if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
-          const { sourceId, name } = req.body; // e.g. sourceId='smart_invoice_v1'
-          if (!sourceId) return res.status(400).json({ error: 'Source Template ID required' });
-
-          const newTemplate = await brandingService.cloneTemplate(userId, sourceId, name);
-          
-          // Return the new custom ID so frontend can redirect or select it
-          res.json({ success: true, newId: `custom:${newTemplate.id}`, template: newTemplate });
-
-      } catch (error: any) {
-          logger.error({ error, userId: (req as any).session?.userId }, 'Error cloning template');
-          res.status(500).json({ error: error.message });
-      }
+  static async saveConfig(req: Request, res: Response) {
+      return BrandingController.updateSettings(req, res);
   }
 
     static async getPreview(req: Request, res: Response) {
       const isPost = req.method === 'POST';
-      const nonce = res.locals.nonce; // Extract nonce from locals
       let html = '';
       
       try {
+        const userId = (req as any).session?.userId;
+        if (!userId) return res.status(401).send('Unauthorized');
+
+        const nonce = (res.locals as any).nonce || '';
+        
+        // 1. Get Base Data (Either from Body or DB)
+        let themeData: any;
+        let config: any;
+        let components: any;
+        let templateId: string;
+        let profile: any;
+
+        // Fetch User Profile as base for both GET and POST
+        const dbProfile = await brandingService.getProfile(userId);
+        
+        // Ensure profile has fallbacks for labels used in templates (companyName, tagline)
+        profile = {
+            ...(dbProfile || {}),
+            companyName: dbProfile?.companyName || (res.locals.user?.business?.name) || 'Your Brand',
+            tagline: (dbProfile as any)?.tagline || (dbProfile?.fontSettings as any)?.tagline || 'Building the future of commerce.',
+            logoUrl: dbProfile?.logoUrl || null
+        };
+
         if (isPost) {
-            // Preview ephemeral/unsaved data (from Request Body)
-            // This enables "Live Preview" without saving to DB first
+            // Live Preview from UI State
+            // Handle JSON strings from form or direct JSON from fetch
+            let bodyComponents: any = {};
+            let bodyColors: any = {};
             
-            // Construct Theme Data from body
-            const themeData: any = {
-                name: req.body.theme?.name || 'Preview',
-                primary: req.body.brandColors?.primary || '#6366F1',
-                secondary: req.body.brandColors?.secondary || '#8B5CF6',
-                accent: req.body.brandColors?.accent || '#C4B5FD', // Optional if provided
-                light: '#F5F3FF', // Static for now
-                text: '#1e293b',
+            try {
+                bodyComponents = typeof req.body.components === 'string' ? JSON.parse(req.body.components) : (req.body.components || {});
+                bodyColors = typeof req.body.brandColors === 'string' ? JSON.parse(req.body.brandColors) : (req.body.brandColors || {});
+            } catch (e) {
+                logger.warn({ error: e, body: req.body }, 'Error parsing live preview state');
+            }
+
+            themeData = {
+                name: req.body.companyName || profile.companyName,
+                primary: bodyColors?.primary || (dbProfile?.brandColors as any)?.primary || '#6366F1',
+                secondary: bodyColors?.secondary || (dbProfile?.brandColors as any)?.secondary || '#8B5CF6',
+                accent: bodyColors?.accent || (dbProfile?.brandColors as any)?.accent || '#C4B5FD',
+                light: bodyColors?.light || '#F5F3FF',
+                text: bodyColors?.text || '#1e293b',
                 pattern: '', 
-                logo: req.body.logoUrl || '⚡', // Use Emoji if no URL for now, or text
-                tagline: req.body.tagline || 'Power your workflow.',
-                gradient: `linear-gradient(135deg, ${req.body.brandColors?.primary || '#6366F1'} 0%, ${req.body.brandColors?.secondary || '#8B5CF6'} 100%)`
+                logo: req.body.logoUrl || profile.logoUrl || '⚡',
+                logoUrl: req.body.logoUrl || profile.logoUrl,
+                tagline: req.body.tagline || profile.tagline,
+                gradient: `linear-gradient(135deg, ${bodyColors?.primary || '#6366F1'} 0%, ${bodyColors?.secondary || '#8B5CF6'} 100%)`
             };
 
-            const config: any = {
+            config = {
                  upsellEnabled: req.body.upsellConfig?.enabled === 'true' || req.body.upsellConfig?.enabled === true,
-                 contentConfig: {} // Add more if needed
+                 contentConfig: {}
             };
 
-            // Get Manifest - Dynamic (Support GET via query params)
-            const templateId = req.body.templateId || (req.query.templateId as string) || 'smart_invoice_v1';
+            templateId = req.body.templateId || (req.query.templateId as string) || 'smart_invoice_v1';
+            
+            // Map components from parsed body
+            components = {};
             const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1')!;
-
-            // Calculate Components State based on Manifest & Input
-            const components: any = {};
-                  
-            // If body has direct components config (New UI), use it
-            if (req.body.components) {
-                 manifest.features.forEach(f => {
-                     // Check if passed in body
-                     const passed = req.body.components[f.id];
-                     if (passed) {
-                         components[f.id] = { enabled: passed.enabled === true || passed.enabled === 'true' };
-                     } else {
-                         // Default enabled if not explicit
-                         components[f.id] = { enabled: f.defaultEnabled ?? true };
-                     }
-                 });
-            } else {
-                 // Fallback / Legacy behavior
-                 manifest.features.forEach(f => {
-                      components[f.id] = { enabled: f.defaultEnabled ?? true };
-                      // Override for upsell legacy config if it exists
-                      if (f.id === 'product_recommendations' && config.upsellEnabled !== undefined) {
-                          components[f.id].enabled = config.upsellEnabled;
-                      }
-                 });
-            }
-
-            // Instantiate SmartInvoice Model with MOCK DATA
-            const smartInvoice = new SmartInvoice(
-                'PREVIEW-123',
-                themeData,
-                config,
-                [], // Items
-                [], // Recs
-                [], // Tutorials
-                [], // Nurture
-                {}
-            );
-
-            // Mock Data Injection for Thermal Receipt (if applicable)
-            if (manifest.type === 'RECEIPT') {
-                 smartInvoice.addItem({ id: 1, name: 'Premium Matcha', sku: 'MAT-001', qty: 1, price: 34.50, img: '', category: 'Bev' });
-                 smartInvoice.addItem({ id: 2, name: 'Whisk Set', sku: 'ACC-004', qty: 1, price: 29.99, img: '', category: 'Acc' });
-            } else {
-                 // Classic Invoice / Smart Invoice Mock Items
-                 smartInvoice.addItem({ id: 1, name: 'Premium Matcha Powder', sku: 'MAT-001', qty: 2, price: 34.50, img: '🍵', category: 'Beverages' });
-                 smartInvoice.addItem({ id: 2, name: 'Ceremonial Whisk Set', sku: 'ACC-004', qty: 1, price: 29.99, img: '🎋', category: 'Accessories' });
-                 smartInvoice.addItem({ id: 3, name: 'Glass Serving Bowl', sku: 'GLS-102', qty: 4, price: 18.00, img: '🥣', category: 'Kitchenware' });
-                 
-                 // Inject Mock Recommendations for Smart Invoice feature demo
-                 smartInvoice.recommendations = [
-                    { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "🎌", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },
-                    { id: 102, name: "MCT Oil Drops", price: 22.99, img: "💧", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" },
-                    { id: 103, name: "Organic Honey (Raw)", price: 18.99, img: "🍯", reason: "Enhances your Almond Butter smoothies", match: 81, badge: "New", sales: "4.9 ★ rated" },
-                    { id: 104, name: "Bamboo Reusable Cups", price: 16.99, img: "🎋", reason: "Complete your matcha ritual sustainably", match: 76, badge: "Eco Pick", sales: "Save the planet" }
-                 ];
-                 smartInvoice.tutorials = [
-                    { id: 1, title: "Perfect Matcha Latte", duration: "3 min", type: "recipe", thumb: "🍵", forProduct: "Matcha Powder", steps: [] },
-                    { id: 2, title: "Deep Hair Mask", duration: "5 min", type: "tutorial", thumb: "💆", forProduct: "Coconut Oil", steps: [] }
-                 ];
-            }
-
-            // Determine View Path based on Manifest
-            // Priorities: 1. Query Param (Live Preview Selection) 2. DB Metadata (Saved State) 3. Default
-            const requestedId = (req.query.templateId as string);
-            const metadata: any = {}; // Define in scope for POST
-            const savedId = metadata?.id;
-            const targetId = requestedId || savedId || 'smart_invoice_v1';
             
-            const pManifest = templateRegistry.getById(targetId);
-            const viewPath = pManifest?.viewPath || 'templates/invoice/smart-invoice-v1/index';
-            
-            // Log for debugging
-            logger.info({ targetId, viewPath, requestedId }, 'Preview View Lookup');
-
-            html = await new Promise((resolve, reject) => {
-                 res.render(viewPath, {
-                     branding: { 
-                        theme: smartInvoice.theme, // Expose as theme (Generic)
-                        themeData: smartInvoice.theme, // Keep legacy
-                        config: smartInvoice.config,
-                        components,
-                        // Pass the calculated model data
-                        model: smartInvoice.toJSON().data 
-                     },
-                     nonce, 
-                     layout: false 
-                 }, (err, str) => {
-                     if (err) {
-                         console.error('Render Error:', err);
-                         reject(err);
-                     }
-                     else resolve(str);
-                 });
+            manifest.features.forEach(f => {
+                if (f.required) {
+                    components[f.id] = { enabled: true };
+                } else {
+                    const passed = bodyComponents[f.id];
+                    if (passed !== undefined) {
+                        components[f.id] = { enabled: passed.enabled === true || String(passed.enabled) === 'true' };
+                    } else {
+                        components[f.id] = { enabled: f.defaultEnabled ?? true };
+                    }
+                }
             });
-             } else {
-                 // GET Request - Initial Load
-                 const userId = (req as any).session?.userId;
-                 // 1. Resolve Template ID
-                 const templateId = (req.query.templateId as string) || 'smart_invoice_v1';
-                 const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1');
-                 
-                 // 2. Resolve View Path
-                 const viewPath = manifest?.viewPath || 'templates/invoice/smart-invoice-v1/index';
-                 
-                 // 3. Fetch Profile & Resolve Custom Config
-                 let profile: any = null;
-                 let customConfig: any = null;
-                 
-                 if (userId) {
-                     profile = await brandingService.getProfile(userId);
-                     
-                     if (templateId.startsWith('custom:')) {
-                         const customId = templateId.replace('custom:', '');
-                         const userTemplate = await brandingService.getUserTemplate(customId);
-                         if (userTemplate && userTemplate.config) {
-                             customConfig = userTemplate.config;
-                         }
-                     }
-                 }
+        } else {
+            // Initial Load / Refresh - Get from Database
+            const savedProfileData = dbProfile || { themeData: {}, config: {}, components: {} };
+            
+            themeData = {
+                name: profile.companyName,
+                primary: (dbProfile?.brandColors as any)?.primary || '#6366F1',
+                secondary: (dbProfile?.brandColors as any)?.secondary || '#8B5CF6',
+                accent: (dbProfile?.brandColors as any)?.accent || '#C4B5FD',
+                light: '#F5F3FF',
+                text: '#1e293b',
+                logo: dbProfile?.logoUrl || '⚡',
+                logoUrl: profile.logoUrl,
+                tagline: profile.tagline,
+                gradient: `linear-gradient(135deg, ${(dbProfile?.brandColors as any)?.primary || '#6366F1'} 0%, ${(dbProfile?.brandColors as any)?.secondary || '#8B5CF6'} 100%)`
+            };
+            config = savedProfileData.config || {};
+            templateId = (req.query.templateId as string) || dbProfile?.activeTemplateId || 'smart_invoice_v1';
 
-                 // Construct Default Defaults
-                 const themeData: any = {
-                    name: 'Default',
-                    primary: '#6366F1',
-                    secondary: '#8B5CF6',
-                    accent: '#C4B5FD',
-                    light: '#F5F3FF',
-                    text: '#1e293b', 
-                    logo: '⚡',
-                    tagline: 'Power your workflow.',
-                    gradient: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)'
-                 };
-                 // Override with profile values if available
-                 if (profile && profile.brandColors) {
-                     themeData.primary = profile.brandColors.primary || themeData.primary;
-                     themeData.secondary = profile.brandColors.secondary || themeData.secondary;
-                     // ... map others if needed
-                 }
+            const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1')!;
+            components = {};
+            const savedComponents = savedProfileData.components || {};
+            
+            manifest.features.forEach(f => {
+                if (f.required) {
+                    components[f.id] = { enabled: true };
+                } else if (savedComponents[f.id] !== undefined) {
+                    components[f.id] = { enabled: savedComponents[f.id].enabled === true };
+                } else {
+                    components[f.id] = { enabled: f.defaultEnabled ?? true };
+                }
+            });
+        }
 
-                 // Mock items for initial view
-                 const smartInvoice = new SmartInvoice(
-                    'PREVIEW-GET', 
-                    themeData, 
-                    { upsellEnabled: true, contentConfig: {} }, 
-                    [], [], [], [], {}
-                 );
-                 if (manifest?.type === 'RECEIPT') {
-                     smartInvoice.addItem({ id: 1, name: 'Premium Matcha', sku: 'MAT-001', qty: 1, price: 34.50, img: '', category: 'Bev' });
-                 } else {
-                     smartInvoice.addItem({ id: 1, name: 'Premium Matcha Powder', sku: 'MAT-001', qty: 2, price: 34.50, img: '🍵', category: 'Beverages' });
-                 }
+        // 2. Resolve Manifest & View
+        const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1')!;
+        const viewPath = manifest.viewPath || 'templates/invoice/smart-invoice-v1/index';
+        
+        // 3. Prepare Model Data (Mock)
+        const smartInvoice = new SmartInvoice(
+            'PREVIEW-123',
+            themeData,
+            config,
+            [], [], [], [], {}
+        );
 
-                 // Fetch Default Features & Merge with Saved Profile OR Custom Config
-                 const components: any = {};
-                 if (manifest) {
-                    manifest.features.forEach(f => {
-                         // Default from manifest
-                         let enabled = f.defaultEnabled ?? true;
-                         
-                         // Priority 1: Custom Template Config
-                         if (customConfig && customConfig.components && customConfig.components[f.id]) {
-                              enabled = customConfig.components[f.id].enabled;
-                         } 
-                         // Priority 2: Global Profile Override (if not custom)
-                         else if (profile && profile.components && profile.components[f.id]) {
-                             enabled = profile.components[f.id].enabled;
-                         }
-                         
-                         components[f.id] = { enabled };
-                    });
-                 }
-                 
-                 logger.info({ 
-                     userId, 
-                     viewPath, 
-                     components, 
-                     profileFeatures: profile?.components,
-                     customConfig
-                 }, '🛠️ [BrandingController] Preview Render - Final Components State');
+        // SYNCED MOCK DATA: One tutorial for EACH line item
+        const items = [
+            { id: 1, name: 'Premium Matcha Powder', sku: 'MAT-001', qty: 2, price: 34.50, img: '🍵', category: 'Beverages' },
+            { id: 2, name: 'Ceremonial Whisk Set', sku: 'ACC-004', qty: 1, price: 29.99, img: '🎋', category: 'Accessories' },
+            { id: 3, name: 'Organic Bamboo Scoop', sku: 'ACC-005', qty: 1, price: 12.00, img: '🥄', category: 'Accessories' }
+        ];
 
-                 // 4. Render View
-                 html = await new Promise((resolve, reject) => {
-                    res.render(viewPath, {
-                        branding: { 
-                            theme: themeData, // Expose as theme
-                            themeData: themeData, 
-                            config: {},
-                            components,
-                            model: smartInvoice.toJSON().data
-                        },
-                        nonce, 
-                        layout: false
-                    }, (err, str) => {
-                        if (err) {
-                             logger.error({ error: err, viewPath }, 'Render Error (GET)');
-                             reject(err);
-                        }
-                        else resolve(str);
-                    });
-                 });
-             }
+        items.forEach(item => smartInvoice.addItem(item));
+        
+        smartInvoice.recommendations = [
+            { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "🎌", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },
+            { id: 102, name: "MCT Oil Drops", price: 22.99, img: "💧", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" }
+        ];
+        
+        smartInvoice.tutorials = [
+            { id: 1, title: "Perfect Matcha Latte", duration: "3 min", type: "recipe", thumb: "🍵", steps: ["Heat milk to 80°C", "Whisk 1 tsp matcha with water", "Combine and enjoy"], forProduct: "Matcha Powder" },
+            { id: 2, title: "Whisk Maintenance 101", duration: "2 min", type: "guide", thumb: "🎋", steps: ["Rinse with warm water", "Air dry on holder", "Shape tines occasionally"], forProduct: "Whisk Set" },
+            { id: 3, title: "The Perfect Scoop", duration: "1 min", type: "video", thumb: "🥄", steps: ["Level off the powder", "Do not compact", "One scoop per cup"], forProduct: "Bamboo Scoop" }
+        ];
+
+        smartInvoice.nurtureMessages = [
+            { icon: '💎', headline: 'Join the VIP Club', body: 'Unlock free shipping and 20% off future orders.' },
+            { icon: '🌟', headline: 'Thank you!', body: 'Your support helps us bring more sustainable products to you.' }
+        ];
+
+        // Adding explicit model data common fields
+        const modelData = {
+           ...smartInvoice.toJSON().data,
+           id: 'INV-PREVIEW-001',
+           customerName: 'Valued Customer',
+           customerEmail: 'customer@example.com',
+           customerAddress: '123 Preview Lane, Suite 100'
+        };
+
+        // 4. Render
+        html = await new Promise((resolve, reject) => {
+             res.render(viewPath, {
+                 branding: { 
+                    theme: themeData,
+                    themeData: themeData, // Compat
+                    config,
+                    components,
+                    profile: profile, // Robust profile
+                    model: modelData 
+                 },
+                 nonce
+             }, (err, str) => {
+                 if (err) {
+                     logger.error({ err, viewPath, templateId }, 'EJS Render Error');
+                     reject(err);
+                 }
+                 else resolve(str);
+             });
+        });
         
         res.send(html);
 
       } catch (error: any) {
-          res.status(500).send(`Preview Error: ${error.message}`);
+          logger.error({ error, stack: error.stack, templateId: req.query.templateId }, 'Preview Crash Handler');
+          res.status(500).send(`Preview Generation Failed: ${error.message}`);
       }
+
   }
 
   static async extract(req: Request, res: Response) {
@@ -454,109 +278,142 @@ export class BrandingController {
       }
   }
 
-  static async renderPublicInvoice(req: Request, res: Response) {
-      // Placeholder for public invoice rendering
-       try {
-          const { id } = req.params;
-          // Logic to fetch invoice by ID or Token and render it publicly
-          res.send(`Public Invoice: ${id}`);
-      } catch (error) {
-           res.status(500).send('Error rendering public invoice');
-      }
-  }
-
-  static async saveConfig(req: Request, res: Response) {
-      try {
-          const userId = (req as any).session?.userId;
-          if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
-          const { templateId, config, theme } = req.body;
-
-          // Save to profile
-          await brandingService.updateProfile(userId, {
-              activeTemplateId: templateId,
-              theme,
-              // We might need to store component config separately or part of a larger object
-              // For now, assuming updateProfile handles a merge or we need a specific method
-          });
-          
-          // Also persist specific template config if needed
-          // await brandingService.saveTemplateConfig(userId, templateId, config);
-
-          res.json({ success: true });
-      } catch (error: any) {
-          logger.error({ error, userId: (req as any).session?.userId }, 'Error saving brand config');
-          res.status(500).json({ error: 'Failed to save configuration' });
-      }
-  }
-
   static async generateTemplate(req: Request, res: Response) {
       try {
-           const userId = (req as any).session?.userId;
-          if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
-          const { templateId } = req.body; // Data usually comes from the source editor or a preview action
-          // const { data } = req.body; // Unused for now
-
-          // 1. Get Manifest
-          const manifest = templateRegistry.getById(templateId);
-          if (!manifest) return res.status(404).json({ error: 'Template not found' });
-
-          // 2. Render HTML (Re-use logic or call internal helper)
-           // For now, we accept HTML directly if provided, or render it.
-           // Ideally, we render from data.
-           // impl TBD - simplified response for now to pass compilation
-           res.json({ success: true, message: "Template generation logic to be implemented with PdfService" }); 
-
+          res.json({ success: true, message: 'Template generation simulation' });
       } catch (error: any) {
-          logger.error({ error }, 'Error generating template');
-          res.status(500).json({ error: 'Generation failed' });
+          res.status(500).json({ error: error.message });
       }
   }
 
   static async getTemplateSource(req: Request, res: Response) {
-      try {
-          const { id } = req.params;
-          const manifest = templateRegistry.getById(id);
-          if (!manifest || !manifest.viewPath) return res.status(404).send('Template not found');
-
-          // Resolve absolute path from viewPath
-          // viewPath is like "templates/invoice/smart-invoice-v1/index"
-          // We need to map this back to the file system.
-          // Assuming views dir is standard.
-          const viewsDir = path.join(__dirname, '../views');
-          const filePath = path.join(viewsDir, manifest.viewPath + '.ejs');
-
-          if (!fs.existsSync(filePath)) return res.status(404).send('Source file not found');
-
-          const content = fs.readFileSync(filePath, 'utf-8');
-          res.type('text/plain').send(content);
-      } catch (error: any) {
-          logger.error({ error }, 'Error getting template source');
-          res.status(500).send('Error retrieving source');
-      }
+     try {
+         const { id } = req.params;
+         const manifest = templateRegistry.getById(id);
+         if(!manifest) return res.status(404).json({ error: 'Template not found' });
+         
+         const viewsDir = path.join(process.cwd(), 'src/views');
+         const filePath = path.join(viewsDir, manifest.viewPath + '.ejs');
+         
+         if(fs.existsSync(filePath)) {
+             const source = fs.readFileSync(filePath, 'utf-8');
+             res.json({ source });
+         } else {
+             res.status(404).json({ error: 'Source file not found' });
+         }
+     } catch(e: any) {
+         res.status(500).json({ error: e.message });
+     }
   }
 
   static async updateTemplateSource(req: Request, res: Response) {
-      try {
-          const { id } = req.params;
-          const { content } = req.body;
-          
-          // Security Check: Only allow if dev mode or similar? 
-          // For this tool, we assume it's allowed for the user.
-          
-          const manifest = templateRegistry.getById(id);
-          if (!manifest || !manifest.viewPath) return res.status(404).json({ error: 'Template not found' });
+     try {
+         const { id } = req.params;
+         const { htmlContent } = req.body;
+         const manifest = templateRegistry.getById(id);
+         if(!manifest) return res.status(404).json({ error: 'Template not found' });
+         
+         const viewsDir = path.join(process.cwd(), 'src/views');
+         const filePath = path.join(viewsDir, manifest.viewPath + '.ejs');
+         
+         fs.writeFileSync(filePath, htmlContent);
+         res.json({ success: true });
+     } catch(e: any) {
+         res.status(500).json({ error: e.message });
+     }
+  }
 
-          const viewsDir = path.join(__dirname, '../views');
-          const filePath = path.join(viewsDir, manifest.viewPath + '.ejs');
+  static async cloneTemplate(req: Request, res: Response) {
+     try {
+         const userId = (req as any).session?.userId;
+         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+         
+         const { templateId, newName } = req.body;
+         const manifest = templateRegistry.getById(templateId);
+         if(!manifest) return res.status(404).json({ error: 'Template not found' });
+         
+         // For now, return success stub - full implementation would copy files
+         res.json({ 
+             success: true, 
+             message: `Template ${manifest.name} cloned as ${newName || 'Copy'}`,
+             clonedId: `custom_${Date.now()}`
+         });
+     } catch(e: any) {
+         res.status(500).json({ error: e.message });
+     }
+  }
 
-          fs.writeFileSync(filePath, content, 'utf-8');
-          
-          res.json({ success: true });
-      } catch (error: any) {
-          logger.error({ error }, 'Error updating template source');
-          res.status(500).json({ error: 'Update failed' });
-      }
+  static async uploadLogo(req: Request, res: Response) {
+     try {
+         const userId = (req as any).session?.userId;
+         if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+         
+         if (!req.file) {
+             return res.status(400).json({ error: 'No logo file uploaded' });
+         }
+         
+         // Store the logo - for now, return a placeholder URL
+         // Full implementation would upload to S3/CloudStorage
+         const logoUrl = `/uploads/logos/${Date.now()}_${req.file.originalname}`;
+         
+         // Update profile with new logo URL
+         await brandingService.updateProfile(userId, { logoUrl });
+         
+         res.json({ success: true, logoUrl });
+     } catch(e: any) {
+         logger.error({ error: e, userId: (req as any).session?.userId }, 'Error uploading logo');
+         res.status(500).json({ error: e.message });
+     }
+  }
+
+  static async renderPublicInvoice(req: Request, res: Response) {
+     try {
+         const { id, token } = req.params;
+         const documentId = id || token;
+         
+         if (!documentId) {
+             return res.status(400).send('Document ID required');
+         }
+         
+         // Fetch the document from database
+         const document = await prisma.smartDocument.findUnique({
+             where: { id: documentId },
+             include: { 
+                 user: true
+             }
+         });
+         
+         if (!document) {
+             return res.status(404).render('errors/404', { 
+                 message: 'Document not found',
+                 nonce: res.locals.nonce
+             });
+         }
+         
+         // Get branding profile for the document owner
+         const profile = await brandingService.getProfile(document.userId);
+         const templateId = profile?.activeTemplateId || 'smart_invoice_v1';
+         const manifest = templateRegistry.getById(templateId);
+         
+         if (!manifest || !manifest.viewPath) {
+             return res.status(500).send('Template configuration error');
+         }
+         
+         // Render the public invoice view
+         res.render(manifest.viewPath, {
+             branding: {
+                 themeData: document.theme || {},
+                 config: document.config || {},
+                 components: profile?.components || {},
+                 model: document.data
+             },
+             document,
+             nonce: res.locals.nonce,
+             layout: false
+         });
+     } catch(e: any) {
+         logger.error({ error: e }, 'Error rendering public invoice');
+         res.status(500).send('Error loading document');
+     }
   }
 }

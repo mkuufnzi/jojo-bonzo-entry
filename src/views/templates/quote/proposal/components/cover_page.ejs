@@ -1,0 +1,22 @@
+<!-- Cover Page -->
+<% if (branding.components && branding.components['cover_page'] && branding.components['cover_page'].enabled) { %>
+<div class="proposal-section max-w-4xl mx-auto bg-white shadow-2xl overflow-hidden min-h-[1000px] mb-10 flex flex-col relative">
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900 z-0"></div>
+    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0"></div>
+    
+    <div class="relative z-10 flex-1 flex flex-col justify-center p-20 text-white">
+        <div class="mb-10 text-6xl"><%= branding.themeData.logo %></div>
+        <h1 class="text-7xl font-black leading-tight mb-6">Project<br>Proposal</h1>
+        <div class="w-32 h-2 bg-indigo-500 mb-10"></div>
+        
+        <h2 class="text-2xl font-light text-indigo-200">Prepared for:</h2>
+        <p class="text-3xl font-bold">Sarah Mitchell</p>
+        
+        <div class="mt-auto pt-20">
+            <p class="text-indigo-300">Presented by:</p>
+            <p class="font-bold text-xl"><%= branding.themeData.name %></p>
+            <p class="text-sm opacity-70"><%= new Date().toLocaleDateString() %></p>
+        </div>
+    </div>
+</div>
+<% } %>

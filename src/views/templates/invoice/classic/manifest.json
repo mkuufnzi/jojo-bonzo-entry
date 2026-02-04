@@ -7,16 +7,46 @@
     "features": [
         {
             "id": "header",
-            "name": "Header",
+            "name": "Header Banner",
             "type": "toggle",
-            "defaultEnabled": true
+            "required": true,
+            "description": "issuer branding and status indicators."
         },
         {
-            "id": "watermark",
-            "name": "Background Watermark",
+            "id": "customer_info",
+            "name": "Customer Details",
             "type": "toggle",
-            "defaultEnabled": false,
-            "description": "Display company logo as a subtle watermark."
+            "required": true,
+            "description": "Bill-to/Ship-to information."
+        },
+        {
+            "id": "line_items",
+            "name": "Line Items Table",
+            "type": "toggle",
+            "required": true,
+            "description": "Detailed breakdown of products."
+        },
+        {
+            "id": "product_recommendations",
+            "name": "Product Recommendations",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Conversion"
+        },
+        {
+            "id": "marketing_banner",
+            "name": "Promotional Banner",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Marketing"
+        },
+        {
+            "id": "footer",
+            "name": "Document Footer",
+            "type": "toggle",
+            "required": true
         }
     ]
 }

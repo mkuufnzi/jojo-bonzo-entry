@@ -1,0 +1,26 @@
+<!-- Line Items -->
+<div class="mb-12">
+    <table class="w-full" data-split="true">
+        <thead>
+            <tr class="border-b-2 border-gray-800">
+                <th class="text-left py-4 px-2 font-bold text-gray-900 w-1/2">Description</th>
+                <th class="text-center py-4 px-2 font-bold text-gray-900">Quantity</th>
+                <th class="text-right py-4 px-2 font-bold text-gray-900">Unit Price</th>
+                <th class="text-right py-4 px-2 font-bold text-gray-900">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% branding.model.items.forEach((item, index) => { %>
+            <tr class="<%= index % 2 === 0 ? 'bg-gray-50' : 'bg-white' %> border-b border-gray-100">
+                <td class="py-4 px-2">
+                    <span class="font-bold text-gray-800 block"><%= item.name %></span>
+                    <span class="text-xs text-gray-500"><%= item.category %></span>
+                </td>
+                <td class="py-4 px-2 text-center text-gray-600"><%= item.qty %></td>
+                <td class="py-4 px-2 text-right text-gray-600">$<%= item.price.toFixed(2) %></td>
+                <td class="py-4 px-2 text-right font-bold text-gray-900">$<%= (item.price * item.qty).toFixed(2) %></td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>

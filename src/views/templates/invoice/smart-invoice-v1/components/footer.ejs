@@ -1,6 +1,15 @@
 <!-- FOOTER -->
 <div class="mt-7 bg-white rounded-xl p-6 text-center shadow-sm font-sans">
-    <div class="text-lg" x-text="theme.logo"></div>
+    <!-- Logo fallback logic -->
+    <div class="mb-2">
+        <template x-if="theme.logoUrl">
+            <img :src="theme.logoUrl" alt="Logo" class="h-8 w-auto mx-auto object-contain">
+        </template>
+        <template x-if="!theme.logoUrl">
+            <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 font-bold text-lg" 
+                 x-text="(theme.name || 'B').charAt(0)"></div>
+        </template>
+    </div>
     <div class="text-[13px] font-bold mt-1.5" :style="'color: ' + theme.text">Thank you for your order, Sarah!</div>
     <div class="text-[11px] text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed">
         You're earning <strong :style="'color: ' + theme.primary">47 loyalty points</strong> with this purchase.

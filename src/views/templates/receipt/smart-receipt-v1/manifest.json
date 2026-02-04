@@ -6,34 +6,43 @@
     "version": "1.0.0",
     "features": [
         {
-            "id": "loyalty_points",
-            "name": "Loyalty Points Balance",
+            "id": "header",
+            "name": "Receipt Header",
             "type": "toggle",
+            "required": true
+        },
+        {
+            "id": "customer_info",
+            "name": "Customer Info",
+            "type": "toggle",
+            "required": true
+        },
+        {
+            "id": "line_items",
+            "name": "Items breakdown",
+            "type": "toggle",
+            "required": true
+        },
+        {
+            "id": "product_recommendations",
+            "name": "Next Purchase Offers",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "Retention"
+        },
+        {
+            "id": "marketing_banner",
+            "name": "Loyalty Message",
+            "type": "toggle",
+            "required": false,
             "defaultEnabled": true
         },
         {
-            "id": "next_purchase_discount",
-            "name": "Next Purchase Discount",
+            "id": "footer",
+            "name": "Receipt Footer",
             "type": "toggle",
-            "defaultEnabled": true
-        },
-        {
-            "id": "review_request",
-            "name": "Review Request CTA",
-            "type": "toggle",
-            "defaultEnabled": true
-        },
-        {
-            "id": "referral_program",
-            "name": "Referral Program",
-            "type": "toggle",
-            "defaultEnabled": false
-        },
-        {
-            "id": "customer_support",
-            "name": "Support Access",
-            "type": "toggle",
-            "defaultEnabled": true
+            "required": true
         }
     ]
 }

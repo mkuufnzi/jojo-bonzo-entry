@@ -13,6 +13,14 @@ export const errorHandler = (err: any, req: Request, res: Response, _next: NextF
       err.message = `Invalid JSON payload: ${err.message}`;
   }
 
+  if (statusCode === 400) {
+      console.warn(`[400 Error Context] ${req.method} ${req.url}:`, {
+          body: req.body,
+          headers: req.headers,
+          error: err
+      });
+  }
+
   const isApi = req.path.startsWith('/api') || req.path.includes('/api/') || req.xhr || req.headers.accept?.indexOf('json') !== -1;
 
   if (isApi) {

@@ -44,20 +44,15 @@
         </div>
         <div class="ml-6 text-white">
             <div class="flex items-center gap-3 mb-1">
-                <% if (branding.theme.logoUrl) { %>
-                    <img src="<%= branding.theme.logoUrl %>" alt="Logo" class="h-10 w-10 object-contain rounded-full bg-white p-1">
-                <% } else { %>
-                    <div class="logo-circle">
-                        <%= (branding.profile?.companyName || 'B').charAt(0) %>
-                    </div>
-                <% } %>
-                <div class="font-bold text-2xl tracking-tight brand-font">
-                    <%= branding.profile?.companyName || 'Brand Name' %>
-                </div>
+                <template x-if="theme.logoUrl">
+                    <img :src="theme.logoUrl" alt="Logo" class="h-10 w-10 object-contain rounded-full bg-white p-1">
+                </template>
+                <template x-if="!theme.logoUrl">
+                    <div class="logo-circle" x-text="(theme.name || 'B').charAt(0)"></div>
+                </template>
+                <div class="font-bold text-2xl tracking-tight brand-font" x-text="theme.name || 'Brand Name'"></div>
             </div>
-            <div class="text-sm opacity-80 font-light">
-                <%= branding.profile?.tagline || 'Building the future of commerce.' %>
-            </div>
+            <div class="text-sm opacity-80 font-light" x-text="theme.tagline || 'Building the future of commerce.'"></div>
         </div>
     </div>
 </div>

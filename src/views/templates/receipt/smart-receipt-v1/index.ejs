@@ -1,254 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Receipt</title>
-    <!-- Alpine.js & Tailwind -->
-    <script src="//unpkg.com/alpinejs" defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+<% layout('layouts/document-master') %>
+
+<!-- Standard Document Configuration -->
+<div id="doc-config" 
+    data-page-size="A4" 
+    data-orientation="portrait" 
+    data-margin-top="50" 
+    data-margin-bottom="50"
+    class="hidden"></div>
+
+<% block('head').append(`
     <style>
-        [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; }
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white !important; }
-        }
     </style>
-</head>
-<body class="bg-gray-50 min-h-screen text-gray-800" x-data="smartReceipt()" x-cloak>
+`) %>
 
-    <!-- Main Container - A4 Proportions -->
-    <div class="max-w-[800px] mx-auto py-8 px-4">
+<%- include('../../../components/logic/smart-document-logic') %>
+
+<!-- Template Interface -->
+<div class="font-sans text-slate-800 antialiased">
+    
+    <div class="max-w-[800px] mx-auto px-8 py-12">
         
-        <!-- RECEIPT CARD -->
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100">
-            
-            <!-- Header with Brand & Payment Status -->
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-8">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div class="text-3xl font-bold mb-1"><%= branding.themeData.name || 'Your Company' %></div>
-                        <div class="text-emerald-100 text-sm">Payment Receipt</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-semibold">
-                            PAYMENT RECEIVED
-                        </div>
-                        <div class="text-emerald-100 text-sm mt-2">
-                            <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
-                        </div>
-                    </div>
-                </div>
+        <!-- Section: Header -->
+        <div class="doc-section mb-8">
+            <%- include('./components/header') %>
+        </div>
+
+        <!-- Section: Transaction Details -->
+        <div class="doc-section mb-8">
+            <%- include('./components/transaction_details') %>
+        </div>
+
+        <!-- Section: Line Items (Splittable) -->
+        <div class="doc-section mb-8" data-split="true">
+            <%- include('./components/line_items') %>
+        </div>
+
+        <!-- Section: Financial Summary -->
+        <div class="doc-section mb-8">
+            <%- include('./components/financial_summary') %>
+        </div>
+
+        <!-- Section: Loyalty Widgets -->
+        <% if (branding.components?.loyalty_program?.enabled) { %>
+            <div class="doc-section mb-6">
+                <%- include('../../../components/smart-widgets/loyalty') %>
             </div>
+        <% } %>
 
-            <!-- Transaction Details -->
-            <div class="p-8 border-b border-gray-100">
-                <div class="grid grid-cols-2 gap-8">
-                    <div>
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Transaction Details</h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Receipt No:</span>
-                                <span class="font-semibold">#RCP-<%= branding.model.id || '2025-0001' %></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Invoice Ref:</span>
-                                <span class="font-medium">#INV-<%= branding.model.id || '2025-0847' %></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Payment Method:</span>
-                                <span class="font-medium">Credit Card ****4242</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Transaction ID:</span>
-                                <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">txn_1NsO2cL...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Billed To</h3>
-                        <div class="text-sm">
-                            <div class="font-semibold">Acme Corporation</div>
-                            <div class="text-gray-500">
-                                123 Business Street<br>
-                                Tech City, TC 12345<br>
-                                accounts@acmecorp.com
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Section: Discount Widgets -->
+        <% if (branding.components?.discount_offer?.enabled) { %>
+            <div class="doc-section mb-6">
+                <%- include('../../../components/smart-widgets/discount') %>
             </div>
+        <% } %>
 
-            <!-- Order Summary -->
-            <div class="p-8 border-b border-gray-100">
-                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Order Summary</h3>
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200">
-                            <th class="text-left py-2 font-semibold text-gray-600">Item</th>
-                            <th class="text-center py-2 font-semibold text-gray-600">Qty</th>
-                            <th class="text-right py-2 font-semibold text-gray-600">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% (branding.model.items || [{name: 'Professional Services', qty: 1, price: 1500}, {name: 'Setup Fee', qty: 1, price: 250}]).forEach(item => { %>
-                        <tr class="border-b border-gray-50">
-                            <td class="py-3">
-                                <span class="font-medium"><%= item.name %></span>
-                            </td>
-                            <td class="text-center py-3 text-gray-500"><%= item.qty %></td>
-                            <td class="text-right py-3 font-medium">$<%= (item.price * item.qty).toFixed(2) %></td>
-                        </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
+        <!-- Section: Review Request -->
+        <% if (branding.components?.review_request?.enabled) { %>
+            <div class="doc-section mb-6">
+                <%- include('../../../components/smart-widgets/review') %>
             </div>
+        <% } %>
 
-            <!-- Financial Summary -->
-            <div class="p-8 border-b border-gray-100 bg-gray-50">
-                <div class="max-w-xs ml-auto space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Subtotal</span>
-                        <span>$<%= (branding.model.subtotal || 1750).toFixed(2) %></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Tax (8%)</span>
-                        <span>$<%= (branding.model.tax || 140).toFixed(2) %></span>
-                    </div>
-                    <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-                        <span>Total Paid</span>
-                        <span class="text-emerald-600">$<%= (branding.model.total || 1890).toFixed(2) %></span>
-                    </div>
-                </div>
+        <!-- Section: Referral Program -->
+        <% if (branding.components?.referral_program?.enabled) { %>
+            <div class="doc-section mb-6">
+                <%- include('../../../components/smart-widgets/referral') %>
             </div>
+        <% } %>
 
-            <!-- Smart Features Section -->
-            <div class="p-8 space-y-6">
-                
-                <!-- Loyalty Points -->
-                <% if (branding.components?.loyalty_points?.enabled) { %>
-                <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                </svg>
-                                <span class="font-semibold text-amber-800">Loyalty Rewards</span>
-                            </div>
-                            <div class="text-sm text-amber-700">You earned <span class="font-bold">189 points</span> on this purchase</div>
-                            <div class="text-xs text-amber-600 mt-1">Total Balance: 2,450 points</div>
-                        </div>
-                        <button class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors no-print">
-                            Redeem Points
-                        </button>
-                    </div>
-                </div>
-                <% } %>
-
-                <!-- Next Purchase Discount -->
-                <% if (branding.components?.next_purchase_discount?.enabled) { %>
-                <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-6 border border-violet-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="font-semibold text-violet-800 mb-1">Thank you for your business!</div>
-                            <div class="text-sm text-violet-700">Use code <span class="font-mono bg-violet-200 px-2 py-0.5 rounded font-bold">THANKYOU15</span> for 15% off your next order</div>
-                            <div class="text-xs text-violet-500 mt-1">Valid until <%= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString() %></div>
-                        </div>
-                        <button class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors no-print">
-                            Shop Now
-                        </button>
-                    </div>
-                </div>
-                <% } %>
-
-                <!-- Review Request -->
-                <% if (branding.components?.review_request?.enabled) { %>
-                <div class="bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-6 border border-sky-100">
-                    <div class="text-center">
-                        <div class="font-semibold text-sky-800 mb-2">How was your experience?</div>
-                        <div class="flex justify-center gap-1 mb-3">
-                            <% for(let i = 0; i < 5; i++) { %>
-                            <button class="text-3xl hover:scale-110 transition-transform no-print" @click="rating = <%= i + 1 %>">
-                                <span :class="rating > <%= i %> ? 'text-yellow-400' : 'text-gray-300'">★</span>
-                            </button>
-                            <% } %>
-                        </div>
-                        <div class="text-sm text-sky-600">Your feedback helps us improve</div>
-                        <button class="mt-3 text-sky-700 hover:text-sky-800 text-sm font-semibold underline no-print">
-                            Write a detailed review →
-                        </button>
-                    </div>
-                </div>
-                <% } %>
-
-                <!-- Referral Program -->
-                <% if (branding.components?.referral_program?.enabled) { %>
-                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="font-semibold text-emerald-800 mb-1">Share the love, get rewarded</div>
-                            <div class="text-sm text-emerald-700">Give $20, Get $20 when friends make their first purchase</div>
-                            <div class="mt-2 flex items-center gap-2">
-                                <input type="text" readonly value="https://ref.yourcompany.com/ABC123" 
-                                       class="text-xs bg-white border border-emerald-200 rounded px-3 py-1.5 w-64 font-mono">
-                                <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-semibold no-print">
-                                    Copy
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <% } %>
-
-                <!-- Support Access -->
-                <% if (branding.components?.customer_support?.enabled) { %>
-                <div class="flex items-center justify-center gap-8 pt-4 text-sm text-gray-500 border-t border-gray-100 no-print">
-                    <a href="#" class="hover:text-gray-700 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        FAQ
-                    </a>
-                    <a href="#" class="hover:text-gray-700 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                        Contact Support
-                    </a>
-                    <a href="#" class="hover:text-gray-700 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        Returns
-                    </a>
-                </div>
-                <% } %>
-
+        <!-- Section: Support Links -->
+        <% if (branding.components?.customer_support?.enabled) { %>
+            <div class="doc-section mb-6">
+                <%- include('../../../components/smart-widgets/support-links') %>
             </div>
+        <% } %>
 
-            <!-- Footer -->
-            <div class="bg-gray-50 p-6 text-center text-xs text-gray-400 border-t border-gray-100">
-                <div class="mb-2">Thank you for your business!</div>
-                <div>This is an official receipt for your records. Please retain for your accounting purposes.</div>
-                <div class="mt-2 text-gray-300">Smart Receipt Engine v1.0 · Powered by Floovioo</div>
-            </div>
-
+        <!-- Section: Footer -->
+        <div class="doc-section mt-12">
+            <%- include('./components/footer') %>
         </div>
 
     </div>
-
-    <!-- Data Injection Script -->
-    <script nonce="<%= nonce %>">
-        function smartReceipt() {
-            return {
-                rating: 0
-            }
-        }
-    </script>
-</body>
-</html>
+</div>

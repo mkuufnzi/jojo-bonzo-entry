@@ -25,20 +25,31 @@ export class BrandingService {
     });
     
     // Clean up incoming data to ensure proper JSON types
-    const components = data.components || {};
+    const parseJson = (val: any) => {
+        if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch (e) { return {}; }
+        }
+        return val || {};
+    };
+
+    const components = parseJson(data.components);
+    const brandColors = parseJson(data.brandColors);
+    const fontSettings = parseJson(data.fontSettings);
+    const upsellConfig = parseJson(data.upsellConfig);
+    const supportConfig = parseJson(data.supportConfig);
 
     if (existing) {
       return await (prisma as any).brandingProfile.update({
         where: { id: existing.id },
         data: {
-          brandColors: data.brandColors,
-          fontSettings: data.fontSettings,
+          brandColors,
+          fontSettings,
           logoUrl: data.logoUrl || existing.logoUrl,
-          upsellConfig: data.upsellConfig,
-          supportConfig: data.supportConfig,
+          upsellConfig,
+          supportConfig,
           templates: data.templates,
-          components: components, // New Field
-          activeTemplateId: data.activeTemplateId // New Field
+          components: components,
+          activeTemplateId: data.activeTemplateId || existing.activeTemplateId
         }
       });
     }
@@ -49,12 +60,12 @@ export class BrandingService {
         businessId,
         name: 'Default Brand',
         isDefault: true,
-        brandColors: data.brandColors,
-        fontSettings: data.fontSettings,
+        brandColors,
+        fontSettings,
         logoUrl: data.logoUrl,
-        upsellConfig: data.upsellConfig || {},
-        supportConfig: data.supportConfig || {},
-        components: components,
+        upsellConfig,
+        supportConfig,
+        components,
         activeTemplateId: data.activeTemplateId || 'smart_invoice_v1'
       }
     });

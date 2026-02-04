@@ -1,90 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proposal - <%= branding.model.id %></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+<% layout('layouts/document-master') %>
+
+<!-- Standard Document Configuration -->
+<div id="doc-config" 
+    data-page-size="A4" 
+    data-orientation="portrait" 
+    data-margin-top="50" 
+    data-margin-bottom="50"
+    class="hidden"></div>
+
+<% block('head').append(`
     <style>
         body { font-family: 'Outfit', sans-serif; }
     </style>
-</head>
-<body class="bg-slate-50 min-h-screen py-10 px-4">
+`) %>
 
-    <!-- Cover Page -->
-    <% if (branding.components && branding.components['cover_page'] && branding.components['cover_page'].enabled) { %>
-    <div class="max-w-4xl mx-auto bg-white shadow-2xl overflow-hidden min-h-[1000px] mb-10 flex flex-col relative">
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900 z-0"></div>
-        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0"></div>
-        
-        <div class="relative z-10 flex-1 flex flex-col justify-center p-20 text-white">
-            <div class="mb-10 text-6xl"><%= branding.themeData.logo %></div>
-            <h1 class="text-7xl font-black leading-tight mb-6">Project<br>Proposal</h1>
-            <div class="w-32 h-2 bg-indigo-500 mb-10"></div>
-            
-            <h2 class="text-2xl font-light text-indigo-200">Prepared for:</h2>
-            <p class="text-3xl font-bold">Sarah Mitchell</p>
-            
-            <div class="mt-auto pt-20">
-                <p class="text-indigo-300">Presented by:</p>
-                <p class="font-bold text-xl"><%= branding.themeData.name %></p>
-                <p class="text-sm opacity-70"><%= new Date().toLocaleDateString() %></p>
-            </div>
-        </div>
+<%- include('../../components/logic/smart-document-logic') %>
+
+<!-- Template Interface -->
+<div class="font-sans text-slate-800 antialiased">
+
+    <!-- Section: Cover Page -->
+    <div class="doc-section h-full">
+        <%- include('./components/cover_page') %>
     </div>
-    <% } %>
 
-    <!-- Content Page -->
-    <div class="max-w-4xl mx-auto bg-white shadow-lg p-16 min-h-[1000px] text-slate-800">
+    <!-- Container for Detailed Proposal Content -->
+    <div class="max-w-4xl mx-auto px-16 py-12">
         
-        <h2 class="text-3xl font-bold mb-8 text-indigo-900 border-b border-indigo-100 pb-4">Executive Summary</h2>
-        <p class="text-lg leading-relaxed text-slate-600 mb-12">
-            We are pleased to submit this proposal for your review. Based on our recent discussions, we have outlined a comprehensive strategy to elevate your business operations using our premium services. Our goal is to provide efficiency, scalability, and unmatched quality.
-        </p>
-
-        <h2 class="text-3xl font-bold mb-8 text-indigo-900 border-b border-indigo-100 pb-4">Investment Outline</h2>
-        
-        <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 mb-12">
-            <% branding.model.items.forEach(item => { %>
-            <div class="flex items-center justify-between py-4 border-b border-slate-200 last:border-0 last:pb-0 first:pt-0">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm border border-slate-100">
-                        <%= item.img || '📦' %>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-lg text-slate-900"><%= item.name %></h4>
-                        <p class="text-sm text-slate-500"><%= item.category || 'Service' %> • Qty: <%= item.qty %></p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="block font-bold text-lg text-slate-900">$<%= (item.price * item.qty).toFixed(2) %></span>
-                    <% if (item.qty > 1) { %>
-                        <span class="text-xs text-slate-400">$<%= item.price %> each</span>
-                    <% } %>
-                </div>
-            </div>
-            <% }); %>
-            
-            <div class="mt-8 pt-8 border-t border-slate-200 flex justify-between items-center">
-                <span class="text-xl font-bold text-slate-700">Estimated Total</span>
-                <span class="text-4xl font-black text-indigo-600">$<%= branding.model.total.toFixed(2) %></span>
-            </div>
+        <!-- Section: Executive Summary -->
+        <div class="doc-section mb-12">
+            <%- include('./components/executive_summary') %>
         </div>
 
-        <% if (branding.components && branding.components['signatures'] && branding.components['signatures'].enabled) { %>
-        <div class="flex items-center justify-between bg-indigo-900 text-white p-10 rounded-2xl">
-            <div>
-                <h3 class="text-2xl font-bold mb-2">Ready to proceed?</h3>
-                <p class="text-indigo-200">Sign digitally to get started immediately.</p>
-            </div>
-            <div class="h-16 w-48 bg-white/10 rounded-xl border-2 border-dashed border-white/30 flex items-center justify-center text-sm font-bold tracking-wider uppercase">
-                Sign Here
-            </div>
+        <!-- Section: Investment -->
+        <div class="doc-section mb-12">
+            <%- include('./components/investment') %>
         </div>
+
+        <!-- Section: Product Support (Splittable) -->
+        <% if (branding.components?.product_support?.enabled) { %>
+            <div class="doc-section mb-12" data-split="true">
+                <%- include('../../../components/smart-widgets/tutorials') %>
+            </div>
         <% } %>
 
-    </div>
+        <!-- Section: Signatures -->
+        <div class="doc-section">
+            <%- include('./components/signatures') %>
+        </div>
 
-</body>
-</html>
+    </div>
+</div>

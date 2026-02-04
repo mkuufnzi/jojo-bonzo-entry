@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Document Preview' %></title>
+    
+    <!-- Core Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <link href="/assets/css/style.css" rel="stylesheet"> -->
+    
+    <!-- Template-Specific Head Content -->
+    <%- block('head') %>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Universal Document Config */
+        :root {
+            /* Defaults (A4) */
+            --page-width: 210mm;
+            --page-height: 297mm;
+        }
+
+        /* Pagination Containers */
+        #source-document { display: none; }
+        
+        #preview-stage {
+            width: 100%;
+            min-height: 100vh;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Dynamic Sheet Class */
+        .sheet {
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: width 0.3s, height 0.3s;
+        }
+
+        /* Standard Sizes */
+        .sheet.A4 { width: 210mm; min-height: 297mm; }
+        .sheet.A4.landscape { width: 297mm; min-height: 210mm; }
+        
+        .sheet.Letter { width: 215.9mm; min-height: 279.4mm; }
+        .sheet.Letter.landscape { width: 279.4mm; min-height: 215.9mm; }
+
+        @media print {
+            body { background: white; }
+            #preview-stage { padding: 0; display: block; }
+            .sheet { 
+                margin: 0; 
+                box-shadow: none; 
+                break-after: always; 
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body x-data="smartInvoice()" x-cloak>
+
+    <!-- Source Document -->
+    <div id="source-document">
+        <%- body %>
+    </div>
+
+    <!-- Pagination Stage -->
+    <div id="preview-stage"></div>
+
+    <!-- Core Engines -->
+    <script src="/engines/paginator-v1.js" nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>"></script>
+
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>">
+        // Basic page health check
+        console.log('[App] Page assets loaded & Alpine initialized.');
+    </script>
+</body>
+</html>

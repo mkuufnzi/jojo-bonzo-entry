@@ -1,5 +1,5 @@
 <!-- SUPPORT / TUTORIALS -->
-<div class="mt-7">
+<div class="mt-7" data-split="true">
      <div class="mb-3">
          <div class="text-[13px] font-bold font-sans" :style="'color: ' + theme.text">📚 Get More From Your Products</div>
          <div class="text-[10px] text-gray-400 font-sans">Tutorials & recipes matched to your order</div>
@@ -28,7 +28,7 @@
                  </div>
 
                  <!-- Details -->
-                 <div x-show="expandedTutorial === tut.id" class="border-t px-4 py-3" :style="'background: ' + theme.light + '; border-color: ' + theme.light">
+                <div x-show="expandedTutorial === tut.id" x-collapse class="border-t px-4 py-3" :style="'background: ' + theme.light + '; border-color: ' + theme.light">
                      <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 opacity-60" :style="'color: ' + theme.muted">Steps</div>
                      <template x-for="(step, i) in tut.steps" :key="i">
                          <div class="flex items-start gap-2.5 mb-2 last:mb-0">

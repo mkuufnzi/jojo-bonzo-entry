@@ -25,7 +25,7 @@ export interface Tutorial {
     id: number;
     title: string;
     duration: string;
-    type: 'recipe' | 'tutorial';
+    type: 'recipe' | 'tutorial' | 'guide' | 'video';
     thumb: string;
     steps: string[];
     forProduct: string;
