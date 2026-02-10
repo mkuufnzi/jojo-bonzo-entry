@@ -10,69 +10,112 @@
 
 <%- include('../../../components/logic/smart-document-logic') %>
 
+<!-- 
+  ============================================================================
+  SMART INVOICE TEMPLATE v2.0
+  ============================================================================
+  Architecture: Widget Registry Pattern
+  - Single source of truth: branding.layoutOrder (from controller's resolveLayout)
+  - Deterministic rendering: widgets render in exact layoutOrder sequence
+  - No conditional if/else chains that can skip or reorder widgets
+  ============================================================================
+-->
+
 <!-- Template Interface -->
-<div class="font-sans text-slate-800 antialiased">
+<div class="font-sans text-slate-800 antialiased" style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;">
     
-    <!-- Page Overlay: Fixed background ignored by Paginator flow -->
+    <!-- Page Overlay -->
     <div data-page-overlay class="fixed inset-0 pointer-events-none z-0" 
          :style="'background: ' + theme.pattern"></div>
 
-    <!-- Section: Header (Full Width) -->
-    <div class="doc-section relative z-10 w-full mb-8 shadow-sm">
-        <%- include('./components/header') %>
-    </div>
-
-    <!-- Container for Constrained Content -->
-    <div class="doc-section max-w-[780px] mx-auto px-8 pb-12">
+    <!-- Main Document Wrapper - Width and Padding managed by Paginator Sheet (A4 Layer) -->
+    <div class="mx-auto relative z-10" 
+         style="width: 100% !important; max-width: 100% !important; padding: 0 !important;">
         
-        <!-- Section: Marketing Banner -->
-        <% if (branding.components?.marketing_banner?.enabled) { %>
-            <div class="doc-section mb-8">
-                <%- include('../../../components/smart-widgets/banner') %>
+        <% 
+           /**
+            * Widget Registry: Maps widget IDs to include paths
+            * - null means render inline (spacers)
+            * - 'LANDMARK_HEADER' and 'LANDMARK_FOOTER' are special pinned positions
+            */
+           const WIDGET_REGISTRY = {
+               'header': { path: './components/header', landmark: true, splittable: false },
+               'spacer_1': { path: null, landmark: false, splittable: false },
+               'spacer_2': { path: null, landmark: false, splittable: false },
+               'customer_info': { path: './components/customer_info', landmark: false, splittable: false },
+               'marketing_banner': { path: '../../../components/smart-widgets/banner', landmark: false, splittable: false },
+               'line_items': { path: './components/line_items', landmark: false, splittable: true },
+               'totals': { path: './components/totals', landmark: false, splittable: false },
+               'product_recommendations': { path: '../../../components/smart-widgets/product-recommendations', landmark: false, splittable: false },
+               'product_support': { path: '../../../components/smart-widgets/tutorials', landmark: false, splittable: false },
+               'payment_details': { path: '../../../components/smart-widgets/payment-details', landmark: false, splittable: false },
+               'customer_support': { path: '../../../components/smart-widgets/support-card', landmark: false, splittable: false },
+               'footer': { path: './components/footer', landmark: true, splittable: false }
+           };
+           
+           // SINGLE SOURCE OF TRUTH: Controller MUST provide these via resolveLayout()
+           // No fallbacks - if missing, it's a bug in controller resolution
+           if (!branding.layoutOrder || !branding.widgetStates) {
+               console.error('[EJS ERROR] Missing layoutOrder or widgetStates - check controller resolution');
+           }
+           const layoutOrder = branding.layoutOrder || [];
+           const widgetStates = branding.widgetStates || {};
+           
+           // Separate landmarks from dynamic content
+           const dynamicWidgets = layoutOrder.filter(id => {
+               const reg = WIDGET_REGISTRY[id];
+               return reg && !reg.landmark;
+           });
+        %>
+        
+        <!-- DEBUG: Unified Layout from resolveLayout() -->
+        <script>console.log('[EJS v2.1] layoutOrder:', <%= JSON.stringify(layoutOrder) %>, 'resolvedFrom:', '<%= branding.resolvedFrom || "unknown" %>');</script>
+
+        <!-- =============== PINNED HEADER =============== -->
+        <% if (widgetStates.header?.enabled !== false) { %>
+            <div class="doc-section w-full block" data-widget-id="header" data-no-split="true" 
+                 style="display: block !important; width: 100% !important; margin-bottom: 20px !important;">
+                <%- include('./components/header') %>
             </div>
         <% } %>
 
-        <!-- Section: Customer Info -->
-        <div class="doc-section mb-6">
-            <%- include('./components/customer_info') %>
-        </div>
+        <!-- =============== DYNAMIC WIDGETS (in layoutOrder sequence) =============== -->
+        <% dynamicWidgets.forEach((widgetId, index) => { %>
+            <% 
+                const widget = WIDGET_REGISTRY[widgetId];
+                const state = widgetStates[widgetId];
+                const isEnabled = state?.enabled !== false;
+                const isSpacer = widgetId.startsWith('spacer_');
+                const splitAttr = widget?.splittable ? 'data-split="true"' : 'data-no-split="true"';
+            %>
+            
+            <% if (isEnabled) { %>
+                <% if (isSpacer) { %>
+                    <!-- Spacer: <%= widgetId %> -->
+                    <div class="doc-section w-full block" 
+                         data-widget-id="<%= widgetId %>" 
+                         data-no-split="true"
+                         style="display: block !important; width: 100% !important; height: <%= state?.value || 20 %>px !important; min-height: <%= state?.value || 20 %>px !important; margin-top: 0 !important; margin-bottom: 0 !important;">
+                    </div>
+                <% } else if (widget?.path) { %>
+                    <!-- Widget: <%= widgetId %> (position: <%= index + 1 %>) -->
+                    <div class="doc-section w-full block" 
+                         data-widget-id="<%= widgetId %>" 
+                         <%- splitAttr %>
+                         style="display: block !important; width: 100% !important; margin-bottom: 20px !important;">
+                        <%- include(widget.path) %>
+                    </div>
+                <% } %>
+            <% } %>
+        <% }); %>
 
-        <!-- Section: Line Items -->
-        <div class="doc-section mb-8">
-            <%- include('./components/line_items') %>
-        </div>
-
-        <!-- Section: Recommendations (Splittable) -->
-        <% if (branding.components?.product_recommendations?.enabled) { %>
-            <div class="doc-section mb-8" data-split="true">
-                <%- include('../../../components/smart-widgets/product-recommendations') %>
+        <!-- =============== PINNED FOOTER =============== -->
+        <% if (widgetStates.footer?.enabled !== false) { %>
+            <div class="doc-section w-full block" data-widget-id="footer" data-no-split="true" 
+                 style="display: block !important; width: 100% !important; margin-top: 60px !important; border-top: 1px solid #f1f5f9; padding-top: 20px !important;">
+                <%- include('./components/footer') %>
             </div>
         <% } %>
 
-        <!-- Section: Product Support (Splittable) -->
-        <% if (branding.components?.product_support?.enabled) { %>
-            <div class="doc-section mb-8" data-split="true">
-                <%- include('../../../components/smart-widgets/tutorials') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Payment Details -->
-        <% if (branding.components?.payment_details?.enabled) { %>
-             <div class="doc-section mb-8">
-                <%- include('../../../components/smart-widgets/payment-details') %>
-             </div>
-        <% } %>
-
-        <!-- Section: Feedback/Support -->
-        <% if (branding.components?.customer_support?.enabled) { %>
-            <div class="doc-section mb-8">
-                <%- include('../../../components/smart-widgets/support-card') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Footer -->
-        <div class="doc-section mt-auto">
-            <%- include('./components/footer') %>
-        </div>
     </div>
 </div>

@@ -94,7 +94,6 @@ export class BusinessController {
 
       logger.info({ 
           traceId, 
-          body: req.body, 
           userId,
           finalName,
           finalSector
@@ -441,10 +440,25 @@ export class BusinessController {
         } catch (error: any) {
             console.error(`[BusinessController] OAuth Callback Failed for ${provider}:`, error);
             
-            // Redirect to wizard with error context instead of raw text
-            const errorType = error.message.includes('already connected') ? 'duplicate_connection' : 'oauth_failed';
-            const errorContext = encodeURIComponent(error.message);
-            res.redirect(`/onboarding/wizard?step=2&error=${errorType}&context=${errorContext}`);
+            let errorType = 'oauth_failed';
+            let errorContext = error.message;
+
+            try {
+                // Try to parse structured error
+                const parsed = JSON.parse(error.message);
+                if (parsed.code === 'DUPLICATE_CONNECTION') {
+                    errorType = 'duplicate_connection';
+                    // Pass the whole JSON object for the frontend modal
+                    errorContext = JSON.stringify(parsed);
+                }
+            } catch (e) {
+                // Not JSON, fallback to legacy text check
+                if (error.message.includes('already connected')) {
+                    errorType = 'duplicate_connection';
+                }
+            }
+
+            res.redirect(`/onboarding/wizard?step=2&error=${errorType}&context=${encodeURIComponent(errorContext)}`);
         }
     }
 

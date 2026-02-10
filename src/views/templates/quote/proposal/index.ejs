@@ -37,6 +37,13 @@
             <%- include('./components/investment') %>
         </div>
 
+        <!-- Section: Optional Extras (Recommendations) -->
+        <% if (branding.components?.product_recommendations?.enabled) { %>
+            <div class="doc-section mb-12" data-split="true">
+                <%- include('../../../components/smart-widgets/product-recommendations') %>
+            </div>
+        <% } %>
+
         <!-- Section: Product Support (Splittable) -->
         <% if (branding.components?.product_support?.enabled) { %>
             <div class="doc-section mb-12" data-split="true">

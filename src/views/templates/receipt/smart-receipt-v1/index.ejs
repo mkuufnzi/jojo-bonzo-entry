@@ -41,6 +41,13 @@
             <%- include('./components/financial_summary') %>
         </div>
 
+        <!-- Section: Recommendations (Next Purchase Offers) -->
+        <% if (branding.components?.product_recommendations?.enabled) { %>
+            <div class="doc-section mb-6" data-split="true">
+                <%- include('../../../components/smart-widgets/product-recommendations') %>
+            </div>
+        <% } %>
+
         <!-- Section: Loyalty Widgets -->
         <% if (branding.components?.loyalty_program?.enabled) { %>
             <div class="doc-section mb-6">

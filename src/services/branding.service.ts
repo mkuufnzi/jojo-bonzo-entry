@@ -33,6 +33,17 @@ export class BrandingService {
     };
 
     const components = parseJson(data.components);
+    if (data.layoutOrder) {
+        components.layoutOrder = Array.isArray(data.layoutOrder) 
+            ? data.layoutOrder 
+            : typeof data.layoutOrder === 'string' 
+                ? JSON.parse(data.layoutOrder) 
+                : data.layoutOrder;
+        // Also ensure it is saved at the top level of the components object for easy access
+        data.components = components;
+    }
+    
+    // Logic previously using themeData now uses metadata or components
     const brandColors = parseJson(data.brandColors);
     const fontSettings = parseJson(data.fontSettings);
     const upsellConfig = parseJson(data.upsellConfig);
@@ -47,6 +58,8 @@ export class BrandingService {
           logoUrl: data.logoUrl || existing.logoUrl,
           upsellConfig,
           supportConfig,
+          tagline: data.tagline || existing.tagline,
+          companyName: data.companyName || existing.companyName,
           templates: data.templates,
           components: components,
           activeTemplateId: data.activeTemplateId || existing.activeTemplateId
@@ -161,11 +174,34 @@ export class BrandingService {
              // Fallback to static upsell config if AI fails
              smartContent = {
                  personal_message: "Thank you for your business!",
-                 upsell_block: [
-                     { title: "Premium Service", price: "$99/mo" }
+                 recommendations: [
+                     { id: 'rec_1', name: "Premium Service", price: 99.00, match: 95, img: '🚀', reason: 'Upgrade for faster delivery', badge: 'Upgrade', sales: 'Popular' },
+                     { id: 'rec_2', name: "Maintenance Kit", price: 29.99, img: '🛠️', reason: 'Keep your items fresh', badge: 'Care', sales: 'Trending' },
+                     { id: 'rec_3', name: "Extended Warranty", price: 49.00, img: '🛡️', reason: 'Protect your investment', badge: 'Safety', sales: 'Recommended' }
                  ]
              };
          }
+
+         // [FIX] Ensure Tutorials match Line Items EXACTLY (User Request)
+         // We generate one tutorial for each item in mockData.items
+         smartContent.tutorials = mockData.items.map((item: any, i: number) => ({
+             id: `tut_${i}`,
+             title: i === 0 ? `Brewing Guide: ${item.description}` : `Care Plan: ${item.description}`,
+             type: i === 0 ? 'recipe' : 'guide',
+             thumb: i === 0 ? '🍲' : '✨',
+             forProduct: item.description,
+             duration: i === 0 ? '5 min' : '3 min',
+             steps: i === 0 ? [
+                 'Heat water to exactly 80°C.',
+                 'Add 1 tsp of matcha powder.',
+                 'Whisk in a zig-zag motion.',
+                 'Enjoy your perfect cup!'
+             ] : [
+                 'Rinse tools with warm water.',
+                 'Air dry on a specialized holder.',
+                 'Store in a cool, dry place.'
+             ]
+         }));
     }
 
     // Prepare Smart Strings

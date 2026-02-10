@@ -1,5 +1,5 @@
 <!-- Line Items -->
-<div class="px-8 mt-2">
+<div class="mt-4">
     <table class="w-full border-collapse">
         <thead>
             <tr class="border-b-2" :style="'border-color: ' + theme.accent">
@@ -32,7 +32,7 @@
 </div>
 
 <!-- Added Upsells (Part of Line Items Logic) -->
-<div class="px-8 mt-2" x-show="addedItems.length > 0">
+<div class="mt-4" x-show="addedItems.length > 0">
     <div class="rounded-lg p-3" :style="'background: ' + theme.light">
         <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 font-sans" :style="'color: ' + theme.secondary">⚡ Added to Order</div>
         <template x-for="id in addedItems" :key="id">
@@ -49,25 +49,3 @@
     </div>
 </div>
 
-<!-- Totals (Part of Line Items Logic) -->
-<div class="p-8 pt-5 flex justify-end font-sans">
-    <div class="w-60">
-        <div class="flex justify-between text-xs text-gray-500 py-1">
-            <span>Subtotal</span>
-            <span x-text="'$' + subtotal.toFixed(2)"></span>
-        </div>
-        <div class="flex justify-between text-xs text-gray-500 py-1">
-            <span>Tax (8%)</span>
-            <span x-text="'$' + tax.toFixed(2)"></span>
-        </div>
-        <div x-show="addedTotal > 0" class="flex justify-between text-xs text-gray-500 py-1">
-            <span>Upsell Add-ons</span>
-            <span x-text="'$' + addedTotal.toFixed(2)"></span>
-        </div>
-        
-        <div class="flex justify-between mt-3 pt-3 border-t-2" :style="'border-color: ' + theme.accent">
-            <span class="text-[15px] font-bold" :style="'color: ' + theme.text">Total</span>
-            <span class="text-[15px] font-bold" :style="'color: ' + theme.primary" x-text="'$' + total.toFixed(2)"></span>
-        </div>
-    </div>
-</div>

@@ -91,6 +91,10 @@ function smartInvoice() {
         
         get nurtureMsg() {
             return this.nurtureMessages[this.nurtureMsgIdx] || { icon: '✨', headline: 'Welcome', body: 'Thanks for your business' };
+        },
+        
+        cycleNurture() {
+            this.nurtureMsgIdx = (this.nurtureMsgIdx + 1) % this.nurtureMessages.length;
         }
     }
 }

@@ -42,11 +42,32 @@ export class IntegrationService {
                     equals: externalId
                 }
             },
-            include: { business: { select: { name: true } } }
+            include: { 
+                business: { 
+                    select: { 
+                        name: true,
+                        users: {
+                            take: 1,
+                            select: { email: true, name: true }
+                        }
+                    } 
+                } 
+            }
         });
 
         if (duplicate) {
-            throw new Error(`This ${provider.toUpperCase()} account is already connected to business '${duplicate.business.name}'. Please disconnect it there first.`);
+            const owner = duplicate.business.users[0];
+            const conflictData = {
+                code: 'DUPLICATE_CONNECTION',
+                provider: provider.toUpperCase(),
+                externalId,
+                conflictingBusiness: duplicate.business.name,
+                conflictingUserEmail: owner?.email || 'Unknown User',
+                conflictingUserName: owner?.name || 'Unknown',
+                message: `This ${provider.toUpperCase()} account is already connected to business '${duplicate.business.name}'.`
+            };
+
+            throw new Error(JSON.stringify(conflictData));
         }
     }
 

@@ -1,20 +1,45 @@
-<!-- Customer & Status Row -->
-<div class="flex flex-wrap justify-between gap-4 p-5 px-8 border-b border-gray-100 font-sans">
-    <div>
-        <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Bill To</div>
-        <div class="text-sm font-bold text-slate-900" :style="'color: ' + theme.text">Sarah Mitchell</div>
-        <div class="text-[11px] text-gray-500">sarah.mitchell@email.com</div>
-        <div class="text-[11px] text-gray-500">Member since 2023 · 14 orders</div>
-    </div>
-    <div class="flex gap-6">
-        <div class="text-right">
-            <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Status</div>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold" 
-                  :style="'background: ' + theme.accent + '; color: ' + theme.primary">Paid ✓</span>
-        </div>
-        <div class="text-right">
-             <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Loyalty</div>
-             <span class="bg-amber-100 text-amber-600 px-2.5 py-0.5 rounded-full text-[11px] font-bold">★ Gold</span>
-        </div>
-    </div>
+<!-- Customer & Status/Shipping Row -->
+<%# [FIX] ATOMIC TABLE LAYOUT - Guaranteed 3-column parallel alignment that cannot wrap or collapse %>
+<div class="font-sans" 
+     style="margin-top: 24px !important; margin-bottom: 24px !important; padding: 24px 0 !important; border-bottom: 1px solid #f1f5f9; width: 100% !important; display: block !important;">
+    
+    <table style="width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important;" 
+           data-no-split="true">
+        <tr>
+            <!-- Column 1: Bill To -->
+            <td style="width: 33.33% !important; vertical-align: top !important; padding: 0 !important;">
+                <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Bill To</div>
+                <div class="text-[14px] font-bold text-slate-900" :style="'color: ' + theme.text">Sarah Mitchell</div>
+                <div class="text-[11px] text-gray-400 mt-1">sarah.mitchell@email.com</div>
+                <div class="text-[11px] text-gray-400">Member since 2023 · 14 orders</div>
+            </td>
+
+            <!-- Column 2: Shipping Address -->
+            <td style="width: 33.33% !important; vertical-align: top !important; padding: 0 !important; padding-left: 30px !important;">
+                <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Shipping Address</div>
+                <div class="text-[13px] text-slate-600 leading-relaxed font-medium" 
+                     style="line-height: 1.6 !important; color: #475569 !important; mt-1">
+                    123 Ceremony Way,<br>
+                    Bamboo Grove, CA 90210
+                </div>
+            </td>
+
+            <!-- Column 3: Status & Loyalty -->
+            <td style="width: 33.33% !important; vertical-align: top !important; padding: 0 !important; text-align: right !important;">
+                <div style="display: flex !important; flex-direction: column !important; align-items: flex-end !important; gap: 20px !important;">
+                    <div style="text-align: right !important;">
+                        <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Status</div>
+                        <span class="px-3 py-1 rounded-full text-[11px] font-bold" 
+                              style="display: inline-block !important; padding: 4px 12px !important; border-radius: 9999px !important; white-space: nowrap !important;"
+                              :style="'background: ' + theme.accent + '; color: ' + theme.primary">Paid ✓</span>
+                    </div>
+                    <div style="text-align: right !important;">
+                         <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Loyalty</div>
+                         <span class="bg-amber-100 text-amber-600 px-3 py-1 rounded-full text-[11px] font-bold"
+                               style="display: inline-block !important; padding: 4px 12px !important; border-radius: 9999px !important; background: #FEF3C7 !important; color: #D97706 !important; white-space: nowrap !important;">★ Gold</span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>

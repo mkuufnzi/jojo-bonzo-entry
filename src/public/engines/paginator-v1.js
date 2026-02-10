@@ -58,6 +58,8 @@ class Paginator {
         // Tailwind dimensions for A4
         page.style.width = '794px'; // 210mm
         page.style.height = '1123px'; // 297mm
+        page.style.paddingLeft = '40px';
+        page.style.paddingRight = '40px';
         page.style.marginBottom = '2rem';
         
         // Apply Template Background logic if needed (cloned from source if static)

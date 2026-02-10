@@ -11,7 +11,8 @@ export const updateSettingsSchema = z.object({
     components: z.any().optional(),
     fontSettings: z.any().optional(),
     upsellConfig: z.any().optional(),
-    supportConfig: z.any().optional()
+    supportConfig: z.any().optional(),
+    layoutOrder: z.array(z.string()).optional()
   }).passthrough()
 }).passthrough();
 

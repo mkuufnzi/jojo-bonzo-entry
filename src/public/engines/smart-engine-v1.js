@@ -14,12 +14,12 @@ function smartInvoice() {
         config: window.DOC_DATA.config || {},
         items: window.DOC_DATA.items || [],
         
-        // Features
-        recommendations: window.DOC_DATA.features?.recommendations || [],
-        tutorials: window.DOC_DATA.features?.tutorials || [],
-        nurtureMessages: window.DOC_DATA.features?.nurtureMessages || [],
+        // Features (Matched to DOC_DATA)
+        recommendations: window.DOC_DATA.features?.product_recommendations || [],
+        tutorials: window.DOC_DATA.features?.product_support || [],
+        nurtureMessages: window.DOC_DATA.features?.marketing_banner || [],
         reviews: window.DOC_DATA.features?.reviews || [],
-        paymentConfirmation: window.DOC_DATA.features?.paymentConfirmation || null,
+        paymentConfirmation: window.DOC_DATA.features?.payment_details || null,
         
         // Computed State
         addedItems: [], // IDs of upsells added
@@ -39,6 +39,11 @@ function smartInvoice() {
                  setInterval(() => {
                     this.nurtureMsgIdx = (this.nurtureMsgIdx + 1) % this.nurtureMessages.length;
                  }, 5000);
+             }
+
+             // Auto-expand first tutorial for better visibility
+             if (this.tutorials.length > 0 && !this.expandedTutorial) {
+                 this.expandedTutorial = this.tutorials[0].id;
              }
         },
 
@@ -65,10 +70,10 @@ function smartInvoice() {
         },
 
         get addedTotal() {
-             return this.addedItems.reduce((acc, id) => {
-                 const item = this.getRec(id);
-                 return acc + (item ? item.price : 0);
-             }, 0);
+            return this.addedItems.reduce((acc, id) => {
+                const item = this.getRec(id);
+                return acc + (item ? item.price : 0);
+            }, 0);
         },
         
         toggleAdd(id) {
@@ -86,6 +91,10 @@ function smartInvoice() {
         
         get nurtureMsg() {
             return this.nurtureMessages[this.nurtureMsgIdx] || { icon: '✨', headline: 'Welcome', body: 'Thanks for your business' };
+        },
+        
+        cycleNurture() {
+            this.nurtureMsgIdx = (this.nurtureMsgIdx + 1) % this.nurtureMessages.length;
         }
     }
 }

@@ -27,6 +27,13 @@
             "description": "Detailed breakdown of purchased products, quantities, and totals."
         },
         {
+            "id": "totals",
+            "name": "Line Item Totals",
+            "type": "toggle",
+            "required": true,
+            "description": "Subtotal, tax, and final amount summaries."
+        },
+        {
             "id": "product_recommendations",
             "name": "Product Recommendations Widget",
             "type": "toggle",
@@ -70,12 +77,40 @@
             "description": "Direct contact options and help resources."
         },
         {
+            "id": "spacer_1",
+            "name": "Vertical Spacer A",
+            "type": "input",
+            "defaultValue": "20",
+            "description": "Adjustable vertical gap (px) between sections."
+        },
+        {
+            "id": "spacer_2",
+            "name": "Vertical Spacer B",
+            "type": "input",
+            "defaultValue": "40",
+            "description": "Adjustable vertical gap (px) between sections."
+        },
+        {
             "id": "footer",
             "name": "Document Footer",
             "type": "toggle",
             "required": true,
             "description": "Terms, legal disclaimers, and page numbering."
         }
+    ],
+    "layoutOrder": [
+        "header",
+        "spacer_1",
+        "customer_info",
+        "marketing_banner",
+        "line_items",
+        "totals",
+        "product_recommendations",
+        "spacer_2",
+        "product_support",
+        "payment_details",
+        "customer_support",
+        "footer"
     ],
     "author": "Floovioo"
 }

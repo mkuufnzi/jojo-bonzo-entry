@@ -29,7 +29,7 @@
                 Configuration
             </h3>
             
-            <form id="brandForm" class="space-y-10">
+            <form id="brandForm" class="space-y-10" onsubmit="return false;">
                 
                  <!-- Active Template -->
                  <div>
@@ -69,8 +69,6 @@
                     </div>
                 </div>
 
-
-
                 <!-- Template Features Widget -->
                 <div>
                     <h2 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
@@ -78,45 +76,84 @@
                          Template Features
                     </h2>
                     
-                    <div class="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 space-y-4">
+                     <input type="hidden" name="layoutOrder" id="layoutOrderInput" value="">
+                    
+                    <div id="sortableWidgetList" class="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 space-y-4">
                         <% if (typeof features !== 'undefined' && features && features.length > 0) { %>
-                            <% features.forEach(feature => { %>
+                            <% 
+                                const savedOrder = profile.components?.layoutOrder || [];
+                                const sortedFeatures = [...features].sort((a, b) => {
+                                    const indexA = savedOrder.indexOf(a.id);
+                                    const indexB = savedOrder.indexOf(b.id);
+                                    if(indexA !== -1 && indexB !== -1) return indexA - indexB;
+                                    if(indexA !== -1) return -1;
+                                    if(indexB !== -1) return 1;
+                                    return 0;
+                                });
+                            %>
+
+                            <% sortedFeatures.forEach(feature => { %>
                                 <% 
                                     const isRequired = feature.required;
-                                    // Determine if enabled: check profile config first, then default
-                                    const isEnabled = profile.components?.[feature.id]?.enabled ?? feature.defaultEnabled ?? true;
+                                    const compConfig = profile.components?.[feature.id] || {};
+                                    const isEnabled = compConfig.enabled ?? feature.defaultEnabled ?? true;
+                                    const val = compConfig.value ?? feature.defaultValue ?? '';
                                 %>
-                                <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-indigo-50 shadow-sm">
-                                    <div class="flex items-center gap-3">
-                                        <div class="p-2 bg-indigo-50 rounded-lg text-indigo-500">
-                                            <% if (feature.id.includes('header')) { %> <i data-lucide="layout-template" class="w-4 h-4"></i> <% } %>
-                                            <% if (feature.id.includes('footer')) { %> <i data-lucide="panel-bottom" class="w-4 h-4"></i> <% } %>
-                                            <% if (feature.id.includes('recommendations')) { %> <i data-lucide="shopping-bag" class="w-4 h-4"></i> <% } %>
-                                            <% if (feature.id.includes('support')) { %> <i data-lucide="life-buoy" class="w-4 h-4"></i> <% } %>
-                                            <% if (feature.id.includes('banner')) { %> <i data-lucide="megaphone" class="w-4 h-4"></i> <% } %>
-                                            <% if (feature.id.includes('line_items')) { %> <i data-lucide="list" class="w-4 h-4"></i> <% } %>
-                                            <% if (feature.id.includes('customer_info')) { %> <i data-lucide="user" class="w-4 h-4"></i> <% } %>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                                <%= feature.name %>
-                                                <% if (feature.badge) { %>
-                                                    <span class="bg-indigo-100 text-indigo-600 text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold"><%= feature.badge %></span>
+                                <div class="widget-item <%= feature.id.includes('spacer') ? 'p-2' : 'p-4' %> <%= (feature.id === 'header' || feature.id === 'footer') ? 'locked-widget opacity-80' : '' %> bg-white rounded-xl border border-indigo-50 shadow-sm mb-3 group transition-all hover:shadow-md hover:border-indigo-200" 
+                                     data-id="<%= feature.id %>"
+                                     data-type="<%= feature.type %>">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <% if (feature.id !== 'header' && feature.id !== 'footer') { %>
+                                                <div class="drag-handle cursor-grab active:cursor-grabbing p-1.5 text-slate-300 hover:text-slate-500 rounded hover:bg-slate-100">
+                                                    <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="p-1.5 text-slate-200">
+                                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                                </div>
+                                            <% } %>
+
+                                            <div class="p-2 bg-indigo-50 rounded-lg text-indigo-500">
+                                                <% if (feature.id.includes('header')) { %> <i data-lucide="layout-template" class="w-4 h-4"></i> <% } %>
+                                                <% if (feature.id.includes('footer')) { %> <i data-lucide="panel-bottom" class="w-4 h-4"></i> <% } %>
+                                                <% if (feature.id.includes('recommendations')) { %> <i data-lucide="shopping-bag" class="w-4 h-4"></i> <% } %>
+                                                <% if (feature.id.includes('support')) { %> <i data-lucide="life-buoy" class="w-4 h-4"></i> <% } %>
+                                                <% if (feature.id.includes('banner')) { %> <i data-lucide="megaphone" class="w-4 h-4"></i> <% } %>
+                                                <% if (feature.id.includes('line_items')) { %> <i data-lucide="list" class="w-4 h-4"></i> <% } %>
+                                                <% if (feature.id.includes('customer_info')) { %> <i data-lucide="user" class="w-4 h-4"></i> <% } %>
+                                                <% if (feature.id.includes('spacer')) { %> <i data-lucide="unfold-vertical" class="w-4 h-4"></i> <% } %>
+                                                <% if (!['header', 'footer', 'recommendations', 'support', 'banner', 'line_items', 'customer_info', 'spacer'].some(k => feature.id.includes(k))) { %>
+                                                     <i data-lucide="box" class="w-4 h-4"></i>
                                                 <% } %>
-                                            </h4>
-                                            <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide"><%= feature.description %></p>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                                    <%= feature.name %>
+                                                    <% if (feature.badge) { %>
+                                                        <span class="bg-indigo-100 text-indigo-600 text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold"><%= feature.badge %></span>
+                                                    <% } %>
+                                                </h4>
+                                                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide"><%= feature.description %></p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <% if (isRequired) { %>
-                                        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-lg">
-                                            <i data-lucide="lock" class="w-3 h-3 text-slate-400"></i>
-                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Required</span>
-                                        </div>
-                                        <input type="hidden" name="components[<%= feature.id %>][enabled]" value="true">
-                                    <% } else { %>
-                                        <% if (feature.type === 'toggle') { %>
-                                            <div class="flex items-center">
+                                        
+                                        <% if (isRequired) { %>
+                                            <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-lg">
+                                                <i data-lucide="lock" class="w-3 h-3 text-slate-400"></i>
+                                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Required</span>
+                                            </div>
+                                            <input type="hidden" name="components[<%= feature.id %>][enabled]" value="true" class="component-enabled-hidden">
+                                        <% } else { %>
+                                            <div class="flex items-center gap-2">
+                                                <% if (feature.id.includes('spacer')) { %>
+                                                    <button type="button" 
+                                                            onclick="this.closest('.widget-item').remove(); window.triggerAutoSave();"
+                                                            class="text-slate-300 hover:text-red-500 transition-colors p-1"
+                                                            title="Remove Spacer">
+                                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                    </button>
+                                                <% } %>
                                                 <label class="relative inline-flex items-center cursor-pointer">
                                                     <input type="checkbox" name="components[<%= feature.id %>][enabled]" value="true" 
                                                            class="sr-only peer component-toggle" 
@@ -126,6 +163,24 @@
                                                 </label>
                                             </div>
                                         <% } %>
+                                    </div>
+
+                                    <% if (feature.type === 'input') { %>
+                                        <div class="pl-14 pr-4 pb-2">
+                                            <div class="flex items-center gap-4">
+                                                <input type="range" 
+                                                       min="0" max="200" step="5"
+                                                       value="<%= val %>"
+                                                       class="flex-1 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-500 component-value-range"
+                                                       oninput="this.nextElementSibling.value = this.value; window.triggerAutoSave()">
+                                                <input type="number" 
+                                                       name="components[<%= feature.id %>][value]" 
+                                                       value="<%= val %>"
+                                                       class="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-indigo-600 component-value-input"
+                                                       oninput="this.previousElementSibling.value = this.value; window.triggerAutoSave()">
+                                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">px</span>
+                                            </div>
+                                        </div>
                                     <% } %>
                                 </div>
                             <% }); %>
@@ -133,16 +188,23 @@
                             <p class="text-sm text-red-500">Error loading template manifest.</p>
                         <% } %>
                     </div>
+
+                    <div class="mt-4 flex justify-center">
+                         <button type="button" onclick="window.addSpacer()" class="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-indigo-200 rounded-xl text-xs font-bold text-indigo-400 uppercase tracking-widest hover:border-indigo-400 hover:text-indigo-600 transition-all group">
+                            <i data-lucide="plus-circle" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                            Insert New Spacer
+                         </button>
+                    </div>
                 </div>
 
-                <!-- End of Configuration Widgets -->
+                <!-- Sortable Library -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" nonce="<%= nonce %>"></script>
 
                 <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">
-                    <button type="button" id="refreshBtn" onclick="refreshPreview()" class="px-6 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 uppercase tracking-widest hover:bg-slate-50 transition-all">
+                    <button type="button" id="refreshBtn" onclick="window.refreshPreview()" class="px-6 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 uppercase tracking-widest hover:bg-slate-50 transition-all">
                         Refresh Preview
                     </button>
-                    <!-- IMPORTANT: preventDefault in onsubmit is crucial to avoid double submission -->
-                    <button type="button" onclick="saveAndRefresh()" class="px-8 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 hover:shadow-lg transition-all shadow-md">
+                    <button type="submit" class="px-8 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 hover:shadow-lg transition-all shadow-md">
                         Save Changes
                     </button>
                 </div>
@@ -153,25 +215,48 @@
         <div class="sticky top-10">
             <div class="bg-slate-900 rounded-[2rem] shadow-2xl overflow-hidden border border-slate-800">
                 <div class="bg-slate-800/50 px-6 py-4 flex justify-between items-center border-b border-slate-700">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-6">
                          <div class="flex gap-1.5">
                              <div class="w-3 h-3 rounded-full bg-red-500"></div>
                              <div class="w-3 h-3 rounded-full bg-amber-500"></div>
                              <div class="w-3 h-3 rounded-full bg-green-500"></div>
                          </div>
-                         <span class="ml-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Document Preview</span>
+                         
+                         <!-- Zoom Controls -->
+                         <div class="flex items-center bg-slate-900 rounded-lg p-1 border border-slate-700">
+                             <button type="button" onclick="window.zoomIn()" class="p-1.5 text-slate-400 hover:text-white transition-colors" title="Zoom In">
+                                 <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                             </button>
+                             <button type="button" onclick="window.resetZoom()" class="px-2 text-[10px] font-bold text-slate-500 hover:text-white transition-colors border-x border-slate-700" id="zoomPercent">
+                                 100%
+                             </button>
+                             <button type="button" onclick="window.zoomOut()" class="p-1.5 text-slate-400 hover:text-white transition-colors" title="Zoom Out">
+                                 <i data-lucide="zoom-out" class="w-4 h-4"></i>
+                             </button>
+                         </div>
                     </div>
-                    <select id="previewTypeSelect" class="bg-slate-800 text-slate-300 text-xs font-bold uppercase border border-slate-600 rounded px-2 py-1 outline-none focus:border-blue-500">
-                        <option value="invoice" <%= manifest.type === 'INVOICE' ? 'selected' : '' %>>Invoice</option>
-                        <option value="receipt" <%= manifest.type === 'RECEIPT' ? 'selected' : '' %>>Receipt</option>
-                        <option value="quote" <%= manifest.type === 'QUOTE' ? 'selected' : '' %>>Quote</option>
-                        <option value="credit_memo" <%= manifest.type === 'CREDIT_MEMO' ? 'selected' : '' %>>Credit Memo</option>
-                    </select>
+
+                    <div class="flex items-center gap-3">
+                        <select id="previewTypeSelect" class="bg-slate-800 text-slate-300 text-xs font-bold uppercase border border-slate-600 rounded px-2 py-1 outline-none focus:border-blue-500" onchange="window.refreshPreview()">
+                            <option value="invoice" <%= manifest.type === 'INVOICE' ? 'selected' : '' %>>Invoice</option>
+                            <option value="receipt" <%= manifest.type === 'RECEIPT' ? 'selected' : '' %>>Receipt</option>
+                            <option value="quote" <%= manifest.type === 'QUOTE' ? 'selected' : '' %>>Quote</option>
+                            <option value="credit_memo" <%= manifest.type === 'CREDIT_MEMO' ? 'selected' : '' %>>Credit Memo</option>
+                        </select>
+
+                        <button type="button" 
+                                id="downloadPdfBtn"
+                                data-app-id="<%= appId %>"
+                                data-api-key="<%= apiKey %>"
+                                onclick="window.downloadPdf()" 
+                                class="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-[11px] font-bold uppercase tracking-wider hover:bg-indigo-500 transition-all shadow-lg active:scale-95">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            PDF
+                        </button>
+                    </div>
                 </div>
                 
-                <!-- Scaled Iframe Wrapper -->
-                <!-- We want the container to fill the column width, and height to match A4 aspect ratio relative to that width -->
-                <div id="previewContainer" class="relative w-full bg-gray-50 overflow-hidden h-[800px]">
+                <div id="previewContainer" class="relative w-full bg-gray-50 overflow-auto h-[800px]">
                     <iframe id="previewFrame" 
                             name="previewFrame"
                             src="/dashboard/brand/preview?templateId=<%= manifest.id %>&type=<%= manifest.type %>" 
@@ -181,7 +266,6 @@
                 </div>
             </div>
             
-            <!-- Hidden form for CSP-safe POST previews -->
              <form id="previewHiddenForm" action="/dashboard/brand/preview" method="POST" target="previewFrame" class="hidden">
                  <input type="hidden" name="templateId" id="previewFormTemplateId">
                  <input type="hidden" name="type" id="previewFormType">
@@ -189,64 +273,11 @@
                  <input type="hidden" name="brandColors" id="previewFormColors">
                  <input type="hidden" name="tagline" id="previewFormTagline">
                  <input type="hidden" name="companyName" id="previewFormCompanyName">
+                 <input type="hidden" name="layoutOrder" id="previewFormLayoutOrder">
             </form>
-            </div>
             <p class="text-center text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-4">
                 Desktop View • Scaled to Fit
             </p>
-        </div>
-    </div>
-    <!-- Code Editor Modal -->
-    <div id="editorModal" class="hidden fixed inset-0 z-[60] overflow-hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="absolute inset-0 bg-slate-900 bg-opacity-90 transition-opacity backdrop-blur-sm" id="editorModalBackdrop"></div>
-        
-        <div class="fixed inset-4 bg-slate-900 rounded-xl shadow-2xl overflow-hidden flex flex-col border border-slate-700">
-            <!-- Header -->
-            <div class="bg-slate-800 px-6 py-4 flex items-center justify-between border-b border-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-blue-500/10 rounded-lg">
-                        <i data-lucide="code-2" class="h-5 w-5 text-blue-400"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-100">Template Source Editor</h3>
-                        <p class="text-xs text-slate-400" id="editorTemplateName">Editing: Custom Template</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-xs text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 flex items-center gap-1.5">
-                        <i data-lucide="alert-triangle" class="h-3 w-3"></i>
-                        Advanced Mode
-                    </span>
-                    <button type="button" id="closeEditorBtn" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-700 transition-colors">
-                        <i data-lucide="x" class="h-5 w-5"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Editor Body -->
-            <div class="flex-1 bg-[#1e1e1e] relative">
-                <div id="monaco-container" class="absolute inset-0"></div>
-            </div>
-
-            <!-- Footer -->
-            <div class="bg-slate-800 px-6 py-4 border-t border-slate-700 flex justify-between items-center">
-                <div class="flex items-center gap-4 text-xs text-slate-400">
-                     <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        EJS / HTML5
-                     </div>
-                     <div>Ln <span id="cursorLine">1</span>, Col <span id="cursorCol">1</span></div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button type="button" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors" onclick="document.getElementById('editorModal').classList.add('hidden')">
-                        Discard Changes
-                    </button>
-                    <button type="button" id="saveCodeBtn" class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium shadow-lg shadow-blue-500/20 transition-all">
-                        <i data-lucide="save" class="h-4 w-4"></i>
-                        Save Template
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -255,399 +286,182 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
 <script nonce="<%= nonce %>">
-document.addEventListener('DOMContentLoaded', () => {
-    // Icons
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+window.BrandEditor = {
+    currentZoom: 1.0,
+    debounceTimer: null,
+    previewDebounce: null,
+    sortableInstance: null,
 
-    const form = document.getElementById('brandForm');
-    if(form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            console.log('Form submission intercepted');
-        });
-    }
-    const previewFrame = document.getElementById('previewFrame');
-    const saveBtn = document.querySelector('button[type="submit"]'); // Define globally for this scope
-
-    // ... existing vars ...
-    
-    // Monaco Init
-    let editor = null;
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
-
-    const initEditor = (initialValue) => {
-        if(editor) return editor.setValue(initialValue);
+    init() {
+        console.log('🏁 [BrandEditor] Initializing...');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         
-        require(['vs/editor/editor.main'], function() {
-            editor = monaco.editor.create(document.getElementById('monaco-container'), {
-                value: initialValue,
-                language: 'html', // html handles embedded css/js well enough for EJS
-                theme: 'vs-dark',
-                automaticLayout: true,
-                minimap: { enabled: true },
-                fontSize: 14,
-                fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
-                lineHeight: 1.5,
-                padding: { top: 20 }
-            });
-
-            // Update status bar
-            editor.onDidChangeCursorPosition((e) => {
-                document.getElementById('cursorLine').textContent = e.position.lineNumber;
-                document.getElementById('cursorCol').textContent = e.position.column;
-            });
-        });
-    }
-
-    // Edit Button Logic (Delegation)
-    document.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.edit-code-btn');
-        if(!btn) return;
-        
-        e.stopPropagation(); // Prevent card selection
-        e.preventDefault();
-
-        const templateId = btn.getAttribute('data-id');
-        const isCustom = templateId.startsWith('custom:');
-        
-        // Show Modal
-        const modal = document.getElementById('editorModal');
-        modal.classList.remove('hidden');
-        document.getElementById('editorTemplateName').textContent = `ID: ${templateId}`;
-        document.getElementById('saveCodeBtn').setAttribute('data-id', templateId);
-
-        // Fetch Source
-        // For custom, we can fetch from an endpoint. For standard... we might just show "Read Only" or fetch the standard render?
-        // Let's implement an endpoint: GET /api/branding/template/:id/source
-        try {
-            const res = await fetch(`/api/branding/template/${templateId}/source`);
-            const data = await res.json();
-            
-            if(data.source) {
-                 initEditor(data.source);
-            } else {
-                 initEditor('<!-- Could not load source -->');
-            }
-        } catch(err) {
-            console.error(err);
-            initEditor('<!-- Error loading source -->');
+        const previewFrame = document.getElementById('previewFrame');
+        if (previewFrame) {
+            previewFrame.addEventListener('load', () => this.updatePreviewScale());
+            window.addEventListener('resize', () => this.updatePreviewScale());
+            this.updatePreviewScale();
         }
-    });
 
-    // Close Logic
-    const closeEditor = () => document.getElementById('editorModal').classList.add('hidden');
-    document.getElementById('closeEditorBtn').addEventListener('click', closeEditor);
-    document.getElementById('editorModalBackdrop').addEventListener('click', closeEditor);
+        const widgetList = document.getElementById('sortableWidgetList');
+        if (widgetList && typeof Sortable !== 'undefined') {
+            console.log('✅ [BrandEditor] Sortable found, initializing...');
+            this.sortableInstance = new Sortable(widgetList, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'bg-indigo-50',
+                filter: '.locked-widget',
+                onEnd: () => {
+                    console.log('🖱️ [BrandEditor] Drag end detected');
+                    this.updateLayoutOrderInput();
+                    this.triggerAutoSave();
+                }
+            });
+            this.updateLayoutOrderInput();
+        } else {
+            console.warn('⚠️ [BrandEditor] Sortable NOT initialized. List:', !!widgetList, 'Sortable:', typeof Sortable);
+        }
 
-    // Save Logic
-    document.getElementById('saveCodeBtn').addEventListener('click', async () => {
-        if(!editor) return;
-        const code = editor.getValue();
-        const templateId = document.getElementById('saveCodeBtn').getAttribute('data-id');
-        const btn = document.getElementById('saveCodeBtn');
+        document.querySelectorAll('.component-toggle').forEach(t => t.addEventListener('change', () => this.triggerAutoSave()));
+        
+        const brandForm = document.getElementById('brandForm');
+        if (brandForm) {
+            brandForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveToDatabase();
+            });
+        }
+    },
 
-        btn.disabled = true;
-        btn.innerHTML = '<i class="animate-spin" data-lucide="loader-2"></i> Saving...';
+    triggerAutoSave() {
+        const btn = document.querySelector('button[type="submit"]');
+        if(btn) btn.innerHTML = '<i class="animate-spin w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full mr-2"></i>Syncing...';
+        
+        clearTimeout(this.previewDebounce);
+        this.previewDebounce = setTimeout(() => this.updateLivePreview(), 400);
+
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => this.saveToDatabase(), 2000);
+    },
+
+    updatePreviewScale() {
+        const container = document.getElementById('previewContainer');
+        const iframe = document.getElementById('previewFrame');
+        if (!container || !iframe) return;
+        const bw = 1024;
+        const scale = Math.min(1, container.offsetWidth / bw) * this.currentZoom;
+        iframe.style.width = bw + 'px';
+        iframe.style.height = '2500px';
+        iframe.style.transform = `scale(${scale})`;
+        iframe.style.transformOrigin = 'top left';
+        iframe.style.left = Math.max(0, (container.offsetWidth - (bw * scale)) / 2) + 'px';
+        const z = document.getElementById('zoomPercent');
+        if(z) z.innerText = Math.round(this.currentZoom * 100) + '%';
+    },
+
+    zoomIn() { if(this.currentZoom < 2) { this.currentZoom += 0.1; this.updatePreviewScale(); } },
+    zoomOut() { if(this.currentZoom > 0.5) { this.currentZoom -= 0.1; this.updatePreviewScale(); } },
+    resetZoom() { this.currentZoom = 1.0; this.updatePreviewScale(); },
+
+    updateLayoutOrderInput() {
+        const order = Array.from(document.querySelectorAll('.widget-item')).map(el => el.getAttribute('data-id'));
+        const input = document.getElementById('layoutOrderInput');
+        if (input) input.value = JSON.stringify(order);
+    },
+
+    addSpacer() {
+        const list = document.getElementById('sortableWidgetList');
+        if(!list) return;
+        const id = `spacer_${Date.now()}`;
+        const html = `
+            <div class="widget-item p-2 bg-white rounded-xl border border-indigo-50 shadow-sm mb-3 group transition-all hover:shadow-md h-[80px]" data-id="${id}" data-type="spacer">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                        <div class="drag-handle cursor-grab p-1 text-slate-300 hover:text-slate-500 rounded hover:bg-slate-100"><i data-lucide="grip-vertical" class="w-4 h-4"></i></div>
+                        <h4 class="text-xs font-bold text-slate-700">Spacer</h4>
+                    </div>
+                    <button type="button" onclick="this.closest('.widget-item').remove(); window.triggerAutoSave();" class="text-slate-300 hover:text-red-500 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    <input type="checkbox" class="component-toggle sr-only" checked>
+                </div>
+                <div class="flex items-center justify-between gap-4 px-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Height (px)</span>
+                    <input type="number" value="20" class="component-value-input w-16 px-1.5 py-1 text-right bg-white border border-slate-200 rounded text-xs" oninput="window.triggerAutoSave()">
+                </div>
+            </div>`;
+        const footer = list.querySelector('[data-id="footer"]');
+        const div = document.createElement('div');
+        div.innerHTML = html.trim();
+        const el = div.firstChild;
+        if(footer) list.insertBefore(el, footer); else list.appendChild(el);
         if(typeof lucide !== 'undefined') lucide.createIcons();
+        this.updateLayoutOrderInput();
+        this.triggerAutoSave();
+    },
 
-        try {
-            const res = await fetch(`/api/branding/template/${templateId}/source`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ htmlContent: code })
-            });
-            const data = await res.json();
-            
-            if(data.success) {
-                // Refresh Preview
-                const previewFrame = document.getElementById('previewFrame');
-                if(previewFrame) previewFrame.src = previewFrame.src; // Reload iframe
-                closeEditor();
-                // Show toast?
-            } else {
-                alert('Save failed: ' + data.error);
-            }
-        } catch(e) {
-            alert('Error saving template');
-        } finally {
-             btn.disabled = false;
-             btn.innerHTML = '<i data-lucide="save"></i> Save Template';
-             if(typeof lucide !== 'undefined') lucide.createIcons();
-        }
-    });
-
-    // ... existing JS ... (AI Modal, etc)
-
-    // Template Card Selection
-    const cards = document.querySelectorAll('.template-card');
-    const templateInput = document.getElementById('invoiceTemplateId');
-
-    cards.forEach(card => {
-        card.addEventListener('click', () => {
-            // Remove selection from all
-            cards.forEach(c => c.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50'));
-            
-            // Add to clicked
-            card.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
-            
-            // Update Hidden Input
-            const id = card.getAttribute('data-id');
-            if(templateInput) templateInput.value = id;
-
-            // Trigger Save & Preview
-            triggerAutoSave();
-        });
-    });
-
-    // Component Toggles Auto-Save
-    document.querySelectorAll('.component-toggle').forEach(toggle => {
-        toggle.addEventListener('change', triggerAutoSave);
-    });
-
-    // Inputs Auto-Save
-    // NO-OP: All inputs currently removed in favor of toggle-only configuration.
-    // Re-enable here if we add text inputs to the generic widget.
-    /*
-    ['someInput'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', triggerAutoSave);
-    });
-    */
-
-
-    // ============================================================
-    // LIVE PREVIEW LOGIC
-    // ============================================================
-    let debounceTimer;
-    let previewDebounce;
-    
-    function triggerAutoSave() {
-        // 1. Instant Visual Feedback
-        if(saveBtn) saveBtn.innerHTML = '<i class="animate-spin w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full mr-2"></i>Syncing...';
-        
-        // 2. Refresh Preview via POST (Live State)
-        clearTimeout(previewDebounce);
-        previewDebounce = setTimeout(() => {
-            updateLivePreview();
-        }, 300); // Fast feedback for UI
-
-        // 3. Persist to DB (Debounced)
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            saveToDatabase();
-        }, 1500); // Slower for DB persistence
-    }
-
-    async function updateLivePreview() {
-        if(!previewFrame) return;
-
-        const components = {};
-        document.querySelectorAll('.component-toggle').forEach(toggle => {
-             const id = toggle.getAttribute('data-id');
-             components[id] = { enabled: toggle.checked };
-        });
-
-        const templateId = document.getElementById('invoiceTemplateId').value;
-        const type = document.getElementById('previewTypeSelect').value || 'invoice';
-
-        // Gather All UI State for Live Sync
-        const brandColors = {
-            primary: document.getElementById('primaryColorText')?.value,
-            secondary: document.getElementById('secondaryColorText')?.value,
-            accent: document.getElementById('accentColorText')?.value
-        };
-        const tagline = document.getElementById('brandTagline')?.value;
-        const companyName = document.getElementById('companyName')?.value;
-
-        // Update hidden form and submit to iframe
+    updateLivePreview() {
         const hiddenForm = document.getElementById('previewHiddenForm');
-        document.getElementById('previewFormTemplateId').value = templateId;
-        document.getElementById('previewFormType').value = type;
-        document.getElementById('previewFormComponents').value = JSON.stringify(components);
-        document.getElementById('previewFormColors').value = JSON.stringify(brandColors);
-        document.getElementById('previewFormTagline').value = tagline || '';
-        document.getElementById('previewFormCompanyName').value = companyName || '';
-        
-        hiddenForm.submit();
-        console.log('[App] Live Preview triggered with full UI state.');
-    }
+        if(!hiddenForm) return;
+        const comps = {};
+        const order = [];
+        document.querySelectorAll('.widget-item').forEach(item => {
+            const id = item.getAttribute('data-id');
+            const type = item.getAttribute('data-type');
+            const toggle = item.querySelector('.component-toggle');
+            const enabled = toggle ? toggle.checked : true;
+            comps[id] = { enabled };
+            if (type === 'input' || type === 'spacer') {
+                comps[id].value = parseInt(item.querySelector('.component-value-input')?.value || 20);
+            }
+            order.push(id);
+        });
 
-    async function saveToDatabase() {
-        if(!form) return;
-        
-        const components = {};
-        document.querySelectorAll('.component-toggle').forEach(toggle => {
-             const id = toggle.getAttribute('data-id');
-             components[id] = { enabled: toggle.checked };
+        document.getElementById('previewFormTemplateId').value = document.getElementById('invoiceTemplateId').value;
+        document.getElementById('previewFormType').value = document.getElementById('previewTypeSelect').value;
+        document.getElementById('previewFormComponents').value = JSON.stringify(comps);
+        document.getElementById('previewFormLayoutOrder').value = JSON.stringify(order);
+        hiddenForm.submit();
+    },
+
+    async saveToDatabase() {
+        const comps = {};
+        const order = [];
+        document.querySelectorAll('.widget-item').forEach(item => {
+            const id = item.getAttribute('data-id');
+            const toggle = item.querySelector('.component-toggle');
+            comps[id] = { enabled: toggle ? toggle.checked : true };
+            if(item.getAttribute('data-type') === 'spacer') {
+                comps[id].value = parseInt(item.querySelector('.component-value-input')?.value || 20);
+            }
+            order.push(id);
         });
 
         const payload = {
             activeTemplateId: document.getElementById('invoiceTemplateId').value,
-            components,
-            brandColors: {
-                primary: document.getElementById('primaryColorText')?.value,
-                secondary: document.getElementById('secondaryColorText')?.value,
-                accent: document.getElementById('accentColorText')?.value
-            },
-            tagline: document.getElementById('brandTagline')?.value,
-            companyName: document.getElementById('companyName')?.value
+            components: comps,
+            layoutOrder: order
         };
 
         try {
-            const response = await fetch('/dashboard/brand/settings?format=json', {
+            const res = await fetch('/dashboard/brand/settings?format=json', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 body: JSON.stringify(payload)
             });
-
-            if (response.ok) {
-                if(saveBtn) saveBtn.textContent = 'Saved';
-                setTimeout(() => { if(saveBtn) saveBtn.textContent = 'Save Changes'; }, 2000);
-            } else {
-                // If 400 happens here, we at least have the Live Preview working!
-                console.warn('Persistence failed (400), but live preview active.');
-                if(saveBtn) saveBtn.textContent = 'Sync Only';
+            if (res.ok) {
+                const btn = document.querySelector('button[type="submit"]');
+                if(btn) { btn.textContent = 'Saved'; setTimeout(() => btn.textContent = 'Save Changes', 2000); }
             }
-        } catch (e) {
-            console.error('Database Save Error', e);
-        }
+        } catch (e) { console.error('Save error', e); }
     }
+};
 
-    function refreshPreview() {
-        if (previewFrame) {
-            // Reload iframe with selected type & template ID
-            const type = document.getElementById('previewTypeSelect').value || 'invoice';
-            const templateId = document.getElementById('invoiceTemplateId').value;
-            
-            const currentSrc = new URL(previewFrame.src, window.location.origin); // Ensure base URL
-            currentSrc.searchParams.set('t', Date.now()); // bust cache
-            currentSrc.searchParams.set('type', type);
-            if(templateId) currentSrc.searchParams.set('templateId', templateId);
-            
-            previewFrame.src = currentSrc.toString();
-        }
-    }
+window.triggerAutoSave = () => window.BrandEditor.triggerAutoSave();
+window.zoomIn = () => window.BrandEditor.zoomIn();
+window.zoomOut = () => window.BrandEditor.zoomOut();
+window.resetZoom = () => window.BrandEditor.resetZoom();
+window.addSpacer = () => window.BrandEditor.addSpacer();
+window.refreshPreview = () => window.BrandEditor.updateLivePreview();
+window.downloadPdf = () => alert('PDF export context restricted in preview refactor.');
 
-    // AI Generation / n8n Webhook Logic
-    const generateBtn = document.getElementById('openAiModalBtn');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            // UI State
-            const originalText = generateBtn.innerHTML;
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<i class="animate-spin" data-lucide="loader-2"></i> Generatin...';
-            if(typeof lucide !== 'undefined') lucide.createIcons();
-
-            try {
-                // 1. Gather Context
-                const payload = {
-                    type: document.getElementById('previewTypeSelect').value || 'invoice',
-                    data: {
-                        // Pass current form values as specific overrides if needed,
-                        // otherwise backend uses saved profile.
-                        // We'll pass the "draft" values so user sees immediate results.
-                        colors: {
-                            primary: document.getElementById('primaryColorText').value,
-                            secondary: document.getElementById('secondaryColorText').value
-                        },
-                        font: document.getElementById('fontSelect').value
-                    }
-                };
-
-                // 2. Call Service
-                // maps to ServicesController.handleDynamicAction -> DesignEngine.executeAction
-                const response = await fetch('/services/transactional-core/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.success && result.type === 'html') {
-                    // 3. Render Result
-                    const previewFrame = document.getElementById('previewFrame');
-                    if (previewFrame) {
-                        // Use srcdoc for immediate HTML rendering
-                        previewFrame.removeAttribute('src'); // Clear URL source to prioritize srcdoc
-                        previewFrame.srcdoc = result.content;
-                        
-                        // Show Success Toast/Label
-                        // "Your Ugly Invoice" Label as requested
-                        const label = document.createElement('div');
-                        label.className = 'absolute top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black font-black uppercase tracking-widest px-4 py-2 rounded-full shadow-lg z-50 animate-bounce';
-                        label.innerHTML = '✨ Your Ugly Invoice (n8n) ✨';
-                        label.id = 'uglyLabel';
-                        
-                        // Remove old label if exists
-                        const oldLabel = document.getElementById('uglyLabel');
-                        if(oldLabel) oldLabel.remove();
-                        
-                        previewFrame.parentElement.appendChild(label);
-                        setTimeout(() => label.remove(), 5000);
-                    }
-                } else {
-                    alert('Generation completed but returned unexpected format: ' + JSON.stringify(result));
-                }
-
-            } catch (error) {
-                console.error('Generation Error:', error);
-                alert('Failed to generate document. Please try again.');
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = originalText;
-                if(typeof lucide !== 'undefined') lucide.createIcons();
-            }
-        });
-    }
-
-    // Type Selector Listener
-    const typeSelect = document.getElementById('previewTypeSelect');
-    if(typeSelect) {
-        typeSelect.addEventListener('change', refreshPreview);
-    }
-
-    // --- SCALED PREVIEW LOGIC ---
-    function updatePreviewScale() {
-        const container = document.getElementById('previewContainer');
-        const iframe = document.getElementById('previewFrame');
-        if (!container || !iframe) return;
-
-        // Desired Width for Desktop View (matches CSS A4 width with padding)
-        const baseWidth = 1024; // Paginator target width (approx) or just a standard desktop width
-        // Actually, A4 is ~794px at 96dpi. But we want to simulate a full desktop view.
-        
-        const containerWidth = container.offsetWidth;
-        const scale = Math.min(1, containerWidth / baseWidth); // Shrink only, don't pixelate if larger? Or just scale.
-        
-        // Apply Scale
-        iframe.style.width = `${baseWidth}px`;
-        iframe.style.height = `${(container.offsetHeight / scale)}px`; // Compensate height
-        iframe.style.transform = `scale(${scale})`;
-        
-        // Center it if needed, or stick to top-left (origin-top-left class)
-    }
-    
-    // Initial and Resize
-    updatePreviewScale();
-    window.addEventListener('resize', updatePreviewScale); 
-    // Also update on load of iframe to be sure?
-    previewFrame.addEventListener('load', updatePreviewScale);
-    
-    // --- URL PERSISTENCE ---
-    // Ensure if user refreshes, they stay on this template
-    const currentTemplateId = document.getElementById('invoiceTemplateId').value;
-    if (currentTemplateId) {
-        const url = new URL(window.location);
-        url.searchParams.set('templateId', currentTemplateId);
-        window.history.replaceState({}, '', url);
-    }
-
-});
+document.addEventListener('DOMContentLoaded', () => window.BrandEditor.init());
 </script>

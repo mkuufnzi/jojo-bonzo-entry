@@ -1,47 +1,92 @@
 <!-- SUPPORT / TUTORIALS -->
-<div class="mt-7" data-split="true">
-     <div class="mb-3">
-         <div class="text-[13px] font-bold font-sans" :style="'color: ' + theme.text">📚 Get More From Your Products</div>
-         <div class="text-[10px] text-gray-400 font-sans">Tutorials & recipes matched to your order</div>
+<% 
+    const tutorialsList = (branding.model?.tutorials || []).length > 0 ? branding.model.tutorials : [
+        { id: 1, title: "Quick Guide", duration: "2 min", type: "guide", thumb: "🚀", steps: ["Check your settings", "Connect your account", "Launch your first flow"], forProduct: "General Access" }
+    ];
+    const theme = (branding.themeData || branding.theme) || {};
+    const primaryColor = theme.primary || '#6366f1';
+    const accentColor = theme.accent || '#6366f1';
+    const lightColor = theme.light || '#f8fafc';
+    const textColor = theme.text || '#1e293b';
+    const mutedColor = theme.muted || '#64748b';
+%>
+<%# [FIX] CRITICAL: Using inline styles to force vertical list view and prevent horizontal collapse %>
+<div class="mt-8 font-sans w-full block" 
+     style="display: block !important; width: 100% !important;"
+     data-split="false">
+     
+     <div class="mb-5" style="margin-bottom: 20px !important;">
+         <div class="text-[14px] font-bold text-slate-800" style="color: <%= textColor %>">📚 Product Support & Guides</div>
+         <div class="text-[11px] text-gray-400 mt-1">Personalized resources for your purchase</div>
      </div>
      
-     <div class="flex flex-col gap-2.5 font-sans">
-         <template x-for="tut in tutorials" :key="tut.id">
-             <div class="bg-white rounded-xl shadow-sm border transition-all overflow-hidden"
-                  :style="'border-color: ' + (expandedTutorial === tut.id ? theme.accent : 'transparent')">
+     <div class="flex flex-col gap-6 w-full" 
+          style="display: flex !important; flex-direction: column !important; width: 100% !important; gap: 24px !important;">
+         <% tutorialsList.forEach((tut, idx) => { %>
+             <div class="bg-white rounded-xl shadow-sm border transition-all overflow-hidden w-full block"
+                  x-data="{ isOpen: <%= idx === 0 ? 'true' : 'false' %> }"
+                  style="display: block !important; width: 100% !important; border-width: 1px !important;"
+                  :style="{ borderColor: isOpen ? '<%= accentColor %>' : '#f1f5f9' }">
                  
-                 <!-- Header -->
-                 <div class="flex items-center gap-3 p-3.5 cursor-pointer" @click="expandedTutorial = expandedTutorial === tut.id ? null : tut.id">
-                     <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0" :style="'background: ' + theme.light" x-text="tut.thumb"></div>
-                     <div class="flex-1">
-                         <div class="flex items-center gap-1.5">
-                             <span class="text-[12px] font-semibold" :style="'color: ' + theme.text" x-text="tut.title"></span>
-                             <span class="text-[8.5px] font-bold uppercase px-1.5 py-0.5 rounded"
-                                   :style="tut.type === 'recipe' ? 'background: #FEF3C7; color: #D97706' : 'background: ' + theme.light + '; color: ' + theme.primary"
-                                   x-text="tut.type"></span>
-                         </div>
-                         <div class="text-[10px] text-gray-400 mt-0.5">
-                             For: <span x-text="tut.forProduct"></span> · ⏱ <span x-text="tut.duration"></span> read
+                 <!-- Card Header -->
+                 <div class="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50/50 transition-colors w-full" 
+                      style="display: flex !important; flex-direction: row !important; align-items: center !important; width: 100% !important; padding: 20px !important;"
+                      @click="isOpen = !isOpen">
+                     <div class="w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0 shadow-sm border border-black/5" 
+                          style="background: <%= lightColor %>; width: 48px !important; height: 48px !important; flex-shrink: 0 !important;"><%= tut.thumb || '📝' %></div>
+                     <div class="flex-1 min-w-0">
+                         <div class="flex flex-col" style="display: flex !important; flex-direction: column !important;">
+                             <div class="flex items-center gap-2" style="display: flex !important; flex-direction: row !important; align-items: center !important;">
+                                <span class="text-[13px] font-bold text-slate-800 truncate" style="color: <%= textColor %>"><%= tut.title %></span>
+                                <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider shrink-0"
+                                      style="<%= tut.type === 'recipe' ? 'background: #FEF3C7; color: #D97706' : 'background: ' + lightColor + '; color: ' + primaryColor %>">
+                                      <%= tut.type %>
+                                </span>
+                             </div>
+                             <div class="text-[11px] text-gray-400 mt-1 truncate font-medium">
+                                 For: <span class="text-slate-600 font-bold"><%= tut.forProduct %></span> · ⏱ <span class="text-slate-600"><%= tut.duration %></span>
+                             </div>
                          </div>
                      </div>
-                     <div class="text-gray-400 transition-transform text-sm font-bold" :class="expandedTutorial === tut.id ? 'rotate-90' : ''">›</div>
+                     <div class="text-gray-400 transition-transform text-lg font-bold ml-2 shrink-0" 
+                          style="font-size: 20px !important;"
+                          :class="isOpen ? 'rotate-90 text-slate-800' : ''">›</div>
                  </div>
 
-                 <!-- Details -->
-                <div x-show="expandedTutorial === tut.id" x-collapse class="border-t px-4 py-3" :style="'background: ' + theme.light + '; border-color: ' + theme.light">
-                     <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 opacity-60" :style="'color: ' + theme.muted">Steps</div>
-                     <template x-for="(step, i) in tut.steps" :key="i">
-                         <div class="flex items-start gap-2.5 mb-2 last:mb-0">
-                             <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" :style="'background: ' + theme.primary" x-text="i + 1"></div>
-                             <span class="text-[11.5px] leading-snug pt-0.5" :style="'color: ' + theme.text" x-text="step"></span>
-                         </div>
-                     </template>
-                     <button class="w-full mt-3 py-1.5 rounded-lg text-[11px] font-semibold border bg-transparent"
-                             :style="'border-color: ' + theme.primary + '; color: ' + theme.primary">
-                         📺 Watch Full Tutorial →
-                     </button>
+                 <!-- Card Details (Expanded Content) -->
+                <div x-show="isOpen" 
+                     x-collapse 
+                     class="border-t px-8 py-6 flex flex-col gap-5 w-full block" 
+                     style="background: <%= lightColor %>10; border-color: <%= lightColor %>; display: flex !important; flex-direction: column !important; width: 100% !important; border-top-width: 1px !important; padding: 24px !important;">
+                     
+                     <div class="text-[10px] font-bold uppercase tracking-[0.15em] mb-1 opacity-50" 
+                          style="color: <%= mutedColor %>; margin-bottom: 12px !important; letter-spacing: 0.15em !important;">Steps for Success</div>
+                     
+                     <!-- Steps List - FORCED VERTICAL -->
+                     <div class="flex flex-col gap-5 w-full" 
+                          style="display: flex !important; flex-direction: column !important; width: 100% !important; gap: 20px !important;">
+                        <% (tut.steps || []).forEach((step, i) => { %>
+                            <div class="flex items-start gap-5 w-full mb-2" 
+                                 style="display: flex !important; flex-direction: row !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 8px !important;">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0 shadow-sm mt-0.5" 
+                                     style="background: <%= primaryColor %>; width: 32px !important; height: 32px !important; flex-shrink: 0 !important;"><%= i + 1 %></div>
+                                <div class="flex-1 text-[13px] leading-relaxed text-slate-700 font-medium pt-0.5" 
+                                     style="color: <%= textColor %>; line-height: 1.6 !important;">
+                                    <%= step %>
+                                </div>
+                            </div>
+                        <% }); %>
+                     </div>
+                     
+                     <!-- Action Button -->
+                     <div class="pt-4 w-full" style="padding-top: 16px !important;">
+                        <button class="w-full py-3 rounded-lg text-[11px] font-bold border bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                style="border-color: <%= primaryColor %>30; color: <%= primaryColor %>; display: flex !important; align-items: center !important; justify-center !important;">
+                            <span class="text-sm">📺</span> Watch Full Tutorial
+                        </button>
+                     </div>
                  </div>
              </div>
-         </template>
+         <% }); %>
      </div>
 </div>

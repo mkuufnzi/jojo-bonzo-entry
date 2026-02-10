@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { brandingService } from '../services/branding.service';
 import { templateRegistry } from '../services/template-registry.service';
+import { resolveLayout } from '../services/layout-resolution.service';
+import { AppRepository } from '../repositories/app.repository';
+
+const appRepo = new AppRepository();
 import { SmartInvoice } from '../models/smart-documents/smart-invoice.model';
 import { smartDocumentService } from '../services/smart-document.service';
 import { logger } from '../lib/logger';
@@ -37,14 +41,37 @@ export class BrandingController {
                 userId 
             }, 'Rendering Brand Editor');
 
+            // Fetch App Context for PDF Export (Dashboard Flow)
+            const apps = await appRepo.findManyByUserId(userId);
+            const activeApp = apps.find(a => a.isActive) || apps[0];
+            
+            // Use resolveLayout() for SINGLE SOURCE OF TRUTH
+            const resolved = resolveLayout(manifest, profile?.components);
+            
+            logger.info({ 
+                layoutOrder: resolved.layoutOrder.slice(0, 5),
+                resolvedFrom: resolved.resolvedFrom 
+            }, '[renderEditor] Layout resolved');
+
             res.render('dashboard/brand', {
               title: `Configure ${manifest.name}`,
-              activeService: 'transactional', // update activeService to match sidebar
-              profile: profile || {},
+              activeService: 'transactional',
+              profile: {
+                  ...profile,
+                  components: {
+                      ...(profile?.components || {}),
+                      layoutOrder: resolved.layoutOrder  // Unified resolution
+                  }
+              },
+              layoutOrder: resolved.layoutOrder,     // Direct access for sidebar
+              widgetStates: resolved.widgetStates,   // Widget enabled states
+              resolvedFrom: resolved.resolvedFrom,   // For debugging
               manifest,
-              features: manifest.features, // Pass features for view
+              features: manifest.features,
               user: res.locals.user,
-              nonce: res.locals.nonce
+              nonce: res.locals.nonce,
+              appId: activeApp?.id || '',
+              apiKey: activeApp?.apiKey || ''
           });
       } catch (error: any) {
           logger.error({ error, userId: (req as any).session?.userId }, 'Error rendering brand editor');
@@ -102,6 +129,8 @@ export class BrandingController {
             logoUrl: dbProfile?.logoUrl || null
         };
 
+        let layoutOrder: any;
+
         if (isPost) {
             // Live Preview from UI State
             // Handle JSON strings from form or direct JSON from fetch
@@ -135,27 +164,35 @@ export class BrandingController {
             };
 
             templateId = req.body.templateId || (req.query.templateId as string) || 'smart_invoice_v1';
-            
+        
             // Map components from parsed body
             components = {};
             const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1')!;
             
+            // 1. First, include all components passed in the body (handles dynamic spacers)
+            Object.keys(bodyComponents).forEach(id => {
+                const passed = bodyComponents[id];
+                components[id] = { 
+                    enabled: passed.enabled === true || String(passed.enabled) === 'true',
+                    value: passed.value
+                };
+            });
+
+            // 2. Then, ensure manifest features are initialized if missing (backwards compat)
             manifest.features.forEach(f => {
-                if (f.required) {
-                    components[f.id] = { enabled: true };
-                } else {
-                    const passed = bodyComponents[f.id];
-                    if (passed !== undefined) {
-                        components[f.id] = { enabled: passed.enabled === true || String(passed.enabled) === 'true' };
+                if (!components[f.id]) {
+                    if (f.required) {
+                        components[f.id] = { enabled: true };
                     } else {
                         components[f.id] = { enabled: f.defaultEnabled ?? true };
                     }
                 }
             });
+
+            // Ensure themeData has everything for the view
+            themeData.components = components;
         } else {
             // Initial Load / Refresh - Get from Database
-            const savedProfileData = dbProfile || { themeData: {}, config: {}, components: {} };
-            
             themeData = {
                 name: profile.companyName,
                 primary: (dbProfile?.brandColors as any)?.primary || '#6366F1',
@@ -168,26 +205,40 @@ export class BrandingController {
                 tagline: profile.tagline,
                 gradient: `linear-gradient(135deg, ${(dbProfile?.brandColors as any)?.primary || '#6366F1'} 0%, ${(dbProfile?.brandColors as any)?.secondary || '#8B5CF6'} 100%)`
             };
-            config = savedProfileData.config || {};
+            config = dbProfile?.config || {};
             templateId = (req.query.templateId as string) || dbProfile?.activeTemplateId || 'smart_invoice_v1';
-
-            const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1')!;
-            components = {};
-            const savedComponents = savedProfileData.components || {};
-            
-            manifest.features.forEach(f => {
-                if (f.required) {
-                    components[f.id] = { enabled: true };
-                } else if (savedComponents[f.id] !== undefined) {
-                    components[f.id] = { enabled: savedComponents[f.id].enabled === true };
-                } else {
-                    components[f.id] = { enabled: f.defaultEnabled ?? true };
-                }
-            });
+            components = dbProfile?.components || {};
         }
 
-        // 2. Resolve Manifest & View
+        // UNIFIED LAYOUT RESOLUTION via resolveLayout() - SINGLE SOURCE OF TRUTH
         const manifest = templateRegistry.getById(templateId) || templateRegistry.getById('smart_invoice_v1')!;
+        
+        // Use resolveLayout for base resolution, then allow POST override for live preview
+        const resolved = resolveLayout(manifest, components);
+        let finalLayoutOrder = resolved.layoutOrder;
+        let widgetStates = resolved.widgetStates;
+        
+        // POST: Override with live sidebar order if provided (drag-and-drop sync)
+        if (isPost && req.body.layoutOrder) {
+            let postedOrder = req.body.layoutOrder;
+            if (typeof postedOrder === 'string') {
+                try { postedOrder = JSON.parse(postedOrder); } catch (e) { /* ignore */ }
+            }
+            if (Array.isArray(postedOrder) && postedOrder.length > 0) {
+                finalLayoutOrder = postedOrder;
+            }
+        }
+        
+        logger.info({ 
+            layoutOrder: finalLayoutOrder.slice(0, 5),
+            resolvedFrom: resolved.resolvedFrom,
+            isPost 
+        }, '[getPreview] Layout resolved');
+        
+        // Attach to theme for backward compatibility
+        (themeData as any).layoutOrder = finalLayoutOrder;
+
+        // 2. Resolve View
         const viewPath = manifest.viewPath || 'templates/invoice/smart-invoice-v1/index';
         
         // 3. Prepare Model Data (Mock)
@@ -209,7 +260,8 @@ export class BrandingController {
         
         smartInvoice.recommendations = [
             { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "🎌", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },
-            { id: 102, name: "MCT Oil Drops", price: 22.99, img: "💧", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" }
+            { id: 102, name: "MCT Oil Drops", price: 22.99, img: "💧", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" },
+            { id: 103, name: "Bamboo Whisk Holder", price: 14.50, img: "🏺", reason: "Keep your whisk in perfect shape", match: 82, badge: "Essential", sales: "Popular Add-on" }
         ];
         
         smartInvoice.tutorials = [
@@ -240,8 +292,12 @@ export class BrandingController {
                     themeData: themeData, // Compat
                     config,
                     components,
-                    profile: profile, // Robust profile
-                    model: modelData 
+                    profile: profile,
+                    model: modelData,
+                    // NEW: Single source of truth from resolveLayout()
+                    layoutOrder: finalLayoutOrder,
+                    widgetStates: widgetStates,
+                    resolvedFrom: resolved.resolvedFrom
                  },
                  nonce
              }, (err, str) => {

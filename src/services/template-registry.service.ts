@@ -21,6 +21,7 @@ export interface SmartTemplateManifest {
     version: string;
     thumbnailUrl?: string;
     features: TemplateFeature[];
+    layoutOrder?: string[];
     viewPath?: string; // Internal: calculated path to index.ejs relative to views
 }
 

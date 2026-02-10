@@ -71,11 +71,11 @@ logger.info('------------------------------------------------');
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/robots.txt', (req, res) => res.status(204).end());
 
-// Global 400 Debugger
+// Global 400/404 Debugger
 app.use((req, res, next) => {
     const originalStatus = res.status;
     res.status = function(code) {
-        if (code === 400) {
+        if (code === 400 || code === 404) {
             const debugInfo = {
                 timestamp: new Date().toISOString(),
                 method: req.method,
@@ -83,15 +83,15 @@ app.use((req, res, next) => {
                 headers: req.headers,
                 body: req.body,
                 params: req.params,
-                query: req.query
+                query: req.query,
+                statusCode: code
             };
-            logger.warn(debugInfo, `[400 DEBUG] Bad Request Detection`);
-            console.warn('[400 DEBUG] Request intercepted:', JSON.stringify(debugInfo, null, 2));
-            // Also write to a file we can easily read
+            logger.warn(debugInfo, `[${code} DEBUG] Request Detection`);
+            console.warn(`[${code} DEBUG] Request intercepted:`, JSON.stringify(debugInfo, null, 2));
             try {
-                fs.appendFileSync(path.join(process.cwd(), 'debug_400.log'), JSON.stringify(debugInfo, null, 2) + '\n---\n');
+                fs.appendFileSync(path.join(process.cwd(), 'debug_error.log'), JSON.stringify(debugInfo, null, 2) + '\n---\n');
             } catch (e: any) {
-                console.error('[400 DEBUG] Failed to write to debug_400.log:', e.message);
+                console.error(`[${code} DEBUG] Failed to write to debug_error.log:`, e.message);
             }
         }
         return originalStatus.call(this, code);
@@ -111,6 +111,7 @@ app.use(compression());
 // For now, keeping morgan for dev visibility, but Sentry/logger handles the heavy lifting.
 app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.static(path.join(__dirname, '../public')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'))); // [FIX] Serve logo uploads
 
 import { traceMiddleware } from './middleware/trace.middleware';
 app.use(traceMiddleware);

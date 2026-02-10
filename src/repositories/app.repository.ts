@@ -84,6 +84,12 @@ export class AppRepository {
       where: { userId },
     });
   }
+
+  async findManyByUserId(userId: string): Promise<App[]> {
+    return prisma.app.findMany({
+      where: { userId },
+    });
+  }
   
   async addService(appId: string, serviceId: string) {
       return prisma.appService.create({

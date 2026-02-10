@@ -18,7 +18,8 @@ class Paginator {
         return {
             pageSize: (docConfig?.getAttribute('data-page-size')) || 'A4',
             marginTop: parseInt(docConfig?.getAttribute('data-margin-top') || '50'),
-            marginBottom: parseInt(docConfig?.getAttribute('data-margin-bottom') || '50')
+            marginBottom: parseInt(docConfig?.getAttribute('data-margin-bottom') || '50'),
+            bleedFirstPage: docConfig?.hasAttribute('data-bleed-first-page')
         };
     }
 
@@ -29,6 +30,15 @@ class Paginator {
         }
         
         console.log('[Paginator] v1.3.2 Splitting Document into Pages...');
+        
+        // DEBUG: Log source DOM order BEFORE cloning
+        const debugSections = Array.from(this.source.querySelectorAll('.doc-section'));
+        console.log('[Paginator] SOURCE ORDER (Pre-Clone):', debugSections.map((el, i) => {
+            const firstChild = el.firstElementChild;
+            const hint = firstChild?.className?.split(' ')[0] || firstChild?.tagName || 'empty';
+            return `${i+1}:${hint}`;
+        }).join(' | '));
+        
         this.target.innerHTML = '';
         this.pageCount = 0;
         this.currentPage = null;
@@ -68,24 +78,13 @@ class Paginator {
         const toDelete = Array.from(source.querySelectorAll('script, style, [data-paginator-ignore]'));
         toDelete.forEach(n => n.parentNode.removeChild(n));
         
-        // NEW: Recursively strip Alpine attributes to prevent JS errors in clones
-        this.stripAlpineRecursive(source);
+        // Reverted aggressive Alpine stripping to preserve interactivity
+        // The x-ignore on #source-document in document-master.ejs handles the double-rendering issue correctly.
     }
 
+    // stripAlpineRecursive moved to legacy or removed if no longer needed
     stripAlpineRecursive(el) {
-        if (el.nodeType !== 1) return;
-        
-        const attrs = Array.from(el.attributes);
-        attrs.forEach(attr => {
-            if (attr.name.startsWith('x-') || attr.name.startsWith(':') || attr.name.startsWith('@')) {
-                el.removeAttribute(attr.name);
-            }
-        });
-        
-        // Mark as ignore for any future Alpine re-initialization
-        el.setAttribute('x-ignore', '');
-        
-        Array.from(el.children).forEach(child => this.stripAlpineRecursive(child));
+        // Keeping it for potential surgical use, but not calling it globally
     }
 
     createNewPage() {
@@ -108,6 +107,10 @@ class Paginator {
         content.style.height = availableHeight + 'px';
         content.style.overflow = 'hidden';
         content.style.paddingBottom = '1px';
+        
+        // [FIX] Ensure generated pages respect the 40px (px-10) margin standard
+        content.style.paddingLeft = '40px';
+        content.style.paddingRight = '40px';
 
         page.appendChild(content);
         this.target.appendChild(page);
@@ -128,8 +131,22 @@ class Paginator {
         if (node.nodeType !== 1) return;
 
         if (this.isNonFlow(node)) {
-            if (this.currentPage) this.currentPage.appendChild(node.cloneNode(true));
-            else this.nonFlowBuffer.push(node.cloneNode(true));
+            const clone = node.cloneNode(true);
+            
+            // Special handling for Full Bleed on Page 1
+            if (node.hasAttribute('data-full-bleed') && this.pageCount <= 1) {
+                if (!this.currentPage) this.createNewPage();
+                // Place directly in sheet, NOT in content layer
+                this.currentPage.parentElement.appendChild(clone);
+                clone.style.position = 'absolute';
+                clone.style.top = '0';
+                clone.style.left = '0';
+                clone.style.width = '100%';
+                clone.style.zIndex = '5';
+            } else {
+                if (this.currentPage) this.currentPage.appendChild(clone);
+                else this.nonFlowBuffer.push(clone);
+            }
             return;
         }
 
@@ -142,10 +159,12 @@ class Paginator {
         if (this.isOverflown(this.currentPage)) {
             const flowItems = Array.from(this.currentPage.children).filter(n => !this.isNonFlow(n));
             const isCont = this.isContainer(node);
+            
+            console.log(`[Paginator] Overflow in <${this.currentPage.className}>: ${this.currentPage.scrollHeight}px > ${this.currentPage.clientHeight}px (Items: ${flowItems.length})`);
 
             if (isCont) {
                 if (flowItems.length > 1) {
-                    console.log(`[Paginator] Moving <${node.tagName}> to fresh Page ${this.pageCount+1}`);
+                    console.log(`[Paginator] Moving Container <${node.tagName}> to fresh Page ${this.pageCount+1}`);
                     this.currentPage.removeChild(clone);
                     this.createNewPage();
                     this.currentPage.appendChild(clone);
@@ -161,17 +180,22 @@ class Paginator {
                     this.splitContainer(node, []);
                 }
             } else if (flowItems.length > 1) {
-                console.log(`[Paginator] Atomic <${node.tagName}> overflows. Moving to Page ${this.pageCount+1}`);
+                console.log(`[Paginator] Moving Atomic <${node.tagName}> to Page ${this.pageCount+1}`);
                 this.currentPage.removeChild(clone);
                 this.createNewPage();
                 this.currentPage.appendChild(clone);
             } else {
-                console.warn(`[Paginator] Atomic First-Item <${node.tagName}> overflows by ${this.currentPage.scrollHeight - this.currentPage.clientHeight}px. Content will clip.`);
+                console.warn(`[Paginator] Atomic First-Item <${node.tagName}> on Page ${this.pageCount} overflows but will CLIP to avoid blank pages. (Height: ${this.currentPage.scrollHeight}px > ${this.currentPage.clientHeight}px)`);
             }
         }
     }
 
     splitContainer(container, stack = []) {
+        if (stack.length > 5) {
+            console.warn(`[Paginator] Max split depth reached for <${container.tagName}>. Clipping.`);
+            return;
+        }
+
         const myClone = container.cloneNode(false);
         const newStack = [...stack, myClone];
         
@@ -211,16 +235,10 @@ class Paginator {
             this.appendToLeaf(newStack, childClone);
 
             if (this.isOverflown(this.currentPage)) {
-                const allLeafs = Array.from(this.currentPage.querySelectorAll('*')).filter(n => !this.isNonFlow(n) && n.children.length === 0);
-                
-                if (allLeafs.length > 1) {
-                    this.removeFromLeaf(newStack, childClone);
-                    this.createNewPage();
-                    this.ensureStack(newStack);
-                    this.appendToLeaf(newStack, childClone);
-                } else {
-                    console.warn(`[Paginator] First item <${child.tagName}> on Page ${this.pageCount} overflows but cannot be moved. Let it clip or improve split depth.`);
-                }
+                this.removeFromLeaf(newStack, childClone);
+                this.createNewPage();
+                this.ensureStack(newStack);
+                this.appendToLeaf(newStack, childClone);
             }
         }
     }
@@ -278,11 +296,8 @@ class Paginator {
 
     isOverflown(el) {
         if (!el) return false;
-        const over = el.scrollHeight > (el.clientHeight + 1); // 1px buffer
-        if (over) {
-            console.log(`[Paginator] Overflow: ${el.scrollHeight} > ${el.clientHeight}`);
-        }
-        return over;
+        // Use a 5px buffer to ignore sub-pixel rendering jitter and small overflow regressions
+        return el.scrollHeight > (el.clientHeight + 5); 
     }
 
     isNonFlow(node) {
@@ -296,6 +311,10 @@ class Paginator {
 
     isContainer(node) {
         if (!node || node.nodeType !== 1) return false;
+        
+        // [FIX] Explicitly allow marking nodes as non-containers to prevent splitting
+        if (node.hasAttribute('data-no-split') || node.getAttribute('data-split') === 'false') return false;
+
         if (node.hasAttribute('data-split') || node.hasAttribute('data-container') || node.classList.contains('doc-section')) return true;
         
         const splitTags = ['TABLE', 'TBODY', 'UL', 'OL', 'SECTION', 'ARTICLE', 'MAIN', 'BLOCKQUOTE'];

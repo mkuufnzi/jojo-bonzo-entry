@@ -83,14 +83,14 @@
         <!-- Section: Upsell Recommendations (Splittable) -->
         <% if (branding.components?.product_recommendations?.enabled) { %>
             <div class="doc-section mb-8" data-split="true">
-                <%- include('./components/upsell') %>
+                <%- include('../../../components/smart-widgets/product-recommendations') %>
             </div>
         <% } %>
 
         <!-- Section: Product Support (Splittable) -->
         <% if (branding.components?.product_support?.enabled) { %>
-            <div class="doc-section mb-8" data-split="true">
-                <%- include('./components/nurture') %>
+            <div class="doc-section mb-8">
+                <%- include('../../../components/smart-widgets/tutorials') %>
             </div>
         <% } %>
 
