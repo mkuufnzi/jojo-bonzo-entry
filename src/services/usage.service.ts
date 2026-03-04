@@ -267,6 +267,53 @@ export class UsageService {
     });
   }
 
+  /**
+   * [Phase 3] Get unified usage across all models
+   */
+  async getUnifiedUsage(userId: string, startDate?: Date, endDate?: Date) {
+      const now = new Date();
+      const start = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const prisma = (await import('../lib/prisma')).default;
+
+      const [usageLogs, processedDocs, smartDocs] = await Promise.all([
+          prisma.usageLog.count({
+              where: { userId, status: 'success', createdAt: { gte: start, lte: end }, resourceType: { not: 'dashboard_visit' } }
+          }),
+          prisma.processedDocument.count({
+              where: { userId, status: 'completed', createdAt: { gte: start, lte: end } }
+          }),
+          prisma.smartDocument.count({
+              where: { userId, createdAt: { gte: start, lte: end } }
+          })
+      ]);
+
+      return { total: usageLogs + processedDocs + smartDocs, usageLogs, processedDocs, smartDocs };
+  }
+
+  /**
+   * [Phase 3] Get analytics specifically for integrations
+   */
+  async getIntegrationAnalytics(businessId: string) {
+      const prisma = (await import('../lib/prisma')).default;
+      
+      const [processedStats, auditStats] = await Promise.all([
+          prisma.processedDocument.groupBy({
+              by: ['status'],
+              where: { businessId },
+              _count: { id: true },
+              _sum: { processingTimeMs: true }
+          }),
+          prisma.auditLog.groupBy({
+              by: ['actionType', 'success'],
+              where: { businessId },
+              _count: { id: true }
+          })
+      ]);
+
+      return { processedStats, auditStats };
+  }
+
   async getUserCostByService(userId: string, startDate?: Date, endDate?: Date) {
     const now = new Date();
     const start = startDate || new Date(now.getFullYear(), now.getMonth(), 1);

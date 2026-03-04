@@ -4,7 +4,7 @@ import prisma from '../lib/prisma';
 import { emailService } from './email.service';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
-export type NotificationCategory = 'toolSuccess' | 'toolFailure' | 'billingAlert' | 'paymentAction';
+export type NotificationCategory = 'toolSuccess' | 'toolFailure' | 'billingAlert' | 'paymentAction' | 'syncEvent' | 'recoveryAction' | 'recoveryAlert';
 
 export class NotificationService {
   private notificationRepository: NotificationRepository;
@@ -53,6 +53,25 @@ export class NotificationService {
             console.error(`Failed to send email to ${user.email}:`, error);
         }
     }
+  }
+
+  /**
+   * Notifies all users associated with a specific business.
+   * Useful for background jobs or webhooks where `req.user` isn't available.
+   */
+  async notifyBusiness(businessId: string, type: NotificationType, title: string, message: string, category?: NotificationCategory, link?: string) {
+    // Note: Assuming `businessId` exists on the User model as determined in DB schema
+    const users = await prisma.user.findMany({ 
+        where: { businessId }, 
+        select: { id: true } 
+    });
+    
+    // Dispatch notifications in parallel
+    const notifyPromises = users.map(u => 
+        this.notifyUser(u.id, type, title, message, category, link)
+    );
+    
+    await Promise.allSettled(notifyPromises);
   }
 
   async getSettings(userId: string) {

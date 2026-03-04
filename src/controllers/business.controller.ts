@@ -84,13 +84,17 @@ export class BusinessController {
   static async saveProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user?.id || req.session.userId!;
-      const { name, organization, sector, industry, taxId, address, city, state, zip, country, website, niche, slogan, about } = req.body;
+      const bodyData = req.body?.profile || req.body || {};
+      const { name, organization, sector, industry, taxId, address, city, state, zip, country, website, niche, slogan, about } = bodyData;
 
       // Handle both Alpine model names and HTML input names just in case
       const finalName = name || organization;
       const finalSector = sector || industry;
 
       const traceId = (req as any).traceId || 'unknown';
+      
+      console.log('\n[DEBUG BusinessController] saveProfile Raw Payload:', JSON.stringify(req.body, null, 2));
+      console.log(`[DEBUG BusinessController] saveProfile Extracted - Name: ${finalName}, Sector: ${finalSector}`);
 
       logger.info({ 
           traceId, 
@@ -200,10 +204,6 @@ export class BusinessController {
         });
     }
 
-   /**
-    * POST /api/business/branding (Step 3)
-    * Accepts multipart/form-data with optional logo file upload
-    */
    /**
     * POST /api/business/branding (Step 3)
     * Accepts multipart/form-data with optional logo file upload

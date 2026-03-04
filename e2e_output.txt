@@ -1,0 +1,68 @@
+[dotenv@17.2.3] injecting env (3) from environments\.env -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+≡ƒÜÇ [E2E] Starting Smart Recovery Phase 3 Verification...
+
+≡ƒôä [1/4] Verifying Email Templates Existence...
+Γ£à Template found: reminder_gentle.ejs
+Γ£à Template found: reminder_firm.ejs
+Γ£à Template found: reminder_final.ejs
+
+ΓÅ░ [2/4] Simulating Daily Dispatch Cycle...
+[2026-02-11 19:37:41.643 +0300] [34mDEBUG[39m: [36mInitializing Prisma Client for PostgreSQL...[39m
+[2026-02-11 19:37:51.966 +0300] [32mINFO[39m: [36mΓÅ░ [Recovery] Starting Daily Dispatch[39m
+[2026-02-11 19:37:52.024 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Found active sequences[39m
+    [35mcount[39m: 1
+Γ£à Daily Dispatch initiated (Jobs queued to Redis)
+
+≡ƒÄ» [3/4] Testing Direct Action Execution (Step 1 -> Gentle)...
+[2026-02-11 19:37:52.054 +0300] [32mINFO[39m: [36mΓ£à [Recovery] Sequence updated[39m
+    [35mbusinessId[39m: "1a98aaf1-9c92-4d1f-b854-3da8899a310f"
+    [35msequenceId[39m: "1a114d2f-4fe3-47e5-918a-8e7a9a596127"
+Using Action ID: a8af809e-340c-48f6-943b-11dbdb3c863d for Invoice: E2E-INV-P3-3605
+[2026-02-11 19:37:52.072 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dunning action created[39m
+    [35mbusinessId[39m: "1a98aaf1-9c92-4d1f-b854-3da8899a310f"
+    [35mexternalInvoiceId[39m: "E2E-INV-P3-3605"
+    [35mactionId[39m: "a4866ed9-5a2e-4427-8305-2e082c392062"
+    [35mstep[39m: 3
+    [35mtotalSteps[39m: 3
+    [35mactionType[39m: "email"
+ΓÜá∩╕Å No workflow executed. Check if an active "invoice_overdue" workflow exists for this business.
+
+≡ƒôæ [4/4] Checking for Workflow Execution Logs...
+[2026-02-11 19:37:52.075 +0300] [33mWARN[39m: [36mΓÜá∩╕Å [Recovery] No active workflow found for dispatch. Action recorded but not sent.[39m
+    [35mbusinessId[39m: "1a98aaf1-9c92-4d1f-b854-3da8899a310f"
+≡ƒô¥ Creating recovery workflow for test...
+Γ£à Using recovery workflow: 0cd9b564-dcac-481d-be69-57630679d16a
+
+≡ƒöä Re-executing action with workflow present...
+[2026-02-11 19:37:52.102 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dunning action created[39m
+    [35mbusinessId[39m: "1a98aaf1-9c92-4d1f-b854-3da8899a310f"
+    [35mexternalInvoiceId[39m: "E2E-INV-P3-3605-WF"
+    [35mactionId[39m: "5e0260ee-0882-477f-a8ed-67d286b11334"
+    [35mstep[39m: 1
+    [35mtotalSteps[39m: 3
+    [35mactionType[39m: "email"
+≡ƒôì Captured Workflow Payload: {
+  "type": "invoice_overdue",
+  "invoiceId": "E2E-INV-P3-3605-WF",
+  "amount": 450,
+  "currency": "USD",
+  "dueDate": "2026-02-10T16:37:52.057Z",
+  "step": 1,
+  "action": "email",
+  "templateId": "reminder_gentle",
+  "invoiceLink": "http://localhost:3002/public/invoice/E2E-INV-P3-3605-WF",
+  "customer": {
+    "email": "test-recipient@example.com"
+  }
+}
+[2026-02-11 19:37:52.104 +0300] [32mINFO[39m: [36m≡ƒöù [Recovery] Triggering Workflow[39m
+    [35mbusinessId[39m: "1a98aaf1-9c92-4d1f-b854-3da8899a310f"
+    [35mworkflowId[39m: "0cd9b564-dcac-481d-be69-57630679d16a"
+Γ£à Final Verification: Payload captured successfully!
+ - Template ID: reminder_gentle
+ - Invoice Link: http://localhost:3002/public/invoice/E2E-INV-P3-3605-WF
+
+≡ƒÅü Phase 3 E2E Verification Complete.
+[2026-02-11 19:37:52.109 +0300] [32mINFO[39m: [36mΓ£à [Recovery] Workflow Executed & Action Updated[39m
+    [35mactionId[39m: "5e0260ee-0882-477f-a8ed-67d286b11334"
+[2026-02-11 19:38:49.672 +0300] [32mINFO[39m: [36mDisconnecting Prisma Client...[39m

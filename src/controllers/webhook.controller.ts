@@ -161,7 +161,79 @@ export class WebhookController {
       }
     });
 
-    console.log(`[Webhook] ✅ Payment recorded: $${amountPaid} ${currency} for user ${user.id}`);
+    logger.info({ stripeInvoiceId, userId: user.id, amountPaid, currency }, `[Webhook] ✅ Payment recorded`);
+
+    /**
+     * Trigger Transactional Branding Workflow
+     *
+     * Stripe invoices now flow through the same WorkflowService pipeline as
+     * ERP-originated invoices (QuickBooks, Xero, Zoho). The normalised payload
+     * mirrors the ERP event shape so existing workflow-matching regex logic in
+     * processWebhook works without modification.
+     *
+     * Workflow matching requires a Workflow record with:
+     *   triggerType:   'webhook'
+     *   triggerConfig: { provider: 'stripe', event: 'stripe.invoice.*' }
+     *   actionConfig:  { type: 'apply_branding' }
+     *
+     * ensureDefaultWorkflow('stripe') creates this record automatically the
+     * first time a successful Stripe payment is received for a business.
+     */
+    try {
+      const businessId = user.businessId;
+
+      if (!businessId) {
+        logger.warn({ userId: user.id }, '[Webhook] User has no businessId — skipping branding workflow dispatch');
+        return;
+      }
+
+      // Ensure a default branding workflow exists for Stripe-triggered documents
+      await workflowService.ensureDefaultWorkflow(user.id, businessId, 'stripe');
+
+      // Build the normalised event payload (mirrors ERP event shape)
+      const stripeEventPayload = {
+        // Floovioo routing fields (used by WorkflowService.processWebhook)
+        provider: 'stripe',
+        normalizedEventType: 'stripe.invoice.payment_succeeded',
+        type: 'invoice.payment_succeeded',   // for fuzzy matching fallback
+        entityId: stripeInvoiceId,
+        entityType: 'invoice',
+        resourceType: 'invoice',
+
+        // Document data (used by n8n branding workflow)
+        id: stripeInvoiceId,
+        amount: amountPaid,
+        currency,
+        status: 'paid',
+        subscriptionId: subscriptionId || null,
+        stripeCustomerId: customerId,
+
+        // Customer context — Stripe may expose name/email on the invoice object
+        customer: {
+          name: invoice.customer_name || invoice.customer_email || 'Customer',
+          email: invoice.customer_email || null,
+        },
+
+        // Line items from Stripe (if present)
+        items: (invoice.lines?.data || []).map((line: any) => ({
+          description: line.description || 'Subscription',
+          quantity: line.quantity || 1,
+          unitPrice: (line.unit_amount_excluding_tax || line.amount || 0) / 100,
+          amount: (line.amount || 0) / 100,
+        })),
+
+        // Raw Stripe object for n8n passthrough
+        _raw: invoice,
+      };
+
+      logger.info({ userId: user.id, businessId, stripeInvoiceId }, '[Webhook] Dispatching Stripe invoice to WorkflowService');
+      const results = await workflowService.processWebhook(user.id, stripeEventPayload);
+      logger.info({ results: results.length, stripeInvoiceId }, '[Webhook] Stripe branding workflow dispatch complete');
+
+    } catch (workflowError: any) {
+      // Non-critical: payment is already recorded. Log but do not re-throw.
+      logger.error({ error: workflowError.message, stripeInvoiceId }, '[Webhook] ⚠️ Branding workflow dispatch failed — payment still recorded');
+    }
   }
 
   private async handleInvoicePaymentFailed(invoice: any) {
@@ -231,6 +303,18 @@ export class WebhookController {
       } else {
           logger.info({ provider }, '✅ [Webhook] Signature Verified');
       }
+
+      // [Phase 2] Log Entry for Audit Trail
+      await prisma.auditLog.create({
+          data: {
+              actionType: 'erp_webhook_received',
+              eventType: `raw_${normalizedProvider}_webhook`,
+              businessId: null, // To be updated after resolution
+              success: true,
+              requestPayload: req.body as any,
+              requestId: (req.headers['x-request-id'] || `recv_${Date.now()}`) as string
+          }
+      });
 
       // 3. Parse Webhook Event (Normalized)
       logger.debug({ provider: normalizedProvider, body: req.body }, '📥 [Webhook] Received Payload');
@@ -337,9 +421,23 @@ export class WebhookController {
             
             logger.debug({ payload: finalPayload }, '📤 [Webhook] Payload Detail');
 
+            // [Phase 8] Update Recovery Engine Sessions
+            try {
+                const { RecoveryService } = await import('../modules/recovery/recovery.service');
+                const recoveryService = new RecoveryService();
+                await recoveryService.handleErpEvent(integration.businessId, {
+                    type: event.type,
+                    externalId: event.entityId,
+                    payload: event.payload // Pass full QB entity payload for reconciliation
+                });
+            } catch (recoveryError) {
+                logger.error({ recoveryError }, 'Failed to update recovery session from webhook');
+            }
+
             console.log(`[Webhook] ⚙️ Dispatching to WorkflowService for User ${userId}`);
             try {
-                const results = await workflowService.processWebhook(userId, finalPayload);
+                // [Phase 2] Pass App context if available through integration
+                const results = await workflowService.processWebhook(userId, finalPayload, integration?.appId);
                 console.log(`[Webhook] 🏁 Dispatch complete. Results: ${results.length} workflows triggered`);
             } catch (e) {
                 console.error(`[Webhook] ❌ Workflow processing failed:`, e);

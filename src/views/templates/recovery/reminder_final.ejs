@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Inter', sans-serif; color: #374151; line-height: 1.6; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { max-height: 40px; }
+        .content { margin-bottom: 30px; }
+        .footer { text-align: center; font-size: 12px; color: #9ca3af; }
+        .btn { display: inline-block; background-color: #dc2626; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .invoice-box { background-color: #fef2f2; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <% if (brand.logo) { %>
+                <img src="<%= brand.logo %>" alt="<%= brand.name %>" class="logo">
+            <% } else { %>
+                <h2><%= brand.name %></h2>
+            <% } %>
+        </div>
+        <div class="content">
+            <p><strong>Urgent: Final Notice Regarding Overdue Invoice</strong></p>
+            <p>This is a final notice regarding invoice <strong>#<%= trigger.invoiceId %></strong>, which remains unpaid despite our previous reminders.</p>
+            
+            <div class="invoice-box">
+                <strong>Total Outstanding:</strong> <%= trigger.currency %> <%= trigger.amount %><br>
+                <strong>Days Overdue:</strong> <%= Math.floor((new Date().getTime() - new Date(trigger.dueDate).getTime()) / (1000 * 60 * 60 * 24)) %> days
+            </div>
+
+            <p>We value your business and would like to resolve this matter immediately. Please use the link below to settle the outstanding balance today:</p>
+            
+            <p style="text-align: center;">
+                <a href="<%= trigger.invoiceLink %>" class="btn">Pay Immediately</a>
+            </p>
+
+            <p>If payment is not received, we may have to take further action to recover the debt. Please contact us immediately if you are experiencing difficulties seltling this invoice.</p>
+            <p>Sincerely,<br>The Credit Control Team<br><%= brand.name %></p>
+        </div>
+        <div class="footer">
+            <p>&copy; <%= new Date().getFullYear() %> <%= brand.name %>. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -68,8 +68,37 @@ export class RevenueService {
     }
 
     /**
-     * Helper: Resolve Target Product & Format Offer
+     * Context Provider: Gets enriched "Smart Content" for a document dispatch.
+     * Consolidates personal message and potential upsells into a single block.
      */
+    async getEnrichedContext(businessId: string, items: string[]): Promise<any> {
+        logger.info({ businessId, itemCount: items.length }, '🧠 [RevenueService] Generating Enriched Context');
+        
+        const offers = await this.getRecommendations({ 
+            businessId, 
+            items, 
+            totalAmount: 0 // Amount check logic can be expanded later
+        });
+
+        // Format for n8n consumption (Strict Schema)
+        return {
+            has_offers: offers.length > 0,
+            offers: offers.map(o => ({
+                sku: o.sku,
+                name: o.productName,
+                copy: o.copy,
+                price: o.price,
+                currency: o.currency,
+                reason: o.reason
+            })),
+            // Default personal message if no specific logic exists yet
+            personal_message: offers.length > 0 
+                ? `We thought you might like these additions to your ${items[0] || 'order'}!`
+                : "Thank you for being a valued customer!",
+            timestamp: new Date().toISOString()
+        };
+    }
+
     private async addOffer(offers: Offer[], rule: any, businessId: string) {
         // Prevent duplicates
         if (offers.find(o => o.sku === rule.targetSku)) return;

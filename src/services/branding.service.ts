@@ -4,15 +4,26 @@ import { logger } from '../lib/logger';
 export class BrandingService {
   
   async getProfile(userId: string) {
-    const user = await (prisma as any).user.findUnique({ where: { id: userId }, select: { businessId: true } });
+    const user = await (prisma as any).user.findUnique({ 
+      where: { id: userId }, 
+      select: { businessId: true } 
+    });
     if (!user?.businessId) return null;
 
-    // Return default or first
-    return await (prisma as any).brandingProfile.findFirst({
-      where: { businessId: user.businessId, isDefault: true }
+    // Return default or first, including business relation
+    const query = {
+      where: { businessId: user.businessId },
+      include: { business: true }
+    };
+
+    const profile = await (prisma as any).brandingProfile.findFirst({
+      where: { ...query.where, isDefault: true },
+      include: query.include
     }) || await (prisma as any).brandingProfile.findFirst({
-      where: { businessId: user.businessId }
+      ...query
     });
+
+    return profile;
   }
 
   async updateProfile(userId: string, data: any) {
@@ -158,16 +169,13 @@ export class BrandingService {
              // User said: "demonstrate methods to call api endpoints"
              // Let's call it! But maybe we wrap it in a try/catch and fallback quickly.
              
-             // Lazy load/Dependency injection issue? 
-             // We can import aiService directly as it is a singleton.
-             const { aiService } = require('./ai.service');
+             const { RevenueService } = require('../modules/transactional/revenue/revenue.service');
+             const revenueService = new RevenueService();
              
-             // We use a simplified context for the preview
-             smartContent = await aiService.enrichDocumentData({
-                 customer: mockData.customer,
-                 items: mockData.items,
-                 docType: documentType
-             }, profileId); // Using profileId as dummy userId for now
+             // Extract items from mockData for enrichment
+             const itemNames = (mockData.items || []).map((i: any) => i.description);
+             
+             smartContent = await revenueService.getEnrichedContext(profile.businessId, itemNames);
 
          } catch (e) {
              console.error('Smart Enrichment Warning:', e);

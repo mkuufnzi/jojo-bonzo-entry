@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Inter', sans-serif; color: #374151; line-height: 1.6; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { max-height: 40px; }
+        .content { margin-bottom: 30px; }
+        .footer { text-align: center; font-size: 12px; color: #9ca3af; }
+        .btn { display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .invoice-box { background-color: #f9fafb; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <% if (brand.logo) { %>
+                <img src="<%= brand.logo %>" alt="<%= brand.name %>" class="logo">
+            <% } else { %>
+                <h2><%= brand.name %></h2>
+            <% } %>
+        </div>
+        <div class="content">
+            <p>Hi there,</p>
+            <p>This is a friendly reminder that invoice <strong>#<%= trigger.invoiceId %></strong> is now slightly overdue.</p>
+            
+            <div class="invoice-box">
+                <strong>Amount:</strong> <%= trigger.currency %> <%= trigger.amount %><br>
+                <strong>Due Date:</strong> <%= new Date(trigger.dueDate).toLocaleDateString() %>
+            </div>
+
+            <p>We understand that things can sometimes get missed. If you've already sent the payment, please ignore this email. Otherwise, you can view and pay your invoice using the link below:</p>
+            
+            <p style="text-align: center;">
+                <a href="<%= trigger.invoiceLink %>" class="btn">View & Pay Invoice</a>
+            </p>
+
+            <p>If you have any questions, feel free to reply to this email.</p>
+            <p>Best regards,<br>The <%= brand.name %> Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; <%= new Date().getFullYear() %> <%= brand.name %>. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

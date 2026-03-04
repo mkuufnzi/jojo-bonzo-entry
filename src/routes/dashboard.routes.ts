@@ -20,6 +20,7 @@ router.get('/transactional/api', transactionalGuard, DashboardController.dashboa
 router.get('/transactional/analytics', transactionalGuard, BusinessAnalyticsController.showOverview);
 router.get('/transactional/analytics/:integrationId', BusinessAnalyticsController.showIntegrationDetail);
 router.get('/retention', DashboardController.dashboardRetention);
+router.get('/retention/triggers', DashboardController.dashboardRetentionTriggers);
 router.get('/sales', DashboardController.dashboardSales);
 router.get('/content', DashboardController.dashboardContent);
 router.get('/tools/:slug', DashboardController.showTool);

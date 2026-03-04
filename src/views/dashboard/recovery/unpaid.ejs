@@ -1,0 +1,250 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-6 overflow-x-hidden" x-data="unpaidManager()">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <a href="/dashboard/recovery" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1">
+                    <i data-lucide="arrow-left" class="w-3 h-3"></i>
+                    Back to Recovery
+                </a>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-heading font-black text-slate-900 tracking-tight flex items-center gap-3">
+                Unpaid Invoices
+                <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-bold tracking-wide"><%= invoices.length %></span>
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Live from QuickBooks. Select invoices to start recovery follow-up.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.reload()" class="p-2.5 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-slate-50 hover:text-slate-700 transition-all shadow-sm">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <th class="px-4 py-4 w-10">
+                            <input type="checkbox" 
+                                   x-model="selectAll"
+                                   @change="toggleAll()"
+                                   class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                        </th>
+                        <th class="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Invoice</th>
+                        <th class="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Customer</th>
+                        <th class="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Date</th>
+                        <th class="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Due Date</th>
+                        <th class="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Balance</th>
+                        <th class="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    <% if (invoices.length === 0) { %>
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm font-medium">
+                                <div class="flex flex-col items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-8 h-8 text-emerald-100"></i>
+                                    <span>All caught up! No unpaid invoices found.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+
+                    <% invoices.forEach((inv, idx) => { 
+                        const isOverdue = inv.daysOverdue > 0;
+                        const isActionable = inv.daysOverdue >= gracePeriod;
+                    %>
+                        <tr class="hover:bg-slate-50/50 transition-colors group" 
+                            :class="{ 'bg-indigo-50/40': selected.includes('<%= inv.id %>') }">
+                            <td class="px-4 py-4">
+                                <input type="checkbox" 
+                                       value="<%= inv.id %>"
+                                       x-model="selected"
+                                       @change="updateSelectAll()"
+                                       data-customer-id="<%= inv.customerId %>"
+                                       data-customer-name="<%= inv.contactName %>"
+                                       data-invoice-id="<%= inv.externalId %>"
+                                       data-balance="<%= inv.balance %>"
+                                       data-due-date="<%= inv.dueDate ? inv.dueDate.toISOString() : '' %>"
+                                       class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="font-bold text-slate-700 text-sm">#<%= inv.externalId %></span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <a href="/dashboard/recovery/customers/<%= inv.customerId %>" 
+                                   class="font-bold text-indigo-600 hover:text-indigo-700 text-sm block transition-colors hover:underline">
+                                    <%= inv.contactName %>
+                                    <i data-lucide="external-link" class="w-3 h-3 inline-block ml-0.5 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                </a>
+                            </td>
+                            <td class="px-4 py-4 text-xs text-slate-500 font-medium">
+                                <%= inv.date.toLocaleDateString() %>
+                            </td>
+                            <td class="px-4 py-4 text-xs font-bold <%= isOverdue ? 'text-red-500' : 'text-slate-500' %>">
+                                <%= inv.dueDate ? inv.dueDate.toLocaleDateString() : 'N/A' %>
+                                <% if (isOverdue) { %>
+                                    <span class="block text-[10px] font-medium opacity-75"><%= inv.daysOverdue %> days ago</span>
+                                <% } %>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <span class="font-black text-slate-700 text-sm">$<%= Number(inv.balance).toLocaleString() %></span>
+                                <span class="block text-[10px] text-slate-400 font-medium">of $<%= Number(inv.total).toLocaleString() %></span>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <% if (isActionable) { %>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-red-50 text-red-600 border border-red-100">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                        Overdue
+                                    </span>
+                                <% } else if (isOverdue) { %>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-600 border border-amber-100">
+                                        Grace Period
+                                    </span>
+                                <% } else { %>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200">
+                                        Open
+                                    </span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Floating Action Bar -->
+    <div x-show="selected.length > 0"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-4"
+         class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl border border-white/10 flex items-center gap-6"
+         style="display: none;">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center">
+                <span x-text="selected.length" class="text-lg font-black text-indigo-400"></span>
+            </div>
+            <div>
+                <p class="text-sm font-bold">invoices selected</p>
+                <p class="text-[10px] text-slate-400 font-medium"><span x-text="uniqueCustomerCount()"></span> unique customers</p>
+            </div>
+        </div>
+
+        <div class="w-px h-10 bg-white/10"></div>
+
+        <button @click="enrollSelected()" 
+                :disabled="enrolling"
+                class="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95 disabled:opacity-50">
+            <i data-lucide="play" class="w-4 h-4"></i>
+            <span x-text="enrolling ? 'Starting...' : 'Start Recovery'"></span>
+        </button>
+
+        <button @click="selected = []; selectAll = false" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+            <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+        </button>
+    </div>
+
+    <!-- Toast -->
+    <div x-show="toast" x-transition
+         class="fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 bg-slate-900 text-white border border-white/10"
+         style="display: none;">
+        <i data-lucide="check-circle" class="w-5 h-5" :class="toastType === 'success' ? 'text-emerald-400' : 'text-red-400'"></i>
+        <span x-text="toastMessage"></span>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+function unpaidManager() {
+    const allIds = [<% invoices.forEach((inv, i) => { %>'<%= inv.id %>'<%= i < invoices.length - 1 ? ',' : '' %><% }); %>];
+    
+    return {
+        selected: [],
+        selectAll: false,
+        enrolling: false,
+        toast: false,
+        toastMessage: '',
+        toastType: 'success',
+
+        toggleAll() {
+            this.selected = this.selectAll ? [...allIds] : [];
+        },
+
+        updateSelectAll() {
+            this.selectAll = this.selected.length === allIds.length;
+        },
+
+        uniqueCustomerCount() {
+            const customerIds = new Set();
+            this.selected.forEach(id => {
+                const el = document.querySelector(`input[value="${id}"]`);
+                if (el) customerIds.add(el.dataset.customerId);
+            });
+            return customerIds.size;
+        },
+
+        async enrollSelected() {
+            this.enrolling = true;
+            try {
+                // Group selected invoices by customer
+                const customerMap = {};
+                this.selected.forEach(id => {
+                    const el = document.querySelector(`input[value="${id}"]`);
+                    if (el) {
+                        const custId = el.dataset.customerId;
+                        if (!customerMap[custId]) {
+                            customerMap[custId] = {
+                                customerId: custId,
+                                customerName: el.dataset.customerName,
+                                invoices: []
+                            };
+                        }
+                        customerMap[custId].invoices.push({
+                            invoiceId: el.dataset.invoiceId,
+                            balance: parseFloat(el.dataset.balance) || 0,
+                            dueDate: el.dataset.dueDate || null
+                        });
+                    }
+                });
+
+                const res = await fetch('/dashboard/recovery/customers/enroll', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customers: Object.values(customerMap) })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    this.showToast(`Recovery started for ${data.enrolled} customers`, 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    this.showToast(data.error || 'Failed to start recovery', 'error');
+                }
+            } catch (e) {
+                this.showToast('Network error', 'error');
+            } finally {
+                this.enrolling = false;
+            }
+        },
+
+        showToast(message, type = 'success') {
+            this.toastMessage = message;
+            this.toastType = type;
+            this.toast = true;
+            setTimeout(() => this.toast = false, 5000);
+        }
+    };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

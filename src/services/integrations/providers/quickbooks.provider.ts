@@ -71,29 +71,81 @@ export class QBOProvider implements IERPProvider {
         }
     }
 
-    async fetchRaw(endpoint: string, options?: RequestInit): Promise<any> {
+    async fetchRaw(endpoint: string, options?: RequestInit, maxRetries = 3): Promise<any> {
         if (!this.integration) throw new Error('Not Initialized');
-        const headers = await this.getHeaders();
+        
         const url = `${this.baseUrl}/${this.realmId}${endpoint}`;
         
-        console.log(`[QBOProvider] 🌐 Calling API: ${url}`);
+        let attempt = 0;
+        let lastError: any = null;
+
+        while (attempt < maxRetries) {
+            try {
+                const headers = await this.getHeaders();
+                console.log(`[QBOProvider] 🌐 Calling API (Attempt ${attempt + 1}/${maxRetries}): ${url}`);
+                
+                const response = await fetch(url, {
+                    ...options,
+                    headers: { ...headers, ...options?.headers }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`[QBOProvider] ❌ API Error (${response.status}): ${errorText}`);
+                    
+                    if (response.status === 401 || response.status === 429 || response.status >= 500) {
+                        throw new Error(`QBO API Network Error: ${response.status} - ${errorText}`);
+                    }
+                    
+                    // Fatal bad requests like syntax queries should not retry
+                    throw new Error(`QBO API Fatal Error: ${response.status} - ${errorText}`);
+                }
+
+                const data = await response.json();
+                if (data.Fault) {
+                    // QBO occasionally returns 200 OK but embeds a Fault XML object inside
+                    const faultMsg = data.Fault.Error?.[0]?.Detail || data.Fault.Error?.[0]?.Message || JSON.stringify(data.Fault);
+                    
+                    try {
+                        const { PrismaClient } = await import('@prisma/client');
+                        const p = new PrismaClient();
+                        if (this.integration?.businessId) {
+                            await p.auditLog.create({
+                                data: {
+                                    actionType: 'erp_sync_failure',
+                                    eventType: 'quickbooks_fault',
+                                    businessId: this.integration.businessId,
+                                    success: false,
+                                    requestPayload: { endpoint, fault: data.Fault } as any,
+                                    requestId: `qbo_fault_${Date.now()}`
+                                }
+                            });
+                        }
+                    } catch (e) {
+                         console.error('[QBOProvider] Could not log fault to AuditLog', e);
+                    }
+
+                    throw new Error(`QBO API Fault Payload: ${faultMsg}`);
+                }
+                return data;
+
+            } catch (err: any) {
+                lastError = err;
+                
+                if (err.message.includes('Fatal Error')) {
+                    throw err; // Break loop immediately
+                }
+                
+                attempt++;
+                if (attempt < maxRetries) {
+                    const backoffMs = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+                    console.warn(`[QBOProvider] ⚠️ Retrying after ${Math.round(backoffMs)}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, backoffMs));
+                }
+            }
+        }
         
-        const response = await fetch(url, {
-            ...options,
-            headers: { ...headers, ...options?.headers }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`[QBOProvider] ❌ API Error (${response.status}): ${errorText}`);
-            throw new Error(`QBO API Error: ${response.status} - ${errorText}`);
-        }
-
-        const data = await response.json();
-        if (data.Fault) {
-            throw new Error(`QBO API Error Data: ${JSON.stringify(data.Fault)}`);
-        }
-        return data;
+        throw new Error(`[QBOProvider] ❌ Exhausted all ${maxRetries} retries. Final Error: ${lastError?.message}`);
     }
 
     // --- Webhook Validation ---
@@ -441,6 +493,7 @@ export class QBOProvider implements IERPProvider {
             externalId: inv.DocNumber,
             type: 'invoice',
             date: new Date(inv.TxnDate),
+            dueDate: inv.DueDate ? new Date(inv.DueDate) : undefined,
             name: `Invoice #${inv.DocNumber}` || 'Unknown Invoice',
             total: inv.TotalAmt,
             status: inv.Balance === 0 ? 'paid' : 'open',
@@ -635,6 +688,216 @@ export class QBOProvider implements IERPProvider {
             count++;
         }
         return count;
+    }
+
+    async syncInvoices(userId: string): Promise<number> {
+        if (!this.integration) throw new Error('Not Initialized');
+
+        // 1. Fetch from QBO (Order by latest modifications first)
+        const result = await this.fetchRaw("/query?query=select * from Invoice ORDERBY MetaData.LastUpdatedTime DESC MAXRESULTS 1000");
+        const invoices = result.QueryResponse?.Invoice || [];
+        
+        if (invoices.length === 0) return 0;
+
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+
+        let count = 0;
+        for (const invoice of invoices) {
+            await prisma.externalDocument.upsert({
+                where: {
+                    integrationId_externalId_type: {
+                        integrationId: this.integration.id,
+                        externalId: invoice.Id,
+                        type: 'invoice'
+                    }
+                },
+                update: {
+                    data: invoice,
+                    syncedAt: new Date(),
+                    updatedAt: new Date()
+                },
+                create: {
+                    businessId: this.integration.businessId,
+                    integrationId: this.integration.id,
+                    externalId: invoice.Id,
+                    type: 'invoice',
+                    data: invoice,
+                    syncedAt: new Date()
+                }
+            });
+            count++;
+        }
+        return count;
+    }
+
+    // --- Smart Recovery: Overdue Invoice Bridge ---
+    /**
+     * Fetches invoices that are overdue (Balance > 0 AND DueDate < today).
+     * Used by the Recovery Engine to identify candidates for dunning sequences.
+     */
+    async getOverdueInvoices(daysOverdue: number = 0): Promise<ERPDocument[]> {
+        if (!this.integration) throw new Error('Not Initialized');
+
+        const date = new Date();
+        date.setDate(date.getDate() - daysOverdue);
+        const thresholdDate = date.toISOString().split('T')[0];
+
+        let allInvoices: any[] = [];
+        let startPosition = 1;
+        const maxResults = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+            const query = `SELECT * FROM Invoice WHERE Balance > '0' AND DueDate <= '${thresholdDate}' STARTPOSITION ${startPosition} MAXRESULTS ${maxResults}`;
+            console.log(`[QBOProvider] 🔍 Querying Overdue Invoices (Start: ${startPosition}): ${query}`);
+
+            try {
+                const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+                const pageInvoices = data.QueryResponse?.Invoice || [];
+                
+                allInvoices = [...allInvoices, ...pageInvoices];
+
+                if (pageInvoices.length < maxResults) {
+                    hasMore = false;
+                } else {
+                    startPosition += maxResults;
+                }
+            } catch (e: any) {
+                console.error('[QBOProvider] ❌ Failed to fetch overdue invoices page:', e);
+                throw new Error(`QBO Pagination Failure (Overdue): ${e.message}`);
+            }
+        }
+
+        console.log(`[QBOProvider] 📊 Found ${allInvoices.length} total overdue invoices`);
+
+        return allInvoices.map((inv: any) => ({
+            id: inv.Id,
+            externalId: inv.DocNumber || inv.Id,
+            type: 'invoice' as const,
+            date: new Date(inv.TxnDate),
+            dueDate: inv.DueDate ? new Date(inv.DueDate) : undefined,
+            name: `Invoice #${inv.DocNumber || inv.Id}`,
+            total: inv.Balance, 
+            status: 'overdue',
+            contactName: inv.CustomerRef?.name,
+            rawData: inv
+        }));
+    }
+
+    /**
+     * Fetches ALL unpaid invoices (Balance > 0) regardless of due date.
+     * Used by the Recovery Engine to accurately verify if an invoice was paid.
+     */
+    async getAllUnpaidInvoices(): Promise<ERPDocument[]> {
+        if (!this.integration) throw new Error('Not Initialized');
+
+        let allInvoices: any[] = [];
+        let startPosition = 1;
+        const maxResults = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+            const query = `SELECT * FROM Invoice WHERE Balance > '0' STARTPOSITION ${startPosition} MAXRESULTS ${maxResults}`;
+            console.log(`[QBOProvider] 🔍 Querying Unpaid Invoices (Start: ${startPosition}): ${query}`);
+
+            try {
+                const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+                const pageInvoices = data.QueryResponse?.Invoice || [];
+                
+                allInvoices = [...allInvoices, ...pageInvoices];
+
+                if (pageInvoices.length < maxResults) {
+                    hasMore = false;
+                } else {
+                    startPosition += maxResults;
+                }
+            } catch (e: any) {
+                console.error('[QBOProvider] ❌ Failed to fetch unpaid invoices page:', e);
+                // CRITICAL: Throwing ensures the orchestrator crashes cleanly and retries later.
+                // Returning a partial [] would trick the system into closing "missing" active invoices as RECOVERED!
+                throw new Error(`QBO Pagination Failure: ${e.message}`);
+            }
+        }
+
+        console.log(`[QBOProvider] 📊 Successfully retrieved all ${allInvoices.length} unpaid invoices across all pages.`);
+
+        return allInvoices.map((inv: any) => ({
+            id: inv.Id,
+            externalId: inv.DocNumber || inv.Id,
+            type: 'invoice' as const,
+            date: new Date(inv.TxnDate),
+            dueDate: inv.DueDate ? new Date(inv.DueDate) : undefined,
+            name: `Invoice #${inv.DocNumber || inv.Id}`,
+            total: inv.Balance,
+            status: 'unpaid',
+            contactName: inv.CustomerRef?.name,
+            rawData: inv
+        }));
+    }
+    /**
+     * Fetches ALL customers to build a local map and avoid N+1 queries.
+     */
+    async getAllCustomers(): Promise<any[]> {
+        if (!this.integration) throw new Error('Not Initialized');
+
+        let allCustomers: any[] = [];
+        let startPosition = 1;
+        const maxResults = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+            const query = `SELECT * FROM Customer STARTPOSITION ${startPosition} MAXRESULTS ${maxResults}`;
+            console.log(`[QBOProvider] 🔍 Querying Customers (Start: ${startPosition}): ${query}`);
+
+            try {
+                const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+                const pageCustomers = data.QueryResponse?.Customer || [];
+                
+                allCustomers = [...allCustomers, ...pageCustomers];
+
+                if (pageCustomers.length < maxResults) {
+                    hasMore = false;
+                } else {
+                    startPosition += maxResults;
+                }
+            } catch (e: any) {
+                console.error('[QBOProvider] ❌ Failed to fetch customers page:', e);
+                throw new Error(`QBO Pagination Failure (Customers): ${e.message}`);
+            }
+        }
+
+        console.log(`[QBOProvider] 📊 Successfully retrieved all ${allCustomers.length} customers across all pages.`);
+        return allCustomers;
+    }
+
+    async getInvoiceStats(daysThreshold: number = 0): Promise<{ total: number, unpaid: number, overdue: number }> {
+        if (!this.integration) throw new Error('Not Initialized');
+        
+        try {
+            const date = new Date();
+            date.setDate(date.getDate() - daysThreshold);
+            const thresholdDate = date.toISOString().split('T')[0];
+            
+            // 1. Total Count
+            const totalRes = await this.fetchRaw(`/query?query=${encodeURIComponent("SELECT COUNT(*) FROM Invoice")}`);
+            const total = totalRes.QueryResponse?.totalCount || 0;
+
+            // 2. Unpaid (Balance > 0)
+            const unpaidRes = await this.fetchRaw(`/query?query=${encodeURIComponent("SELECT COUNT(*) FROM Invoice WHERE Balance > '0'")}`);
+            const unpaid = unpaidRes.QueryResponse?.totalCount || 0;
+
+            // 3. Overdue (Balance > 0 AND DueDate < thresholdDate)
+            const overdueRes = await this.fetchRaw(`/query?query=${encodeURIComponent(`SELECT COUNT(*) FROM Invoice WHERE Balance > '0' AND DueDate <= '${thresholdDate}'`)}`);
+            const overdue = overdueRes.QueryResponse?.totalCount || 0;
+
+            console.log(`[QBOProvider] 📊 Invoice Stats - Total: ${total}, Unpaid: ${unpaid}, Overdue: ${overdue} (Threshold: ${daysThreshold} days)`);
+            
+            return { total, unpaid, overdue };
+        } catch (e) {
+            console.error('[QBOProvider] ❌ Failed to fetch invoice stats:', e);
+            return { total: 0, unpaid: 0, overdue: 0 };
+        }
     }
 
     // --- Stubs for Interface ---

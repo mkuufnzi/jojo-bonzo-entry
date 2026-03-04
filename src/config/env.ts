@@ -109,6 +109,13 @@ const envSchema = z.object({
 
   // Admin Seeding
   INITIAL_ADMIN_PASSWORD: z.string().optional(),
+
+  // n8n Authentication (Optional)
+  N8N_USER: z.string().optional(),
+  N8N_PASSWORD: z.string().optional(),
+
+  // Recovery Engine Security
+  RECOVERY_SIGNING_SECRET: z.string().default('dev-secret-32-chars-min-length-123456'),
 });
 
 const env = envSchema.safeParse(process.env);

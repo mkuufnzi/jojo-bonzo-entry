@@ -78,6 +78,31 @@ export class EmailService {
     }
   }
 
+  /**
+   * Send a customer-facing transactional email with raw HTML content.
+   * Used by the Recovery Engine for dunning emails — no subject prefix, no body wrapping.
+   */
+  async sendHtmlEmail(to: string, subject: string, html: string) {
+    await this.ensureTransporter();
+    const fromName = config.FROM_NAME || 'Flozino';
+    const fromEmail = config.FROM_EMAIL || 'no-reply@floovioo.com';
+
+    try {
+        const info = await this.transporter.sendMail({
+            from: `"${fromName}" <${fromEmail}>`,
+            to,
+            subject,
+            html,
+            text: html.replace(/<[^>]*>/g, ''), // Strip tags for plain-text fallback
+        });
+        console.log('[EmailService] HTML Email sent to %s: %s', to, info.messageId);
+        return info;
+    } catch (error) {
+        console.error('[EmailService] Error sending HTML email:', error);
+        throw error;
+    }
+  }
+
   async sendNewPassword(to: string, password: string) {
     await this.ensureTransporter();
     const fromName = config.FROM_NAME || 'Flozino';

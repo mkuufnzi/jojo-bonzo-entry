@@ -31,7 +31,7 @@
         
         <!-- Onboarding Hero (Show if not ready or skipped) -->
         <% const isOnboardingComplete = business && business.onboardingStatus === 'COMPLETED'; %>
-        <% if (!isReady && business) { %>
+        <% if (!isReady) { %>
             <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-950 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-2xl group border border-blue-500/30">
                 <div class="absolute right-0 top-0 h-full w-1/2 bg-[url('/assets/pattern-white.svg')] opacity-5"></div>
                 
@@ -62,7 +62,7 @@
                             <p class="text-slate-300 font-medium text-lg mb-6 max-w-lg">
                                 Unlock the full power of the Transactional Engine by completing your brand standards and settings.
                             </p>
-                            <a href="/onboarding/wizard?step=<%= business.currentOnboardingStep || 1 %>" 
+                            <a href="/onboarding/wizard?step=<%= business ? (business.currentOnboardingStep || 1) : 1 %>" 
                                class="bg-white text-slate-900 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-100 transition-all shadow-lg inline-flex items-center">
                                 Continue Setup &rarr;
                             </a>
@@ -75,10 +75,10 @@
                             <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-800" />
                             <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="8" fill="transparent" class="text-blue-500"
                                 stroke-dasharray="553"
-                                stroke-dashoffset="<%= 553 - (553 * (business.currentOnboardingStep || 1) / 4) %>" />
+                                stroke-dashoffset="<%= 553 - (553 * (business ? (business.currentOnboardingStep || 1) : 1) / 4) %>" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
-                            <span class="text-3xl font-black"><%= Math.round(((business.currentOnboardingStep || 1) / 4) * 100) %>%</span>
+                            <span class="text-3xl font-black"><%= Math.round(((business ? (business.currentOnboardingStep || 1) : 1) / 4) * 100) %>%</span>
                             <span class="text-[0.625rem] font-bold uppercase text-slate-500">Ready</span>
                         </div>
                     </div>
@@ -149,7 +149,7 @@
                     <%= isSynced ? 'Active' : (isIntegrationSkipped ? 'Skipped' : 'Unconfigured') %>
                 </h3>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    <%= business.integrations && business.integrations.length > 0 
+                    <%= business && business.integrations && business.integrations.length > 0 
                         ? (business.integrations.length > 1 ? business.integrations.length + ' Connected Sources' : 'Provider: ' + (business.integrations[0]?.provider || 'None'))
                         : 'No Data Source' %>
                 </p>
@@ -201,23 +201,24 @@
 
                     <div class="space-y-3">
                         <% overdueInvoices.forEach(inv => { %>
+                            <% const norm = inv.normalized || {}; %>
                         <div class="p-4 bg-white border border-slate-100 rounded-2xl flex items-center justify-between hover:border-rose-300 hover:shadow-md transition-all group/item">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center group-hover/item:bg-rose-100 transition-colors">
                                     <i data-lucide="file-warning" class="w-5 h-5 text-rose-500"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-slate-900 font-bold text-sm"><%= inv.normalized.contactName %></h3>
+                                    <h4 class="text-slate-900 font-bold text-sm"><%= norm.contactName || 'Unknown Contact' %></h4>
                                     <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                        <span><%= inv.externalId %></span>
+                                        <span><%= inv.externalId || 'N/A' %></span>
                                         <span>•</span>
-                                        <span class="text-rose-400">Overdue <%= Math.floor((Date.now() - new Date(inv.normalized.date).getTime()) / (1000 * 60 * 60 * 24)) %> Days</span>
+                                        <span class="text-rose-400">Overdue <%= norm.date ? Math.floor((Date.now() - new Date(norm.date).getTime()) / (1000 * 60 * 60 * 24)) : '?' %> Days</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-6">
                                 <div class="text-right">
-                                    <span class="block text-lg font-black text-rose-600 tracking-tight">$<%= inv.normalized.amount.toLocaleString() %></span>
+                                    <span class="block text-lg font-black text-rose-600 tracking-tight"><%= norm.amount ? '$' + Number(norm.amount).toLocaleString() : '---' %></span>
                                 </div>
                                 <button 
                                     onclick="triggerFollowup('<%= inv.id %>')"
@@ -254,18 +255,19 @@
                 <% if (isReady && brandingHistory && brandingHistory.length > 0) { %>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <% brandingHistory.slice(0, 8).forEach(doc => { %>
+                        <% const norm = doc.normalized || {}; %>
                     <div class="p-4 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center justify-between hover:border-blue-300 transition-all group/item">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover/item:bg-blue-100 transition-colors">
                                 <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-500"></i>
                             </div>
                             <div class="max-w-[140px]">
-                                <span class="block text-slate-900 font-bold text-[11px] truncate leading-tight"><%= doc.normalized.contactName %></span>
-                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest"><%= doc.externalId %></span>
+                                <span class="block text-slate-900 font-bold text-[11px] truncate leading-tight"><%= norm.contactName || 'Unknown Contact' %></span>
+                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest"><%= doc.externalId || 'N/A' %></span>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="block text-slate-900 font-black text-sm tracking-tight">$<%= doc.normalized.amount.toLocaleString() %></span>
+                            <span class="block text-slate-900 font-black text-sm tracking-tight"><%= norm.amount ? '$' + Number(norm.amount).toLocaleString() : '---' %></span>
                             <span class="text-[9px] text-blue-500 font-black uppercase tracking-tighter">Branded</span>
                         </div>
                     </div>

@@ -10,9 +10,11 @@
                  x-text="(theme.name || 'B').charAt(0)"></div>
         </template>
     </div>
-    <div class="text-[13px] font-bold mt-1.5" :style="'color: ' + theme.text">Thank you for your order, Sarah!</div>
+    <div class="text-[13px] font-bold mt-1.5" :style="'color: ' + theme.text">
+        Thank you for your order, <span x-text="document ? document.customerName : 'Valued Customer'"></span>!
+    </div>
     <div class="text-[11px] text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed">
-        You're earning <strong :style="'color: ' + theme.primary">47 loyalty points</strong> with this purchase.
+        We appreciate your business at <strong :style="'color: ' + theme.primary" x-text="theme.name"></strong>.
     </div>
     
     <div class="flex justify-center gap-2.5 mt-4 flex-wrap">

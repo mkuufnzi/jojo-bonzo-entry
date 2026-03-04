@@ -86,7 +86,7 @@ export const requireServiceAccess = (serviceSlug?: string) => {
             (req as any).service = service;
 
             // 2.5 Implementation Check (PRIORITY: Show Coming Soon if not implemented)
-            const implementedSlugs = ['html-to-pdf', 'ai-doc-generator', 'transactional-branding'];
+            const implementedSlugs = ['html-to-pdf', 'ai-doc-generator', 'transactional-branding', 'floovioo_transactional_debt-collection'];
             const isImplemented = implementedSlugs.includes(currentSlug);
             
             if (!isImplemented && req.method === 'GET') {

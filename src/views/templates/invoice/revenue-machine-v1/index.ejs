@@ -39,81 +39,68 @@
 
 <%- include('../../../components/logic/smart-document-logic') %>
 
-<!-- Template Interface -->
-<div class="font-sans text-slate-800 antialiased">
+<!-- Template Meta -->
+<div class="font-sans text-slate-800 antialiased" style="font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;">
     
-    <!-- Section: Header (Full Width) -->
-    <% if (branding.components?.header?.enabled) { %>
-        <div class="doc-section mb-8">
-            <%- include('./components/header') %>
-        </div>
-    <% } %>
+    <% 
+       /**
+        * Widget Registry: Maps widget IDs to include paths
+        */
+       const WIDGET_REGISTRY = {
+           'header': { path: './components/header', landmark: true, splittable: false },
+           'spacer_1': { path: null, landmark: false, splittable: false },
+           'spacer_2': { path: null, landmark: false, splittable: false },
+           'customer_info': { path: './components/customer_info', landmark: false, splittable: false },
+           'marketing_banner': { path: './components/banner', landmark: false, splittable: false },
+           'line_items': { path: './components/line_items', landmark: false, splittable: true },
+           'totals': { path: './components/totals', landmark: false, splittable: false },
+           'product_recommendations': { path: '../../../components/smart-widgets/product-recommendations', landmark: false, splittable: false },
+           'product_support': { path: '../../../components/smart-widgets/tutorials', landmark: false, splittable: false },
+           'payment_details': { path: './components/payment_info', landmark: false, splittable: false },
+           'customer_support': { path: '../../../components/smart-widgets/support-card', landmark: false, splittable: false },
+           'footer': { path: './components/footer', landmark: true, splittable: false }
+       };
+       
+       const layoutOrder = branding.layoutOrder || [];
+       const widgetStates = branding.widgetStates || {};
+       
+       // Flattened structure for Paginator optimization
+       // We skip the landing wrapper and render everything as direct descendants
+    %>
 
-    <!-- Container for Constrained Content -->
-    <div class="max-w-[850px] mx-auto px-8 pb-12">
+    <!-- =============== RENDER LOOP (Deterministic) =============== -->
+    <% 
+        let i = 0;
+        while(i < layoutOrder.length) {
+            const widgetId = layoutOrder[i];
+            const widget = WIDGET_REGISTRY[widgetId];
+            const state = widgetStates[widgetId];
+            const isEnabled = state?.enabled !== false;
+            const isSpacer = widgetId.startsWith('spacer_');
+            const splitAttr = widget?.splittable ? 'data-split="true"' : 'data-no-split="true"';
+            
+            // Constrain inner content width for non-landmark widgets
+            const containerClass = widget?.landmark ? "w-full" : "max-w-[850px] mx-auto px-8";
+    %>
         
-        <!-- Section: Title & Customer Meta -->
-        <% if (branding.components?.customer_info?.enabled) { %>
-            <div class="doc-section mb-6">
-                <%- include('./components/customer_info') %>
-            </div>
+        <% if (isEnabled) { %>
+            <% if (isSpacer) { %>
+                <div class="doc-section w-full block" 
+                     data-widget-id="<%= widgetId %>" 
+                     data-no-split="true"
+                     style="display: block !important; height: <%= state?.value || 20 %>px !important; min-height: <%= state?.value || 20 %>px !important; margin: 0 !important;">
+                </div>
+            <% } else if (widget?.path) { %>
+                <div class="doc-section <%= containerClass %> block" 
+                     data-widget-id="<%= widgetId %>" 
+                     <%- splitAttr %>
+                     style="display: block !important; margin-bottom: 8px !important;">
+                    <%- include(widget.path) %>
+                </div>
+            <% } %>
         <% } %>
-
-        <!-- Section: Smart Banner -->
-        <% if (branding.components?.marketing_banner?.enabled) { %>
-            <div class="doc-section mb-8">
-                <%- include('./components/banner') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Line Items (Splittable) -->
-        <% if (branding.components?.line_items?.enabled) { %>
-            <div class="doc-section mb-8" data-split="true">
-                <%- include('./components/line_items') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Totals -->
-        <% if (branding.components?.totals?.enabled) { %>
-            <div class="doc-section mb-8">
-                <%- include('./components/totals') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Upsell Recommendations (Splittable) -->
-        <% if (branding.components?.product_recommendations?.enabled) { %>
-            <div class="doc-section mb-8" data-split="true">
-                <%- include('../../../components/smart-widgets/product-recommendations') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Product Support (Splittable) -->
-        <% if (branding.components?.product_support?.enabled) { %>
-            <div class="doc-section mb-8">
-                <%- include('../../../components/smart-widgets/tutorials') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Payment Details -->
-        <% if (branding.components?.payment_details?.enabled) { %>
-             <div class="doc-section mb-8">
-                <%- include('./components/payment_info') %>
-             </div>
-        <% } %>
-
-        <!-- Section: Customer Support Widget -->
-        <% if (branding.components?.customer_support?.enabled) { %>
-            <div class="doc-section mb-8">
-                <%- include('../../../components/smart-widgets/support-card') %>
-            </div>
-        <% } %>
-
-        <!-- Section: Footer -->
-        <% if (branding.components?.footer?.enabled) { %>
-            <div class="doc-section mt-auto">
-                <%- include('./components/footer') %>
-            </div>
-        <% } %>
-    </div>
+        
+        <% i++; %> 
+    <% } %>
 </div>
 

@@ -544,4 +544,8 @@ export class XeroProvider implements IERPProvider {
         }
         return count;
     }
+
+    async syncInvoices(userId: string): Promise<number> {
+        return 0; // only QBO has this implementation natively at the moment
+    }
 }

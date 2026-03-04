@@ -1,0 +1,147 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-6 overflow-x-hidden" x-data="recoverySequences()">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-heading font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <div class="p-2 bg-indigo-100 rounded-xl">
+                    <i data-lucide="layers" class="w-6 h-6 text-indigo-600"></i>
+                </div>
+                Recovery Campaigns
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Manage multiple recovery strategies for different customer segments.</p>
+        </div>
+
+        <button @click="createSequence()" 
+                class="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-xl active:scale-95">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Campaign
+        </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-8 border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
+        <a href="/dashboard/recovery" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Overview</a>
+        <a href="/dashboard/recovery/sequences" class="pb-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 whitespace-nowrap">Campaigns</a>
+        <a href="/dashboard/recovery/sessions" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Active Sessions</a>
+        <a href="/dashboard/recovery/activity" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">History</a>
+    </div>
+
+    <!-- Sequences Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <% sequences.forEach(seq => { %>
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all relative group overflow-hidden">
+                <% if (seq.isDefault) { %>
+                    <div class="absolute top-0 right-0 px-4 py-1.5 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-bl-xl shadow-lg">
+                        Default Sequence
+                    </div>
+                <% } %>
+
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0
+                        <%= seq.isActive ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-400' %>">
+                        <i data-lucide="shield" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-black text-slate-900"><%= seq.name %></h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="w-2 h-2 rounded-full <%= seq.isActive ? 'bg-emerald-400' : 'bg-slate-300' %>"></span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest <%= seq.isActive ? 'text-emerald-500' : 'text-slate-400' %>">
+                                <%= seq.isActive ? 'Active' : 'Inactive' %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rules Summary -->
+                <div class="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Assignment Rules</p>
+                    <div class="flex flex-wrap gap-2 text-[10px] font-bold">
+                        <% if (seq.isDefault) { %>
+                            <span class="text-slate-500">Matches any invoice when no other rules apply.</span>
+                        <% } else { %>
+                            <% const rules = seq.rules || {}; %>
+                            <% if (Object.keys(rules).length > 0) { %>
+                                <% if (rules.minAmount) { %>
+                                    <span class="px-3 py-1 bg-white rounded-lg shadow-sm border border-slate-200">Amount > $<%= rules.minAmount.toLocaleString() %></span>
+                                <% } %>
+                                <% if (rules.customerSegment) { %>
+                                    <span class="px-3 py-1 bg-white rounded-lg shadow-sm border border-slate-200">Tag: <%= rules.customerSegment %></span>
+                                <% } %>
+                            <% } else { %>
+                                <span class="text-slate-400 italic">No specific rules defined.</span>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Steps Visualization -->
+                <div class="mb-8 overflow-hidden">
+                   <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Timeline (Days)</p>
+                   <div class="flex items-center gap-1.5 relative h-8">
+                       <!-- Line -->
+                       <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-slate-100"></div>
+                       
+                       <% (Array.isArray(seq.steps) ? seq.steps : []).sort((a,b) => a.day - b.day).forEach((step, idx) => { %>
+                           <div class="relative z-10 w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black shadow-sm
+                                <%= idx === 0 ? 'bg-emerald-100 text-emerald-600' : 
+                                    idx === (seq.steps.length - 1) ? 'bg-red-100 text-red-600' : 
+                                    'bg-indigo-100 text-indigo-600' %>"
+                                title="Day <%= step.day %>: <%= step.action %>">
+                               <%= step.day %>
+                           </div>
+                       <% }); %>
+                   </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <a href="/dashboard/recovery/settings?id=<%= seq.id %>" class="flex-1 text-center py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest hover:bg-slate-50 transition-all">
+                        Edit Campaign
+                    </a>
+                    <button class="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-100 transition-all"
+                            @click="deleteSequence('<%= seq.id %>')">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Glossy Finish -->
+                <div class="absolute bottom-[-50%] right-[-10%] w-64 h-64 bg-indigo-50/20 rounded-full blur-3xl group-hover:bg-indigo-50/40 transition-all pointer-events-none"></div>
+            </div>
+        <% }); %>
+
+        <!-- Add New Placeholder -->
+        <button @click="createSequence()" 
+                class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center group hover:border-indigo-300 hover:bg-slate-100/50 transition-all">
+            <div class="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-lg mb-4 group-hover:scale-110 transition-transform">
+                <i data-lucide="plus" class="w-6 h-6 text-indigo-500"></i>
+            </div>
+            <h4 class="text-sm font-black text-slate-600 uppercase tracking-wider">Add Strategy</h4>
+            <p class="text-[10px] text-slate-400 mt-2">Create a custom recovery path</p>
+        </button>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+function recoverySequences() {
+    return {
+        async createSequence() {
+            window.location.href = '/dashboard/recovery/settings?new=true';
+        },
+        async deleteSequence(id) {
+            if (!confirm('Are you sure you want to delete this campaign?')) return;
+            try {
+                const res = await fetch(`/dashboard/recovery/sequences/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) window.location.reload();
+                else alert(data.error || 'Delete failed');
+            } catch (e) {
+                alert('Connection error');
+            }
+        }
+    };
+}
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

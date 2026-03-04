@@ -19,6 +19,7 @@ export const ServiceSlugs = {
     // Branding & Core
     TRANSACTIONAL_BRANDING: 'transactional-branding',
     DESIGN_ENGINE: 'design-engine',
+    DEBT_COLLECTION: 'floovioo_transactional_debt-collection',
     
     // V2 Services
     ONBOARDING: 'onboarding-service',

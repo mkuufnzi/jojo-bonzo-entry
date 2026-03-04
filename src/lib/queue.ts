@@ -70,5 +70,6 @@ export const QUEUES = {
     AI_GENERATION: 'ai-generation',
     WEBHOOKS: 'webhooks',
     ONBOARDING_SYNC: 'onboarding-sync',
-    REVENUE_ENGINE: 'revenue-engine'
+    REVENUE_ENGINE: 'revenue-engine',
+    RECOVERY_ENGINE: 'recovery-engine'
 } as const;

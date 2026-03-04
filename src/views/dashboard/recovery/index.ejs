@@ -1,0 +1,463 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-6 overflow-x-hidden" x-data="recoveryDashboard()">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-heading font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <div class="p-2 bg-emerald-100 rounded-xl">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-emerald-600"></i>
+                </div>
+                Smart Recovery V2
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Multi-sequence intelligent recovery. Recoverized at scale.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+             <a href="/dashboard/recovery/sequences/new" class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg active:scale-95">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                New Sequence
+            </a>
+            <button @click="triggerSync()" 
+                    :disabled="syncing"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i data-lucide="refresh-cw" class="w-4 h-4" :class="{ 'animate-spin': syncing }"></i>
+                <span x-text="syncing ? 'Syncing...' : 'Sync Now'"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-8 border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
+        <a href="/dashboard/recovery" class="pb-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 whitespace-nowrap">Overview</a>
+        <a href="/dashboard/recovery/sequences" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Campaigns</a>
+        <a href="/dashboard/recovery/sessions" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Active Sessions</a>
+        <a href="/dashboard/recovery/activity" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">History</a>
+        <a href="/dashboard/recovery/clusters" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Clusters</a>
+        <a href="/dashboard/recovery/webhooks" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Event Log</a>
+    </div>
+
+    <!-- Onboarding Hero (Show if not complete) -->
+    <% if (!isOnboardingComplete) { %>
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-900 to-emerald-950 rounded-3xl p-8 mb-10 relative overflow-hidden shadow-2xl group border border-indigo-500/30">
+            <div class="absolute right-0 top-0 h-full w-1/2 bg-[url('/assets/pattern-white.svg')] opacity-5"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                <div class="max-w-2xl">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-[0.625rem] font-bold rounded-lg border border-indigo-500/20 uppercase tracking-widest backdrop-blur-sm">
+                            Setup Required
+                        </span>
+                    </div>
+                    
+                    <h2 class="text-3xl sm:text-4xl font-heading font-black mb-4 tracking-tight text-white">Activate Smart Recovery</h2>
+                    <p class="text-slate-300 font-medium text-sm sm:text-lg mb-6 max-w-lg">
+                        <% if (currentOnboardingStep === 1) { %>
+                            Your recovery engine needs an ERP connection to discover unpaid invoices automatically.
+                        <% } else if (currentOnboardingStep === 2) { %>
+                            Configure your grace periods and brand voice to start recovering revenue gracefully.
+                        <% } else { %>
+                            Review your recovery sequence and activate the engine to begin automating debt collection.
+                        <% } %>
+                    </p>
+                    <a href="/dashboard/recovery/onboarding?step=<%= currentOnboardingStep %>" 
+                        class="bg-white text-slate-900 px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all shadow-lg inline-flex items-center">
+                        Continue Setup &rarr;
+                    </a>
+                </div>
+
+                <!-- Visual Progress Indicator -->
+                <div class="hidden md:block w-48 h-48 relative">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-800" />
+                        <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="8" fill="transparent" class="text-emerald-500"
+                            stroke-dasharray="553"
+                            stroke-dashoffset="<%= 553 - (553 * (currentOnboardingStep - 1) / 3) %>" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <span class="text-3xl font-black"><%= Math.round(((currentOnboardingStep - 1) / 3) * 100) %>%</span>
+                        <span class="text-[0.625rem] font-bold uppercase text-slate-500">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
+        <!-- Recovered Amount -->
+        <a href="/dashboard/recovery/sessions?filter=RECOVERED" class="block bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 group hover:shadow-xl hover:translate-y-[-2px] transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Recovered Revenue</span>
+                <div class="p-3 bg-emerald-50 rounded-2xl group-hover:scale-110 transition-transform">
+                    <i data-lucide="trending-up" class="w-5 h-5 text-emerald-500"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-black text-emerald-600 tracking-tight">$<%= (recovery.recoveredAmount || 0).toLocaleString() %></p>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="flex items-center gap-0.5 text-[10px] font-bold text-emerald-500">
+                    <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+                    Auto-Tracked
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">from <%= recovery.recoveredCount || 0 %> invoices</span>
+            </div>
+        </a>
+
+        <!-- Active Sessions -->
+        <a href="/dashboard/recovery/sessions?filter=ACTIVE" class="block bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 group hover:shadow-xl hover:translate-y-[-2px] transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Active Recovery</span>
+                <div class="p-3 bg-indigo-50 rounded-2xl group-hover:scale-110 transition-transform">
+                    <i data-lucide="activity" class="w-5 h-5 text-indigo-500"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-black text-slate-900 tracking-tight"><%= recovery.activeSessions || 0 %></p>
+            <p class="text-[10px] text-slate-400 mt-2 font-medium">customers currently in cycle</p>
+        </a>
+
+        <!-- Conversion Rate -->
+        <a href="/dashboard/recovery/sessions" class="block bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 group hover:shadow-xl hover:translate-y-[-2px] transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Success Rate</span>
+                <div class="p-3 bg-amber-50 rounded-2xl group-hover:scale-110 transition-transform">
+                    <i data-lucide="award" class="w-5 h-5 text-amber-500"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-black text-slate-900 tracking-tight">
+                <%= recovery.successRate || 0 %>%
+            </p>
+            <p class="text-[10px] text-slate-400 mt-2 font-medium"><%= recovery.recoveredCount || 0 %> recovered of <%= recovery.trackedSessions || 0 %> tracked</p>
+        </a>
+
+        <!-- Overdue candidates -->
+        <a href="/dashboard/recovery/unpaid" class="block bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 group hover:shadow-xl hover:translate-y-[-2px] transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Total Outstanding</span>
+                <div class="p-3 bg-red-50 rounded-2xl group-hover:scale-110 transition-transform">
+                    <i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-black text-slate-900 tracking-tight">$<%= (recovery.totalOutstanding || 0).toLocaleString() %></p>
+            <div class="flex items-center gap-2 mt-2">
+                 <span class="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+                    <%= recovery.unpaidInvoices || 0 %> unpaid
+                </span>
+                <span class="text-[10px] text-slate-300">•</span>
+                <span class="flex items-center gap-1 text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">
+                    <%= recovery.overdueInvoices || 0 %> overdue
+                </span>
+            </div>
+        </a>
+    </div>
+
+    </div>
+
+    <!-- Analytics Chart -->
+    <div class="mb-8">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Recovery Performance Map</h3>
+                    <p class="text-[10px] text-slate-500 font-medium mt-1">Successful recoveries vs new overdue customers over the last 7 days</p>
+                </div>
+                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                </div>
+            </div>
+            <div class="h-72 w-full relative">
+                <div x-show="chartLoading" class="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-10 rounded-xl">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-indigo-500 animate-spin"></i>
+                </div>
+                <canvas id="recoveryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Customers in Recovery -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Customers in Recovery</h3>
+                    <a href="/dashboard/recovery/sessions" class="text-xs font-bold text-indigo-600 hover:text-indigo-700">View All</a>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    <% if (customerSessions && customerSessions.length > 0) { %>
+                        <% customerSessions.forEach(cust => { %>
+                            <a href="/dashboard/recovery/customers/<%= cust.customerId %>" class="px-8 py-6 flex items-center justify-between hover:bg-slate-50/80 transition-all group block">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-white transition-colors">
+                                        <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900"><%= cust.customerName || 'Unknown' %></h4>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-[10px] font-bold text-slate-400"><%= cust.activeSessionCount %> active session<%= cust.activeSessionCount !== 1 ? 's' : '' %></span>
+                                            <span class="text-[10px] text-slate-300">•</span>
+                                            <span class="text-[10px] font-bold text-indigo-500">$<%= (cust.totalAmount || 0).toLocaleString() %></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-8">
+                                    <div class="hidden sm:block text-right">
+                                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-indigo-100 text-indigo-600">
+                                            Active
+                                        </span>
+                                    </div>
+                                    <div class="text-right min-w-[100px]">
+                                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Campaign</p>
+                                        <p class="text-[10px] font-bold text-slate-700"><%= cust.latestSequence || 'Default' %></p>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                                </div>
+                            </a>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="p-12 text-center">
+                            <i data-lucide="inbox" class="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                            <p class="text-sm text-slate-400 font-medium">No customers in recovery yet.</p>
+                            <a href="/dashboard/recovery/unpaid" class="mt-4 inline-block text-xs font-bold text-indigo-600 hover:underline">View unpaid invoices to begin</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Performance & Shortcuts -->
+        <div class="space-y-6">
+            <!-- Active Campaigns Summary -->
+            <div class="bg-indigo-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-xs font-black uppercase tracking-[0.2em] text-indigo-300 mb-6">Active Campaigns</h3>
+                    <div class="space-y-4">
+                        <% if (recovery.sequences && recovery.sequences.length > 0) { %>
+                            <% recovery.sequences.forEach(seq => { %>
+                                <div class="flex items-center justify-between group cursor-pointer" onclick="window.location.href='/dashboard/recovery/settings?id=<%= seq.id %>'">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full <%= seq.isActive ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-slate-500' %>"></div>
+                                        <div>
+                                            <p class="text-xs font-bold"><%= seq.name %></p>
+                                            <p class="text-[10px] text-indigo-300"><%= (seq.steps || []).length %> steps configured</p>
+                                        </div>
+                                    </div>
+                                    <% if (seq.isDefault) { %>
+                                        <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 bg-indigo-700 rounded-full border border-indigo-600">Default</span>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                    <a href="/dashboard/recovery/sequences" class="mt-8 block text-center w-full py-3 bg-indigo-800 hover:bg-indigo-700 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Manage Campaigns</a>
+                </div>
+                <!-- Abstract blob decoration -->
+                <div class="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-800 rounded-full opacity-50 blur-3xl"></div>
+            </div>
+
+            <!-- Health Banner -->
+            <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="p-3 bg-emerald-50 rounded-2xl">
+                        <i data-lucide="zap" class="w-5 h-5 text-emerald-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900">Auto-Pilot Active</h4>
+                        <p class="text-[10px] text-slate-400 font-medium">Recovery engine is online.</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-slate-500">
+                        <span>ERP Hook Readiness</span>
+                        <span class="text-emerald-500">READY</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-full w-[100%] transition-all duration-1000"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast UI -->
+    <div x-show="toast" 
+         x-transition
+         class="fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 bg-slate-900 text-white border border-white/10"
+         style="display: none;">
+        <i data-lucide="check-circle" class="w-5 h-5" :class="toastType === 'success' ? 'text-emerald-400' : 'text-red-400'"></i>
+        <span x-text="toastMessage"></span>
+    </div>
+</div>
+
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('alpine:init', () => {
+    Alpine.data('recoveryDashboard', () => ({
+        syncing: false,
+        toast: false,
+        toastMessage: '',
+        toastType: 'success',
+        chartLoading: true,
+
+        async init() {
+            if (typeof Chart === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.onload = () => this.renderChart();
+                document.head.appendChild(script);
+            } else {
+                this.renderChart();
+            }
+        },
+
+        async renderChart() {
+            try {
+                const res = await fetch('/api/v1/recovery/analytics/overview');
+                const data = await res.json();
+                
+                this.chartLoading = false;
+                
+                if (data.success && data.trend) {
+                    const ctx = document.getElementById('recoveryChart').getContext('2d');
+                    
+                    const labels = data.trend.map(t => new Date(t.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }));
+                    const recoveredData = data.trend.map(t => t.recovered);
+                    const overdueData = data.trend.map(t => t.newOverdue);
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: 'Recovered Customers',
+                                    data: recoveredData,
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    fill: true,
+                                    tension: 0.4,
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#10b981',
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6
+                                },
+                                {
+                                    label: 'New Overdue',
+                                    data: overdueData,
+                                    borderColor: '#6366f1',
+                                    borderDash: [5, 5],
+                                    tension: 0.4,
+                                    borderWidth: 2,
+                                    fill: false,
+                                    pointBackgroundColor: '#fff',
+                                    pointBorderColor: '#6366f1',
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            plugins: {
+                                legend: { 
+                                    position: 'top', 
+                                    align: 'end',
+                                    labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, family: 'Inter' } } 
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                    titleFont: { size: 11, family: 'Inter' },
+                                    bodyFont: { size: 12, family: 'Inter', weight: 'bold' },
+                                    padding: 12,
+                                    cornerRadius: 8,
+                                    boxPadding: 4
+                                }
+                            },
+                            scales: {
+                                y: { 
+                                    beginAtZero: true, 
+                                    grid: { borderDash: [4, 4], color: '#f1f5f9' }, 
+                                    ticks: { stepSize: 1, font: { size: 10, family: 'Inter' }, color: '#94a3b8' },
+                                    border: { display: false }
+                                },
+                                x: { 
+                                    grid: { display: false }, 
+                                    ticks: { font: { size: 10, family: 'Inter' }, color: '#94a3b8' },
+                                    border: { display: false }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch(e) {
+                console.error('Failed to render chart', e);
+                this.chartLoading = false;
+            }
+        },
+
+        async triggerSync() {
+            this.syncing = true;
+            try {
+                const res = await fetch('/dashboard/recovery/trigger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                
+                if (data.success && data.jobId) {
+                    this.showToast('Sync queued. Processing...', 'success');
+                    await this.pollJob(data.jobId);
+                } else {
+                    this.showToast(data.error || 'Sync failed', 'error');
+                    this.syncing = false;
+                }
+            } catch (e) {
+                this.showToast('Network error. Check your connection.', 'error');
+                this.syncing = false;
+            }
+        },
+
+        async pollJob(jobId) {
+            const poll = setInterval(async () => {
+                try {
+                    const res = await fetch(`/dashboard/recovery/jobs/${jobId}`);
+                    const data = await res.json();
+
+                    if (data.state === 'completed') {
+                        clearInterval(poll);
+                        this.showToast('Sync complete! Refreshing...', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else if (data.state === 'failed') {
+                        clearInterval(poll);
+                        this.showToast('Sync failed. Please try again.', 'error');
+                        this.syncing = false;
+                    }
+                    // Continue polling if active/delayed/waiting
+                } catch (e) {
+                    console.error('Poll error', e);
+                    clearInterval(poll);
+                    this.syncing = false;
+                }
+            }, 1000); // Poll every 1s
+        },
+
+        showToast(message, type = 'success') {
+            this.toastMessage = message;
+            this.toastType = type;
+            this.toast = true;
+            setTimeout(() => this.toast = false, 5000);
+        }
+    }));
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

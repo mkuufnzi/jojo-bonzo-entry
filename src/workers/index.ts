@@ -114,6 +114,20 @@ analyticsWorker.on('failed', (job, err) => {
 
 logger.info(`✅ Analytics Worker listening on: ${QUEUES.REVENUE_ENGINE}`);
 
+// Initialize Smart Recovery Worker
+import recoveryWorker from '../modules/recovery/recovery.worker';
+
+recoveryWorker.on('completed', job => {
+    logger.info({ jobId: job.id, queue: QUEUES.RECOVERY_ENGINE }, '[Recovery] Job completed');
+});
+
+recoveryWorker.on('failed', (job, err) => {
+    logger.error({ jobId: job?.id, err, queue: QUEUES.RECOVERY_ENGINE }, '[Recovery] Job failed');
+    Sentry.captureException(err, { tags: { job_id: job?.id, queue: QUEUES.RECOVERY_ENGINE } });
+});
+
+logger.info(`✅ Recovery Worker listening on: ${QUEUES.RECOVERY_ENGINE}`);
+
 // Keep process alive
 process.on('SIGTERM', async () => {
     logger.info('SIGTERM received. Closing workers...');
@@ -122,7 +136,8 @@ process.on('SIGTERM', async () => {
         webhookWorker.close(), 
         aiWorker.close(), 
         onboardingWorker.close(),
-        analyticsWorker.close()
+        analyticsWorker.close(),
+        recoveryWorker.close()
     ]);
     process.exit(0);
 });

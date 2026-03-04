@@ -1,27 +1,62 @@
 
 > afs_doc_tools@1.0.0 test
-> jest tests/v2/services/transactional.service.test.ts
+> jest src/tests/unit/recovery.service.test.ts
 
-FAIL tests/v2/services/transactional.service.test.ts
-  ΓùÅ Test suite failed to run
+  console.log
+    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
 
-    src/services/v2/transactional.service.ts:169:14 - error TS2741: Property 'externalId' is missing in type '{ name: string; }' but required in type '{ externalId: string; name: string; id?: string | undefined; metadata?: Record<string, unknown> | undefined; email?: string | undefined; billingAddress?: { line1: string; city: string; postalCode: string; country: string; line2?: string | undefined; state?: string | undefined; } | undefined; shippingAddress?: { ...;...'.
+      at _log (node_modules/dotenv/lib/main.js:142:11)
 
-    169              customer: {
-                     ~~~~~~~~
+FAIL src/tests/unit/recovery.service.test.ts (7.275 s)
+  RecoveryService
+    syncOverdueInvoices
+      ├ù should create sessions from manual invoices and bypass QBO (19 ms)
+      ├ù should resolve customer emails correctly in manual mode (2 ms)
+    findApplicableSequence
+      ΓêÜ should select sequence based on amount rules (2 ms)
+      ΓêÜ should fallback to default sequence if no rules match (1 ms)
+    processRecovery
+      ΓêÜ should dispatch to workflowService for recovery_email action (43 ms)
+      ΓêÜ should advance step index and calculate nextActionAt (2 ms)
+    Utility Logic
+      ΓêÜ calculateNextActionDate should respect day offsets (2 ms)
+      ΓêÜ injectVariables should replace {{key}} with data[key] (1 ms)
+    processBusinessOverdues
+      ΓêÜ should queue actions for sessions due now (3 ms)
 
-      src/services/v2/schemas.ts:56:3
-        56   externalId: z.string().describe('ID in External ERP/CRM'),
-             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        'externalId' is declared here.
-      src/services/v2/schemas.ts:139:3
-        139   customer: CustomerSchema,
-              ~~~~~~~~~~~~~~~~~~~~~~~~
-        The expected type comes from property 'customer' which is declared here on type '{ number: string; type: "invoice"; status: "unknown" | "draft" | "sent" | "viewed" | "paid" | "partial" | "overdue" | "voided" | "disputed"; date: string; externalId: string; currency: string; ... 13 more ...; normalizedAt?: string | ... 1 more ... | undefined; }'
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should create sessions from manual invoices and bypass QBO
+
+    TypeError: Cannot read properties of undefined (reading 'findMany')
+
+      106 |
+      107 |             if (remainingCustIds.length > 0) {
+    > 108 |                 const contacts = await p.contact.findMany({
+          |                                                  ^
+      109 |                     where: { 
+      110 |                         businessId,
+      111 |                         source: 'quickbooks',
+
+      at RecoveryService.syncOverdueInvoices (src/modules/transactional/recovery/recovery.service.ts:108:50)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:97:28)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should resolve customer emails correctly in manual mode
+
+    TypeError: Cannot read properties of undefined (reading 'findMany')
+
+      106 |
+      107 |             if (remainingCustIds.length > 0) {
+    > 108 |                 const contacts = await p.contact.findMany({
+          |                                                  ^
+      109 |                     where: { 
+      110 |                         businessId,
+      111 |                         source: 'quickbooks',
+
+      at RecoveryService.syncOverdueInvoices (src/modules/transactional/recovery/recovery.service.ts:108:50)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:121:13)
 
 Test Suites: 1 failed, 1 total
-Tests:       0 total
+Tests:       2 failed, 7 passed, 9 total
 Snapshots:   0 total
-Time:        10.572 s
-Ran all test suites matching tests/v2/services/transactional.service.test.ts.
+Time:        7.432 s, estimated 18 s
+Ran all test suites matching src/tests/unit/recovery.service.test.ts.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

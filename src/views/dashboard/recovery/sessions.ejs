@@ -1,0 +1,228 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-6 overflow-x-hidden" x-data="recoverySessions()">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-heading font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <div class="p-2 bg-emerald-100 rounded-xl">
+                    <i data-lucide="play-circle" class="w-6 h-6 text-emerald-600"></i>
+                </div>
+                Active Recovery Sessions
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Monitor customer recovery progress grouped by customer.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Bulk Action Dropdown (shown when sessions are selected) -->
+            <template x-if="selected.length > 0">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-indigo-600" x-text="`${selected.length} selected`"></span>
+                    <select x-model="bulkActionType" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600">
+                        <option value="">Bulk Action...</option>
+                        <option value="pause">Pause All</option>
+                        <option value="resume">Resume All</option>
+                        <option value="terminate">Terminate All</option>
+                    </select>
+                    <button @click="executeBulkAction()" :disabled="!bulkActionType"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        Apply
+                    </button>
+                </div>
+            </template>
+            <!-- 🧪 Instant Fire Debug Button -->
+            <button @click="instantFire()" :disabled="firing"
+                    class="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl text-xs font-bold hover:bg-violet-500 transition-all shadow-sm disabled:opacity-50"
+                    title="Immediately dispatch a recovery webhook to n8n (debug only)">
+                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                <span x-text="firing ? 'Firing...' : '🧪 Instant Fire'"></span>
+            </button>
+            <!-- Export CSV Button -->
+            <a href="/api/v1/recovery/export?type=sessions" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                Export
+            </a>
+            <span class="px-3 py-1 bg-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-200 shadow-sm animate-pulse">Live</span>
+            <span class="text-xs text-slate-400 font-medium tracking-tight">System Polling ERP every 6 hours</span>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-8 border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
+        <a href="/dashboard/recovery" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Overview</a>
+        <a href="/dashboard/recovery/sequences" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Campaigns</a>
+        <a href="/dashboard/recovery/sessions" class="pb-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 whitespace-nowrap">Active Sessions</a>
+        <a href="/dashboard/recovery/activity" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">History</a>
+    </div>
+
+    <!-- Customer-Grouped Sessions -->
+    <div class="space-y-6">
+        <% if (customerGroups && customerGroups.length > 0) { %>
+            <% customerGroups.forEach(group => { %>
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                    <!-- Customer Header -->
+                    <a href="/dashboard/recovery/customers/<%= group.customerId %>" class="px-8 py-6 flex items-center justify-between bg-slate-50/50 border-b border-slate-100 hover:bg-slate-100/50 transition-all block">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center shrink-0">
+                                <i data-lucide="user" class="w-5 h-5 text-indigo-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-slate-900"><%= group.customerName || 'Unknown Customer' %></h3>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="text-[10px] font-bold text-slate-500"><%= group.sessions.length %> active session<%= group.sessions.length !== 1 ? 's' : '' %></span>
+                                    <span class="text-[10px] text-slate-300">•</span>
+                                    <span class="text-[10px] font-black text-indigo-500">$<%= (group.totalAmount || 0).toLocaleString() %> outstanding</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <!-- Progress -->
+                            <div class="hidden sm:block w-40">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[10px] font-bold text-slate-400">Overall Progress</span>
+                                    <span class="text-[10px] font-black text-slate-700"><%= Math.round(group.avgProgress) %>%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-indigo-600 h-full rounded-full transition-all duration-700" style="width: <%= group.avgProgress %>%"></div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+                        </div>
+                    </a>
+
+                    <!-- Invoice Rows (collapsed view showing key info) -->
+                    <div class="divide-y divide-slate-50">
+                        <% group.sessions.forEach(session => { %>
+                            <%
+                                const completed = session.currentStepIndex || 0;
+                                const total = (session.sequence?.steps || []).length;
+                                const percent = total > 0 ? Math.min(100, (completed / total) * 100) : 0;
+                            %>
+                            <a href="/dashboard/recovery/sessions/<%= session.id %>" class="px-8 py-4 flex items-center justify-between text-xs hover:bg-indigo-50/40 transition-all block group cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <!-- Bulk Select Checkbox -->
+                                    <input type="checkbox" :value="'<%= session.id %>'" x-model="selected"
+                                           class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                           @click.stop>
+                                    <div class="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-slate-700">Inv #<%= session.externalInvoiceId %></span>
+                                        <span class="text-slate-400 ml-2">$<%= Number(session.metadata?.amount || 0).toLocaleString() %></span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6">
+                                    <span class="text-[10px] font-bold text-slate-400"><%= completed %>/<%= total %> steps</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest
+                                        <%= session.status === 'ACTIVE' ? 'bg-indigo-50 text-indigo-500' : 
+                                            session.status === 'PAUSED' ? 'bg-amber-50 text-amber-500' :
+                                            session.status === 'RECOVERED' ? 'bg-emerald-50 text-emerald-500' : 
+                                            'bg-slate-100 text-slate-400' %>">
+                                        <%= session.status %>
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 font-medium"><%= session.sequence?.name || 'Unknown' %></span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-colors"></i>
+                                </div>
+                            </a>
+                        <% }); %>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-20 text-center">
+                <i data-lucide="search-x" class="w-16 h-16 text-slate-100 mx-auto mb-6"></i>
+                <h3 class="text-base font-black text-slate-300 uppercase tracking-[0.2em] mb-2">No Active Journeys</h3>
+                <p class="text-xs text-slate-400 font-medium">Synced overdue invoices will appear here as they enter recovery.</p>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 px-2 flex justify-between items-center">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Showing <%= customerGroups ? customerGroups.length : 0 %> customer<%= (customerGroups && customerGroups.length !== 1) ? 's' : '' %> in recovery</p>
+    </div>
+
+    <!-- Toast UI -->
+    <div x-show="toast" x-transition
+         class="fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 bg-slate-900 text-white border border-white/10"
+         style="display: none;">
+        <i data-lucide="check-circle" class="w-5 h-5" :class="toastType === 'success' ? 'text-emerald-400' : 'text-red-400'"></i>
+        <span x-text="toastMessage"></span>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+function recoverySessions() {
+    return {
+        // Bulk action state
+        selected: [],
+        bulkActionType: '',
+        toast: false,
+        toastMessage: '',
+        toastType: 'success',
+        firing: false,
+
+        async instantFire() {
+            this.firing = true;
+            try {
+                const res = await fetch('/api/v1/recovery/debug/instant-fire', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast(data.message || '⚡ Instant-fire dispatched! Check n8n.', 'success');
+                    console.log('[Instant Fire] Response:', data);
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    this.showToast(data.error || 'Instant fire failed', 'error');
+                }
+            } catch (e) {
+                this.showToast('Network error: ' + e.message, 'error');
+            } finally {
+                this.firing = false;
+            }
+        },
+
+        async executeBulkAction() {
+            if (!this.bulkActionType || this.selected.length === 0) return;
+
+            // Confirm terminate
+            if (this.bulkActionType === 'terminate' && !confirm(`Are you sure you want to terminate ${this.selected.length} session(s)?`)) return;
+
+            console.log(`[Recovery UI] Bulk action: ${this.bulkActionType} on ${this.selected.length} session(s)`);
+            try {
+                const res = await fetch('/api/v1/recovery/sessions/bulk-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: this.bulkActionType,
+                        sessionIds: this.selected
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast(`${data.affected} session(s) ${this.bulkActionType}d`, 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    this.showToast(data.error || 'Bulk action failed', 'error');
+                }
+            } catch (e) {
+                this.showToast('Network error', 'error');
+            }
+        },
+
+        showToast(msg, type = 'success') {
+            this.toastMessage = msg;
+            this.toastType = type;
+            this.toast = true;
+            setTimeout(() => this.toast = false, 5000);
+        }
+    };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

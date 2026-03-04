@@ -1,0 +1,157 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-6 overflow-x-hidden" x-data="clusterManager()">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-heading font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <div class="p-2 bg-violet-100 rounded-xl">
+                    <i data-lucide="layers" class="w-6 h-6 text-violet-600"></i>
+                </div>
+                Customer Clusters
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Auto-segmented customer groups with tailored recovery strategies.</p>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-8 border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
+        <a href="/dashboard/recovery" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Overview</a>
+        <a href="/dashboard/recovery/sequences" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Campaigns</a>
+        <a href="/dashboard/recovery/sessions" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Active Sessions</a>
+        <a href="/dashboard/recovery/activity" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">History</a>
+        <a href="/dashboard/recovery/clusters" class="pb-4 text-sm font-bold border-b-2 border-violet-600 text-violet-600 whitespace-nowrap">Clusters</a>
+        <a href="/dashboard/recovery/webhooks" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Event Log</a>
+    </div>
+
+    <!-- Cluster Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <% clusters.forEach((cluster, idx) => { %>
+            <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 hover:shadow-xl hover:translate-y-[-2px] transition-all cursor-pointer"
+                 @click="activeCluster = '<%= cluster.id %>'">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] <%= idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-red-500' : 'text-slate-400' %>"><%= cluster.name %></span>
+                    <div class="p-3 rounded-2xl <%= idx === 0 ? 'bg-amber-50' : idx === 1 ? 'bg-red-50' : 'bg-slate-50' %>">
+                        <i data-lucide="<%= idx === 0 ? 'crown' : idx === 1 ? 'alert-triangle' : 'users' %>" class="w-5 h-5 <%= idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-red-500' : 'text-slate-400' %>"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-black text-slate-900 tracking-tight"><%= cluster.customerCount || 0 %></p>
+                <p class="text-[10px] text-slate-400 mt-2 font-medium"><%= cluster.description %></p>
+                <% if (cluster.sequence) { %>
+                    <div class="mt-4 flex items-center gap-2">
+                        <span class="text-[9px] font-black uppercase tracking-widest text-violet-500 bg-violet-50 px-2 py-0.5 rounded-full"><%= cluster.sequence.name %></span>
+                    </div>
+                <% } %>
+            </div>
+        <% }); %>
+    </div>
+
+    <!-- Customer Table per Cluster -->
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Customers by Cluster</h3>
+        </div>
+
+        <% if (customers && customers.length > 0) { %>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-100">
+                            <th class="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Cluster</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Unpaid</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">LTV</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg Days to Pay</th>
+                            <th class="px-4 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Move To</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <% customers.forEach(cust => { %>
+                            <tr class="hover:bg-slate-50/80 transition-all">
+                                <td class="px-8 py-5">
+                                    <a href="/dashboard/recovery/customers/<%= cust.id %>" class="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors"><%= cust.name || 'Unknown' %></a>
+                                    <p class="text-[10px] text-slate-400 mt-0.5"><%= cust.email || '' %></p>
+                                </td>
+                                <td class="px-4 py-5">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest
+                                        <%= cust.clusterName === 'High-Value VIPs' ? 'bg-amber-100 text-amber-600' : cust.clusterName === 'Chronic Late Payers' ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600' %>">
+                                        <%= cust.clusterName || 'Unassigned' %>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-5 text-sm font-bold text-slate-700"><%= cust.unpaidInvoices || 0 %></td>
+                                <td class="px-4 py-5 text-sm font-bold text-slate-700">$<%= (cust.lifetimeValue || 0).toLocaleString() %></td>
+                                <td class="px-4 py-5 text-sm font-bold text-slate-700"><%= cust.avgDaysToPay || '—' %></td>
+                                <td class="px-4 py-5 text-right">
+                                    <select class="text-[10px] font-bold border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-600 focus:ring-2 focus:ring-violet-300 focus:border-violet-500 outline-none"
+                                            @change="moveCustomer('<%= cust.id %>', $event.target.value)">
+                                        <option value="">Move to...</option>
+                                        <% clusters.forEach(cl => { %>
+                                            <% if (cl.id !== cust.clusterId) { %>
+                                                <option value="<%= cl.id %>"><%= cl.name %></option>
+                                            <% } %>
+                                        <% }); %>
+                                    </select>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="p-12 text-center">
+                <i data-lucide="inbox" class="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                <p class="text-sm text-slate-400 font-medium">No customers clustered yet. Run a sync to auto-segment.</p>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Toast UI -->
+    <div x-show="toast" x-transition
+         class="fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 bg-slate-900 text-white border border-white/10"
+         style="display: none;">
+        <i data-lucide="check-circle" class="w-5 h-5" :class="toastType === 'success' ? 'text-emerald-400' : 'text-red-400'"></i>
+        <span x-text="toastMessage"></span>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('alpine:init', () => {
+    Alpine.data('clusterManager', () => ({
+        activeCluster: null,
+        toast: false,
+        toastMessage: '',
+        toastType: 'success',
+
+        async moveCustomer(customerId, clusterId) {
+            if (!clusterId) return;
+            try {
+                const res = await fetch('/dashboard/recovery/clusters/move', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customerId, clusterId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast(`Customer moved to ${data.clusterName || 'new cluster'}`, 'success');
+                    setTimeout(() => window.location.reload(), 1200);
+                } else {
+                    this.showToast(data.error || 'Move failed', 'error');
+                }
+            } catch (e) {
+                this.showToast('Network error', 'error');
+            }
+        },
+
+        showToast(message, type = 'success') {
+            this.toastMessage = message;
+            this.toastType = type;
+            this.toast = true;
+            setTimeout(() => this.toast = false, 5000);
+        }
+    }));
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

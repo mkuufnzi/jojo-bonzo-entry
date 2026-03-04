@@ -147,8 +147,13 @@
                                 </div>
                                 <div id="paths-container" class="space-y-3">
                                     <% 
-                                        const paths = (service.config && service.config.paths) || [];
-                                        paths.forEach(p => {
+                                        const configPaths = (service.config && service.config.paths) || [];
+                                        const modelEndpoints = service.endpoints || [];
+                                        const pathsToShow = configPaths.length > 0 ? configPaths : modelEndpoints.map((e) => ({
+                                            path: e.path || e,
+                                            billable: e.billable || false
+                                        }));
+                                        pathsToShow.forEach(p => {
                                     %>
                                     <div class="path-row flex flex-col md:flex-row gap-2 md:items-center p-3 border border-slate-200 rounded-lg bg-slate-50" data-key="<%= p.path %>">
                                         <input type="text" value="<%= p.path %>" class="path-value w-full md:flex-1 rounded-lg border-slate-300 text-sm font-mono" readonly>
@@ -434,9 +439,20 @@
             try {
                 const res = await fetch('/admin/services/test-webhook', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: JSON.stringify({ url, method })
                 });
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error('Test Webhook Failed:', res.status, text);
+                    if (window.showToast) window.showToast('Error', `HTTP ${res.status}: Browser/Proxy likely blocked request. Check console.`, 'error');
+                    return;
+                }
+
                 const data = await res.json();
                 if (data.success) {
                     if (window.showToast) window.showToast('Success', `Webhook fired! Status: ${data.status}`, 'success');

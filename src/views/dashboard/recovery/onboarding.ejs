@@ -1,0 +1,229 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-4xl mx-auto py-8" x-data="recoveryOnboarding()">
+    
+    <!-- Header -->
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-black text-slate-800 mb-2">Setup Smart Recovery</h1>
+        <p class="text-slate-500">Automate your invoice follow-ups in 3 simple steps.</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="flex justify-center mb-12">
+        <div class="flex items-center gap-4">
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center gap-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+                     :class="step >= 1 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'">
+                    1
+                </div>
+                <span class="text-xs font-semibold" :class="step >= 1 ? 'text-indigo-600' : 'text-slate-400'">Connect</span>
+            </div>
+            <div class="w-16 h-0.5" :class="step >= 2 ? 'bg-indigo-600' : 'bg-slate-200'"></div>
+            
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center gap-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+                     :class="step >= 2 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'">
+                    2
+                </div>
+                <span class="text-xs font-semibold" :class="step >= 2 ? 'text-indigo-600' : 'text-slate-400'">Configure</span>
+            </div>
+            <div class="w-16 h-0.5" :class="step >= 3 ? 'bg-indigo-600' : 'bg-slate-200'"></div>
+
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center gap-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+                     :class="step >= 3 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'">
+                    3
+                </div>
+                <span class="text-xs font-semibold" :class="step >= 3 ? 'text-indigo-600' : 'text-slate-400'">Activate</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: Connect -->
+    <% if (step === 1) { %>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-600">
+            <i data-lucide="link" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">Connect your Accounting Software</h2>
+        <p class="text-slate-500 mb-8 max-w-md mx-auto">We need access to your invoices to know when they are overdue.</p>
+
+        <% if (integration) { %>
+            <div class="bg-green-50 border border-green-100 rounded-xl p-4 mb-8 inline-flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                <span class="font-semibold text-green-700">Connected to QuickBooks</span>
+            </div>
+            <div>
+                <button @click="nextStep(1)" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all">
+                    Continue to Configuration &rarr;
+                </button>
+            </div>
+        <% } else { %>
+            <a href="/dashboard/connections" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-lg transition-all inline-flex items-center gap-2">
+                <i data-lucide="plus"></i> Connect QuickBooks
+            </a>
+            <p class="mt-4 text-sm text-slate-400">Please connect securely via OAuth2.</p>
+        <% } %>
+    </div>
+    <% } %>
+
+    <!-- Step 2: Configure -->
+    <% if (step === 2) { %>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <h2 class="text-xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4">Configuration</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Grace Period -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Grace Period (Days)</label>
+                <p class="text-xs text-slate-500 mb-3">How many days after the due date should we wait before sending the first reminder?</p>
+                <div class="flex items-center gap-3">
+                    <button @click="form.gracePeriod = Math.max(0, form.gracePeriod - 1)" class="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center hover:bg-slate-50">
+                        <i data-lucide="minus" class="w-4 h-4"></i>
+                    </button>
+                    <input type="number" x-model="form.gracePeriod" class="w-20 text-center font-bold text-lg border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <button @click="form.gracePeriod++" class="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center hover:bg-slate-50">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Brand Voice -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Brand Voice</label>
+                <p class="text-xs text-slate-500 mb-3">Choose the tone for your reminder emails.</p>
+                <div class="space-y-3">
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors" :class="{'ring-2 ring-indigo-500 border-indigo-500 bg-indigo-50': form.brandVoice === 'standard'}">
+                        <input type="radio" name="brandVoice" value="standard" x-model="form.brandVoice" class="mt-1 text-indigo-600 focus:ring-indigo-500">
+                        <div>
+                            <span class="block font-bold text-slate-800">Standard / Professional</span>
+                            <span class="text-xs text-slate-500">Polite but firm. Best for most businesses.</span>
+                        </div>
+                    </label>
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors" :class="{'ring-2 ring-indigo-500 border-indigo-500 bg-indigo-50': form.brandVoice === 'empathetic'}">
+                        <input type="radio" name="brandVoice" value="empathetic" x-model="form.brandVoice" class="mt-1 text-indigo-600 focus:ring-indigo-500">
+                        <div>
+                            <span class="block font-bold text-slate-800">Empathetic / Soft</span>
+                            <span class="text-xs text-slate-500">Focuses on "checking in". Good for long-term clients.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+            <button @click="submitStep2()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all">
+                Save & Continue &rarr;
+            </button>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- Step 3: Activate -->
+    <% if (step === 3) { %>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+        <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-emerald-600">
+            <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">Ready to Activate</h2>
+        <p class="text-slate-500 mb-8 max-w-md mx-auto">We will create a <strong>Recovery Workflow</strong> based on your settings. You can edit this workflow later.</p>
+
+        <div class="bg-slate-50 rounded-xl p-6 text-left max-w-lg mx-auto mb-8 border border-slate-200">
+            <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wide">Summary</h3>
+            <ul class="space-y-3">
+                <li class="flex justify-between text-sm">
+                    <span class="text-slate-500">Grace Period</span>
+                    <span class="font-bold text-slate-800"><span x-text="savedSettings?.gracePeriod || 3"></span> Days</span>
+                </li>
+                <li class="flex justify-between text-sm">
+                    <span class="text-slate-500">Brand Voice</span>
+                    <span class="font-bold text-slate-800 capitalize" x-text="savedSettings?.brandVoice || 'Standard'"></span>
+                </li>
+                <li class="flex justify-between text-sm">
+                    <span class="text-slate-500">Sequence</span>
+                    <span class="font-bold text-slate-800">3 Steps (Day 1, 7, 14)</span>
+                </li>
+            </ul>
+        </div>
+
+        <button @click="activate()" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-lg shadow-xl shadow-emerald-100 transition-all w-full md:w-auto">
+            Enable Smart Recovery
+        </button>
+    </div>
+    <% } %>
+
+        <!-- Data Injection -->
+        <%
+            const onboardingData = {
+                step: step,
+                gracePeriod: sequence?.settings?.gracePeriod || 3,
+                brandVoice: sequence?.settings?.brandVoice || "standard",
+                savedSettings: sequence?.settings || {}
+            };
+        %>
+        <script type="application/json" id="recovery-onboarding-data">
+            <%- JSON.stringify(onboardingData) %>
+        </script>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+    function recoveryOnboarding() {
+        const dataDisplay = document.getElementById('recovery-onboarding-data');
+        const initial = dataDisplay ? JSON.parse(dataDisplay.textContent) : {};
+
+        return {
+            step: initial.step,
+            form: {
+                gracePeriod: initial.gracePeriod,
+                brandVoice: initial.brandVoice
+            },
+            savedSettings: initial.savedSettings,
+            
+            async nextStep(currentStep) {
+                // For step 1, just navigation since integration check is server-side
+                if (currentStep === 1) {
+                    window.location.href = '/dashboard/recovery/onboarding?step=2';
+                    return;
+                }
+            },
+
+            async submitStep2() {
+                try {
+                    const res = await fetch('/dashboard/recovery/onboarding/step', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ step: 2, data: this.form })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        window.location.href = '/dashboard/recovery/onboarding?step=3';
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert('Failed to save settings');
+                }
+            },
+
+            async activate() {
+                try {
+                    const res = await fetch('/dashboard/recovery/onboarding/step', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ step: 3 }) // 3 triggers activation
+                    });
+                    const result = await res.json();
+                    if (result.success && result.redirect) {
+                        window.location.href = result.redirect;
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert('Activation failed');
+                }
+            }
+        }
+    }
+</script>

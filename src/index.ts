@@ -31,6 +31,7 @@ import landingRoutes from './routes/landing.routes';
 import integrationsRoutes from './routes/integrations.routes';
 import brandingRoutes from './routes/branding.routes';
 import workflowsRoutes from './routes/workflows.routes';
+import { callbackRoutes } from './routes/callback.routes';
 
 import adminRoutes from './routes/admin';
 import passport from './config/passport';
@@ -48,6 +49,14 @@ import { initSentry } from './config/sentry';
 import { logger } from './lib/logger';
 import { healthCheck } from './lib/redis';
 import * as Sentry from '@sentry/node';
+
+// [DEBUG] Ultra-Early Request Logger (Before Sentry/Helmet)
+app.use((req, res, next) => {
+    if (req.url.startsWith('/admin')) {
+        console.log(`[Ultra-Early Admin] ${req.method} ${req.url} | Headers: ${JSON.stringify(req.headers)}`);
+    }
+    next();
+});
 
 initSentry(app);
 
@@ -311,8 +320,18 @@ app.use('/dashboard', requireAuth, checkOnboarding);
 app.use('/onboarding', businessRoutes);       // New Business Onboarding Wizard
 app.use('/dashboard/brand', brandingRoutes);     // Brand Standards
 app.use('/dashboard/workflows', workflowsRoutes); // Workflows
+
+// Recovery REST API (JSON) — uses own requireServiceAccess chain
+import recoveryApiRoutes from './routes/recovery-api.routes';
+app.use('/api/v1/recovery', recoveryApiRoutes);     // Smart Recovery REST API
+
 app.use('/dashboard', checkOnboarding, dashboardRoutes);         // User dashboard
 app.use('/apps', checkOnboarding, appsRoutes);                   // App management UI
+
+// Recovery Dashboard (Requires onboarding + service access)
+import recoveryRoutes from './routes/recovery.routes';
+app.use('/dashboard/recovery', checkOnboarding, recoveryRoutes);  // Smart Recovery (Dunning)
+
 app.use('/services', checkOnboarding, logUsage, servicesRoutes);           // Service configuration UI
 app.use('/billing', checkOnboarding, billingRoutes);             // Billing pages
 app.use('/subscription', checkOnboarding, subscriptionRoutes);   // Subscription management
@@ -320,7 +339,15 @@ app.use('/notifications', checkOnboarding, notificationRoutes);  // Notification
 app.use('/analytics', checkOnboarding, analyticsRoutes);         // Analytics dashboard
 app.use('/user', checkOnboarding, userRoutes);                   // User profile pages
 app.use('/tools', checkOnboarding, logUsage, servicesRoutes);              // Tools catalog (alias for services)
+
+// [DEBUG] Admin Route Logging
+app.use('/admin', (req, res, next) => {
+    console.log(`[Admin Debug] Request to ${req.originalUrl} | Method: ${req.method} | User: ${res.locals.user?.email} | Role: ${res.locals.user?.role}`);
+    next();
+});
+
 app.use('/admin', injectPermissions, adminRoutes);                 // Admin dashboard
+app.use('/api/callbacks', callbackRoutes);                          // Inbound webhooks (n8n, etc.)
 import devRoutes from './routes/dev.routes';
 app.use('/dev', devRoutes);                     // Internal Dev Tools
 app.use(profileRoutes);                         // Profile management (includes /profile endpoint)
@@ -462,6 +489,22 @@ const server = app.listen(PORT, async () => {
 
 server.on('error', (err) => {
   logger.error({ err }, 'Server startup error');
+});
+
+// [DEBUG] Capture Node-level HTTP errors (400 Bad Request)
+server.on('clientError', (err: any, socket: any) => {
+  const timestamp = new Date().toISOString();
+  const errorInfo = {
+    timestamp,
+    code: err.code,
+    reason: err.message,
+    bytesParsed: err.bytesParsed
+  };
+  console.error('[clientError] Node-level HTTP error detected:', JSON.stringify(errorInfo, null, 2));
+  try {
+    fs.appendFileSync(path.join(process.cwd(), 'debug_error.log'), `[${timestamp}] NODE CLIENT ERROR: ${JSON.stringify(errorInfo)}\n---\n`);
+  } catch (e) {}
+  socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
 });
 
 // Keep alive check

@@ -222,80 +222,85 @@ export class IntegrationController {
    * GET /dashboard/connections/:provider
    * Show settings and configuration for a connected integration
    */
-  static async showSettings(req: Request, res: Response, next: NextFunction) {
-      try {
-          const { provider } = req.params;
-          const userId = req.user?.id || req.session.userId!;
-          const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
-          
-          if (!user?.businessId) return res.redirect('/onboarding/wizard');
+    static async showSettings(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { provider } = req.params;
+            const businessId = req.user?.businessId;
 
-          console.log(`[IntegrationSettings] Request for provider: ${provider}, Business: ${user?.businessId}`);
+            if (!businessId) {
+                return res.redirect('/dashboard');
+            }
 
-          // Try exact match first
-          let integration = await prisma.integration.findFirst({
-              where: { businessId: user.businessId, provider }
-          });
-          
-          // Try alias match if not found (zoho-crm -> zoho)
-          if (!integration && provider === 'zoho-crm') {
-              console.log('[IntegrationSettings] Trying alias zoho-crm -> zoho');
-              integration = await prisma.integration.findFirst({
-                  where: { businessId: user.businessId, provider: 'zoho' }
-              });
-          }
+            // 1. Fetch Integration
+            const integration = await prisma.integration.findFirst({
+                where: {
+                    businessId,
+                    provider: provider as any // 'quickbooks' | 'xero' etc
+                }
+            });
 
-          if (!integration) {
-              console.log(`[IntegrationSettings] No integration found for ${provider}. Redirecting to wizard.`);
-              return res.redirect('/onboarding/wizard');
-          }
-          
-          // Map provider slug to Definition (some mismatches like zoho vs zoho-crm need care)
-          // Ideally schema should match perfectly, or we query by config->provider
-          let integrationDefinition = await prisma.integrationDefinition.findFirst({
-              where: { 
-                  OR: [
-                      { slug: provider },
-                      { config: { path: ['provider'], equals: provider } } // JSON filter if supported
-                  ]
-              }
-          });
-          
-          // Fallback simple lookup
-          if (!integrationDefinition) {
-               integrationDefinition = await prisma.integrationDefinition.findUnique({ where: { slug: provider } });
-               // Try aliases
-               if (!integrationDefinition && provider === 'zoho') {
-                   integrationDefinition = await prisma.integrationDefinition.findUnique({ where: { slug: 'zoho-crm' } });
-               }
-          }
+            if (!integration) {
+                return res.redirect('/dashboard/connections');
+            }
 
-          if (!integrationDefinition) {
-              // Just a safety fallback
-               integrationDefinition = { name: provider, slug: provider, logoUrl: '' } as any;
-          }
+            // 2. Fetch Definition (for Name, Logo)
+            let integrationDefinition = await prisma.integrationDefinition.findFirst({
+                where: { 
+                    OR: [
+                        { slug: provider },
+                        { config: { path: ['provider'], equals: provider } } 
+                    ]
+                }
+            });
 
-          // Fetch Global Service Config (for Webhooks)
-          const serviceRecord = await prisma.service.findUnique({
-              where: { slug: provider } // 'quickbooks' matches service slug
-          });
+            if (!integrationDefinition) {
+                // Fallback for safety
+                integrationDefinition = { 
+                    name: provider.charAt(0).toUpperCase() + provider.slice(1), 
+                    slug: provider, 
+                    logoUrl: '',
+                    config: {},
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    id: 'fallback'
+                } as any;
+            }
 
-          res.render('integrations/settings', {
-              provider,
-              integration,
-              integrationDefinition,
-              settings: (integration.settings as any) || { tables: [] },
-              serviceConfig: serviceRecord?.config || {},
-              title: `${integrationDefinition?.name} Settings`,
-              activeService: 'integrations',
-              user: req.user || { email: 'user@example.com', name: 'User' },
-              nonce: res.locals.nonce
-          });
+            // 3. Fetch Global Service Config (for Webhooks) - Safe Lookup
+            let serviceConfig = {};
+            try {
+                const serviceRecord = await prisma.service.findUnique({
+                    where: { slug: provider }
+                });
+                if (serviceRecord && serviceRecord.config) {
+                    serviceConfig = serviceRecord.config;
+                }
+            } catch (e) {
+                console.warn(`[IntegrationController] Failed to fetch service config for ${provider}`, e);
+            }
 
-      } catch (error) {
-          next(error);
-      }
-  }
+            // 4. Render Settings
+            return res.render('integrations/settings', {
+                provider,
+                integration,
+                integrationDefinition,
+                integrationSettings: (integration.settings as any) || { tables: [] }, 
+                serviceConfig,
+                title: `${integrationDefinition?.name} Settings`,
+                activeService: 'integrations',
+                user: req.user || { email: 'user@example.com', name: 'User' },
+                nonce: res.locals.nonce
+            });
+
+        } catch (error) {
+            console.error('[IntegrationController] showSettings Error:', error);
+            // Render a friendly error or redirect
+            return res.status(500).render('error', {
+                message: 'Failed to load integration settings',
+                error: process.env.NODE_ENV === 'development' ? error : {}
+            });
+        }
+    }
 
   /**
    * POST /dashboard/connections/:provider/config

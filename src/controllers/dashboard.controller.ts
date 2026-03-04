@@ -85,12 +85,7 @@ export class DashboardController {
                     select: { provider: true, status: true }
                 },
                 brandingProfiles: { where: { isDefault: true } },
-                /*
-                businessMetrics: {
-                    orderBy: { timestamp: 'desc' },
-                    take: 1
-                }
-                */
+                // businessMetrics calculation removed as it expects fields that may not exist
             } as any
         });
 
@@ -145,6 +140,12 @@ export class DashboardController {
             })
             .filter(Boolean);
 
+        console.log(`[Dashboard Debug] Found ${processedLogs.length} processed logs.`);
+        console.log(`[Dashboard Debug] Extracted External IDs:`, processedExternalIds);
+        
+        // 3. Fetch Branded Documents (History)
+        // [ARCHITECTURE] We join UsageLogs with ExternalDocuments to get financial data
+
         const brandingHistory = isReady ? await prisma.externalDocument.findMany({
             where: { 
                 businessId: business.id, 
@@ -154,12 +155,20 @@ export class DashboardController {
             take: 10
         }) : [];
 
+        console.log(`[Dashboard Debug] Branding History Count: ${brandingHistory.length}`);
+        if (brandingHistory.length > 0) {
+            console.log(`[Dashboard Debug] Sample History Item:`, JSON.stringify(brandingHistory[0].normalized).substring(0, 100));
+        }
+
         // 4. Calculate Real Total Revenue
-        // Sum revenue in memory for accurate Json access (Prisma cannot aggregate on Json fields directly)
+        console.log(`[Dashboard Debug] Calculating revenue from ${brandingHistory.length} documents.`);
         const totalRevenue = brandingHistory.reduce((sum, doc) => {
-            const amount = (doc.normalized as any)?.amount || 0;
-            return sum + amount;
+            const amount = (doc.normalized as any)?.total || (doc.normalized as any)?.amount || 0;
+            return sum + Number(amount);
         }, 0);
+
+        console.log(`[Dashboard Debug] Total Revenue Calculated: $${totalRevenue}`);
+        console.log(`[Dashboard Debug] Total Processed Count: ${processedLogs.length}`);
 
         const processedCount = processedLogs.length;
 
@@ -194,6 +203,20 @@ export class DashboardController {
             title: 'Customer Retention', 
             activeService: 'retention',
             nonce: res.locals.nonce
+        });
+    }
+
+    static async dashboardRetentionTriggers(req: Request, res: Response) {
+        let userId = (req.session as any)?.userId;
+        let user: any = null;
+        if (userId) {
+             user = await prisma.user.findUnique({ where: { id: userId } });
+        }
+        res.render('dashboard/services/retention', { 
+            user, 
+            title: 'Retention Triggers', 
+            activeService: 'retention',
+            nonce: res.locals.nonce || ''
         });
     }
 

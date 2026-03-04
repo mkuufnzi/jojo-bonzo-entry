@@ -28,7 +28,15 @@ export class BootManager {
       const { FeatureSeeder } = await import('../services/feature-seeder.service');
       await FeatureSeeder.seedFeatures();
 
-      // 3.2 Verify Critical Data
+      // 3.2 Force-refresh WebhookService so stale cache never persists across restarts.
+      //     Seeder may have written new URLs to service.config; the singleton must re-read them.
+      logger.info('🔄 Forcing WebhookService cache refresh after seeding...');
+      const { webhookService } = await import('../services/webhook.service');
+      webhookService.invalidateCache();
+      await webhookService.refreshConfig();
+      logger.info('✅ WebhookService cache warmed with current DB config.');
+
+      // 3.3 Verify Critical Data
       await this.verifyCriticalData();
 
       // 4. Sync Stripe Price IDs (if Stripe is configured)
@@ -36,14 +44,78 @@ export class BootManager {
 
       // 5. Initialize V2 Architecture (Enterprise Services)
       logger.info('🚀 Initializing V2 Services...');
-      const { transactionServiceV2, deliveryServiceV2, dataSyncServiceV2, onboardingServiceV2 } = await this.initializeV2Services();
+      await this.initializeV2Services();
       logger.info('✅ V2 Architecture Active.');
+
+      // 6. Schedule Automated Tasks (Cron Jobs)
+      logger.info('⏰ Scheduling Cron Jobs...');
+      await this.scheduleCronJobs();
+
 
       logger.info('✅ Boot Sequence Completed Successfully.');
     } catch (error: any) {
       logger.error({ msg: '❌ Boot Sequence Failed', error: error.message });
       logger.fatal('⚠️ Server cannot start without a healthy database state.');
       process.exit(1);
+    }
+  }
+
+  /**
+   * Schedule Repeatable BullMQ Jobs — Production-Grade Orchestrator
+   * 
+   * ARCHITECTURE:
+   * Instead of 2 daily mega-jobs that iterate ALL tenants sequentially,
+   * we use an ORCHESTRATOR pattern:
+   * 
+   *   recovery:orchestrate (every 15 min)
+   *     → Finds all tenants with active sequences
+   *     → Fans out ONE job per tenant (staggered delays)
+   *     → Each tenant job handles sync + process independently
+   *     → Tenant failures are isolated
+   * 
+   * SCALING: At 10k tenants, this processes tenants in parallel
+   * instead of 8+ hours of sequential processing.
+   */
+  private static async scheduleCronJobs() {
+    try {
+      const { QUEUES, createQueue } = await import('./queue');
+      const recoveryQueue = createQueue(QUEUES.RECOVERY_ENGINE);
+
+      // ── Clean up old cron patterns from previous architecture ──
+      // Remove legacy daily-only crons if they still exist in Redis
+      const existingRepeatable = await recoveryQueue.getRepeatableJobs();
+      for (const job of existingRepeatable) {
+        if (['recovery-erp-sync-id', 'recovery-daily-dispatch-id'].includes(job.id || '')) {
+          await recoveryQueue.removeRepeatableByKey(job.key);
+          logger.info(`   🗑️ Removed legacy cron: ${job.name} (${job.id})`);
+        }
+      }
+
+      // 1. Recovery Orchestrator (Every 15 minutes)
+      // Fans out per-tenant sync + process jobs with staggered delays.
+      // Replaces both the old 8AM erp-sync and 9AM daily-dispatch.
+      await recoveryQueue.add('recovery:orchestrate', {}, {
+        repeat: {
+          pattern: '*/15 * * * *'  // Every 15 minutes
+        },
+        jobId: 'recovery-orchestrate-v2'
+      });
+      logger.info('   ✅ Recovery Orchestrator Scheduled (*/15 * * * *)');
+
+      // 2. Boot-time Orchestrate (catches up immediately on server start)
+      // Runs the orchestrator once on boot so the operator sees the full E2E flow.
+      await recoveryQueue.add('recovery:orchestrate', {
+        trigger: 'boot',
+        bootTime: new Date().toISOString()
+      }, {
+        delay: 15000,  // 15s — allow workers to fully initialize
+        jobId: `recovery-boot-orchestrate-${Date.now()}`,
+        removeOnComplete: true
+      });
+      logger.info('   ✅ Boot-time Orchestrator queued (15s delay)');
+
+    } catch (error: any) {
+      logger.error({ err: error }, '   ⚠️ Failed to schedule cron jobs');
     }
   }
 
@@ -225,14 +297,28 @@ export class BootManager {
       const { dataSyncService } = await import('../services/data-sync.service');
       const { onboardingService } = await import('../services/onboarding.service');
 
-      // Optional: Run a health check or strictly typed initialization if methods exist
-      // e.g. await transactionalService.healthCheck(); 
+      // Initialize Debt Collection (Smart Recovery) Module
+      const { RecoveryService } = await import('../modules/recovery/recovery.service');
+      const recoveryHealth = await RecoveryService.healthCheck();
+
+      if (recoveryHealth.ready) {
+          logger.info({
+              webhook: recoveryHealth.webhookUrl ? '✅' : '❌',
+              activeSequences: recoveryHealth.activeSequences
+          }, '   ✅ Debt-Collection AI initialized');
+      } else {
+          logger.warn({
+              issues: recoveryHealth.issues,
+              activeSequences: recoveryHealth.activeSequences
+          }, '   ⚠️ Debt-Collection AI initialized with issues');
+      }
 
       return {
           transactionServiceV2: transactionalService,
           deliveryServiceV2: deliveryService,
           dataSyncServiceV2: dataSyncService,
-          onboardingServiceV2: onboardingService
+          onboardingServiceV2: onboardingService,
+          recoveryService: RecoveryService
       };
   }
 }

@@ -603,4 +603,8 @@ export class ZohoProvider implements IERPProvider {
         }
         return count;
     }
+
+    async syncInvoices(userId: string): Promise<number> {
+        return 0; // implemented only in QBO currently
+    }
 }

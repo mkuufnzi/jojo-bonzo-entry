@@ -7,17 +7,24 @@
     "features": [
         {
             "id": "header",
-            "name": "Arrow Brand Header",
+            "name": "Document Header",
             "type": "toggle",
             "required": true,
-            "description": "Distinctive arrow-shaped header with logo and tagline."
+            "description": "Standard issuer branding, invoice number, and status indicators."
         },
         {
             "id": "customer_info",
             "name": "Customer Details",
             "type": "toggle",
             "required": true,
-            "description": "Bill-to information and Invoice Metadata."
+            "description": "Bill-to/Ship-to information and Metadata."
+        },
+        {
+            "id": "spacer_1",
+            "name": "Vertical Spacer A",
+            "type": "input",
+            "defaultValue": "20",
+            "description": "Adjustable vertical gap (px) between sections."
         },
         {
             "id": "marketing_banner",
@@ -33,14 +40,14 @@
             "name": "Line Items Table",
             "type": "toggle",
             "required": true,
-            "description": "Itemized list with integrated tutorials and loyalty tags."
+            "description": "Detailed breakdown of purchased products, quantities, and totals."
         },
         {
             "id": "totals",
-            "name": "Totals Section",
+            "name": "Line Item Totals",
             "type": "toggle",
             "required": true,
-            "description": "Subtotal, Tax, and Grand Total block."
+            "description": "Subtotal, tax, and final amount summaries."
         },
         {
             "id": "product_recommendations",
@@ -49,7 +56,14 @@
             "required": false,
             "defaultEnabled": true,
             "badge": "Conversion",
-            "description": "Cross-sell grid based on purchase history."
+            "description": "AI-driven cross-sell suggestions based on purchase history."
+        },
+        {
+            "id": "spacer_2",
+            "name": "Vertical Spacer B",
+            "type": "input",
+            "defaultValue": "40",
+            "description": "Adjustable vertical gap (px) between sections."
         },
         {
             "id": "product_support",
@@ -58,7 +72,7 @@
             "required": false,
             "defaultEnabled": true,
             "badge": "Retention",
-            "description": "VIP Club invite or Loyalty functionality."
+            "description": "Dynamic tutorials, recipes, or setup guides for purchased items."
         },
         {
             "id": "payment_details",
@@ -78,11 +92,25 @@
         },
         {
             "id": "footer",
-            "name": "Footer",
+            "name": "Document Footer",
             "type": "toggle",
             "required": true,
-            "description": "Contact info and thank you message."
+            "description": "Terms, legal disclaimers, and gratitude message."
         }
+    ],
+    "layoutOrder": [
+        "header",
+        "customer_info",
+        "spacer_1",
+        "marketing_banner",
+        "line_items",
+        "totals",
+        "product_recommendations",
+        "spacer_2",
+        "product_support",
+        "payment_details",
+        "customer_support",
+        "footer"
     ],
     "author": "Floovioo"
 }

@@ -74,20 +74,49 @@
         <!-- =============== PINNED HEADER =============== -->
         <% if (widgetStates.header?.enabled !== false) { %>
             <div class="doc-section w-full block" data-widget-id="header" data-no-split="true" 
-                 style="display: block !important; width: 100% !important; margin-bottom: 20px !important;">
+                 style="display: block !important; width: 100% !important; margin-bottom: 8px !important;">
                 <%- include('./components/header') %>
             </div>
         <% } %>
 
         <!-- =============== DYNAMIC WIDGETS (in layoutOrder sequence) =============== -->
-        <% dynamicWidgets.forEach((widgetId, index) => { %>
-            <% 
+        <!-- =============== DYNAMIC WIDGETS (in layoutOrder sequence) =============== -->
+        <% 
+            let i = 0;
+            while(i < dynamicWidgets.length) {
+                const widgetId = dynamicWidgets[i];
+                
+                // Grouping Logic: Check for Line Items + Totals sequence
+                if (widgetId === 'line_items' && dynamicWidgets[i+1] === 'totals') {
+                     const w1 = WIDGET_REGISTRY['line_items'];
+                     const s1 = widgetStates['line_items'];
+                     const w2 = WIDGET_REGISTRY['totals'];
+                     const s2 = widgetStates['totals'];
+                     
+                     if (s1?.enabled !== false && s2?.enabled !== false) {
+        %>
+                        <!-- GROUPED: Line Items + Totals (Prevent Splitting) -->
+                        <div class="doc-section w-full block" 
+                             data-widget-id="group-details" 
+                             data-no-split="true"
+                             style="display: block !important; width: 100% !important; margin-bottom: 8px !important;">
+                             
+                             <%- include(w1.path) %>
+                             <%- include(w2.path) %>
+                        </div>
+        <% 
+                        i += 2; // Skip both
+                        continue; 
+                     }
+                }
+
                 const widget = WIDGET_REGISTRY[widgetId];
                 const state = widgetStates[widgetId];
                 const isEnabled = state?.enabled !== false;
                 const isSpacer = widgetId.startsWith('spacer_');
+                // If it's splittable (like line_items alone), allow split, otherwise no-split
                 const splitAttr = widget?.splittable ? 'data-split="true"' : 'data-no-split="true"';
-            %>
+        %>
             
             <% if (isEnabled) { %>
                 <% if (isSpacer) { %>
@@ -98,16 +127,18 @@
                          style="display: block !important; width: 100% !important; height: <%= state?.value || 20 %>px !important; min-height: <%= state?.value || 20 %>px !important; margin-top: 0 !important; margin-bottom: 0 !important;">
                     </div>
                 <% } else if (widget?.path) { %>
-                    <!-- Widget: <%= widgetId %> (position: <%= index + 1 %>) -->
+                    <!-- Widget: <%= widgetId %> (position: <%= i + 1 %>) -->
                     <div class="doc-section w-full block" 
                          data-widget-id="<%= widgetId %>" 
                          <%- splitAttr %>
-                         style="display: block !important; width: 100% !important; margin-bottom: 20px !important;">
+                         style="display: block !important; width: 100% !important; margin-bottom: 8px !important;">
                         <%- include(widget.path) %>
                     </div>
                 <% } %>
             <% } %>
-        <% }); %>
+            
+            <% i++; %> 
+        <% } %>
 
         <!-- =============== PINNED FOOTER =============== -->
         <% if (widgetStates.footer?.enabled !== false) { %>

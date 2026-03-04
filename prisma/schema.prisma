@@ -8,24 +8,24 @@ datasource db {
 }
 
 model User {
-  id                   String              @id @default(uuid())
-  email                String              @unique
-  password             String              @default("")
+  id                   String               @id @default(uuid())
+  email                String               @unique
+  password             String               @default("")
   name                 String?
-  isActive             Boolean             @default(true)
+  isActive             Boolean              @default(true)
   emailVerified        DateTime?
   verificationToken    String?
-  googleId             String?             @unique
-  facebookId           String?             @unique
-  linkedinId           String?             @unique
+  googleId             String?              @unique
+  facebookId           String?              @unique
+  linkedinId           String?              @unique
   avatar               String?
   stripeCustomerId     String?
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  twitterId            String?             @unique
-  isAdmin              Boolean             @default(false)
-  role                 String              @default("USER")
-  isTwoFactorEnabled   Boolean             @default(false)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  twitterId            String?              @unique
+  isAdmin              Boolean              @default(false)
+  role                 String               @default("USER")
+  isTwoFactorEnabled   Boolean              @default(false)
   twoFactorCodeExpires DateTime?
   twoFactorCurrentCode String?
   twoFactorSecret      String?
@@ -40,43 +40,51 @@ model User {
   paymentMethods       PaymentMethod[]
   subscription         Subscription?
   logs                 UsageLog[]
-  business             Business?           @relation(fields: [businessId], references: [id])
+  business             Business?            @relation(fields: [businessId], references: [id])
   devices              UserDevice[]
   profile              UserProfile?
   smartDocuments       SmartDocument[]
+  debtCollectionTasks  DebtCollectionTask[]
 }
 
 model Business {
-  id                    String               @id @default(uuid())
-  name                  String
-  sector                String?
-  address               String?
-  city                  String?
-  state                 String?
-  zip                   String?
-  country               String?
-  taxId                 String?
-  website               String?
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
-  metadata              Json?
-  currentOnboardingStep Int                  @default(0)
-  onboardingStatus      OnboardingStatus     @default(NOT_STARTED)
-  analyticsEvents       AnalyticsEvent[]
-  brandingProfiles      BrandingProfile[]
-  businessMetrics       BusinessMetric[]
-  campaigns             Campaign[]
-  contacts              Contact[]
-  dunningActions        DunningAction[]
-  dunningSequence       DunningSequence?
-  externalDocuments     ExternalDocument[]
-  integrations          Integration[]
-  products              Product[]
-  recommendationRules   RecommendationRule[]
-  users                 User[]
-  userTemplates         UserTemplate[]
-  workflows             Workflow[]
-  processedDocuments    ProcessedDocument[]
+  id                             String                          @id @default(uuid())
+  name                           String
+  sector                         String?
+  address                        String?
+  city                           String?
+  state                          String?
+  zip                            String?
+  country                        String?
+  taxId                          String?
+  website                        String?
+  createdAt                      DateTime                        @default(now())
+  updatedAt                      DateTime                        @updatedAt
+  metadata                       Json?
+  currentOnboardingStep          Int                             @default(0)
+  onboardingStatus               OnboardingStatus                @default(NOT_STARTED)
+  analyticsEvents                AnalyticsEvent[]
+  brandingProfiles               BrandingProfile[]
+  businessMetrics                BusinessMetric[]
+  campaigns                      Campaign[]
+  contacts                       Contact[]
+  debtCollectionActions          DebtCollectionAction[]
+  debtCollectionSequences        DebtCollectionSequence[]
+  debtCollectionSessions         DebtCollectionSession[]
+  debtCollectionTasks            DebtCollectionTask[]
+  debtCollectionTemplates        DebtCollectionMessageTemplate[]
+  externalDocuments              ExternalDocument[]
+  integrations                   Integration[]
+  products                       Product[]
+  recommendationRules            RecommendationRule[]
+  users                          User[]
+  userTemplates                  UserTemplate[]
+  workflows                      Workflow[]
+  processedDocuments             ProcessedDocument[]
+  debtCollectionCustomers        DebtCollectionCustomer[]
+  debtCollectionInvoices         DebtCollectionInvoice[]
+  debtCollectionCustomerProfiles DebtCollectionCustomerProfile[]
+  debtCollectionClusters         DebtCollectionCluster[]
 }
 
 model UserDevice {
@@ -172,18 +180,18 @@ model IntegrationDefinition {
 }
 
 model BrandingProfile {
-  id            String   @id @default(uuid())
-  name          String   @default("Default Brand")
-  isDefault     Boolean  @default(false)
-  logoUrl       String?
-  faviconUrl    String?
-  brandColors   Json?
-  fontSettings  Json?
-  
+  id           String  @id @default(uuid())
+  name         String  @default("Default Brand")
+  isDefault    Boolean @default(false)
+  logoUrl      String?
+  faviconUrl   String?
+  brandColors  Json?
+  fontSettings Json?
+
   // Template Configuration
-  activeTemplateId String  @default("smart_invoice_v1")
-  components       Json?   // Stores feature states: { "header": { "enabled": true }, ... }
-  
+  activeTemplateId String @default("smart_invoice_v1")
+  components       Json? // Stores feature states: { "header": { "enabled": true }, ... }
+
   // Legacy / Deprecated
   templates     Json?
   upsellConfig  Json?
@@ -236,23 +244,23 @@ model Product {
 }
 
 model UserTemplate {
-  id             String   @id @default(uuid())
-  businessId     String
-  name           String
-  documentType   String   // INVOICE, RECEIPT, QUOTE
-  
+  id           String @id @default(uuid())
+  businessId   String
+  name         String
+  documentType String // INVOICE, RECEIPT, QUOTE
+
   // Cloning Architecture
-  baseTemplateId String?  // e.g. "smart_invoice_v1" (Null if custom HTML)
-  config         Json?    // Stores overrides { theme:..., components:... }
-  isDefault      Boolean  @default(false) 
-  
+  baseTemplateId String? // e.g. "smart_invoice_v1" (Null if custom HTML)
+  config         Json? // Stores overrides { theme:..., components:... }
+  isDefault      Boolean @default(false)
+
   // Legacy / Advanced Custom
-  htmlContent    String?  // Optional: For fully custom templates
-  source         String   @default("system") // "system" (cloned) or "custom"
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  business       Business @relation(fields: [businessId], references: [id])
+  htmlContent String? // Optional: For fully custom templates
+  source      String  @default("system") // "system" (cloned) or "custom"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  business  Business @relation(fields: [businessId], references: [id])
 
   @@index([businessId])
   @@index([businessId, documentType])
@@ -384,19 +392,19 @@ model Invoice {
 }
 
 model App {
-  id              String       @id @default(uuid())
-  name            String
-  description     String?
-  apiKey          String       @unique
-  apiKeyExpiresAt DateTime?
-  isActive        Boolean      @default(true)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  userId          String
-  user            User         @relation(fields: [userId], references: [id])
-  services        AppService[]
-  logs            UsageLog[]
-  processedDocuments   ProcessedDocument[]
+  id                 String              @id @default(uuid())
+  name               String
+  description        String?
+  apiKey             String              @unique
+  apiKeyExpiresAt    DateTime?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  userId             String
+  user               User                @relation(fields: [userId], references: [id])
+  services           AppService[]
+  logs               UsageLog[]
+  processedDocuments ProcessedDocument[]
 }
 
 model ApiKey {
@@ -414,34 +422,34 @@ model ApiKey {
 }
 
 model Service {
-  id                 String       @id @default(uuid())
-  name               String       @unique
-  slug               String       @unique
+  id                 String   @id @default(uuid())
+  name               String   @unique
+  slug               String   @unique
   description        String?
-  pricePerRequest    Float        @default(0.0)
-  executionType      String       @default("local")
+  pricePerRequest    Float    @default(0.0)
+  executionType      String   @default("local")
   endpointUrl        String?
   config             Json?
-  isActive           Boolean      @default(true)
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
   requiredFeatureKey String?
 
   // Service Architecture Fields
-  tier              String   @default("core") // core, transactional, sales, content, retention
-  dependencies      Json?    // Array of service slugs this service depends on
-  provides          Json?    // Array of capability tags
-  requires          Json?    // Array of capability tags required
-  defaultConfig     Json?    // Default configuration values
-  endpoints         Json?    // Array of {path, method, billable, rateLimit, scopes}
-  healthCheckUrl    String?  // URL for service health monitoring
-  scalingConfig     Json?    // {minInstances, maxInstances, targetCPU, targetMemory}
-  
-  defaultScopes     Json?    // Default scopes granted when enabling this service
-  
+  tier           String  @default("core") // core, transactional, sales, content, retention
+  dependencies   Json? // Array of service slugs this service depends on
+  provides       Json? // Array of capability tags
+  requires       Json? // Array of capability tags required
+  defaultConfig  Json? // Default configuration values
+  endpoints      Json? // Array of {path, method, billable, rateLimit, scopes}
+  healthCheckUrl String? // URL for service health monitoring
+  scalingConfig  Json? // {minInstances, maxInstances, targetCPU, targetMemory}
+
+  defaultScopes Json? // Default scopes granted when enabling this service
+  apps          AppService[]
+  logs          UsageLog[]
+
   @@index([tier, slug])
-  apps               AppService[]
-  logs               UsageLog[]
 }
 
 model AppService {
@@ -596,28 +604,320 @@ model Campaign {
   @@index([businessId])
 }
 
-model DunningSequence {
-  id         String   @id @default(uuid())
-  businessId String   @unique
-  name       String   @default("Default Recovery")
-  steps      Json
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+model DebtCollectionSequence {
+  id                          String                       @id @default(uuid())
+  businessId                  String
+  name                        String                       @default("Default Recovery")
+  steps                       Json
+  settings                    Json? // e.g. { gracePeriod: 3, brandVoice: 'empathetic' }
+  isActive                    Boolean                      @default(true)
+  isDefault                   Boolean                      @default(false)
+  rules                       Json? // e.g. { minAmount: 1000, customerTags: ['vip'] }
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  business                    Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  sessions                    DebtCollectionSession[]
+  debtCollectionSequenceSteps DebtCollectionSequenceStep[]
+  debtCollectionSequenceRules DebtCollectionSequenceRule[]
+  cluster                     DebtCollectionCluster?
+
+  @@index([businessId])
 }
 
-model DunningAction {
-  id                String   @id @default(uuid())
+model DebtCollectionSession {
+  id                String    @id @default(uuid())
   businessId        String
+  sequenceId        String
   externalInvoiceId String
-  actionType        String
-  status            String
-  aiGeneratedCopy   String?
-  sentAt            DateTime @default(now())
-  business          Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customerId        String?
+  customerName      String?
+  status            String    @default("ACTIVE") // ACTIVE, RECOVERED, TERMINATED, PAUSED
+  currentStepIndex  Int       @default(0)
+  nextActionAt      DateTime?
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  business                     Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  sequence                     DebtCollectionSequence       @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  actions                      DebtCollectionAction[]
+  debtCollectionTasks          DebtCollectionTask[]
+  debtCollectionDisputes       DebtCollectionDispute[]
+  debtCollectionPromiseToPays  DebtCollectionPromiseToPay[]
+  debtCollectionAuditLogs      DebtCollectionAuditLog[]
+  debtCollectionStateHistories DebtCollectionStateHistory[]
+
+  @@unique([businessId, externalInvoiceId, status])
+  @@index([businessId, externalInvoiceId])
+  @@index([businessId, customerId])
+}
+
+// ==========================================
+// DEBT COLLECTION ISOLATED MICROSERVICE DATA
+// ==========================================
+
+model DebtCollectionCustomer {
+  id             String   @id @default(uuid())
+  businessId     String
+  externalId     String // e.g., QBO Customer ID
+  name           String
+  email          String?
+  phone          String?
+  lifetimeValue  Float    @default(0)
+  totalInvoices  Int      @default(0)
+  unpaidInvoices Int      @default(0)
+  riskScore      String   @default("Unknown")
+  isActive       Boolean  @default(true) // Maps to ERP customer 'Active' status
+  metadata       Json? // Complete cached profile
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  business Business                       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoices DebtCollectionInvoice[]
+  profile  DebtCollectionCustomerProfile?
+
+  @@unique([businessId, externalId])
+  @@index([businessId])
+}
+
+model DebtCollectionCustomerProfile {
+  id             String @id @default(uuid())
+  debtCustomerId String @unique
+  businessId     String
+
+  lifetimeValue        Float   @default(0) // Total historical spend
+  totalPurchases       Int     @default(0) // Total purchase history count
+  paymentFrequencyDays Float? // Average days to pay
+  creditLimit          Float? // Credit limit from ERP
+  riskScore            String  @default("LOW") // High, Medium, Low based on past collection hits
+  clusterId            String? // Relation to DebtCollectionCluster
+
+  lastEnrichedAt DateTime? // When we last pulled deep data
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  business Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer DebtCollectionCustomer @relation(fields: [debtCustomerId], references: [id], onDelete: Cascade)
+  cluster  DebtCollectionCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+  @@index([clusterId])
+}
+
+model DebtCollectionCluster {
+  id          String  @id @default(uuid())
+  businessId  String
+  name        String // e.g., "High-Value VIPs", "Chronic Late Payers"
+  description String?
+  ruleLogic   Json // Define the qualitative ranges (e.g. { ltvMin: 500 })
+  sequenceId  String? @unique // A specific sequence mapped strictly to this cluster
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business                        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  sequence DebtCollectionSequence?         @relation(fields: [sequenceId], references: [id], onDelete: SetNull)
+  profiles DebtCollectionCustomerProfile[]
+
+  @@index([businessId])
+}
+
+model DebtCollectionInvoice {
+  id            String    @id @default(uuid())
+  businessId    String
+  customerId    String
+  externalId    String    @unique // QBO Invoice ID
+  invoiceNumber String?
+  amount        Float     @default(0)
+  balance       Float     @default(0)
+  status        String // E.g., Open, Paid, Voided
+  dueDate       DateTime?
+  issuedDate    DateTime?
+  metadata      Json? // Complete cached invoice payload
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  business Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer DebtCollectionCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, externalId])
+  @@index([businessId, customerId])
+}
+
+model DebtCollectionAction {
+  id                             String                          @id @default(uuid())
+  businessId                     String
+  sessionId                      String?
+  externalInvoiceId              String
+  actionType                     String
+  status                         String
+  aiGeneratedCopy                String?
+  metadata                       Json?
+  sentAt                         DateTime?
+  createdAt                      DateTime                        @default(now())
+  updatedAt                      DateTime                        @default(now()) @updatedAt
+  business                       Business                        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  session                        DebtCollectionSession?          @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  debtCollectionCommunicationLog DebtCollectionCommunicationLog?
 
   @@index([businessId, externalInvoiceId])
+}
+
+// ==========================================
+// DEBT COLLECTION ENTERPRISE OBJECTS
+// ==========================================
+
+model DebtCollectionSequenceStep {
+  id              String   @id @default(uuid())
+  sequenceId      String
+  dayOffset       Int // e.g. 3 = send 3 days after invoice is overdue
+  actionType      String // EMAIL, SMS, CALL, MANUAL_TASK
+  templateId      String? // References DebtCollectionMessageTemplate
+  escalationLevel Int      @default(0) // Severity of the message
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sequence DebtCollectionSequence         @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  template DebtCollectionMessageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([sequenceId])
+}
+
+model DebtCollectionSequenceRule {
+  id             String   @id @default(uuid())
+  sequenceId     String
+  conditionField String // e.g., 'balance', 'riskScore'
+  operator       String // e.g., '>', '==', 'includes'
+  value          String // e.g., '5000', 'High'
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  sequence DebtCollectionSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+
+  @@index([sequenceId])
+}
+
+model DebtCollectionMessageTemplate {
+  id             String   @id @default(uuid())
+  businessId     String
+  name           String
+  channel        String // EMAIL, SMS, SYSTEM
+  subject        String?
+  body           String   @db.Text
+  mergeVariables Json? // Documented list of variable keys used inside the body
+  tone           String   @default("Neutral")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  business Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  steps    DebtCollectionSequenceStep[]
+
+  @@index([businessId])
+}
+
+model DebtCollectionCommunicationLog {
+  id               String   @id @default(uuid())
+  actionId         String   @unique
+  event            String // DELIVERED, OPENED, CLICKED, BOUNCED, REPLIED
+  providerResponse Json? // Raw callback from Postmark/Twilio/n8n
+  timestamp        DateTime @default(now())
+
+  action DebtCollectionAction @relation(fields: [actionId], references: [id], onDelete: Cascade)
+}
+
+model DebtCollectionTask {
+  id              String    @id @default(uuid())
+  businessId      String
+  sessionId       String
+  assignedUserId  String?
+  taskType        String // CALL, REVIEW_DISPUTE, ESCALATE_LEGAL
+  status          String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  dueDate         DateTime?
+  resolutionNotes String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business     Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  session      DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  assignedUser User?                 @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, status])
+  @@index([sessionId])
+}
+
+model DebtCollectionDispute {
+  id                 String    @id @default(uuid())
+  invoiceExternalId  String // Soft link to externalInvoiceId
+  customerExternalId String?
+  sessionId          String?
+  status             String    @default("OPEN") // OPEN, INVESTIGATING, RESOLVED, DISMISSED
+  reasonCategoryId   String?
+  details            String    @db.Text
+  resolutionNotes    String?   @db.Text
+  openedAt           DateTime  @default(now())
+  resolvedAt         DateTime?
+
+  session DebtCollectionSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceExternalId, status])
+}
+
+model DebtCollectionPromiseToPay {
+  id                String   @id @default(uuid())
+  sessionId         String
+  invoiceExternalId String // Soft link
+  status            String   @default("ACTIVE") // ACTIVE, BROKEN, FULFILLED, RENEGOTIATED
+  promisedAmount    Float
+  promisedDate      DateTime
+  terms             String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  session DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([invoiceExternalId])
+}
+
+model DebtCollectionPartialPayment {
+  id                String   @id @default(uuid())
+  invoiceExternalId String
+  amount            Float
+  paymentMethod     String?
+  recordedAt        DateTime @default(now())
+  syncStatus        String   @default("LOCAL") // LOCAL, ERP_CONFIRMED
+
+  @@index([invoiceExternalId])
+}
+
+model DebtCollectionAuditLog {
+  id        String   @id @default(uuid())
+  sessionId String
+  actorType String // SYSTEM, USER, CUSTOMER_REPLY, ERP_SYNC
+  actorId   String? // Could be userId or integration string
+  event     String // e.g. SEQUENCE_PAUSED, AMOUNT_UPDATED, DISPUTE_OPENED
+  reason    String?  @db.Text
+  timestamp DateTime @default(now())
+
+  session DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([timestamp])
+}
+
+model DebtCollectionStateHistory {
+  id             String   @id @default(uuid())
+  sessionId      String
+  previousStatus String
+  newStatus      String
+  reason         String?  @db.Text
+  triggerSource  String   @default("SYSTEM") // e.g., SYSTEM, ERP_SYNC, NSF_REVERSAL, USER
+  timestamp      DateTime @default(now())
+
+  session DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([timestamp])
 }
 
 model AnalyticsEvent {
@@ -659,33 +959,32 @@ enum AccountType {
   BUSINESS
 }
 
-
 model SmartDocument {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
-  
-  type            String   // 'INVOICE', 'RECEIPT', 'ESTIMATE'
-  status          String   @default("DRAFT") // 'DRAFT', 'GENERATED', 'SENT', 'VIEWED'
-  
-  // Identifying info
-  documentNumber  String
-  issuedAt        DateTime @default(now())
-  
-  // The Core Data (Line items, Customer info, Totals)
-  data            Json
-  
-  // The Visual Theme applied (Snapshot of branding at generation time)
-  theme           Json
-  
-  // Feature Configuration (Toggles for Upsells, Tutorials, etc.)
-  config          Json
-  
-  // Metadata for AI/System
-  metadata        Json?
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  type   String // 'INVOICE', 'RECEIPT', 'ESTIMATE'
+  status String @default("DRAFT") // 'DRAFT', 'GENERATED', 'SENT', 'VIEWED'
+
+  // Identifying info
+  documentNumber String
+  issuedAt       DateTime @default(now())
+
+  // The Core Data (Line items, Customer info, Totals)
+  data Json
+
+  // The Visual Theme applied (Snapshot of branding at generation time)
+  theme Json
+
+  // Feature Configuration (Toggles for Upsells, Tutorials, etc.)
+  config Json
+
+  // Metadata for AI/System
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, type])
 }
@@ -696,38 +995,38 @@ model SmartDocument {
 
 /// ProcessedDocument tracks all documents through the branding/email pipeline
 model ProcessedDocument {
-  id                 String   @id @default(uuid())
-  businessId         String
-  appId              String   // REQUIRED - all API calls must have App context
-  userId             String
-  
+  id         String @id @default(uuid())
+  businessId String
+  appId      String // REQUIRED - all API calls must have App context
+  userId     String
+
   // Source
-  provider           String   // quickbooks, xero, zoho
-  resourceType       String   // invoice, estimate, contact, etc.
-  resourceId         String   // External ID from ERP
-  
+  provider     String // quickbooks, xero, zoho
+  resourceType String // invoice, estimate, contact, etc.
+  resourceId   String // External ID from ERP
+
   // Processing
-  eventType          String   // Scoped event name (floovioo_transactional_...)
-  status             String   @default("pending") // pending, processing, completed, failed
-  flooviooId         String?  @unique
-  n8nExecutionId     String?
-  
+  eventType      String // Scoped event name (floovioo_transactional_...)
+  status         String  @default("pending") // pending, processing, completed, failed
+  flooviooId     String? @unique
+  n8nExecutionId String?
+
   // Results
-  brandedUrl         String?
-  emailSent          Boolean  @default(false)
-  emailRecipient     String?
-  emailMessageId     String?
-  
+  brandedUrl     String?
+  emailSent      Boolean @default(false)
+  emailRecipient String?
+  emailMessageId String?
+
   // Metadata
-  processingTimeMs   Int?
-  errorMessage       String?
-  retryCount         Int      @default(0)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  
-  app                App      @relation(fields: [appId], references: [id], onDelete: Cascade)
-  business           Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+  processingTimeMs Int?
+  errorMessage     String?
+  retryCount       Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  app      App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
   @@index([businessId, createdAt(sort: Desc)])
   @@index([status])
   @@index([appId])
@@ -736,34 +1035,34 @@ model ProcessedDocument {
 
 /// AuditLog provides universal audit trail for all API calls and n8n dispatches
 model AuditLog {
-  id              String   @id @default(uuid())
-  timestamp       DateTime @default(now())
-  
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+
   // Actor
-  userId          String?
-  appId           String?
-  businessId      String?
-  
+  userId     String?
+  appId      String?
+  businessId String?
+
   // Action
-  actionType      String   // 'n8n_dispatch', 'n8n_response', 'api_call', 'erp_webhook'
-  serviceId       String?
-  eventType       String?
-  
+  actionType String // 'n8n_dispatch', 'n8n_response', 'api_call', 'erp_webhook'
+  serviceId  String?
+  eventType  String?
+
   // Request
-  requestPayload  Json?
-  requestId       String?
-  
+  requestPayload Json?
+  requestId      String?
+
   // Response
-  responseStatus  Int?
-  responseData    Json?
-  
+  responseStatus Int?
+  responseData   Json?
+
   // Performance
-  durationMs      Int?
-  
+  durationMs Int?
+
   // Result
-  success         Boolean
-  errorMessage    String?
-  
+  success      Boolean
+  errorMessage String?
+
   @@index([userId, timestamp(sort: Desc)])
   @@index([businessId, timestamp(sort: Desc)])
   @@index([eventType])

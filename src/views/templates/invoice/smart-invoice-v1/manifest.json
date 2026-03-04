@@ -35,7 +35,7 @@
         },
         {
             "id": "product_recommendations",
-            "name": "Product Recommendations Widget",
+            "name": "Upsell Recommendations",
             "type": "toggle",
             "required": false,
             "defaultEnabled": true,
@@ -53,16 +53,16 @@
         },
         {
             "id": "marketing_banner",
-            "name": "Promotional Banner Widget",
+            "name": "Smart Insights Banner",
             "type": "toggle",
             "required": false,
             "defaultEnabled": true,
-            "badge": "Marketing",
-            "description": "Sliding offers, announcements, and referral codes."
+            "badge": "AI",
+            "description": "Status banner highlighted with purchase context."
         },
         {
             "id": "payment_details",
-            "name": "Payment Details Widget",
+            "name": "Payment Details",
             "type": "toggle",
             "required": false,
             "defaultEnabled": false,
@@ -95,13 +95,13 @@
             "name": "Document Footer",
             "type": "toggle",
             "required": true,
-            "description": "Terms, legal disclaimers, and page numbering."
+            "description": "Terms, legal disclaimers, and gratitude message."
         }
     ],
     "layoutOrder": [
         "header",
-        "spacer_1",
         "customer_info",
+        "spacer_1",
         "marketing_banner",
         "line_items",
         "totals",

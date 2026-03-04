@@ -1,0 +1,166 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="w-full max-w-[1920px] mx-auto px-2 sm:px-6 overflow-x-hidden" x-data="webhookLog()">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-heading font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <div class="p-2 bg-cyan-100 rounded-xl">
+                    <i data-lucide="webhook" class="w-6 h-6 text-cyan-600"></i>
+                </div>
+                Integration Event Log
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Real-time feed of incoming ERP triggers and outbound webhook dispatches.</p>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-8 border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
+        <a href="/dashboard/recovery" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Overview</a>
+        <a href="/dashboard/recovery/sequences" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Campaigns</a>
+        <a href="/dashboard/recovery/sessions" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Active Sessions</a>
+        <a href="/dashboard/recovery/activity" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">History</a>
+        <a href="/dashboard/recovery/clusters" class="pb-4 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">Clusters</a>
+        <a href="/dashboard/recovery/webhooks" class="pb-4 text-sm font-bold border-b-2 border-cyan-600 text-cyan-600 whitespace-nowrap">Event Log</a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-10">
+        <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Total Events</span>
+                <div class="p-3 bg-cyan-50 rounded-2xl"><i data-lucide="activity" class="w-5 h-5 text-cyan-500"></i></div>
+            </div>
+            <p class="text-4xl font-black text-slate-900 tracking-tight"><%= events.length %></p>
+            <p class="text-[10px] text-slate-400 mt-2 font-medium">in the last 7 days</p>
+        </div>
+        <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Intercepted</span>
+                <div class="p-3 bg-emerald-50 rounded-2xl"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i></div>
+            </div>
+            <p class="text-4xl font-black text-emerald-600 tracking-tight"><%= stats.intercepted || 0 %></p>
+            <p class="text-[10px] text-slate-400 mt-2 font-medium">payments auto-recovered</p>
+        </div>
+        <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Dispatched</span>
+                <div class="p-3 bg-indigo-50 rounded-2xl"><i data-lucide="send" class="w-5 h-5 text-indigo-500"></i></div>
+            </div>
+            <p class="text-4xl font-black text-indigo-600 tracking-tight"><%= stats.dispatched || 0 %></p>
+            <p class="text-[10px] text-slate-400 mt-2 font-medium">outbound webhooks to n8n</p>
+        </div>
+    </div>
+
+    <!-- Event Log Table -->
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Recent Events</h3>
+            <div class="flex items-center gap-2">
+                <select x-model="filterType" @change="applyFilter()" class="text-[10px] font-bold border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-600 focus:ring-2 focus:ring-cyan-300 outline-none">
+                    <option value="">All Types</option>
+                    <option value="invoice">Invoice</option>
+                    <option value="payment">Payment</option>
+                    <option value="dispatch">Dispatch</option>
+                </select>
+            </div>
+        </div>
+
+        <% if (events && events.length > 0) { %>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-100">
+                            <th class="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Provider</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Event Type</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Entity</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                            <th class="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <% events.forEach(ev => { %>
+                            <tr class="hover:bg-slate-50/80 transition-all cursor-pointer" @click="expanded = expanded === '<%= ev.id %>' ? null : '<%= ev.id %>'">
+                                <td class="px-8 py-5 text-[11px] font-medium text-slate-500">
+                                    <%= new Date(ev.createdAt).toLocaleDateString() %>, <%= new Date(ev.createdAt).toLocaleTimeString() %>
+                                </td>
+                                <td class="px-4 py-5">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-slate-100 text-slate-600">
+                                        <%= ev.provider || 'system' %>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-5 text-xs font-bold text-slate-700"><%= ev.eventType || ev.type || '—' %></td>
+                                <td class="px-4 py-5 text-xs font-mono text-slate-500"><%= ev.entityId || '—' %></td>
+                                <td class="px-4 py-5">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest
+                                        <%= ev.status === 'success' || ev.status === 'RECOVERED' ? 'bg-emerald-100 text-emerald-600' : ev.status === 'failed' ? 'bg-red-100 text-red-600' : 'bg-indigo-100 text-indigo-600' %>">
+                                        <%= ev.status || 'processed' %>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-5 text-[10px] text-slate-400 max-w-[200px] truncate"><%= ev.reason || ev.result || '—' %></td>
+                            </tr>
+                            <!-- Expandable Detail Row -->
+                            <tr x-show="expanded === '<%= ev.id %>'" x-collapse style="display:none;">
+                                <td colspan="6" class="px-8 py-6 bg-slate-50">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Event Details</p>
+                                            <pre class="text-[10px] font-mono text-slate-600 bg-slate-100 p-4 rounded-xl overflow-auto max-h-48"><%= JSON.stringify(ev.metadata || ev.payload || {}, null, 2) %></pre>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Trigger Source</p>
+                                            <p class="text-xs text-slate-600"><%= ev.triggerSource || ev.source || 'ERP_WEBHOOK' %></p>
+                                            <% if (ev.sessionId) { %>
+                                                <a href="/dashboard/recovery/sessions/<%= ev.sessionId %>" class="mt-4 inline-block text-xs font-bold text-indigo-600 hover:underline">View Related Session →</a>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="p-12 text-center">
+                <i data-lucide="inbox" class="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                <p class="text-sm text-slate-400 font-medium">No webhook events recorded yet.</p>
+                <p class="text-[10px] text-slate-300 mt-2 font-medium">Events will appear here when your ERP triggers a webhook.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('alpine:init', () => {
+    Alpine.data('webhookLog', () => ({
+        expanded: null,
+        filterType: '',
+        toast: false,
+        toastMessage: '',
+        toastType: 'success',
+
+        applyFilter() {
+            const url = new URL(window.location);
+            if (this.filterType) {
+                url.searchParams.set('type', this.filterType);
+            } else {
+                url.searchParams.delete('type');
+            }
+            window.location = url.toString();
+        },
+
+        showToast(message, type = 'success') {
+            this.toastMessage = message;
+            this.toastType = type;
+            this.toast = true;
+            setTimeout(() => this.toast = false, 5000);
+        }
+    }));
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

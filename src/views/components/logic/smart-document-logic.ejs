@@ -21,6 +21,15 @@
             subtotal: <%- JSON.stringify(branding.model?.subtotal || 0) %>,
             tax: <%- JSON.stringify(branding.model?.tax || 0) %>,
             total: <%- JSON.stringify(branding.model?.total || 0) %>
+        },
+        
+        // Brand & Business Context
+        business: {
+            name: <%- JSON.stringify(branding.model?.businessName || branding.themeData?.name || '') %>,
+            address: <%- JSON.stringify(branding.model?.businessAddress || '') %>,
+            website: <%- JSON.stringify(branding.model?.businessWebsite || '') %>,
+            email: <%- JSON.stringify(branding.model?.businessEmail || '') %>,
+            voice: <%- JSON.stringify(branding.model?.voiceProfile || {}) %>
         }
     };
 

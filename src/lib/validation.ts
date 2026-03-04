@@ -18,7 +18,7 @@ export function validateUuid(id: string, label: string): void {
         throw new Error(`Invalid UUID for ${label}: ID is missing or not a string.`);
     }
 
-    if (id === 'unknown') {
+    if (id === 'unknown' || id === 'system') {
         return; // Allow placeholders for early onboarding/system actions
     }
 

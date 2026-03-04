@@ -53,12 +53,45 @@ export class ServiceRegistry {
         this.registerManifest(deManifest); // Register 'design-engine'
         this.registerManifest({ ...deManifest, slug: ServiceSlugs.TRANSACTIONAL_BRANDING, name: 'Transactional Branding' }); 
         this.registerManifest({ ...deManifest, slug: 'transactional-core', name: 'Transactional Branding' }); // Legacy alias
+
+        // Debt Collection AI (Smart Recovery)
+        this.registerManifest({
+            slug: ServiceSlugs.DEBT_COLLECTION,
+            name: 'Debt Collection AI',
+            description: 'Smart invoice recovery via AI-powered dunning sequences',
+            version: '1.0.0',
+            actions: [
+                {
+                    key: 'recovery_action',
+                    label: 'Trigger Recovery Action',
+                    description: 'Dispatches a recovery email/communication via n8n',
+                    endpoint: '/recovery/action',
+                    method: 'POST',
+                    isBillable: true
+                },
+                {
+                    key: 'data_sync',
+                    label: 'CRM Data Synchronization',
+                    description: 'Pushes synchronized customer and invoice data to n8n CRM cache',
+                    endpoint: '/recovery/sync',
+                    method: 'POST',
+                    isBillable: false
+                }
+            ],
+            externalCalls: [
+                { domain: 'n8n.automation-for-smes.com', purpose: 'Recovery orchestration and CRM Cache' }
+            ]
+        });
         
         // Register Provider Instance for Execution
         this.registerProvider(ServiceSlugs.AI_DOC_GENERATOR, aiService);
         this.registerProvider(ServiceSlugs.DESIGN_ENGINE, designEngineService); 
         this.registerProvider(ServiceSlugs.TRANSACTIONAL_BRANDING, designEngineService); 
         this.registerProvider('transactional-core', designEngineService); // Legacy alias
+
+        // Debt Collection Provider (Lazy-loaded to avoid circular imports)
+        const { RecoveryService } = await import('../modules/recovery/recovery.service');
+        this.registerProvider(ServiceSlugs.DEBT_COLLECTION, new RecoveryService());
 
         console.log(`   ✅ Loaded ${services.length} services & ${this.manifests.size} manifests into registry`);
     }

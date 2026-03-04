@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from '../lib/logger';
 import prisma from '../lib/prisma';
 import { AppError } from '../lib/AppError';
 
@@ -18,7 +19,8 @@ export class WebhookService {
     private registry: Map<string, WebhookConfig> = new Map();
     private initialized = false;
     private lastRefresh = 0;
-    private readonly REFRESH_INTERVAL = 10 * 60 * 1000; // 10 Minutes
+    // Env-configurable TTL: short in dev to catch any URL changes quickly
+    private readonly REFRESH_INTERVAL = parseInt(process.env.WEBHOOK_CACHE_TTL_MS || '60000', 10);
 
     constructor() {}
 
@@ -35,6 +37,7 @@ export class WebhookService {
 
     /**
      * Forces a refresh of the webhook configuration from the database.
+     * Public so boot.ts and seeder can call it immediately after writing new URLs.
      */
     async refreshConfig() {
         console.log('🔄 [WebhookService] Refreshing configuration from Database...');
@@ -46,23 +49,42 @@ export class WebhookService {
             this.registry.clear();
             
             for (const service of services) {
-                if (service.config && typeof service.config === 'object') {
-                    const config = service.config as any;
-                    
-                    if (config.webhooks) {
-                        this.registry.set(service.slug, config.webhooks);
+                const defaultConfig = (service.defaultConfig as any) || {};
+                const runtimeConfig = (service.config as any) || {};
+                
+                // CRITICAL MERGE ORDER: runtime config (DB service.config) MUST override defaultConfig.
+                // defaultConfig is the code-defined baseline; runtimeConfig is the authoritative DB entry.
+                const webhooks = {
+                    ...(defaultConfig.webhooks || {}),
+                    ...(runtimeConfig.webhooks || {})
+                };
+
+                if (Object.keys(webhooks).length > 0) {
+                    this.registry.set(service.slug, webhooks);
+                    // Log every resolved URL upfront so stale cache issues are immediately visible
+                    for (const [action, cfg] of Object.entries(webhooks)) {
+                        const url = typeof cfg === 'string' ? cfg : (cfg as any)?.url;
+                        console.log(`   [WebhookService] ${service.slug}.${action} → ${url}`);
                     }
                 }
             }
             
             this.initialized = true;
             this.lastRefresh = Date.now();
-            console.log(`✅ [WebhookService] Loaded configuration for ${this.registry.size} services.`);
+            console.log(`✅ [WebhookService] Registry ready (${this.registry.size} services, TTL=${this.REFRESH_INTERVAL}ms).`);
         } catch (error) {
             console.error('❌ [WebhookService] Failed to load configuration:', error);
-            // Don't throw here to allow partial uptime if DB blips, 
-            // but log critical error.
         }
+    }
+
+    /**
+     * Immediately invalidates the cache so the next call to getEndpoint()
+     * will re-query the database. Call this after any DB write to service.config.
+     */
+    invalidateCache() {
+        this.initialized = false;
+        this.lastRefresh = 0;
+        console.log('🔄 [WebhookService] Cache invalidated — will refresh on next access.');
     }
 
     /**
@@ -105,6 +127,7 @@ export class WebhookService {
         }
 
         console.log(`[WebhookService] ✅ Resolved '${action}' for '${serviceSlug}' -> ${url}`);
+        logger.info({ serviceSlug, action, url }, '✅ [WebhookService] Endpoint resolved');
         return url;
     }
 

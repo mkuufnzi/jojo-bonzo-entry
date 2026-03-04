@@ -4,8 +4,14 @@ import { webhookService } from './webhook.service';
 import { n8nPayloadFactory } from './n8n/n8n-payload.factory';
 import { OnboardingEventTypes } from '../domain-events';
 
+/**
+ * @deprecated Use RecoveryService from modules/transactional/recovery instead.
+ * This legacy service uses ExternalDocument queries and n8n webhooks.
+ * The new RecoveryService uses direct QBO API calls and native email sending.
+ */
 export class DunningService {
     /**
+     * @deprecated Use RecoveryService.syncOverdueInvoices() instead.
      * Fetches invoices that are unpaid and overdue
      * @param businessId 
      */
@@ -25,6 +31,7 @@ export class DunningService {
     }
 
     /**
+     * @deprecated Use RecoveryService.processRecovery() instead.
      * Triggers a branded followup action via n8n
      * @param userId User triggering the action (Owner)
      * @param businessId 
@@ -46,7 +53,7 @@ export class DunningService {
         if (!business) throw new Error('Business not found');
 
         // Create Dunning Action log
-        const dunningAction = await prisma.dunningAction.create({
+        const debtCollectionAction = await prisma.debtCollectionAction.create({
             data: {
                 businessId,
                 externalInvoiceId: (invoice.normalized as any)?.externalId || invoice.externalId,
@@ -69,22 +76,22 @@ export class DunningService {
                 externalId: invoice.externalId,
                 amount: (invoice.normalized as any)?.amount,
                 contactName: (invoice.normalized as any)?.contactName,
-                actionId: dunningAction.id,
+                actionId: debtCollectionAction.id,
                 brandingConfig: (business.metadata as any)?.branding
             }, userId, context);
 
             await webhookService.sendTrigger('transactional-branding', 'invoice.overdue.followup', payload);
 
-            await prisma.dunningAction.update({
-                where: { id: dunningAction.id },
+            await prisma.debtCollectionAction.update({
+                where: { id: debtCollectionAction.id },
                 data: { status: 'sent' }
             });
 
-            return { success: true, actionId: dunningAction.id };
+            return { success: true, actionId: debtCollectionAction.id };
         } catch (error: any) {
-            logger.error({ error: error.message, actionId: dunningAction.id }, 'Dunning trigger failed');
-            await prisma.dunningAction.update({
-                where: { id: dunningAction.id },
+            logger.error({ error: error.message, actionId: debtCollectionAction.id }, 'Dunning trigger failed');
+            await prisma.debtCollectionAction.update({
+                where: { id: debtCollectionAction.id },
                 data: { status: 'failed' }
             });
             throw error;

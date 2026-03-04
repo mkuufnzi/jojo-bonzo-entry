@@ -7,46 +7,109 @@
     "features": [
         {
             "id": "header",
-            "name": "Header Banner",
+            "name": "Document Header",
             "type": "toggle",
             "required": true,
-            "description": "issuer branding and status indicators."
+            "description": "Standard issuer branding, invoice number, and status indicators."
         },
         {
             "id": "customer_info",
             "name": "Customer Details",
             "type": "toggle",
             "required": true,
-            "description": "Bill-to/Ship-to information."
+            "description": "Bill-to/Ship-to information and Metadata."
+        },
+        {
+            "id": "spacer_1",
+            "name": "Vertical Spacer A",
+            "type": "input",
+            "defaultValue": "20",
+            "description": "Adjustable vertical gap (px) between sections."
+        },
+        {
+            "id": "marketing_banner",
+            "name": "Smart Insights Banner",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "badge": "AI",
+            "description": "Status banner highlighted with purchase context."
         },
         {
             "id": "line_items",
             "name": "Line Items Table",
             "type": "toggle",
             "required": true,
-            "description": "Detailed breakdown of products."
+            "description": "Detailed breakdown of purchased products, quantities, and totals."
+        },
+        {
+            "id": "totals",
+            "name": "Line Item Totals",
+            "type": "toggle",
+            "required": true,
+            "description": "Subtotal, tax, and final amount summaries."
         },
         {
             "id": "product_recommendations",
-            "name": "Product Recommendations",
+            "name": "Upsell Recommendations",
             "type": "toggle",
             "required": false,
             "defaultEnabled": true,
-            "badge": "Conversion"
+            "badge": "Conversion",
+            "description": "AI-driven cross-sell suggestions based on purchase history."
         },
         {
-            "id": "marketing_banner",
-            "name": "Promotional Banner",
+            "id": "spacer_2",
+            "name": "Vertical Spacer B",
+            "type": "input",
+            "defaultValue": "40",
+            "description": "Adjustable vertical gap (px) between sections."
+        },
+        {
+            "id": "product_support",
+            "name": "Product Support",
             "type": "toggle",
             "required": false,
             "defaultEnabled": true,
-            "badge": "Marketing"
+            "badge": "Retention",
+            "description": "Dynamic tutorials, recipes, or setup guides for purchased items."
+        },
+        {
+            "id": "payment_details",
+            "name": "Payment Details",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": false,
+            "description": "Bank details and payment method summary."
+        },
+        {
+            "id": "customer_support",
+            "name": "Customer Support Widget",
+            "type": "toggle",
+            "required": false,
+            "defaultEnabled": true,
+            "description": "Direct contact options and help resources."
         },
         {
             "id": "footer",
             "name": "Document Footer",
             "type": "toggle",
-            "required": true
+            "required": true,
+            "description": "Terms, legal disclaimers, and gratitude message."
         }
+    ],
+    "layoutOrder": [
+        "header",
+        "customer_info",
+        "spacer_1",
+        "marketing_banner",
+        "line_items",
+        "totals",
+        "product_recommendations",
+        "spacer_2",
+        "product_support",
+        "payment_details",
+        "customer_support",
+        "footer"
     ]
 }

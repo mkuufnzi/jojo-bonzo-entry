@@ -1,0 +1,137 @@
+{
+    "eventType": "workflow_execution",
+    "floovioo_id": "290c03be-a6c9-40aa-8edb-65766326c701",
+    "timestamp": "2026-02-22T16:11:51.422Z",
+    "context": {
+        "service_id": "floovioo_transactional_debt-collection",
+        "service_tenant_id": "726496ca-c4e9-4f37-9a9f-649721ac64da",
+        "app_id": "d61632cd-3ff9-46ef-b11e-70d9a6e9e2bb",
+        "request_id": "wf_recovery_1771776711422",
+        "environment": "development",
+        "brand_id": "03ccfe08-b5ac-4293-9b33-fd944b554c17",
+        "business_id": "726496ca-c4e9-4f37-9a9f-649721ac64da"
+    },
+    "data": {
+        "workflow_id": "recovery-cc180d9b-a073-4181-bcdb-a65d8afe8073",
+        "action": "recovery_email",
+        "trigger": {
+            "businessId": "726496ca-c4e9-4f37-9a9f-649721ac64da",
+            "externalInvoiceId": "1",
+            "customerEmail": "test-customer-1@example.com",
+            "amount": "USD 898",
+            "currency": "USD",
+            "dueDate": "24/02/2026",
+            "userId": "system",
+            "customerName": "Valued Customer",
+            "contactName": "BONIFACE GACHUI MUTHAKA",
+            "invoiceNumber": "1",
+            "invoiceLink": "https://lakia-dreich-foamingly.ngrok-free.dev/public/invoice/1",
+            "companyName": "Us",
+            "actionId": "9107265f-5995-4fc5-b287-23b14e1384f6",
+            "sessionId": "cc180d9b-a073-4181-bcdb-a65d8afe8073",
+            "stepIndex": 0,
+            "action": "email"
+        },
+        "config": {
+            "type": "recovery_email",
+            "templateId": "reminder_firm",
+            "customSubject": "Follow up on Invoice 1",
+            "customBody": "PY NOW!"
+        },
+        "brand": {
+            "id": "03ccfe08-b5ac-4293-9b33-fd944b554c17",
+            "name": "Default Brand",
+            "isDefault": true,
+            "logoUrl": "/uploads/logos/726496ca-c4e9-4f37-9a9f-649721ac64da-1770852132387-Floovioo_logo_v1.png",
+            "faviconUrl": null,
+            "brandColors": {},
+            "fontSettings": {},
+            "activeTemplateId": "smart_receipt_v1",
+            "components": {
+                "footer": {
+                    "enabled": true
+                },
+                "header": {
+                    "enabled": true
+                },
+                "line_items": {
+                    "enabled": true
+                },
+                "layoutOrder": [
+                    "header",
+                    "customer_info",
+                    "marketing_banner",
+                    "product_recommendations",
+                    "line_items",
+                    "footer"
+                ],
+                "customer_info": {
+                    "enabled": true
+                },
+                "marketing_banner": {
+                    "enabled": true
+                },
+                "product_recommendations": {
+                    "config": {
+                        "layout": "list"
+                    },
+                    "enabled": true
+                }
+            },
+            "templates": null,
+            "upsellConfig": {},
+            "supportConfig": {},
+            "createdAt": "2026-02-11T23:22:12.397Z",
+            "updatedAt": "2026-02-13T21:59:14.557Z",
+            "businessId": "726496ca-c4e9-4f37-9a9f-649721ac64da",
+            "metadata": null,
+            "voiceProfile": {
+                "aiRules": "Use clear, jargon-free language. Be helpful and solution-oriented. End communications with a call to action.",
+                "persona": "The Innovative Partner",
+                "emailSignature": "Best regards,\r\nThe Floovioo Team\r\nsupport@floovioo.com",
+                "toneAdjectives": [
+                    "Professional",
+                    "Bold",
+                    "Warm",
+                    "Empathetic",
+                    "Playful"
+                ]
+            },
+            "business": {
+                "id": "726496ca-c4e9-4f37-9a9f-649721ac64da",
+                "name": "Floovioo",
+                "sector": "technology",
+                "address": null,
+                "city": null,
+                "state": null,
+                "zip": null,
+                "country": null,
+                "taxId": "A1234567S",
+                "website": "https://lakia-dreich-foamingly.ngrok-free.dev",
+                "createdAt": "2026-02-11T23:18:27.962Z",
+                "updatedAt": "2026-02-11T23:22:48.872Z",
+                "metadata": {
+                    "about": "Floovioo is a Branding Automation platform. We turn invoices into revenue machines",
+                    "niche": "Branding Automation",
+                    "slogan": "We turn invoices into revenue machines",
+                    "skippedSteps": [],
+                    "documentTypes": [
+                        "invoice",
+                        "receipt",
+                        "estimate",
+                        "quote",
+                        "order",
+                        "offer",
+                        "statement",
+                        "credit_note"
+                    ],
+                    "needsRemediation": false
+                },
+                "currentOnboardingStep": 4,
+                "onboardingStatus": "COMPLETED"
+            }
+        },
+        "smart_content": {}
+    },
+    "workflow_mode": "active"
+}

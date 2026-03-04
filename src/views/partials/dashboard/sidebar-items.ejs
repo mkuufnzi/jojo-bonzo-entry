@@ -64,6 +64,13 @@
             Brand Editor
         </a>
 
+        <!-- Recovery -->
+        <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Recovery</div>
+        <a href="/dashboard/recovery" class="<%= (locals.title && locals.title.includes('Recovery')) ? 'bg-slate-800 text-white shadow-sm shadow-black/20 font-bold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="shield-check" class="mr-3 h-5 w-5 <%= (locals.title && locals.title.includes('Recovery')) ? 'text-emerald-500' : 'text-slate-500 group-hover:text-emerald-400' %>"></i>
+            Invoice Follow-up
+        </a>
+
         <!-- Automation -->
         <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Automation</div>
         <a href="/dashboard/workflows?service=transactional" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">

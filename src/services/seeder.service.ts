@@ -335,11 +335,11 @@ export class SeederService {
                             label: 'ERP Data Sync'
                         },
                         apply_invoice: {
-                            url: process.env.N8N_WEBHOOK_APPLY_INVOICE || '',
+                            url: process.env.N8N_WEBHOOK_APPLY_INVOICE || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
                             label: 'Apply Branding to Invoice'
                         },
                         apply_estimate: {
-                            url: process.env.N8N_WEBHOOK_APPLY_ESTIMATE || '',
+                            url: process.env.N8N_WEBHOOK_APPLY_ESTIMATE || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
                             label: 'Apply Branding to Estimate'
                         }
                     }
@@ -490,7 +490,52 @@ export class SeederService {
                 requiredFeatureKey: 'pdf_conversion'
             },
             {
-                name: 'Legacy Doc Unlocker', // Was unlock-pdf
+                name: 'Debt Collection AI',
+                slug: 'floovioo_transactional_debt-collection',
+                description: 'AI-powered dunning and payment recovery automation with risk scoring',
+                pricePerRequest: 0.10,
+                requiredFeatureKey: 'ai_generation',
+                config: {
+                    ml: { model: 'xgboost', features: ['payment_history', 'invoice_amount', 'days_overdue'], retrainInterval: '7d' },
+                    prioritization: { minAmount: 100, riskThreshold: 0.7 },
+                    webhooks: {
+                        recovery_action: { 
+                            label: 'Trigger Recovery Action',
+                            description: 'Triggers the n8n workflow for sending recovery communications (email/sms)',
+                            url: process.env.N8N_WEBHOOK_RECOVERY_EXECUTE || 'https://n8n.automation-for-smes.com/webhook/ce76d8c1-5242-49c7-a350-02f55b7c2db4', 
+                            method: 'POST' 
+                        },
+                        data_sync: {
+                            label: 'CRM Data Synchronization',
+                            description: 'Pushes synchronized customer and invoice data to n8n CRM cache',
+                            url: process.env.N8N_WEBHOOK_DATA_SYNC || 'https://n8n.automation-for-smes.com/webhook/ce76d8c1-5242-49c7-a350-02f55b7c2db4',
+                            method: 'POST'
+                        }
+                    },
+                    // Billable Paths: Only the recovery action dispatch is billable
+                    paths: [
+                        { path: '/recovery/action', billable: true },
+                        { path: '/recovery/status', billable: false },
+                        { path: '/recovery/sequences', billable: false },
+                        { path: '/recovery/invoices', billable: false }
+                    ],
+                    // API Endpoints for Service Discovery
+                    endpoints: [
+                        { path: '/dashboard/recovery', method: 'GET', description: 'Recovery Dashboard', billable: false },
+                        { path: '/dashboard/recovery/sequences', method: 'GET', description: 'List Dunning Sequences', billable: false },
+                        { path: '/dashboard/recovery/sequences', method: 'POST', description: 'Create/Update Dunning Sequence', billable: false },
+                        { path: '/dashboard/recovery/invoices', method: 'GET', description: 'List Tracked Invoices', billable: false },
+                        { path: '/api/callbacks/recovery', method: 'POST', description: 'N8N Recovery Callback', billable: false }
+                    ],
+                    // External Service Dependencies
+                    externalCalls: [
+                        { domain: 'n8n.automation-for-smes.com', purpose: 'Recovery email orchestration & AI content generation' },
+                        { domain: 'quickbooks.api.intuit.com', purpose: 'ERP invoice sync for overdue detection' }
+                    ]
+                }
+            },
+            {
+                name: 'Legacy Doc Unlocker',
                 slug: 'unlock-pdf',
                 description: 'Remove lost passwords from old archived business documents.',
                 pricePerRequest: 0.05, // Premium service
@@ -543,8 +588,8 @@ export class SeederService {
                     // 2. Overlay Existing Config (preserves user edits)
                     // 3. Re-assert System Fields (Endpoints, DocTypes, ExternalCalls) from Code Manifest
                     mergedConfig = {
-                        ...mergedConfig,
-                        ...currentConfig,
+                        ...currentConfig, // Start with existing
+                        ...mergedConfig,  // Overlay seeded (Env/Code URLs win)
                         
                         // System Managed Fields (Source of Truth is Code/Manifest)
                         endpoints: manifest?.endpoints || mergedConfig.endpoints || [], // Manifest > Seed > Empty
@@ -553,10 +598,11 @@ export class SeederService {
                         paths: manifest?.endpoints?.map((e: any) => ({ path: e.path.split('?')[0], billable: e.billable ?? true })) || mergedConfig.paths, // Derive paths from endpoints if manifest exists
                         dependencies: mergedConfig.dependencies, // Enforce Dependencies from Code
 
-                        // Deep merge webhooks to allow discovery of new keys
+                        // Webhook merge order: DB fills in gaps, but Seeder/Env wins for keys it defines.
+                        // This ensures process.env.N8N_WEBHOOK_* overrides are always authoritative.
                         webhooks: {
-                            ...(mergedConfig.webhooks || {}),
-                            ...(currentConfig.webhooks || {})
+                            ...(currentConfig.webhooks || {}),  // DB: base layer (fills gaps)
+                            ...(mergedConfig.webhooks || {})    // Seeder/Env: always wins (authoritative)
                         }
                     };
                 } else if (manifest) {

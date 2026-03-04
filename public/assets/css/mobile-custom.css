@@ -1,0 +1,51 @@
+/* 
+  Floovioo : High-Density Mobile-First Theme
+  Advanced overrides for compact enterprise dashboard UI
+*/
+
+:root {
+    --text-mobile-xs: 0.625rem; /* 10px */
+    --text-mobile-sm: 0.75rem;  /* 12px */
+    --gap-mobile-dense: 0.5rem;
+    --padding-mobile-dense: 0.75rem;
+}
+
+/* Global Mobile Density Overrides */
+@media (max-width: 640px) {
+    .text-mobile-dense {
+        font-size: var(--text-mobile-sm) !important;
+    }
+    
+    .text-mobile-micro {
+        font-size: var(--text-mobile-xs) !important;
+    }
+
+    .p-mobile-dense {
+        padding: var(--padding-mobile-dense) !important;
+    }
+
+    .gap-mobile-dense {
+        gap: var(--gap-mobile-dense) !important;
+    }
+
+    /* Smaller icons for mobile */
+    .icon-mobile-dense {
+        width: 1rem !important;
+        height: 1rem !important;
+    }
+}
+
+/* Brand Editor Specific Mobile Optimization */
+.mobile-preview-active .editor-column {
+    display: none !important;
+}
+
+@media (max-width: 1024px) {
+    .mobile-hide-preview {
+        display: none !important;
+    }
+    
+    .mobile-show-preview {
+        display: block !important;
+    }
+}

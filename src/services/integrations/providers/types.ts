@@ -13,6 +13,7 @@ export interface ERPDocument {
     externalId: string;
     type: 'invoice' | 'estimate' | 'salesorder' | 'purchaseorder' | 'bill' | 'payment' | 'contact' | 'account' | 'item';
     date: Date;
+    dueDate?: Date;
     name: string; // Normalized Display Name (e.g. "Invoice #1001" or "Acme Corp")
     total?: number;
     status: string;
@@ -51,6 +52,7 @@ export interface IERPProvider {
     // --- Data Sync ---
     syncContacts(userId: string): Promise<number>; // Returns count of synced items
     syncInventory(userId: string): Promise<number>;
+    syncInvoices(userId: string): Promise<number>;
 
     // Standardized Fetch Methods
     getInvoices(params?: FetchParams): Promise<ERPDocument[]>;
@@ -85,6 +87,11 @@ export interface IERPProvider {
     // --- Legacy Subset Fetchers ---
     getContact(id: string): Promise<ERPDocument | null>;
     getItem(id: string): Promise<ERPDocument | null>;
+
+    /**
+     * Returns summary stats for the connection health check
+     */
+    getInvoiceStats?(): Promise<{ total: number, unpaid: number, overdue: number }>;
 }
 
 export interface NormalizedWebhookEvent {

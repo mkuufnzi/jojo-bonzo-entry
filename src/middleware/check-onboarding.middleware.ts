@@ -22,13 +22,14 @@ export async function checkOnboarding(req: Request, res: Response, next: NextFun
     // OR if they are INDIVIDUAL, just check profile.
     
     // Simple check: If they are supposed to be a business owner but have no businessId
+    // [V2 UPDATE] We intentionally allow them through so they can see the "hero banner" CTA on the dashboard
     if (!user?.businessId && profile?.accountType === 'BUSINESS') {
-        return res.redirect('/onboarding/wizard?step=1');
+        // no-op, let them see the empty state dashboard
     }
     
     // Explicit flag check from profile
     if (profile && !profile.onboardingCompleted) {
-         return res.redirect('/onboarding/wizard?step=1');
+         // no-op, allow them to view feature hubs with "Setup Required" banners
     }
 
     next();

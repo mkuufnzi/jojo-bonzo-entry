@@ -126,10 +126,11 @@
     <span class="h-px flex-1 bg-slate-100 mx-4"></span>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
     <% 
     const suites = [
         { id: 'transactional', name: 'Transactional', color: 'blue', icon: 'ReceiptText', desc: 'Invoices & Reports' },
+        { id: 'recovery', name: 'Debt Collection', color: 'rose', icon: 'Coins', desc: 'Dunning & AR Sync' },
         { id: 'retention', name: 'Retention', color: 'teal', icon: 'HeartHandshake', desc: 'Onboarding & QBRs' },
         { id: 'sales', name: 'Sales', color: 'indigo', icon: 'BarChartHorizontal', desc: 'Pitch Decks & Leads' },
         { id: 'content', name: 'Content', color: 'purple', icon: 'Layers', desc: 'Infographics & SEO' }

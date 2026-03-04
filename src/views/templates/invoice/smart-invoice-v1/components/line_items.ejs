@@ -1,30 +1,30 @@
 <!-- Line Items -->
-<div class="mt-4">
+<div class="mt-1">
     <table class="w-full border-collapse">
         <thead>
             <tr class="border-b-2" :style="'border-color: ' + theme.accent">
-                <th class="py-3 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted"></th>
-                <th class="py-3 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Product</th>
-                <th class="py-3 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">SKU</th>
-                <th class="py-3 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Qty</th>
-                <th class="py-3 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Unit</th>
-                <th class="py-3 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Total</th>
+                <th class="py-2 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted"></th>
+                <th class="py-2 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Product</th>
+                <th class="py-2 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">SKU</th>
+                <th class="py-2 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Qty</th>
+                <th class="py-2 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Unit</th>
+                <th class="py-2 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans" :style="'color: ' + theme.muted">Total</th>
             </tr>
         </thead>
         <tbody class="font-sans">
             <template x-for="item in items" :key="item.id">
                 <tr class="border-b border-gray-100">
-                    <td class="py-3.5 w-9">
+                    <td class="py-2 w-9">
                         <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg bg-gray-50" :style="'background: ' + theme.light" x-text="item.img"></div>
                     </td>
-                    <td class="py-3.5 pl-3">
+                    <td class="py-2 pl-3">
                         <div class="text-[13px] font-bold" :style="'color: ' + theme.text" x-text="item.name"></div>
                         <div class="text-[10px] text-gray-400" x-text="item.category"></div>
                     </td>
-                    <td class="py-3.5 text-[11px] text-gray-400" x-text="item.sku"></td>
-                    <td class="py-3.5 text-right text-[13px]" :style="'color: ' + theme.text" x-text="item.qty"></td>
-                    <td class="py-3.5 text-right text-[13px] text-gray-500" x-text="'$' + item.price.toFixed(2)"></td>
-                    <td class="py-3.5 text-right text-[13px] font-bold" :style="'color: ' + theme.text" x-text="'$' + (item.price * item.qty).toFixed(2)"></td>
+                    <td class="py-2 text-[11px] text-gray-400" x-text="item.sku"></td>
+                    <td class="py-2 text-right text-[13px]" :style="'color: ' + theme.text" x-text="item.qty"></td>
+                    <td class="py-2 text-right text-[13px] text-gray-500" x-text="'$' + item.price.toFixed(2)"></td>
+                    <td class="py-2 text-right text-[13px] font-bold" :style="'color: ' + theme.text" x-text="'$' + (item.price * item.qty).toFixed(2)"></td>
                 </tr>
             </template>
         </tbody>

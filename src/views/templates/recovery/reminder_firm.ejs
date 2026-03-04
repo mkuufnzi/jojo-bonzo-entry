@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Inter', sans-serif; color: #374151; line-height: 1.6; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { max-height: 40px; }
+        .content { margin-bottom: 30px; }
+        .footer { text-align: center; font-size: 12px; color: #9ca3af; }
+        .btn { display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .invoice-box { background-color: #fff7ed; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #f97316; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <% if (brand.logo) { %>
+                <img src="<%= brand.logo %>" alt="<%= brand.name %>" class="logo">
+            <% } else { %>
+                <h2><%= brand.name %></h2>
+            <% } %>
+        </div>
+        <div class="content">
+            <p>Hello,</p>
+            <p>Our records show that invoice <strong>#<%= trigger.invoiceId %></strong> is now significantly overdue.</p>
+            
+            <div class="invoice-box">
+                <strong>Amount Due:</strong> <%= trigger.currency %> <%= trigger.amount %><br>
+                <strong>Original Due Date:</strong> <%= new Date(trigger.dueDate).toLocaleDateString() %><br>
+                <strong>Status:</strong> Overdue
+            </div>
+
+            <p>We'd appreciate it if you could settle this balance as soon as possible to avoid any further follow-ups. You can complete the payment securely online via the link below:</p>
+            
+            <p style="text-align: center;">
+                <a href="<%= trigger.invoiceLink %>" class="btn">Settle Invoice Now</a>
+            </p>
+
+            <p>If there is an issue with the invoice or if payment is already in progress, please let us know by replying to this email.</p>
+            <p>Regards,<br>Accounts Receivable<br><%= brand.name %></p>
+        </div>
+        <div class="footer">
+            <p>&copy; <%= new Date().getFullYear() %> <%= brand.name %>. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+npm info using npm@10.9.0
+npm info using node@v22.12.0
+npm verbose title npm test src/tests/unit/recovery.service.test.ts
+npm verbose argv "test" "src/tests/unit/recovery.service.test.ts" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-02-22T03_19_11_632Z-
+npm verbose logfile C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-02-22T03_19_11_632Z-debug-0.log
+
+> afs_doc_tools@1.0.0 test
+> jest src/tests/unit/recovery.service.test.ts
+
+  console.log
+    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL src/tests/unit/recovery.service.test.ts (10.537 s)
+  RecoveryService
+    syncOverdueInvoices
+      ├ù should create sessions from manual invoices and bypass QBO (15 ms)
+      ├ù should resolve customer emails correctly in manual mode (1 ms)
+    findApplicableSequence
+      ΓêÜ should select sequence based on amount rules (2 ms)
+      ΓêÜ should fallback to default sequence if no rules match (1 ms)
+    processRecovery
+      ΓêÜ should dispatch to workflowService for recovery_email action (35 ms)
+      ΓêÜ should advance step index and calculate nextActionAt (2 ms)
+    Utility Logic
+      ΓêÜ calculateNextActionDate should respect day offsets (2 ms)
+      ΓêÜ injectVariables should replace {{key}} with data[key] (1 ms)
+    processBusinessOverdues
+      ΓêÜ should queue actions for sessions due now (2 ms)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should create sessions from manual invoices and bypass QBO
+
+    TypeError: contacts is not iterable
+
+      115 |                 });
+      116 |
+    > 117 |                 for (const contact of contacts) {
+          |                                       ^
+      118 |                     if (contact.email) {
+      119 |                         customerEmailMap.set(contact.externalId, contact.email);
+      120 |                     }
+
+      at RecoveryService.syncOverdueInvoices (src/modules/transactional/recovery/recovery.service.ts:117:39)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:100:28)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should resolve customer emails correctly in manual mode
+
+    TypeError: contacts is not iterable
+
+      115 |                 });
+      116 |
+    > 117 |                 for (const contact of contacts) {
+          |                                       ^
+      118 |                     if (contact.email) {
+      119 |                         customerEmailMap.set(contact.externalId, contact.email);
+      120 |                     }
+
+      at RecoveryService.syncOverdueInvoices (src/modules/transactional/recovery/recovery.service.ts:117:39)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:124:13)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 7 passed, 9 total
+Snapshots:   0 total
+Time:        10.693 s
+Ran all test suites matching src/tests/unit/recovery.service.test.ts.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
+[2026-02-22 06:19:30.375 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: true
+npm verbose cwd D:\apps\websites\saas\afs_doc_tools_source
+npm verbose os Windows_NT 10.0.19045
+npm verbose node v22.12.0
+npm verbose npm  v10.9.0
+npm verbose exit 1
+npm verbose code 1

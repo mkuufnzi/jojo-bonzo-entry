@@ -46,22 +46,52 @@ const coreServices = [
     ],
     provides: ['dunning', 'payment-recovery', 'risk-scoring'],
     endpoints: [
-      { path: '/api/v1/debt-collection/analyze/{invoiceId}', method: 'POST', scopes: ['read'] },
-      { path: '/api/v1/debt-collection/sequences/create', method: 'POST', scopes: ['write'] },
-      { path: '/api/v1/debt-collection/sequences', method: 'GET', scopes: ['read'] },
-      { path: '/api/v1/debt-collection/sequences/{id}', method: 'PUT', scopes: ['write'] },
-      { path: '/api/v1/debt-collection/trigger/{invoiceId}', method: 'POST', scopes: ['write'] },
-      { path: '/api/v1/debt-collection/status/{invoiceId}', method: 'GET', scopes: ['read'] },
-      { path: '/api/v1/debt-collection/pause/{invoiceId}', method: 'POST', scopes: ['write'] },
-      { path: '/api/v1/debt-collection/escalate/{invoiceId}', method: 'POST', scopes: ['write'] },
-      { path: '/api/v1/debt-collection/analytics/recovery-rate', method: 'GET', scopes: ['read'] },
-      { path: '/api/v1/debt-collection/ml/train', method: 'POST', scopes: ['admin'] },
-      { path: '/api/v1/debt-collection/recommendations/{customerId}', method: 'GET', scopes: ['read'] },
-      { path: '/api/v1/debt-collection/callbacks/payment-received', method: 'POST', scopes: ['write'] }
+      { path: '/api/v1/recovery/sessions/{id}', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/recovery/sessions/{id}/pause', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/sessions/{id}/resume', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/sessions/{id}/terminate', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/sessions/{id}/reassign', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/sessions/{id}/escalate', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/sessions/bulk-action', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/sequences', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/sequences/{id}', method: 'PUT', scopes: ['write'] },
+      { path: '/api/v1/recovery/sequences/{id}', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/recovery/actions', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/recovery/actions/{id}/retry', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/invoices/{invoiceId}/timeline', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/recovery/analytics/overview', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/recovery/analytics/recovery-rate', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/recovery/callbacks/payment-received', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/recovery/analyze/{invoiceId}', method: 'POST', scopes: ['read'] },
+      { path: '/api/v1/recovery/export', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/recovery/queue-health', method: 'GET', scopes: ['admin'] }
     ],
     defaultConfig: {
       ml: { model: 'xgboost', features: ['payment_history', 'invoice_amount', 'days_overdue'], retrainInterval: '7d' },
-      prioritization: { minAmount: 100, riskThreshold: 0.7 }
+      prioritization: { minAmount: 100, riskThreshold: 0.7 },
+      paths: [
+        { path: '/sessions/pause', billable: false },
+        { path: '/sessions/resume', billable: false },
+        { path: '/sessions/terminate', billable: false },
+        { path: '/sessions/escalate', billable: true },
+        { path: '/sessions/reassign', billable: true },
+        { path: '/sessions/bulk-action', billable: true },
+        { path: '/sequences', billable: false },
+        { path: '/actions/retry', billable: true },
+        { path: '/callbacks/payment-received', billable: false },
+        { path: '/analyze', billable: true },
+        { path: '/trigger', billable: true },
+        { path: '/export', billable: false },
+        { path: '/queue-health', billable: false }
+      ],
+      webhooks: {
+        recovery_action: { 
+            label: 'Trigger Recovery Action',
+            description: 'Triggers the n8n workflow for sending recovery communications (email/sms)',
+            url: 'https://n8n.automation-for-smes.com/webhook/ce78d8c1-5242-48c7-a350-02f55b7c2db4', 
+            method: 'POST' 
+        }
+      }
     }
   },
   {
@@ -191,6 +221,11 @@ async function main() {
         dependencies: service.dependencies,
         provides: service.provides,
         endpoints: service.endpoints,
+        config: {
+          paths: service.endpoints?.map((e: any) => ({ path: e.path, billable: true })),
+          dependencies: service.dependencies?.map((d: string) => ({ service: d, endpoint: '*', required: true, purpose: 'Core integration' })),
+          webhooks: service.defaultConfig?.webhooks || {}
+        },
         defaultConfig: service.defaultConfig,
         updatedAt: new Date()
       },
@@ -205,6 +240,11 @@ async function main() {
         provides: service.provides,
         requires: [],
         endpoints: service.endpoints,
+        config: {
+          paths: service.endpoints?.map((e: any) => ({ path: e.path, billable: true })),
+          dependencies: service.dependencies?.map((d: string) => ({ service: d, endpoint: '*', required: true, purpose: 'Core integration' })),
+          webhooks: service.defaultConfig?.webhooks || {}
+        },
         defaultConfig: service.defaultConfig,
         createdAt: new Date(),
         updatedAt: new Date()

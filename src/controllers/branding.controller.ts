@@ -122,11 +122,13 @@ export class BrandingController {
         const dbProfile = await brandingService.getProfile(userId);
         
         // Ensure profile has fallbacks for labels used in templates (companyName, tagline)
+        // ALIGNMENT: Use Business data when available
         profile = {
             ...(dbProfile || {}),
-            companyName: dbProfile?.companyName || (res.locals.user?.business?.name) || 'Your Brand',
+            companyName: dbProfile?.companyName || (dbProfile as any)?.business?.name || (res.locals.user?.business?.name) || 'Your Brand',
             tagline: (dbProfile as any)?.tagline || (dbProfile?.fontSettings as any)?.tagline || 'Building the future of commerce.',
-            logoUrl: dbProfile?.logoUrl || null
+            logoUrl: dbProfile?.logoUrl || null,
+            voiceProfile: (dbProfile as any)?.voiceProfile || {}
         };
 
         let layoutOrder: any;
@@ -259,9 +261,9 @@ export class BrandingController {
         items.forEach(item => smartInvoice.addItem(item));
         
         smartInvoice.recommendations = [
-            { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "🎌", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },
-            { id: 102, name: "MCT Oil Drops", price: 22.99, img: "💧", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" },
-            { id: 103, name: "Bamboo Whisk Holder", price: 14.50, img: "🏺", reason: "Keep your whisk in perfect shape", match: 82, badge: "Essential", sales: "Popular Add-on" }
+            { id: 101, name: "Ceremonial Grade Matcha Kit", price: 54.99, img: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=120&h=120&fit=crop&q=80", reason: "Pairs perfectly with your Matcha Powder", match: 94, badge: "Best Match", sales: "+340% this month" },
+            { id: 102, name: "MCT Oil Drops", price: 22.99, img: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=120&h=120&fit=crop&q=80", reason: "Customers who buy Coconut Oil love this", match: 88, badge: "Trending", sales: "Reorder #1 item" },
+            { id: 103, name: "Bamboo Whisk Holder", price: 14.50, img: "https://images.unsplash.com/photo-1563822249366-3efb23b8e0c9?w=120&h=120&fit=crop&q=80", reason: "Keep your whisk in perfect shape", match: 82, badge: "Essential", sales: "Popular Add-on" }
         ];
         
         smartInvoice.tutorials = [
@@ -281,7 +283,13 @@ export class BrandingController {
            id: 'INV-PREVIEW-001',
            customerName: 'Valued Customer',
            customerEmail: 'customer@example.com',
-           customerAddress: '123 Preview Lane, Suite 100'
+           customerAddress: '123 Preview Lane, Suite 100',
+           // Business Info
+           businessName: profile.companyName,
+           businessAddress: (dbProfile as any)?.business?.address || '123 Business Rd, Tech City',
+           businessWebsite: (dbProfile as any)?.business?.website || '',
+           businessEmail: (dbProfile as any)?.supportConfig?.email || (res.locals.user?.email) || '',
+           voiceProfile: profile.voiceProfile
         };
 
         // 4. Render

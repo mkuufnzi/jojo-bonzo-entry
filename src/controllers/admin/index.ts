@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import passport from 'passport';
+import { config } from '../../config/env';
 import { ServiceRegistry } from '../../services/service-registry.service'; // [V2]
 import prisma from '../../lib/prisma';
 import { createQueue, QUEUES } from '../../lib/queue'; // [V2] Queue Health
@@ -868,18 +869,38 @@ export class AdminController {
     static async testWebhook(req: Request, res: Response) {
         try {
             const { url, method } = req.body;
+            console.log(`\n**************************************************`);
+            console.log(`[AdminController] 🚀 TEST FIRE AT ${new Date().toISOString()}`);
+            console.log(`[AdminController] 🛰️ Target: ${method || 'POST'} ${url}`);
+            console.log(`**************************************************\n`);
             
              // Simple Fire & Forget Request
              try {
+                 const authHeader = config.N8N_USER && config.N8N_PASSWORD 
+                     ? `Basic ${Buffer.from(`${config.N8N_USER}:${config.N8N_PASSWORD}`).toString('base64')}`
+                     : undefined;
+
                  const response = await fetch(url, {
                      method: method || 'POST',
-                     headers: { 'Content-Type': 'application/json', 'X-Test-Trigger': 'true' },
+                     headers: { 
+                         'Content-Type': 'application/json', 
+                         'X-Test-Trigger': 'true',
+                         'User-Agent': 'Floovioo-Admin-Tester',
+                         ...(config.AI_WEBHOOK_SECRET ? { 'X-Webhook-Secret': config.AI_WEBHOOK_SECRET } : {}),
+                         ...(authHeader ? { 'Authorization': authHeader } : {})
+                     },
                      body: method === 'POST' ? JSON.stringify({ test: true, timestamp: new Date().toISOString() }) : undefined
                  });
                  
-                 res.json({ success: response.ok, status: response.status });
-             } catch (netError) {
-                 res.json({ success: false, error: (netError as Error).message });
+                 const text = await response.text();
+                 console.log(`[AdminController] 📥 Resp: ${response.status}, Body: ${text.substring(0, 100)}`);
+
+                 let data = {};
+                 try { data = JSON.parse(text); } catch(e) { data = { raw: text.substring(0, 500) }; }
+                 res.json({ success: response.ok, status: response.status, data });
+             } catch (netError: any) {
+                 console.error('[AdminController] ❌ Fetch Error:', netError.message);
+                 res.json({ success: false, error: netError.message });
              }
 
         } catch (error) {

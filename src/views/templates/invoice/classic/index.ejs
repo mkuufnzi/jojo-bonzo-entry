@@ -22,46 +22,64 @@
 
 <%- include('../../../components/logic/smart-document-logic') %>
 
-<!-- Template Interface -->
-<div class="font-sans text-slate-800 antialiased classic-container">
+<!-- Template Meta -->
+<div class="font-sans text-slate-800 antialiased classic-container" style="font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;">
+    
+    <% 
+       /**
+        * Widget Registry: Maps widget IDs to include paths
+        */
+       const WIDGET_REGISTRY = {
+           'header': { path: './components/header', landmark: false, splittable: false },
+           'spacer_1': { path: null, landmark: false, splittable: false },
+           'spacer_2': { path: null, landmark: false, splittable: false },
+           'customer_info': { path: './components/addresses', landmark: false, splittable: false },
+           'marketing_banner': { path: '../../../components/smart-widgets/banner', landmark: false, splittable: false },
+           'line_items': { path: './components/line_items', landmark: false, splittable: true },
+           'totals': { path: './components/totals', landmark: false, splittable: false },
+           'product_recommendations': { path: '../../../components/smart-widgets/product-recommendations', landmark: false, splittable: false },
+           'product_support': { path: '../../../components/smart-widgets/tutorials', landmark: false, splittable: false },
+           'payment_details': { path: '../../../components/smart-widgets/payment-details', landmark: false, splittable: false },
+           'customer_support': { path: '../../../components/smart-widgets/support-card', landmark: false, splittable: false },
+           'footer': { path: './components/footer', landmark: false, splittable: false }
+       };
+       
+       const layoutOrder = branding.layoutOrder || [];
+       const widgetStates = branding.widgetStates || {};
+    %>
 
-    <!-- Section: Header -->
-    <div class="doc-section mb-10 border-t-8 border-gray-800 pt-8">
-        <%- include('./components/header') %>
-    </div>
-
-    <!-- Section: Addresses -->
-    <div class="doc-section mb-10">
-        <%- include('./components/addresses') %>
-    </div>
-
-    <!-- Section: Line Items (Splittable) -->
-    <div class="doc-section mb-10" data-split="true">
-        <%- include('./components/line_items') %>
-    </div>
-
-    <!-- Section: Recommendations (Splittable) -->
-    <% if (branding.components?.product_recommendations?.enabled) { %>
-        <div class="doc-section mb-10" data-split="true">
-            <%- include('../../../components/smart-widgets/product-recommendations') %>
-        </div>
+    <!-- =============== RENDER LOOP (Deterministic) =============== -->
+    <% 
+        let i = 0;
+        while(i < layoutOrder.length) {
+            const widgetId = layoutOrder[i];
+            const widget = WIDGET_REGISTRY[widgetId];
+            const state = widgetStates[widgetId];
+            const isEnabled = state?.enabled !== false;
+            const isSpacer = widgetId.startsWith('spacer_');
+            const splitAttr = widget?.splittable ? 'data-split="true"' : 'data-no-split="true"';
+            
+            // Landmark widgets in Classic are not full-width but constrained by the container padding
+            const containerClass = "w-full mx-auto";
+    %>
+        
+        <% if (isEnabled) { %>
+            <% if (isSpacer) { %>
+                <div class="doc-section w-full block" 
+                     data-widget-id="<%= widgetId %>" 
+                     data-no-split="true"
+                     style="display: block !important; height: <%= state?.value || 20 %>px !important; min-height: <%= state?.value || 20 %>px !important; margin: 0 !important;">
+                </div>
+            <% } else if (widget?.path) { %>
+                <div class="doc-section <%= containerClass %> block" 
+                     data-widget-id="<%= widgetId %>" 
+                     <%- splitAttr %>
+                     style="display: block !important; margin-bottom: 8px !important;">
+                    <%- include(widget.path) %>
+                </div>
+            <% } %>
+        <% } %>
+        
+        <% i++; %> 
     <% } %>
-
-    <!-- Section: Totals -->
-    <div class="doc-section mb-10">
-        <%- include('./components/totals') %>
-    </div>
-
-    <!-- Section: Marketing Banner -->
-    <% if (branding.components?.marketing_banner?.enabled) { %>
-        <div class="doc-section mb-10">
-            <%- include('../../../components/smart-widgets/banner') %>
-        </div>
-    <% } %>
-
-    <!-- Section: Footer -->
-    <div class="doc-section pt-10 mt-auto">
-        <%- include('./components/footer') %>
-    </div>
-
 </div>

@@ -1,4 +1,5 @@
 # n8n Webhook Configuration Guide
+## Feature/service 001 - Transcational Document Branding
 
 ## 1. Webhook Trigger Setup
 
@@ -61,3 +62,33 @@ If generation fails, return:
   "error": "Error description"
 }
 ```
+
+## 5. Invoice Recovery Webhook (Debt Collection)
+
+The Invoice Recovery flow uses the same authentication pattern but with a different payload.
+
+- **Service Slug**: `floovioo_transactional_debt-collection`
+- **Action**: `recovery_action`
+- **Expected Payload**:
+```json
+{
+  "businessId": "uuid-of-business",
+  "externalInvoiceId": "inv_123",
+  "customerEmail": "customer@example.com",
+  "amount": 1000,
+  "currency": "USD",
+  "dueDate": "2026-02-22T00:00:00Z",
+  "sessionId": "recovery-session_uuid",
+  "type": "recovery_email",
+  "currentStep": 1,
+  "templateId": "optional-template-id",
+  "smartContent": {
+    "upsell": "...",
+    "personalizedMessage": "..."
+  }
+}
+```
+
+**Security Requirement**:
+Ensure your Recovery Webhook node in n8n also validates the `X-Webhook-Secret` header against the value set in your `.env` file (`AI_WEBHOOK_SECRET`).
+
