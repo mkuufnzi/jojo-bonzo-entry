@@ -1256,7 +1256,7 @@ export class RecoveryController {
 
             // Update the customer's profile
             const profile = await p.debtCollectionCustomerProfile.findFirst({
-                where: { customerId }
+                where: { debtCustomerId: customerId, businessId }
             });
 
             if (profile) {
@@ -1266,16 +1266,16 @@ export class RecoveryController {
                 });
             } else {
                 await p.debtCollectionCustomerProfile.create({
-                    data: { customerId, clusterId }
+                    data: { debtCustomerId: customerId, clusterId, businessId }
                 });
             }
 
             logger.info({ businessId, customerId, clusterId, clusterName: cluster.name }, '📦 [Recovery] Customer manually moved to cluster');
 
             return res.json({ success: true, clusterName: cluster.name });
-        } catch (error) {
+        } catch (error: any) {
             logger.error({ err: error }, '❌ [Recovery] Move customer to cluster failed');
-            return res.status(500).json({ error: 'Failed to move customer' });
+            return res.status(500).json({ error: 'Failed to move customer: ' + error.message, stack: error.stack });
         }
     }
 

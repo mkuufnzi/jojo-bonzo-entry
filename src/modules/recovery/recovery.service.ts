@@ -2229,7 +2229,7 @@ export class RecoveryService {
      * Escalate: skip to the next step immediately.
      * Uses optimistic concurrency via updatedAt to prevent race conditions.
      */
-    async escalateSession(businessId: string, sessionId: string) {
+    async escalateSession(businessId: string, sessionId: string, options?: { type: string, note?: string }) {
         const session = await p.debtCollectionSession.findFirst({
             where: { id: sessionId, businessId },
             include: { sequence: true }
@@ -2237,6 +2237,36 @@ export class RecoveryService {
         if (!session) return { success: false, error: 'Session not found' };
         if (session.status !== 'ACTIVE') return { success: false, error: `Cannot escalate session in ${session.status} state` };
 
+        const type = options?.type || 'SKIP_STEP';
+        const note = options?.note || '';
+
+        if (type === 'EXTERNAL_COLLECTION' || type === 'LEGAL_ACTION') {
+            // Terminate automated dunning and mark escalated
+            const result = await p.debtCollectionSession.updateMany({
+                where: { id: sessionId, updatedAt: session.updatedAt },
+                data: {
+                    status: 'ESCALATED', // Assuming ESCALATED is a valid status, or we use TERMINATED with metadata
+                    nextActionAt: null,
+                    updatedAt: new Date()
+                }
+            });
+            if (result.count === 0) return { success: false, error: 'Session was modified concurrently' };
+            
+            // Log the escalation reason into audit log
+            await p.debtCollectionAuditLog.create({
+                data: {
+                    sessionId,
+                    timestamp: new Date(),
+                    event: `ESCALATED_${type}`,
+                    reason: note || `Manually escalated to ${type.replace('_', ' ')}`
+                }
+            });
+
+            logger.info({ sessionId, businessId, type }, '⏩ [Recovery API] Session manually escalated out of automation');
+            return { success: true, sessionId, status: 'ESCALATED', message: `Escalated to ${type}` };
+        }
+
+        // Default 'SKIP_STEP' exactly as before
         const steps = session.sequence?.steps as any[] || [];
         const nextIdx = session.currentStepIndex + 1;
 
@@ -2267,7 +2297,7 @@ export class RecoveryService {
             return { success: false, error: 'Session was modified by another operation. Please refresh and try again.' };
         }
 
-        logger.info({ sessionId, businessId, from: session.currentStepIndex, to: nextIdx }, '⏩ [Recovery API] Session escalated');
+        logger.info({ sessionId, businessId, from: session.currentStepIndex, to: nextIdx }, '⏩ [Recovery API] Session escalated to next step');
         
         await notificationService.notifyBusiness(
             businessId,

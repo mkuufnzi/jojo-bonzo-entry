@@ -178,13 +178,13 @@ router.post('/sessions/:id/reassign', async (req: Request, res: Response) => {
     }
 });
 
-/** POST /sessions/:id/escalate — Skip to the next step immediately */
+/** POST /sessions/:id/escalate — Escalate session based on type */
 router.post('/sessions/:id/escalate', async (req: Request, res: Response) => {
     const businessId = await getBusinessId(req, res);
     if (!businessId) return;
     console.log(`[Recovery API] POST /sessions/${req.params.id}/escalate — businessId: ${businessId}`);
     try {
-        const result = await recoveryService.escalateSession(businessId, req.params.id);
+        const result = await recoveryService.escalateSession(businessId, req.params.id, req.body);
         console.log(`[Recovery API] ⏩ Escalate result: ${JSON.stringify({ success: result.success, sessionId: req.params.id })}`);
         return res.status(result.success ? 200 : 400).json(result);
     } catch (err: any) {
