@@ -572,15 +572,9 @@ export class RecoveryController {
             if (activeTab === 'invoices') {
                 data.invoices = await recoveryService.getDetailedInvoices(businessId);
             } else {
-                const workflows = await p.workflow.findMany({
-                    where: { businessId, triggerType: 'invoice_overdue' },
-                    select: { id: true }
-                });
-                const workflowIds = workflows.map((w: any) => w.id);
-
-                data.logs = await p.workflowExecutionLog.findMany({
-                    where: { workflowId: { in: workflowIds } },
-                    include: { workflow: true },
+                data.logs = await p.debtCollectionAction.findMany({
+                    where: { businessId },
+                    include: { session: true },
                     orderBy: { createdAt: 'desc' },
                     take: 50
                 });
@@ -1296,14 +1290,14 @@ export class RecoveryController {
 
             const typeFilter = req.query.type as string || '';
 
-            // Load state history records (these capture webhook intercepts and status changes)
-            const stateHistory = await p.debtCollectionStateHistory.findMany({
+            // Load audit logs (these capture webhook intercepts and status changes)
+            const auditLogs = await p.debtCollectionAuditLog.findMany({
                 where: {
                     session: { businessId },
                     ...(typeFilter ? { reason: { contains: typeFilter } } : {})
                 },
                 include: { session: { select: { id: true, externalInvoiceId: true, customerName: true } } },
-                orderBy: { createdAt: 'desc' },
+                orderBy: { timestamp: 'desc' },
                 take: 100
             });
 
@@ -1321,18 +1315,18 @@ export class RecoveryController {
             // Combine into a unified event feed
             const events: any[] = [];
 
-            for (const sh of stateHistory) {
+            for (const log of auditLogs) {
                 events.push({
-                    id: sh.id,
-                    createdAt: sh.createdAt,
+                    id: log.id,
+                    createdAt: log.timestamp,
                     provider: 'system',
-                    eventType: `${sh.previousStatus} → ${sh.newStatus}`,
-                    entityId: sh.session?.externalInvoiceId || '—',
-                    status: sh.newStatus,
-                    reason: sh.reason || '',
-                    triggerSource: sh.triggerSource || 'SYSTEM',
-                    sessionId: sh.sessionId,
-                    metadata: { previousStatus: sh.previousStatus, newStatus: sh.newStatus, reason: sh.reason }
+                    eventType: log.event,
+                    entityId: log.session?.externalInvoiceId || '—',
+                    status: 'processed',
+                    reason: log.reason || '',
+                    triggerSource: log.actorType || 'SYSTEM',
+                    sessionId: log.sessionId,
+                    metadata: { actorType: log.actorType, event: log.event, reason: log.reason }
                 });
             }
 
@@ -1356,7 +1350,7 @@ export class RecoveryController {
 
             // Compute stats
             const stats = {
-                intercepted: stateHistory.filter(sh => sh.triggerSource === 'ERP_WEBHOOK' && sh.newStatus === 'RECOVERED').length,
+                intercepted: auditLogs.filter(log => log.actorType === 'ERP_WEBHOOK' || log.event === 'PAYMENT_RECEIVED').length,
                 dispatched: dispatchedActions.length
             };
 
