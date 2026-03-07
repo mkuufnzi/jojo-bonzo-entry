@@ -1,0 +1,252 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto space-y-8">
+
+    <!-- Breadcrumbs & Actions -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-2 text-sm font-medium text-slate-500">
+            <a href="/dashboard/transactional" class="hover:text-blue-600 transition-colors">Transactional</a>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+            <a href="/dashboard/transactional/history" class="hover:text-blue-600 transition-colors">History</a>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+            <span class="text-slate-900 dark:text-white font-bold"><%= document.resourceId %></span>
+        </div>
+        <div class="flex items-center gap-3">
+            <% if (brandedUrl && brandedUrl !== '#') { %>
+            <a href="<%= brandedUrl %>" download class="bg-slate-900 dark:bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-xl transition-all flex items-center gap-2 shadow-lg">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download PDF
+            </a>
+            <% } %>
+            <a href="/dashboard/transactional/history" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-1">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Banner -->
+    <div class="flex items-center gap-4 p-4 rounded-2xl border
+        <% if (document.status === 'completed') { %>
+            bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800
+        <% } else if (document.status === 'processing') { %>
+            bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800
+        <% } else { %>
+            bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800
+        <% } %>
+    ">
+        <% if (document.status === 'completed') { %>
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+            <span class="text-sm font-bold text-emerald-800 dark:text-emerald-400">Document successfully branded and ready for download.</span>
+        <% } else if (document.status === 'processing') { %>
+            <i data-lucide="loader" class="w-5 h-5 text-amber-600 flex-shrink-0 animate-spin"></i>
+            <span class="text-sm font-bold text-amber-800 dark:text-amber-400">Document is currently being processed by the branding engine.</span>
+        <% } else { %>
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 flex-shrink-0"></i>
+            <span class="text-sm font-bold text-red-800 dark:text-red-400">Branding failed. <%= document.errorMessage || 'Check engine logs for details.' %></span>
+        <% } %>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Document Preview (Left/Center — 2/3 width) -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Smart Document Preview -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">Smart Document Preview</h2>
+                            <p class="text-[0.6rem] text-slate-400 font-medium">Floovioo branded output</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <% if (brandedUrl && brandedUrl !== '#') { %>
+                        <a href="<%= brandedUrl %>" target="_blank" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-1">
+                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                            Open Full
+                        </a>
+                        <a href="<%= brandedUrl %>" download class="px-3 py-1.5 bg-indigo-600 text-xs font-bold text-white rounded-lg hover:bg-indigo-700 transition-all flex items-center gap-1 shadow-sm">
+                            <i data-lucide="download" class="w-3 h-3"></i>
+                            PDF
+                        </a>
+                        <% } %>
+                    </div>
+                </div>
+                <!-- Preview Area -->
+                <% if (brandedUrl && brandedUrl !== '#') { %>
+                <div class="relative bg-slate-50 dark:bg-slate-800/30">
+                    <iframe 
+                        src="<%= brandedUrl %>" 
+                        class="w-full border-0"
+                        style="height: 700px;"
+                        sandbox="allow-same-origin"
+                        title="Branded Document Preview"
+                        loading="lazy"
+                    ></iframe>
+                    <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-slate-900 to-transparent pointer-events-none"></div>
+                </div>
+                <% } else { %>
+                <!-- Live Preview Fallback -->
+                <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+                    <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                             <span class="flex h-2 w-2 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                             </span>
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Live Preview Engine Active</span>
+                        </div>
+                    </div>
+                    <iframe 
+                        id="source-document" 
+                        src="/dashboard/transactional/history/<%= document.id %>/preview" 
+                        class="w-full border-0 preview-frame" 
+                        style="height: 700px;" 
+                        title="Live JIT Preview">
+                    </iframe>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Original vs Branded Comparison -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Quick Comparison</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative group">
+                        <div class="aspect-[4/3] bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center overflow-hidden">
+                            <i data-lucide="file-text" class="w-8 h-8 text-slate-300 mb-2"></i>
+                            <span class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest">Original ERP</span>
+                            <% if (originalUrl && originalUrl !== '#') { %>
+                            <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <a href="<%= originalUrl %>" target="_blank" class="px-4 py-2 bg-white text-slate-900 rounded-xl text-xs font-bold shadow-xl">View Original</a>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="relative group">
+                        <div class="aspect-[4/3] bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 flex flex-col items-center justify-center overflow-hidden ring-2 ring-indigo-500/10">
+                            <i data-lucide="sparkles" class="w-8 h-8 text-indigo-300 mb-2"></i>
+                            <span class="text-[0.6rem] font-bold text-indigo-500 uppercase tracking-widest">Smart Branded</span>
+                            <% if (brandedUrl && brandedUrl !== '#') { %>
+                            <div class="absolute inset-0 bg-indigo-600/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <a href="<%= brandedUrl %>" target="_blank" class="px-4 py-2 bg-white text-indigo-600 rounded-xl text-xs font-bold shadow-xl">View Smart PDF</a>
+                            </div>
+                            <% } else { %>
+                            <div class="absolute inset-0 bg-indigo-600/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <a href="/dashboard/transactional/history/<%= document.id %>/preview" target="_blank" class="px-4 py-2 bg-white text-indigo-600 rounded-xl text-xs font-bold shadow-xl">View JIT Preview</a>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Stats (Right — 1/3 width) -->
+        <div class="space-y-6">
+
+            <!-- Revenue Lift Card -->
+            <% 
+                const totalLift = (upsells && upsells.length > 0) 
+                    ? upsells.reduce((sum, o) => sum + (Number(o.price) || 0), 0) 
+                    : 0;
+            %>
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-7 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-[0.6rem] uppercase tracking-widest text-indigo-100 mb-3">Revenue Lift Potential</h3>
+                    <div class="flex items-end space-x-2 mb-2">
+                        <span class="text-3xl font-black">$<%= totalLift.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+                    </div>
+                    <p class="text-indigo-100 text-xs leading-relaxed"><%= upsells.length %> Smart Upsell<%= upsells.length !== 1 ? 's' : '' %> injected into this document.</p>
+                </div>
+                <i data-lucide="trending-up" class="absolute -bottom-4 -right-4 w-28 h-28 text-white/10 group-hover:scale-110 transition-transform duration-700"></i>
+            </div>
+
+            <!-- Upsells List -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                <h3 class="font-black text-[0.6rem] uppercase tracking-widest text-slate-400 mb-4">Injected Upsells</h3>
+                <div class="space-y-3">
+                    <% if (upsells && upsells.length > 0) { %>
+                        <% upsells.forEach(offer => { %>
+                        <div class="flex items-center space-x-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+                            <div class="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-sm group-hover:scale-110 transition-transform">✨</div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-xs text-slate-900 dark:text-white truncate"><%= offer.name || offer.productName || 'Product' %></p>
+                                <p class="text-[0.6rem] text-slate-400 truncate"><%= offer.reason || 'Smart Match' %></p>
+                            </div>
+                            <p class="font-black text-xs text-slate-900 dark:text-white">$<%= offer.price || '0' %></p>
+                        </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-xs text-slate-400 italic text-center py-4">No upsells matched for this document.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Document Metadata -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                <h3 class="font-black text-[0.6rem] uppercase tracking-widest text-slate-400 mb-4">Document Info</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500 font-medium">Resource ID</span>
+                        <span class="text-xs font-bold text-slate-900 dark:text-white font-mono"><%= document.resourceId || '—' %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500 font-medium">Provider</span>
+                        <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[0.6rem] font-bold rounded text-slate-600 uppercase"><%= document.provider || 'system' %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500 font-medium">Event Type</span>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300"><%= document.eventType || '—' %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500 font-medium">Type</span>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300"><%= document.resourceType || '—' %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500 font-medium">Created</span>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300"><%= new Date(document.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></span>
+                    </div>
+                    <% if (document.user) { %>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500 font-medium">Processed By</span>
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300"><%= document.user.name || document.user.email %></span>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Internal Trace -->
+            <div class="bg-slate-100 dark:bg-slate-800/50 rounded-3xl p-5">
+                <h3 class="font-black text-[0.6rem] uppercase tracking-widest text-slate-400 mb-3">Internal Trace</h3>
+                <div class="space-y-2 font-mono text-[0.65rem] text-slate-500">
+                    <div class="flex justify-between">
+                        <span>Proc Time:</span>
+                        <span class="text-slate-900 dark:text-white font-bold"><%= document.processingTimeMs ? document.processingTimeMs + 'ms' : '—' %></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>App ID:</span>
+                        <span class="text-slate-900 dark:text-white font-bold text-[0.6rem] truncate max-w-[120px]"><%= document.appId || 'system' %></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Trace ID:</span>
+                        <span class="text-slate-900 dark:text-white font-bold text-[0.6rem] truncate max-w-[120px]"><%= document.flooviooId || '—' %></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Status:</span>
+                        <span class="font-bold uppercase
+                            <% if (document.status === 'completed') { %> text-emerald-600
+                            <% } else if (document.status === 'processing') { %> text-amber-500
+                            <% } else { %> text-red-500 <% } %>
+                        "><%= document.status %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
