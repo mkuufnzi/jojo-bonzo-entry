@@ -115,12 +115,15 @@ export class DataSyncService {
         let created = 0, updated = 0, failed = 0;
         
         // A. Fetch from Source
-        // Use pagination if available in provider (not implemented in interface yet, assuming full dump for now)
         let docs: ERPDocument[] = [];
         switch (entity) {
             case 'invoices': docs = await provider.getInvoices(); break;
             case 'contacts': docs = await provider.getContacts(); break;
-            case 'items': docs = await (provider as any).getItems(); break;
+            case 'items': docs = await provider.getItems(); break;
+            case 'products': docs = await provider.getItems(); break;
+            case 'orders': docs = await provider.getSalesOrders(); break;
+            case 'payments': docs = await provider.getPayments(); break;
+            case 'estimates': docs = await provider.getEstimates(); break;
             default: logger.warn({ entity }, 'Unknown entity type'); return { entity, total: 0, created: 0, updated: 0, failed: 0, durationMs: 0 };
         }
 
@@ -232,10 +235,13 @@ export class DataSyncService {
         const flooviooId = owner?.id || business.id;
 
         // Fetch synced data from ExternalDocument table (where sync stores data)
-        const [contacts, items, invoices] = await Promise.all([
+        const [contacts, items, invoices, orders, payments, estimates] = await Promise.all([
             prisma.externalDocument.findMany({ where: { businessId, type: 'contact' }, take: 100 }),
             prisma.externalDocument.findMany({ where: { businessId, type: 'item' }, take: 100 }),
-            prisma.externalDocument.findMany({ where: { businessId, type: 'invoice' }, take: 100 })
+            prisma.externalDocument.findMany({ where: { businessId, type: 'invoice' }, take: 100 }),
+            prisma.externalDocument.findMany({ where: { businessId, type: { in: ['order', 'salesorder'] } }, take: 100 }),
+            prisma.externalDocument.findMany({ where: { businessId, type: 'payment' }, take: 100 }),
+            prisma.externalDocument.findMany({ where: { businessId, type: 'estimate' }, take: 100 })
         ]);
 
         // Build service context with STABLE IDs

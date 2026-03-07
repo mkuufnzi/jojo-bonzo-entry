@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ApiController } from '../controllers/api.controller';
 import onboardingRoutes from './onboarding.routes';
 import analyticsRoutes from './analytics.routes';
+import transactionalAnalyticsRoutes from './transactional-analytics.routes';
 
 const router = Router();
 
@@ -87,5 +88,6 @@ router.get('/services', ApiController.getServices);
 // Transactional Onboarding
 router.use('/onboarding', onboardingRoutes);
 router.use('/analytics', analyticsRoutes);
+router.use('/transactional/analytics', transactionalAnalyticsRoutes);
 
 export default router;

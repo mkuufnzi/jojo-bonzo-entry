@@ -14,6 +14,7 @@ router.use((req, res, next) => {
 // TODO: Add Signature Validation Middleware here
 
 router.post('/n8n/template', CallbackController.receiveTemplate);
+router.post('/n8n/transactional-complete', CallbackController.transactionalComplete);
 
 // Smart Recovery Callbacks
 router.post('/recovery/action', RecoveryCallbackController.receiveRecoveryAction);

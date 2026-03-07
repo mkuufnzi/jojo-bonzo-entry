@@ -19,14 +19,20 @@ router.get('/transactional/legacy-templates', transactionalGuard, DashboardContr
 router.get('/transactional/api', transactionalGuard, DashboardController.dashboardTransactionalApi);
 router.get('/transactional/analytics', transactionalGuard, BusinessAnalyticsController.showOverview);
 router.get('/transactional/analytics/:integrationId', BusinessAnalyticsController.showIntegrationDetail);
+
+router.get('/unified', DashboardController.dashboardUnified);
+router.get('/unified/customers', DashboardController.dashboardUnifiedCustomers);
+router.get('/unified/customers/:id', DashboardController.dashboardUnifiedCustomerDetail);
+router.get('/unified/transactions', DashboardController.dashboardUnifiedTransactions);
+router.get('/unified/sources', DashboardController.dashboardUnifiedSources);
+router.post('/unified/sync/:integrationId', DashboardController.syncIntegration);
+
 router.get('/retention', DashboardController.dashboardRetention);
 router.get('/retention/triggers', DashboardController.dashboardRetentionTriggers);
 router.get('/sales', DashboardController.dashboardSales);
 router.get('/content', DashboardController.dashboardContent);
 router.get('/tools/:slug', DashboardController.showTool);
-router.get('/connections/:provider/preview', IntegrationController.previewData);
-router.get('/connections/:provider', IntegrationController.showSettings);
-router.post('/connections/:provider/config', IntegrationController.saveConfig);
+// Integrations (Platform management) moved to dedicated /dashboard/integrations path
 
 // Core Dashboard Pages
 router.get('/apps', DashboardController.apps);

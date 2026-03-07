@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { UsageService } from '../services/usage.service';
 import prisma from '../lib/prisma';
+import { logger } from '../lib/logger';
 import { AppsController } from './apps.controller'; 
 import { PaymentController } from './payment.controller';
 import { ProfileController } from './profile.controller';
@@ -64,9 +65,18 @@ export class DashboardController {
         }
     }
 
-    static async dashboardTransactional(req: Request, res: Response) {
-        const userId = (req.session as any).userId;
-        const { user } = await usageService.getDashboardStats(userId);
+    static async dashboardTransactional(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = (req.session as any).userId;
+            const { user } = await usageService.getDashboardStats(userId);
+            
+            // Inject Transactional Analytics Core
+            const { transactionalAnalyticsService } = await import('../services/transactional-analytics.service');
+            const [volumeTrend, successRatio, latencyTrend] = await Promise.all([
+                transactionalAnalyticsService.getVolumeTrend(userId, 30),
+                transactionalAnalyticsService.getSuccessRatio(userId),
+                transactionalAnalyticsService.getLatencyTrend(userId, 14)
+            ]);
         
         // [LAZY PROVISIONING] Ensure all core services are linked to user's apps
         try {
@@ -187,12 +197,19 @@ export class DashboardController {
             activeBlueprints,
             processedCount,
             totalRevenue,
+            transactionalAnalytics: { volumeTrend, successRatio, latencyTrend },
             title: 'Transactional Branding',
             activeService: 'transactional',
             recentLogs: processedLogs, 
             stats,
             nonce: res.locals.nonce
         });
+        } catch (error) {
+            console.error('[DashboardController.dashboardTransactional] Fatal Error:', error);
+            // Also log the stack securely
+            console.error((error as any).stack);
+            next(error);
+        }
     }
 
     static async dashboardRetention(req: Request, res: Response) {
@@ -406,5 +423,268 @@ export class DashboardController {
     static async dashboardTransactionalApi(req: Request, res: Response) {
         // Just reuse the apps logic or redirect
         return DashboardController.apps(req, res);
+    }
+
+    // --- Unified Data Dashboard ---
+    static async dashboardUnified(req: Request, res: Response) {
+        console.log(`\n\n[DASHBOARD UNIFIED] Route Hit! Session User:`, res.locals.user?.email, res.locals.user?.id);
+        
+        try {
+            const user = res.locals.user;
+            if (!user?.id) {
+                console.log(`[DASHBOARD UNIFIED] No User ID, redirecting to login`);
+                return res.redirect('/auth/login');
+            }
+
+            // Fetch ALL integrations (not filtered by status) so Sources count is accurate
+            const business = await (DashboardController as any).resolveBusinessContext(user, { integrations: true });
+            console.log(`[DASHBOARD UNIFIED] Resolved Business:`, business ? business.id : 'NULL');
+            
+            const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+            const { unifiedAnalyticsService } = await import('../modules/unified-data/unified-analytics.service');
+            
+            let stats = { totalCustomers: 0, totalOrders: 0, totalInvoices: 0, totalRevenue: 0, outstandingBalance: 0, totalPaid: 0 };
+            let recentTransactions: any[] = [];
+            let integrations: any[] = business?.integrations || [];
+            
+            let analyticsTrend: any[] = [];
+            let topCustomers: any[] = [];
+            let salesBySource: any[] = [];
+
+            if (business) {
+                console.log(`[UnifiedDashboard] Resolved businessId=${business.id} for user=${user.email} (user.businessId=${user.businessId})`);
+                
+                // Core Scalar Stats
+                stats = await unifiedDataService.getUnifiedBusinessStats(business.id).catch(e => {
+                    console.error('[UnifiedDashboard] Stats Error:', e.message);
+                    return { totalInvoices: 0, totalCustomers: 0, totalOrders: 0, totalRevenue: 0, outstandingBalance: 0, totalPaid: 0 };
+                }) as any;
+                
+                recentTransactions = await unifiedDataService.getUnifiedInvoices(business.id, 1, 10).catch(e => {
+                    console.error('[UnifiedDashboard] Invoices Error:', e.message);
+                    return [];
+                });
+                
+                // Advanced Time-Series Engine Stats
+                const revenueTrend = await unifiedAnalyticsService.getRevenueTrend(business.id, 30).catch(e => {
+                    console.error('[UnifiedDashboard] Revenue Trend Error:', e.message);
+                    return [];
+                });
+                
+                const customers = await unifiedAnalyticsService.getTopCustomers(business.id, 5).catch(e => {
+                    console.error('[UnifiedDashboard] Top Customers Error:', e.message);
+                    return [];
+                });
+                
+                salesBySource = await unifiedAnalyticsService.getSalesBySource(business.id).catch(e => {
+                    console.error('[UnifiedDashboard] Sales By Source Error:', e.message);
+                    return [];
+                });
+                
+                analyticsTrend = revenueTrend;
+                topCustomers = customers;
+
+                console.log(`[UnifiedDashboard] Analytics Data Success. Trend Length: ${revenueTrend.length}, Top Customers: ${customers.length}, Sources: ${salesBySource.length}`);
+            } else {
+                console.warn(`[UnifiedDashboard] ⚠️ Business is null for user=${user.email} (user.businessId=${user.businessId})`);
+            }
+
+            res.render('dashboard/services/unified/index', { 
+                user, 
+                business,
+                title: 'Unified Data Hub', 
+                activeService: 'unified',
+                stats,
+                recentTransactions,
+                integrations,
+                analytics: { revenueTrend: analyticsTrend, topCustomers, salesBySource },
+                salesBySource,
+                nonce: res.locals.nonce
+            });
+        } catch (err: any) {
+            logger.error({ err }, '[UnifiedDashboard] Fatal error');
+            res.status(500).render('error', { message: 'Failed to load Unified Dashboard', error: err });
+        }
+    }
+
+    static async dashboardUnifiedSources(req: Request, res: Response) {
+        try {
+            const user = res.locals.user;
+            if (!user?.id) return res.redirect('/auth/login');
+
+            const business = await (DashboardController as any).resolveBusinessContext(user, { 
+                integrations: true,
+                unifiedSyncJobs: {
+                    orderBy: { startedAt: 'desc' },
+                    take: 10
+                }
+            });
+
+            res.render('dashboard/services/unified/sources', {
+                user,
+                business,
+                title: 'Data Sources & Sync',
+                activeService: 'unified',
+                integrations: business?.integrations || [],
+                syncJobs: (business as any)?.unifiedSyncJobs || [],
+                nonce: res.locals.nonce
+            });
+        } catch (err: any) {
+            res.status(500).render('error', { message: 'Failed to load sources', error: err });
+        }
+    }
+
+    static async syncIntegration(req: Request, res: Response) {
+        try {
+            const user = res.locals.user;
+            const { integrationId } = req.params;
+            const businessId = user.businessId || user.business?.id;
+
+            if (!businessId) return res.status(400).json({ error: 'Business context missing' });
+
+            const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+            const result = await unifiedDataService.syncIntegrationData(businessId, integrationId);
+
+            res.json({ success: true, recordsSynced: result });
+        } catch (err: any) {
+            console.error('[SyncAPI] Error:', err.message);
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    static async dashboardUnifiedCustomers(req: Request, res: Response) {
+        try {
+            const user = res.locals.user;
+            if (!user?.id) return res.redirect('/auth/login');
+
+            const business = await (DashboardController as any).resolveBusinessContext(user);
+
+            let customers: any[] = [];
+            const sourceFilter = req.query.source as string;
+
+            if (business) {
+                console.log(`[UnifiedCustomers] ✅ Business: ${business.id} | Source: ${sourceFilter || 'ALL'}`);
+                const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                customers = await unifiedDataService.getUnifiedCustomers(business.id, 1, 100, { source: sourceFilter });
+            } else {
+                console.log(`[UnifiedCustomers] ❌ Business: NULL`);
+            }
+
+            res.render('dashboard/services/unified/customers', { 
+                user, 
+                business,
+                title: 'Unified Customers', 
+                activeService: 'unified',
+                customers,
+                nonce: res.locals.nonce
+            });
+        } catch (err: any) {
+            console.log(`[UnifiedCustomers] ❌ Error: ${err.message}`);
+            res.status(500).render('error', { message: 'Failed to load customers', error: err });
+        }
+    }
+
+    static async dashboardUnifiedTransactions(req: Request, res: Response) {
+        try {
+            const user = res.locals.user;
+            if (!user?.id) return res.redirect('/auth/login');
+
+            const business = await (DashboardController as any).resolveBusinessContext(user);
+
+            let orders: any[] = [];
+            let invoices: any[] = [];
+            let payments: any[] = [];
+            let estimates: any[] = [];
+            const sourceFilter = req.query.source as string;
+
+            if (business) {
+                console.log(`[UnifiedTransactions] ✅ Business: ${business.id} | Source: ${sourceFilter || 'ALL'}`);
+                const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                orders = await unifiedDataService.getUnifiedOrders(business.id, 1, 50, { source: sourceFilter });
+                invoices = await unifiedDataService.getUnifiedInvoices(business.id, 1, 50, { source: sourceFilter });
+                payments = await unifiedDataService.getUnifiedPayments(business.id, 1, 50, { source: sourceFilter });
+                estimates = await unifiedDataService.getUnifiedEstimates(business.id, 1, 50, { source: sourceFilter });
+            } else {
+                console.log(`[UnifiedTransactions] ❌ Business: NULL`);
+            }
+
+            res.render('dashboard/services/unified/transactions', { 
+                user, 
+                business,
+                title: 'Unified Transactions', 
+                activeService: 'unified',
+                orders,
+                invoices,
+                payments,
+                estimates,
+                nonce: res.locals.nonce
+            });
+        } catch (err: any) {
+            console.log(`[UnifiedTransactions] ❌ Error: ${err.message}`);
+            res.status(500).render('error', { message: 'Failed to load transactions', error: err });
+        }
+    }
+    static async dashboardUnifiedCustomerDetail(req: Request, res: Response) {
+        try {
+            const user = res.locals.user;
+            if (!user?.id) return res.redirect('/auth/login');
+
+            const { id } = req.params;
+            const business = await (DashboardController as any).resolveBusinessContext(user);
+
+            if (!business) return res.status(404).render('error', { message: 'Business context not found' });
+
+            const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+            const customer = await unifiedDataService.getUnifiedCustomerDetail(business.id, id);
+
+            if (!customer) return res.status(404).render('error', { message: 'Customer not found' });
+
+            res.render('dashboard/services/unified/customer-detail', { 
+                user, 
+                business,
+                title: `Customer: ${customer.name}`, 
+                activeService: 'unified',
+                customer,
+                nonce: res.locals.nonce
+            });
+        } catch (err: any) {
+            console.log(`[UnifiedCustomerDetail] ❌ Error: ${err.message}`);
+            res.status(500).render('error', { message: 'Failed to load customer details', error: err });
+        }
+    }
+
+    /**
+     * Helper to resolve business context for the current user.
+     * Tries session ID first, then falls back to user relation.
+     */
+    private static async resolveBusinessContext(user: any, include: any = {}) {
+        const businessId = user.businessId || user.business?.id;
+        let business: any = null;
+
+        if (businessId) {
+            business = await prisma.business.findUnique({
+                where: { id: businessId },
+                include
+            });
+        }
+
+        if (!business) {
+            // Fallback to searching by user membership
+            business = await prisma.business.findFirst({
+                where: { users: { some: { id: user.id } } },
+                orderBy: { createdAt: 'asc' },
+                include
+            });
+            
+            if (business) {
+                console.log(`[DashboardController] Resolved Business via Fallback for ${user.email}: ${business.id}`);
+            }
+        }
+
+        if (!business) {
+            console.warn(`[DashboardController] Failed to resolve Business context for User: ${user.email}`);
+        }
+
+        return business;
     }
 }

@@ -36,61 +36,80 @@ export class TemplateController {
     }
 
     static async renderPreview(req: Request, res: Response) {
-        const { id } = req.params;
-        const manifest = await templateService.getTemplate(id);
+        try {
+            const { id } = req.params;
+            const userId = (req as any).session?.userId || res.locals?.user?.id;
+            const manifest = await templateService.getTemplate(id);
 
-        if (!manifest) {
-            return res.status(404).send('Template not found');
-        }
-
-        const validation = templateService.validateTemplate(manifest);
-        if (!validation.isValid) {
-             return res.status(500).send(`Template Invalid: ${validation.errors.join(', ')}`);
-        }
-
-        // Transform manifest features (boolean) to Component Config (object)
-        const componentConfig: Record<string, { enabled: boolean }> = {};
-        if (manifest.features) {
-            Object.entries(manifest.features).forEach(([key, enabled]) => {
-                componentConfig[key] = { enabled: !!enabled };
-            });
-        }
-
-        const mockData = {
-            themeData: { primary: '#0ea5e9', secondary: '#0284c7', accent: '#38bdf8', text: '#0f172a', light: '#f0f9ff', muted: '#94a3b8', pattern: 'radial-gradient(circle, transparent 20%, #f0f9ff 20%, #f0f9ff 80%, transparent 80%, transparent) 0% 0% / 20px 20px' },
-            config: { title: `Preview: ${manifest.name}` },
-            components: componentConfig, // Injected from Manifest
-            company_name: "Acme Corp", // Header Req
-            document_number: "INV-2024-001", // Header Req
-            issue_date: "2024-02-04", // Header Req
-            due_date: "2024-03-04", // Header Req
-            model: {
-                items: [
-                    { id: 1, name: "Premium Widget A", sku: "WID-001", qty: 2, price: 50.00, img: "📦", category: "Hardware" },
-                    { id: 2, name: "Service Plan B", sku: "SVC-002", qty: 1, price: 150.00, img: "🔧", category: "Services" }
-                ],
-                subtotal: 250.00,
-                tax: 20.00,
-                total: 270.00,
-                recommendations: [
-                    { id: 101, name: "Maintenance Kit", price: 29.99, img: "🧰" },
-                    { id: 102, name: "Extended Warranty", price: 49.99, img: "🛡️" }
-                ],
-                reviews: [
-                    { id: 1, question: "How was the service?", type: "rating" },
-                    { id: 2, question: "Upload Photo", type: "upload" }
-                ]
+            if (!manifest) {
+                return res.status(404).send('Template not found');
             }
-        };
-        
-        const viewPath = templateService.getViewPath(id);
-        
-        res.render(viewPath, {
-            branding: mockData,
-            theme: mockData.themeData, // Explicitly pass theme for EJS includes if needed
-            title: manifest.name
-            // nonce is handled by res.locals
-        });
+
+            const validation = templateService.validateTemplate(manifest);
+            if (!validation.isValid) {
+                 return res.status(500).send(`Template Invalid: ${validation.errors.join(', ')}`);
+            }
+
+            // Transform manifest features (boolean) to Component Config (object)
+            const componentConfig: Record<string, { enabled: boolean }> = {};
+            if (manifest.features) {
+                Object.entries(manifest.features).forEach(([key, enabled]) => {
+                    componentConfig[key] = { enabled: !!enabled };
+                });
+            }
+
+            let profileData: any = null;
+            let themeData: any = null;
+            let invoiceData: any = null;
+
+            if (userId) {
+                profileData = await brandingService.getProfile(userId);
+                themeData = profileData?.themeSettings || {
+                     primary: '#0ea5e9', secondary: '#0284c7', accent: '#38bdf8', text: '#0f172a', light: '#f0f9ff', muted: '#94a3b8' 
+                };
+
+                const user = res.locals.user;
+                const businessId = user?.businessId || user?.business?.id;
+                
+                if (businessId) {
+                    const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                    const recentInvoices = await unifiedDataService.getUnifiedInvoices(businessId, 1, 1);
+                    if (recentInvoices && recentInvoices.length > 0) {
+                        invoiceData = recentInvoices[0];
+                    }
+                }
+            }
+
+            // Provide fallback layout if no real data found
+            const brandingPayload = {
+                themeData: themeData || { primary: '#0ea5e9', secondary: '#0284c7', accent: '#38bdf8', text: '#0f172a', light: '#f0f9ff', muted: '#94a3b8' },
+                config: { title: `Preview: ${manifest.name}` },
+                components: componentConfig,
+                company_name: profileData?.brandName || "Your Company",
+                document_number: invoiceData?.invoiceNumber || invoiceData?.externalId || "INV-001",
+                issue_date: invoiceData?.issuedDate ? new Date(invoiceData.issuedDate).toLocaleDateString() : new Date().toLocaleDateString(),
+                due_date: invoiceData?.dueDate ? new Date(invoiceData.dueDate).toLocaleDateString() : new Date().toLocaleDateString(),
+                model: {
+                    items: invoiceData?.items || [],
+                    subtotal: invoiceData?.amount || 0,
+                    tax: 0,
+                    total: invoiceData?.amount || 0,
+                    recommendations: [],
+                    reviews: []
+                }
+            };
+            
+            const viewPath = templateService.getViewPath(id);
+            
+            res.render(viewPath, {
+                branding: brandingPayload,
+                theme: brandingPayload.themeData,
+                title: manifest.name
+            });
+        } catch (error: any) {
+            console.error('Error rendering template preview:', error);
+            res.status(500).send('Error rendering template preview');
+        }
     }
 
     static async activateTemplate(req: Request, res: Response) {

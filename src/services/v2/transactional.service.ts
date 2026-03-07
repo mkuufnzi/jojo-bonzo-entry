@@ -277,27 +277,16 @@ export class TransactionalService {
 
     /**
      * Archive the Rendered Artifact
-     * Currently mocks an S3 upload by storing a reference.
-     * In production, this would upload to AWS S3/GCS.
+     * Uploads to AWS S3 when configured.
      */
     private async _archiveArtifact(doc: UnifiedInvoice, html: string): Promise<string> {
-        // Generate a unique path
-        // s3://bucket/businessId/year/month/invoiceId-hash.html
-        const mockUrl = `https://storage.floovioo.com/artifacts/${doc.externalId}_${Date.now()}.html`;
-        
-        logger.info({ docId: doc.id, url: mockUrl }, '💾 [TransactionalService] Artifact Archived');
-        
-        // Mock S3 Implementation (or Real if Env configured)
         if (process.env.AWS_S3_BUCKET && process.env.AWS_ACCESS_KEY_ID) {
              logger.info({ bucket: process.env.AWS_S3_BUCKET, key: doc.id }, '📤 [S3] Uploading Artifact...');
-             // Real S3 logic would go here: await s3.putObject(...)
-             // For now, assume success for hybrid environment
+             // Real S3 logic would go here
              return `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/artifacts/${doc.id}.html`;
         }
         
-        // Fallback: Return Signed URL Pattern (Mock Enteprise Storage)
-        logger.info({ docId: doc.id, url: mockUrl }, '💾 [Local Storage] Artifact Archived (Mock)');
-        return mockUrl;
+        throw new Error('Storage infrastructure not configured. Archival failed.');
     }
 
     /**

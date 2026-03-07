@@ -41,9 +41,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
           return res.redirect('/auth/login');
         }
 
-        console.log(`[Session] ✅ Restored user session for: ${user.email}`);
+        console.log(`[Session] ✅ Restored user session for: ${user.email} (businessId: ${user.businessId})`);
         (req as any).user = user;
         res.locals.user = user;
+        console.log(`[Session] Injected into res.locals.user: ${!!res.locals.user}`);
       } catch (error) {
          console.error('[Session] ❌ Error restoring user session:', error);
          return next(error);

@@ -484,22 +484,142 @@ export class QBOProvider implements IERPProvider {
     }
 
     async getInvoices(params?: FetchParams): Promise<ERPDocument[]> {
-        // QBO Query Language
-        const query = "select * from Invoice MAXRESULTS 100";
-        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+        const limit = params?.limit || 100;
         
-        return (data.QueryResponse?.Invoice || []).map((inv: any) => ({
+        // Parallel fetch for Invoices and SalesReceipts (which act as "instant" invoices)
+        const [invData, receiptData] = await Promise.all([
+            this.fetchRaw(`/query?query=${encodeURIComponent(`select * from Invoice MAXRESULTS ${limit}`)}`),
+            this.fetchRaw(`/query?query=${encodeURIComponent(`select * from SalesReceipt MAXRESULTS ${limit}`)}`)
+        ]);
+        
+        const invoices = (invData.QueryResponse?.Invoice || []).map((inv: any) => ({
             id: inv.Id,
-            externalId: inv.DocNumber,
-            type: 'invoice',
+            externalId: inv.DocNumber || inv.Id,
+            type: 'invoice' as const,
             date: new Date(inv.TxnDate),
             dueDate: inv.DueDate ? new Date(inv.DueDate) : undefined,
-            name: `Invoice #${inv.DocNumber}` || 'Unknown Invoice',
+            name: `Invoice #${inv.DocNumber || inv.Id}`,
             total: inv.TotalAmt,
             status: inv.Balance === 0 ? 'paid' : 'open',
             contactName: inv.CustomerRef?.name,
             rawData: inv
         }));
+
+        const receipts = (receiptData.QueryResponse?.SalesReceipt || []).map((rec: any) => ({
+            id: rec.Id,
+            externalId: rec.DocNumber || rec.Id,
+            type: 'invoice' as const, // Treat sales receipts as realized invoices
+            date: new Date(rec.TxnDate),
+            name: `Receipt #${rec.DocNumber || rec.Id}`,
+            total: rec.TotalAmt,
+            status: 'paid', // Receipts are by definition paid
+            contactName: rec.CustomerRef?.name,
+            rawData: rec
+        }));
+        
+        return [...invoices, ...receipts].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, limit);
+    }
+
+    async getEstimates(params?: FetchParams): Promise<ERPDocument[]> {
+        const limit = params?.limit || 100;
+        const query = `select * from Estimate MAXRESULTS ${limit}`;
+        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+        
+        return (data.QueryResponse?.Estimate || []).map((est: any) => ({
+            id: est.Id,
+            externalId: est.DocNumber || est.Id,
+            type: 'estimate' as const,
+            date: new Date(est.TxnDate),
+            name: `Estimate #${est.DocNumber || est.Id}`,
+            total: est.TotalAmt,
+            status: est.TxnStatus,
+            contactName: est.CustomerRef?.name,
+            rawData: est
+        }));
+    }
+
+    async getSalesOrders(params?: FetchParams): Promise<ERPDocument[]> {
+        const limit = params?.limit || 100;
+        // In QBO, SalesOrders are a specific entity
+        const query = `select * from SalesOrder MAXRESULTS ${limit}`;
+        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+        
+        return (data.QueryResponse?.SalesOrder || []).map((so: any) => ({
+            id: so.Id,
+            externalId: so.DocNumber || so.Id,
+            type: 'salesorder' as const,
+            date: new Date(so.TxnDate),
+            name: `Order #${so.DocNumber || so.Id}`,
+            total: so.TotalAmt,
+            status: so.TxnStatus,
+            contactName: so.CustomerRef?.name,
+            rawData: so
+        }));
+    }
+
+    async getPayments(params?: FetchParams): Promise<ERPDocument[]> {
+        const limit = params?.limit || 100;
+        const query = `select * from Payment MAXRESULTS ${limit}`;
+        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+        
+        return (data.QueryResponse?.Payment || []).map((p: any) => ({
+            id: p.Id,
+            externalId: p.Id,
+            type: 'payment' as const,
+            date: new Date(p.TxnDate),
+            name: `Payment #${p.Id}`,
+            total: p.TotalAmt,
+            status: 'success', // QBO Payments are usually successful if in this table
+            contactName: p.CustomerRef?.name,
+            rawData: p
+        }));
+    }
+
+    async getContacts(params?: FetchParams): Promise<ERPDocument[]> {
+        const limit = params?.limit || 100;
+        const query = `select * from Customer MAXRESULTS ${limit}`;
+        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+        
+        return (data.QueryResponse?.Customer || []).map((c: any) => ({
+             id: c.Id,
+             externalId: c.Id,
+             type: 'contact',
+             date: c.MetaData?.CreateTime ? new Date(c.MetaData.CreateTime) : new Date(),
+             name: c.DisplayName || c.FullyQualifiedName || 'Unknown Contact',
+             contactName: c.DisplayName || c.FullyQualifiedName,
+             status: c.Active ? 'active' : 'inactive',
+             rawData: c
+        }));
+    }
+
+    async getItems(params?: FetchParams): Promise<ERPDocument[]> {
+        const limit = params?.limit || 100;
+        const query = `select * from Item WHERE Type IN ('Inventory', 'Service') MAXRESULTS ${limit}`;
+        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+        
+        return (data.QueryResponse?.Item || []).map((item: any) => ({
+            id: item.Id,
+            externalId: item.Sku || item.Id,
+            type: 'item',
+            date: item.MetaData?.CreateTime ? new Date(item.MetaData.CreateTime) : new Date(),
+            status: item.Active ? 'active' : 'inactive',
+            name: item.Name || item.Sku || 'Unknown Item',
+            contactName: item.Name,
+            total: item.UnitPrice,
+            rawData: item
+        }));
+    }
+
+    async getChartOfAccounts(params?: FetchParams): Promise<ERPDocument[]> {
+        return [];
+    }
+
+    async getPurchaseOrders(params?: FetchParams): Promise<ERPDocument[]> {
+        return [];
+    }
+
+    async getBills(params?: FetchParams): Promise<ERPDocument[]> {
+        return [];
     }
 
     // --- OAuth Refresh ---
@@ -900,43 +1020,4 @@ export class QBOProvider implements IERPProvider {
         }
     }
 
-    // --- Stubs for Interface ---
-    async getEstimates(params?: FetchParams): Promise<ERPDocument[]> { return []; }
-    async getSalesOrders(params?: FetchParams): Promise<ERPDocument[]> { return []; }
-    async getContacts(params?: FetchParams): Promise<ERPDocument[]> {
-        const query = "select * from Customer MAXRESULTS 100";
-        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
-        return (data.QueryResponse?.Customer || []).map((c: any) => ({
-             id: c.Id,
-             externalId: c.Id,
-             type: 'contact',
-             date: c.MetaData?.CreateTime ? new Date(c.MetaData.CreateTime) : new Date(),
-             name: c.DisplayName || c.FullyQualifiedName || 'Unknown Contact',
-             contactName: c.DisplayName || c.FullyQualifiedName,
-             status: c.Active ? 'active' : 'inactive',
-             rawData: c
-        }));
-    }
-
-    async getItems(params?: FetchParams): Promise<ERPDocument[]> {
-        const query = "select * from Item WHERE Type IN ('Inventory', 'Service') MAXRESULTS 100";
-        const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
-        return (data.QueryResponse?.Item || []).map((item: any) => ({
-            id: item.Id,
-            externalId: item.Sku || item.Id,
-            type: 'item',
-            date: item.MetaData?.CreateTime ? new Date(item.MetaData.CreateTime) : new Date(),
-            status: item.Active ? 'active' : 'inactive',
-            name: item.Name || item.Sku || 'Unknown Item',
-            contactName: item.Name,
-            total: item.UnitPrice,
-            rawData: item
-        }));
-    }
-
-    // --- Remaining Stubs ---
-    async getChartOfAccounts(params?: FetchParams): Promise<ERPDocument[]> { return []; }
-    async getPurchaseOrders(params?: FetchParams): Promise<ERPDocument[]> { return []; }
-    async getBills(params?: FetchParams): Promise<ERPDocument[]> { return []; }
-    async getPayments(params?: FetchParams): Promise<ERPDocument[]> { return []; }
 }

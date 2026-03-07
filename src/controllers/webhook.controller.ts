@@ -434,6 +434,17 @@ export class WebhookController {
                 logger.error({ recoveryError }, 'Failed to update recovery session from webhook');
             }
 
+            // [Phase 9] Trigger Unified Data Aggregation Sync
+            try {
+                const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                // Fire and forget the sync to keep the endpoint fast
+                unifiedDataService.syncBusinessData(integration.businessId).catch(err => {
+                    logger.error({ err, businessId: integration.businessId }, 'Async Unified Data Sync failed');
+                });
+            } catch (syncError) {
+                logger.error({ syncError }, 'Failed to trigger unified data sync');
+            }
+
             console.log(`[Webhook] ⚙️ Dispatching to WorkflowService for User ${userId}`);
             try {
                 // [Phase 2] Pass App context if available through integration

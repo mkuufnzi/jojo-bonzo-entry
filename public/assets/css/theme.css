@@ -3,71 +3,101 @@
   Methodical CSS overrides and system-wide styling
 */
 
-/* --- Responsive Root Scaling (Refined for Higher Density) --- */
-html {
-    font-size: 14px; /* Mobile base */
-}
-
-@media (min-width: 640px) {
-    html { font-size: 14.5px; }
-}
-
-@media (min-width: 768px) {
-    html { font-size: 14.5px; } /* Tablet */
-}
-
-@media (min-width: 1024px) {
-    html { font-size: 15px; } /* Desktop - Reduced from 16.5px */
-}
-
-@media (min-width: 1280px) {
-    html { font-size: 15.5px; } /* Wide - Reduced from 17px */
-}
-
-@media (min-width: 1536px) {
-    html { font-size: 16px; } /* 2XL - Reduced from 18px */
-}
-
+/* --- Enhanced Density Scaling & Setup --- */
 :root {
-    /* Color Palette - Refined & Minimal */
-    --brand-primary: #2563eb;
-    --brand-primary-hover: #1d4ed8;
-    --bg-main: #f8fafc;
-    --bg-card: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --border-subtle: #e2e8f0;
-    --border-focus: #3b82f6;
+    /* Color Palette - Light Mode Defaults */
+    --color-primary: #2563eb;       /* Blue 600 */
+    --color-primary-hover: #1d4ed8; /* Blue 700 */
+    --color-primary-light: #eff6ff; /* Blue 50 */
+    --color-accent: #06b6d4;        /* Cyan 500 */
+    --color-accent-hover: #0891b2;  /* Cyan 600 */
+
+    /* Backgrounds & Surfaces */
+    --color-background: #f8fafc;    /* Slate 50 */
+    --color-surface: #ffffff;       /* White */
+    --color-secondary: #64748b;     /* Slate 500 */
+
+    /* Text */
+    --color-text-primary: #0f172a;  /* Slate 900 */
+    --color-text-secondary: #334155;/* Slate 700 */
+    --color-text-muted: #64748b;    /* Slate 500 */
+    
+    /* Borders */
+    --color-border: #e2e8f0;        /* Slate 200 */
+
+    /* Status */
+    --color-success: #059669;       /* Emerald 600 */
+    --color-warning: #d97706;       /* Amber 600 */
+    --color-error: #dc2626;         /* Red 600 */
+    --color-info: #3b82f6;          /* Blue 500 */
+
+    /* Shadows & Spacing Base */
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-card-hover: 0 20px 40px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     
     /* System Tokens */
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
-    --radius-lg: 0.75rem; /* Max rounding for a minimalistic look */
-    --shadow-minimal: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-subtle: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --radius-lg: 0.75rem;
 }
 
-/* --- Base System Refinements --- */
-* {
-    border-color: var(--border-subtle);
+/* Dark Mode Tokens */
+.dark {
+    --color-primary: #3b82f6;       /* Blue 500 */
+    --color-primary-hover: #60a5fa; /* Blue 400 */
+    --color-primary-light: #1e3a8a; /* Blue 900 */
+    --color-accent: #22d3ee;        /* Cyan 400 */
+    --color-accent-hover: #67e8f9;  /* Cyan 300 */
+    
+    /* Deep Ocean Backgrounds */
+    --color-background: #0B1121;    /* Slate 950 */
+    --color-surface: #0f172a;       /* Slate 900 */
+    --color-secondary: #475569;     /* Slate 600 */
+
+    /* Light Text */
+    --color-text-primary: #f8fafc;  /* Slate 50 */
+    --color-text-secondary: #cbd5e1;/* Slate 300 */
+    --color-text-muted: #94a3b8;    /* Slate 400 */
+    
+    /* Dark Borders */
+    --color-border: #1e293b;        /* Slate 800 */
+
+    /* Adjusted Status */
+    --color-success: #34d399;       /* Emerald 400 */
+    --color-warning: #fbbf24;       /* Amber 400 */
+    --color-error: #f87171;         /* Red 400 */
+    --color-info: #60a5fa;          /* Blue 400 */
+
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-card-hover: 0 20px 40px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4);
 }
 
+/* Responsive Root Scaling */
+html { font-size: 14px; }
+@media (min-width: 640px) { html { font-size: 14px; } }
+@media (min-width: 768px) { html { font-size: 14.5px; } }
+@media (min-width: 1024px) { html { font-size: 15px; } }
+@media (min-width: 1280px) { html { font-size: 15px; } }
+@media (min-width: 1536px) { html { font-size: 16px; } }
+
+/* Base App Colors applied to root */
 body {
-    background-color: var(--bg-main);
-    color: var(--text-primary);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
 }
+* { border-color: var(--color-border); }
 
 /* Standard Minimal Card */
 .minimal-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-minimal);
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .minimal-card:hover {
-    box-shadow: var(--shadow-subtle);
+    box-shadow: var(--shadow-card-hover);
 }
 
 /* Compact Buttons */

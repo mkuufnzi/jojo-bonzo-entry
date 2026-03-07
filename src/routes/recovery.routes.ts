@@ -27,6 +27,9 @@ router.get('/customers/:id', RecoveryController.customerDetail);
 router.get('/clusters', RecoveryController.clusters);
 router.get('/webhooks', RecoveryController.webhookLog);
 
+// Real-time Event Stream (SSE)
+router.get('/events', RecoveryController.events);
+
 // API Endpoints (JSON)
 router.post('/onboarding/step', RecoveryController.saveOnboardingStep);
 router.get('/status', RecoveryController.getStatus);

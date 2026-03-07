@@ -91,31 +91,39 @@
                 </h3>
              </div>
              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-100">
-                    <thead class="bg-slate-50/50">
+                <table class="block sm:table w-full min-w-full divide-y divide-slate-100">
+                    <thead class="hidden sm:table-header-group bg-slate-50/50">
                         <tr>
                             <th class="px-6 py-4 text-left text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Service</th>
                             <th class="px-6 py-4 text-center text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Requests</th>
                             <th class="px-6 py-4 text-right text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Total Cost</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-50">
+                    <tbody class="block sm:table-row-group divide-y divide-slate-50 p-4 sm:p-0">
                         <% if (usageBreakdown.length === 0) { %>
-                             <tr><td colspan="3" class="px-6 py-12 text-center text-slate-400 font-bold uppercase text-xs">No protocol activity detected</td></tr>
+                             <tr class="block sm:table-row"><td colspan="3" class="block sm:table-cell px-6 py-12 text-center text-slate-400 font-bold uppercase text-xs">No protocol activity detected</td></tr>
                         <% } %>
                         <% usageBreakdown.forEach(svc => { %>
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="px-6 py-4">
+                            <tr class="block sm:table-row mb-4 sm:mb-0 bg-white sm:bg-transparent border border-slate-100 sm:border-0 rounded-xl sm:rounded-none overflow-hidden hover:bg-slate-50/50 transition-colors shadow-sm sm:shadow-none">
+                                <td class="block sm:table-cell px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-50 sm:border-0">
                                     <div class="flex items-center gap-3 font-bold text-slate-700 underline decoration-slate-200 decoration-2 underline-offset-8">
-                                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                                        <%= svc.name %>
+                                        <div class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></div>
+                                        <span class="truncate"><%= svc.name %></span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center text-slate-500 font-bold"><%= svc.count %></td>
-                                <td class="px-6 py-4 text-right">
-                                    <span class="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-mono font-bold">
-                                        <%= currency === 'GBP' ? '£' : '$' %><%= svc.cost.toFixed(4) %>
-                                    </span>
+                                <td class="block sm:table-cell px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-50 sm:border-0">
+                                    <div class="flex justify-between sm:justify-center items-center h-full">
+                                        <span class="sm:hidden text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Requests</span>
+                                        <span class="text-slate-500 font-bold"><%= svc.count %></span>
+                                    </div>
+                                </td>
+                                <td class="block sm:table-cell px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/50 sm:bg-transparent">
+                                    <div class="flex justify-between sm:justify-end items-center h-full">
+                                        <span class="sm:hidden text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Total Cost</span>
+                                        <span class="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-mono font-bold">
+                                            <%= currency === 'GBP' ? '£' : '$' %><%= svc.cost.toFixed(4) %>
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
                         <% }) %>
@@ -153,7 +161,7 @@
                                 </div>
                                 <div>
                                     <p class="font-bold text-slate-900 uppercase tracking-tight">
-                                        <%= method.provider === 'mock' ? 'SECURE_NODE' : method.provider.toUpperCase() %> •••• <%= method.last4 %>
+                                        <%= method.provider.toUpperCase() %> •••• <%= method.last4 %>
                                     </p>
                                     <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mt-1">VAL_EXP: <span class="text-slate-900"><%= method.expiry %></span></p>
                                 </div>
@@ -178,8 +186,8 @@
                     Invoice History
                 </h3>
              </div>
-             <table class="min-w-full divide-y divide-slate-100">
-                <thead class="bg-slate-50/50">
+             <table class="block sm:table w-full min-w-full divide-y divide-slate-100">
+                <thead class="hidden sm:table-header-group bg-slate-50/50">
                     <tr>
                         <th class="px-6 py-4 text-left text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Timestamp</th>
                         <th class="px-6 py-4 text-left text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Package</th>
@@ -187,18 +195,34 @@
                         <th class="px-6 py-4 text-right text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Document</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="block sm:table-row-group divide-y divide-slate-50 p-4 sm:p-0">
                     <% if (invoices.length === 0) { %>
-                         <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold uppercase text-xs">No billing history found</td></tr>
+                         <tr class="block sm:table-row"><td colspan="4" class="block sm:table-cell px-6 py-12 text-center text-slate-400 font-bold uppercase text-xs">No billing history found</td></tr>
                     <% } %>
                     <% invoices.forEach(invoice => { %>
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="px-6 py-4 text-sm font-medium text-slate-500"><%= new Date(invoice.createdAt).toLocaleDateString() %></td>
-                            <td class="px-6 py-4 text-sm font-bold text-slate-900 uppercase tracking-tight"><%= invoice.subscription?.plan?.name || 'On-Demand' %></td>
-                            <td class="px-6 py-4 text-center font-mono font-bold text-slate-900"><%= currency === 'GBP' ? '£' : '$' %><%= invoice.amount.toFixed(2) %></td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="/billing/invoices/<%= invoice.id %>/download" class="p-2 text-brand-blue hover:bg-blue-50 rounded-lg transition-colors inline-block">
-                                    <i data-lucide="download" class="w-4 h-4"></i>
+                        <tr class="block sm:table-row mb-4 sm:mb-0 bg-white sm:bg-transparent border border-slate-100 sm:border-0 rounded-xl sm:rounded-none overflow-hidden hover:bg-slate-50/50 transition-colors shadow-sm sm:shadow-none">
+                            <td class="block sm:table-cell px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-50 sm:border-0">
+                                <div class="flex justify-between sm:justify-start items-center">
+                                    <span class="sm:hidden text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Timestamp</span>
+                                    <span class="text-sm font-medium text-slate-500"><%= new Date(invoice.createdAt).toLocaleDateString() %></span>
+                                </div>
+                            </td>
+                            <td class="block sm:table-cell px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-50 sm:border-0">
+                                <div class="flex justify-between sm:justify-start items-center">
+                                    <span class="sm:hidden text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Package</span>
+                                    <span class="text-sm font-bold text-slate-900 uppercase tracking-tight"><%= invoice.subscription?.plan?.name || 'On-Demand' %></span>
+                                </div>
+                            </td>
+                            <td class="block sm:table-cell px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/50 sm:bg-transparent">
+                                <div class="flex justify-between sm:justify-center items-center">
+                                    <span class="sm:hidden text-[0.625rem] font-black text-slate-400 uppercase tracking-[0.1em]">Amount</span>
+                                    <span class="font-mono font-bold text-slate-900"><%= currency === 'GBP' ? '£' : '$' %><%= invoice.amount.toFixed(2) %></span>
+                                </div>
+                            </td>
+                            <td class="block sm:table-cell px-4 py-3 sm:px-6 sm:py-4 sm:text-right border-t border-slate-50 sm:border-0">
+                                <a href="/billing/invoices/<%= invoice.id %>/download" class="flex sm:inline-flex items-center justify-center w-full sm:w-auto p-2 sm:px-3 text-brand-blue bg-blue-50 sm:bg-transparent sm:hover:bg-blue-50 rounded-lg transition-colors text-xs font-bold uppercase tracking-widest group">
+                                    <i data-lucide="download" class="w-4 h-4 sm:mr-0 mr-2 group-hover:-translate-y-0.5 transition-transform"></i>
+                                    <span class="sm:hidden">Download</span>
                                 </a>
                             </td>
                         </tr>

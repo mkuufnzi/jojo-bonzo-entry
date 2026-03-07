@@ -341,6 +341,18 @@ export class SeederService {
                         apply_estimate: {
                             url: process.env.N8N_WEBHOOK_APPLY_ESTIMATE || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
                             label: 'Apply Branding to Estimate'
+                        },
+                        ai_product_support: {
+                            url: process.env.N8N_WEBHOOK_AI_PRODUCT_SUPPORT || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
+                            label: 'Generate AI Product Support'
+                        },
+                        ai_recommendations: {
+                            url: process.env.N8N_WEBHOOK_AI_RECOMMENDATIONS || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
+                            label: 'Generate AI Recommended Products'
+                        },
+                        deliver_document: {
+                            url: process.env.N8N_WEBHOOK_DELIVER_DOCUMENT || 'https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080',
+                            label: 'Deliver Compiled Document'
                         }
                     }
                 }

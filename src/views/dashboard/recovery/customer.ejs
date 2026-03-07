@@ -522,6 +522,28 @@ function customerRecovery() {
         escalationNote: '',
         
         retrying: null,
+
+        init() {
+            // Establish Server-Sent Events (SSE) connection for real-time updates
+            const source = new EventSource('/dashboard/recovery/events');
+            
+            source.addEventListener('invoice_paid', (e) => {
+                const data = JSON.parse(e.data);
+                if (data && data.invoiceId) {
+                    console.log(`[SSE] Real-time Payment Received for Invoice #${data.invoiceId}`);
+                    this.showToast(`Payment received for invoice #${data.invoiceId}! Refreshing...`, 'success');
+                    
+                    // Soft reload after 2.5 seconds to show updated data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2500);
+                }
+            });
+
+            source.onerror = () => {
+                console.warn('[SSE] Connection lost, attempting to reconnect...');
+            };
+        },
         
         async analyzeRisk(invoiceId) {
             this.analyzeModalOpen = true;

@@ -199,11 +199,15 @@ export class WorkflowService {
     
     const type = actionConfig.type || actionConfig.steps?.[0]?.type;
         // todo: handle all types
-    if (type === 'apply_branding' || type === 'brand_and_email' || type === 'email' || type === 'recovery_email') {
+    if (type === 'apply_branding' || type === 'brand_and_email' || type === 'email' || type === 'recovery_email' || type === 'generate_local_template') {
         
         // 1. Resolve External Endpoint (n8n)
         let serviceSlug: string = ServiceSlugs.TRANSACTIONAL_BRANDING;
         let webhookAction = type === 'email' ? 'email' : 'apply_branding';
+
+        if (type === 'generate_local_template') {
+            webhookAction = 'deliver_document';
+        }
 
         // Special routing for Recovery
         // todo: better routing needed
@@ -294,6 +298,25 @@ export class WorkflowService {
             smartContent = await revenueService.getEnrichedContext(effectiveBusinessId || 'unknown', documentItems);
         }
 
+        // 3.2 Local Template Rendering (if configured)
+        let compiledHtml: string | null = null;
+        if (type === 'generate_local_template') {
+            const { templateGenerator } = require('./template-generator.service');
+            const docType = payload.resourceType || payload.type?.split('.')[0] || 'invoice';
+            try {
+                compiledHtml = await templateGenerator.generateHtml(
+                    effectiveUserId,
+                    effectiveBusinessId || 'unknown',
+                    docType,
+                    payload
+                );
+                logger.info({ businessId: effectiveBusinessId, docType }, '✅ [WorkflowService] Local template rendered successfully');
+            } catch (err: any) {
+                logger.error({ error: err.message }, '❌ [WorkflowService] Local template rendering failed');
+                throw err; // Stop execution if local render fails
+            }
+        }
+
         const envelope = n8nPayloadFactory.createWorkflowExecutionPayload(
             workflowId,
             type,
@@ -305,6 +328,10 @@ export class WorkflowService {
             payload.normalizedEventType, // Use strict event type if provided by integration
             smartContent
         );
+
+        if (compiledHtml) {
+            (envelope as any).html = compiledHtml;
+        }
 
         // ── Recovery: Promote tracking IDs to envelope top-level ──
         // n8n must echo actionId/sessionId/actionIds back in the callback to

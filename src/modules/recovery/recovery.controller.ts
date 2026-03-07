@@ -5,6 +5,7 @@ import { logger } from '../../lib/logger';
 import { createQueue, QUEUES } from '../../lib/queue';
 import prisma from '../../lib/prisma';
 import { notificationService } from '../../services/notification.service';
+import { sseService } from '../../services/sse.service';
 
 const recoveryQueue = createQueue(QUEUES.RECOVERY_ENGINE);
 const recoveryService = new RecoveryService();
@@ -34,7 +35,7 @@ export class RecoveryController {
         const busId = user?.businessId || user?.business?.id;
         if (busId) return busId;
 
-        // DB fallback for stale sessions — User carries businessId scalar
+        // DB fallback
         if (user?.id) {
             const fresh = await prisma.user.findUnique({
                 where: { id: user.id },
@@ -44,6 +45,17 @@ export class RecoveryController {
                 if (res.locals.user) res.locals.user.businessId = fresh.businessId;
                 if ((req as AuthRequest).user) (req as AuthRequest).user.businessId = fresh.businessId;
                 return fresh.businessId;
+            }
+
+            // Fallback for 'users' relation membership
+            const business = await prisma.business.findFirst({
+                where: { users: { some: { id: user.id } } },
+                select: { id: true }
+            });
+            if (business) {
+                if (res.locals.user) res.locals.user.businessId = business.id;
+                if ((req as AuthRequest).user) (req as AuthRequest).user.businessId = business.id;
+                return business.id;
             }
         }
 
@@ -142,6 +154,24 @@ export class RecoveryController {
             }
             return res.status(500).render('error', { message: 'Failed to load recovery dashboard' });
         }
+    }
+
+    /**
+     * Server-Sent Events (SSE) Hub for real-time dashboard updates.
+     */
+    static async events(req: Request, res: Response) {
+        const businessId = await RecoveryController.resolveBusinessId(req, res);
+        if (!businessId) {
+            return res.status(401).end();
+        }
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        // Tell NGINX/proxies not to buffer SSE
+        res.setHeader('X-Accel-Buffering', 'no');
+
+        sseService.addClient(businessId, res);
     }
 
     /**

@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require('tailwindcss/plugin')
+
 module.exports = {
   content: [
     "./src/**/*.{html,js,ts,jsx,tsx,ejs}",
@@ -9,45 +11,44 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Floovioo Modern Palette (Premium "Expensive" Tech Blue)
-        'deep-ocean': '#0B1121', // Darker, richer navy (Slate 950)
-        'brand-blue': '#2563EB', // Blue 600 (Deeper, more "Enterprise" than Blue 500)
-        'brand-indigo': '#4338CA', // Indigo 700 (Deeper purple-blue)
-        'electric-teal': '#06B6D4', // Cyan 500 (Vibrant accent)
-        'off-white': '#F8FAFC', // Slate 50 (Clean background)
-        
-        // Semantic Mappings
-        primary: '#2563EB', // Blue 600
-        'primary-hover': '#1D4ED8', // Blue 700
-        accent: '#06B6D4', // Cyan 500
-        'accent-hover': '#0891B2', // Cyan 600
+        // Semantic Mappings mapped to CSS Variables
+        primary: {
+            DEFAULT: 'var(--color-primary)',
+            hover: 'var(--color-primary-hover)',
+            light: 'var(--color-primary-light)',
+        },
+        accent: {
+            DEFAULT: 'var(--color-accent)',
+            hover: 'var(--color-accent-hover)',
+        },
         
         // Text Colors
-        'text-primary': '#0F172A', // Slate 900
-        'text-secondary': '#334155', // Slate 700 (High legibility)
-        'text-muted': '#64748B', // Slate 500
-        border: '#E2E8F0', // Slate 200
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-muted': 'var(--color-text-muted)',
+        border: 'var(--color-border)',
         
-        // Surface Colors (for bg-surface, etc.)
-        surface: '#FFFFFF', // White
-        secondary: '#64748B', // Slate 500 (for focus:ring-secondary)
+        // Surface & Background Colors
+        background: 'var(--color-background)',
+        surface: 'var(--color-surface)',
+        secondary: 'var(--color-secondary)',
         
         // Semantic status colors
-        success: '#059669', // Emerald 600
-        warning: '#D97706', // Amber 600
-        error: '#DC2626', // Red 600
+        success: 'var(--color-success)',
+        warning: 'var(--color-warning)',
+        error: 'var(--color-error)',
+        info: 'var(--color-info)'
       },
       fontFamily: {
-        // "Plus Jakarta Sans" leads for Geometric Modern feel
         sans: ['"Plus Jakarta Sans"', '"Inter"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         heading: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       boxShadow: {
-        'card': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-        'card-hover': '0 20px 40px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)', // Large soft shadow
-        'glow': '0 0 40px -5px rgba(37, 99, 235, 0.4)', // Blue 600 Glow
-        'glow-teal': '0 0 40px -5px rgba(6, 182, 212, 0.4)', // Teal Glow
+        'card': 'var(--shadow-card)',
+        'card-hover': 'var(--shadow-card-hover)',
+        'glow': '0 0 40px -5px rgba(37, 99, 235, 0.4)', 
+        'glow-teal': '0 0 40px -5px rgba(6, 182, 212, 0.4)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -55,10 +56,14 @@ module.exports = {
       },
       borderRadius: {
         'xl': '1rem',
-        '2xl': '1.25rem', // Smooth curves
+        '2xl': '1.25rem',
         '3xl': '1.5rem',
       }
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function({ addVariant }) {
+        addVariant('compact', '.compact-mode &')
+    })
+  ],
 }

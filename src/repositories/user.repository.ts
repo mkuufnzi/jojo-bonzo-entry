@@ -32,6 +32,7 @@ export class UserRepository {
                 }
             }
         },
+        business: true,
       },
     });
   }

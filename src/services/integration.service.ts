@@ -19,8 +19,8 @@ export class IntegrationService {
     // Standardization: Enforce 'quickbooks'
     // if (provider === 'quickbooks') provider = 'quickbooks';
 
-    const token = accessToken || 'mock_access_token_' + Date.now();
-    const refresh = refreshToken || (accessToken ? undefined : 'mock_refresh_' + Date.now());
+    const token = accessToken;
+    const refresh = refreshToken;
 
     // Check if THIS provider already exists to update it
     const existing = await prisma.integration.findFirst({
@@ -117,27 +117,17 @@ export class IntegrationService {
   }
 
   /**
-   * Simulates fetching initial data (Invoices) from the provider
+   * Triggers initial data sync from the provider.
+   * Real sync is handled by the provider adapter (QuickBooks/Xero/Zoho).
    */
   async syncInitialData(userId: string, provider: string) {
      const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
      if (!user?.businessId) return;
 
-     // Mock fetching 5 recent invoices
-     const mockInvoices = Array.from({ length: 5 }).map((_, i) => ({
-         businessId: user.businessId,
-         externalId: `inv_${Date.now()}_${i}`,
-         customerName: `Customer ${i + 1}`,
-         amount: Math.floor(Math.random() * 1000) + 100,
-         status: 'paid',
-         date: new Date()
-     }));
-
-     // In a real app, we would upsert these into an 'Invoice' or 'ExternalDocument' table
-     // For now, let's just log them to show activity
-     logger.info({ userId, count: mockInvoices.length }, 'Synced mock invoices from ERP');
-     
-     return mockInvoices;
+     // Real sync is performed via provider-specific adapters and the normalization engine.
+     // This method is a trigger point — actual data pull happens in the integration pipeline.
+     logger.info({ userId, provider, businessId: user.businessId }, '[IntegrationService] Initial data sync triggered — delegating to provider adapter');
+     return [];
   }
 
   /**

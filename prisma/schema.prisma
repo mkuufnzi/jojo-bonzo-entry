@@ -33,18 +33,18 @@ model User {
   adminLogs            AdminLog[]
   apiKeys              ApiKey[]
   apps                 App[]
+  debtCollectionTasks  DebtCollectionTask[]
   invoices             Invoice[]
   loginHistory         LoginHistory[]
   notifications        Notification[]
   notificationConfig   NotificationConfig?
   paymentMethods       PaymentMethod[]
+  smartDocuments       SmartDocument[]
   subscription         Subscription?
   logs                 UsageLog[]
   business             Business?            @relation(fields: [businessId], references: [id])
   devices              UserDevice[]
   profile              UserProfile?
-  smartDocuments       SmartDocument[]
-  debtCollectionTasks  DebtCollectionTask[]
 }
 
 model Business {
@@ -69,22 +69,30 @@ model Business {
   campaigns                      Campaign[]
   contacts                       Contact[]
   debtCollectionActions          DebtCollectionAction[]
+  debtCollectionClusters         DebtCollectionCluster[]
+  debtCollectionCustomers        DebtCollectionCustomer[]
+  debtCollectionCustomerProfiles DebtCollectionCustomerProfile[]
+  debtCollectionInvoices         DebtCollectionInvoice[]
+  debtCollectionTemplates        DebtCollectionMessageTemplate[]
   debtCollectionSequences        DebtCollectionSequence[]
   debtCollectionSessions         DebtCollectionSession[]
   debtCollectionTasks            DebtCollectionTask[]
-  debtCollectionTemplates        DebtCollectionMessageTemplate[]
   externalDocuments              ExternalDocument[]
   integrations                   Integration[]
+  processedDocuments             ProcessedDocument[]
   products                       Product[]
   recommendationRules            RecommendationRule[]
+  unifiedCustomers               UnifiedCustomer[]
+  unifiedEstimates               UnifiedEstimate[]
+  unifiedInvoices                UnifiedInvoice[]
+  unifiedOrders                  UnifiedOrder[]
+  unifiedPayments                UnifiedPayment[]
+  unifiedProducts                UnifiedProduct[]
+  unifiedShippingNotes           UnifiedShippingNote[]
+  unifiedSyncJobs                UnifiedSyncJob[]
   users                          User[]
   userTemplates                  UserTemplate[]
   workflows                      Workflow[]
-  processedDocuments             ProcessedDocument[]
-  debtCollectionCustomers        DebtCollectionCustomer[]
-  debtCollectionInvoices         DebtCollectionInvoice[]
-  debtCollectionCustomerProfiles DebtCollectionCustomerProfile[]
-  debtCollectionClusters         DebtCollectionCluster[]
 }
 
 model UserDevice {
@@ -146,20 +154,28 @@ model UserProfile {
 }
 
 model Integration {
-  id                String             @id @default(uuid())
-  provider          String
-  name              String?
-  accessToken       String?
-  refreshToken      String?
-  expiresAt         DateTime?
-  status            String             @default("connected")
-  metadata          Json?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  businessId        String
-  settings          Json?
-  externalDocuments ExternalDocument[]
-  business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id                   String                @id @default(uuid())
+  provider             String
+  name                 String?
+  accessToken          String?
+  refreshToken         String?
+  expiresAt            DateTime?
+  status               String                @default("connected")
+  metadata             Json?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  businessId           String
+  settings             Json?
+  externalDocuments    ExternalDocument[]
+  business             Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  unifiedCustomers     UnifiedCustomer[]
+  unifiedEstimates     UnifiedEstimate[]
+  unifiedInvoices      UnifiedInvoice[]
+  unifiedOrders        UnifiedOrder[]
+  unifiedPayments      UnifiedPayment[]
+  unifiedProducts      UnifiedProduct[]
+  unifiedShippingNotes UnifiedShippingNote[]
+  unifiedSyncJobs      UnifiedSyncJob[]
 
   @@unique([businessId, provider])
   @@index([businessId])
@@ -180,28 +196,24 @@ model IntegrationDefinition {
 }
 
 model BrandingProfile {
-  id           String  @id @default(uuid())
-  name         String  @default("Default Brand")
-  isDefault    Boolean @default(false)
-  logoUrl      String?
-  faviconUrl   String?
-  brandColors  Json?
-  fontSettings Json?
-
-  // Template Configuration
-  activeTemplateId String @default("smart_invoice_v1")
-  components       Json? // Stores feature states: { "header": { "enabled": true }, ... }
-
-  // Legacy / Deprecated
-  templates     Json?
-  upsellConfig  Json?
-  supportConfig Json?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  businessId    String
-  metadata      Json?
-  voiceProfile  Json?
-  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid())
+  name             String   @default("Default Brand")
+  isDefault        Boolean  @default(false)
+  logoUrl          String?
+  faviconUrl       String?
+  brandColors      Json?
+  fontSettings     Json?
+  templates        Json?
+  upsellConfig     Json?
+  supportConfig    Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  businessId       String
+  metadata         Json?
+  voiceProfile     Json?
+  activeTemplateId String   @default("smart_invoice_v1")
+  components       Json?
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
 }
@@ -244,23 +256,18 @@ model Product {
 }
 
 model UserTemplate {
-  id           String @id @default(uuid())
-  businessId   String
-  name         String
-  documentType String // INVOICE, RECEIPT, QUOTE
-
-  // Cloning Architecture
-  baseTemplateId String? // e.g. "smart_invoice_v1" (Null if custom HTML)
-  config         Json? // Stores overrides { theme:..., components:... }
-  isDefault      Boolean @default(false)
-
-  // Legacy / Advanced Custom
-  htmlContent String? // Optional: For fully custom templates
-  source      String  @default("system") // "system" (cloned) or "custom"
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  business  Business @relation(fields: [businessId], references: [id])
+  id             String   @id @default(uuid())
+  businessId     String
+  name           String
+  documentType   String
+  htmlContent    String?
+  source         String   @default("system")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  baseTemplateId String?
+  config         Json?
+  isDefault      Boolean  @default(false)
+  business       Business @relation(fields: [businessId], references: [id])
 
   @@index([businessId])
   @@index([businessId, documentType])
@@ -403,8 +410,8 @@ model App {
   userId             String
   user               User                @relation(fields: [userId], references: [id])
   services           AppService[]
-  logs               UsageLog[]
   processedDocuments ProcessedDocument[]
+  logs               UsageLog[]
 }
 
 model ApiKey {
@@ -422,32 +429,29 @@ model ApiKey {
 }
 
 model Service {
-  id                 String   @id @default(uuid())
-  name               String   @unique
-  slug               String   @unique
+  id                 String       @id @default(uuid())
+  name               String       @unique
+  slug               String       @unique
   description        String?
-  pricePerRequest    Float    @default(0.0)
-  executionType      String   @default("local")
+  pricePerRequest    Float        @default(0.0)
+  executionType      String       @default("local")
   endpointUrl        String?
   config             Json?
-  isActive           Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
   requiredFeatureKey String?
-
-  // Service Architecture Fields
-  tier           String  @default("core") // core, transactional, sales, content, retention
-  dependencies   Json? // Array of service slugs this service depends on
-  provides       Json? // Array of capability tags
-  requires       Json? // Array of capability tags required
-  defaultConfig  Json? // Default configuration values
-  endpoints      Json? // Array of {path, method, billable, rateLimit, scopes}
-  healthCheckUrl String? // URL for service health monitoring
-  scalingConfig  Json? // {minInstances, maxInstances, targetCPU, targetMemory}
-
-  defaultScopes Json? // Default scopes granted when enabling this service
-  apps          AppService[]
-  logs          UsageLog[]
+  defaultConfig      Json?
+  defaultScopes      Json?
+  dependencies       Json?
+  endpoints          Json?
+  healthCheckUrl     String?
+  provides           Json?
+  requires           Json?
+  scalingConfig      Json?
+  tier               String       @default("core")
+  apps               AppService[]
+  logs               UsageLog[]
 
   @@index([tier, slug])
 }
@@ -609,136 +613,124 @@ model DebtCollectionSequence {
   businessId                  String
   name                        String                       @default("Default Recovery")
   steps                       Json
-  settings                    Json? // e.g. { gracePeriod: 3, brandVoice: 'empathetic' }
+  settings                    Json?
   isActive                    Boolean                      @default(true)
   isDefault                   Boolean                      @default(false)
-  rules                       Json? // e.g. { minAmount: 1000, customerTags: ['vip'] }
+  rules                       Json?
   createdAt                   DateTime                     @default(now())
   updatedAt                   DateTime                     @updatedAt
-  business                    Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  sessions                    DebtCollectionSession[]
-  debtCollectionSequenceSteps DebtCollectionSequenceStep[]
-  debtCollectionSequenceRules DebtCollectionSequenceRule[]
   cluster                     DebtCollectionCluster?
+  business                    Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  debtCollectionSequenceRules DebtCollectionSequenceRule[]
+  debtCollectionSequenceSteps DebtCollectionSequenceStep[]
+  sessions                    DebtCollectionSession[]
 
   @@index([businessId])
 }
 
 model DebtCollectionSession {
-  id                String    @id @default(uuid())
-  businessId        String
-  sequenceId        String
-  externalInvoiceId String
-  customerId        String?
-  customerName      String?
-  status            String    @default("ACTIVE") // ACTIVE, RECOVERED, TERMINATED, PAUSED
-  currentStepIndex  Int       @default(0)
-  nextActionAt      DateTime?
-  metadata          Json?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  business                     Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  sequence                     DebtCollectionSequence       @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  id                           String                       @id @default(uuid())
+  businessId                   String
+  sequenceId                   String
+  externalInvoiceId            String
+  customerId                   String?
+  customerName                 String?
+  status                       String                       @default("ACTIVE")
+  currentStepIndex             Int                          @default(0)
+  nextActionAt                 DateTime?
+  metadata                     Json?
+  createdAt                    DateTime                     @default(now())
+  updatedAt                    DateTime                     @updatedAt
   actions                      DebtCollectionAction[]
-  debtCollectionTasks          DebtCollectionTask[]
+  debtCollectionAuditLogs      DebtCollectionAuditLog[]
   debtCollectionDisputes       DebtCollectionDispute[]
   debtCollectionPromiseToPays  DebtCollectionPromiseToPay[]
-  debtCollectionAuditLogs      DebtCollectionAuditLog[]
+  business                     Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  sequence                     DebtCollectionSequence       @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
   debtCollectionStateHistories DebtCollectionStateHistory[]
+  debtCollectionTasks          DebtCollectionTask[]
 
   @@unique([businessId, externalInvoiceId, status])
   @@index([businessId, externalInvoiceId])
   @@index([businessId, customerId])
 }
 
-// ==========================================
-// DEBT COLLECTION ISOLATED MICROSERVICE DATA
-// ==========================================
-
 model DebtCollectionCustomer {
-  id             String   @id @default(uuid())
+  id             String                         @id @default(uuid())
   businessId     String
-  externalId     String // e.g., QBO Customer ID
+  externalId     String
   name           String
   email          String?
   phone          String?
-  lifetimeValue  Float    @default(0)
-  totalInvoices  Int      @default(0)
-  unpaidInvoices Int      @default(0)
-  riskScore      String   @default("Unknown")
-  isActive       Boolean  @default(true) // Maps to ERP customer 'Active' status
-  metadata       Json? // Complete cached profile
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  business Business                       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  invoices DebtCollectionInvoice[]
-  profile  DebtCollectionCustomerProfile?
+  lifetimeValue  Float                          @default(0)
+  totalInvoices  Int                            @default(0)
+  unpaidInvoices Int                            @default(0)
+  riskScore      String                         @default("Unknown")
+  metadata       Json?
+  createdAt      DateTime                       @default(now())
+  updatedAt      DateTime                       @updatedAt
+  isActive       Boolean                        @default(true)
+  business       Business                       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  profile        DebtCollectionCustomerProfile?
+  invoices       DebtCollectionInvoice[]
 
   @@unique([businessId, externalId])
   @@index([businessId])
 }
 
 model DebtCollectionCustomerProfile {
-  id             String @id @default(uuid())
-  debtCustomerId String @unique
-  businessId     String
-
-  lifetimeValue        Float   @default(0) // Total historical spend
-  totalPurchases       Int     @default(0) // Total purchase history count
-  paymentFrequencyDays Float? // Average days to pay
-  creditLimit          Float? // Credit limit from ERP
-  riskScore            String  @default("LOW") // High, Medium, Low based on past collection hits
-  clusterId            String? // Relation to DebtCollectionCluster
-
-  lastEnrichedAt DateTime? // When we last pulled deep data
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  business Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer DebtCollectionCustomer @relation(fields: [debtCustomerId], references: [id], onDelete: Cascade)
-  cluster  DebtCollectionCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  id                   String                 @id @default(uuid())
+  debtCustomerId       String                 @unique
+  businessId           String
+  lifetimeValue        Float                  @default(0)
+  totalPurchases       Int                    @default(0)
+  paymentFrequencyDays Float?
+  creditLimit          Float?
+  riskScore            String                 @default("LOW")
+  clusterId            String?
+  lastEnrichedAt       DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  business             Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  cluster              DebtCollectionCluster? @relation(fields: [clusterId], references: [id])
+  customer             DebtCollectionCustomer @relation(fields: [debtCustomerId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
   @@index([clusterId])
 }
 
 model DebtCollectionCluster {
-  id          String  @id @default(uuid())
+  id          String                          @id @default(uuid())
   businessId  String
-  name        String // e.g., "High-Value VIPs", "Chronic Late Payers"
+  name        String
   description String?
-  ruleLogic   Json // Define the qualitative ranges (e.g. { ltvMin: 500 })
-  sequenceId  String? @unique // A specific sequence mapped strictly to this cluster
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  business Business                        @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  sequence DebtCollectionSequence?         @relation(fields: [sequenceId], references: [id], onDelete: SetNull)
-  profiles DebtCollectionCustomerProfile[]
+  ruleLogic   Json
+  sequenceId  String?                         @unique
+  createdAt   DateTime                        @default(now())
+  updatedAt   DateTime                        @updatedAt
+  business    Business                        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  sequence    DebtCollectionSequence?         @relation(fields: [sequenceId], references: [id])
+  profiles    DebtCollectionCustomerProfile[]
 
   @@index([businessId])
 }
 
 model DebtCollectionInvoice {
-  id            String    @id @default(uuid())
+  id            String                 @id @default(uuid())
   businessId    String
   customerId    String
-  externalId    String    @unique // QBO Invoice ID
+  externalId    String                 @unique
   invoiceNumber String?
-  amount        Float     @default(0)
-  balance       Float     @default(0)
-  status        String // E.g., Open, Paid, Voided
+  amount        Float                  @default(0)
+  balance       Float                  @default(0)
+  status        String
   dueDate       DateTime?
   issuedDate    DateTime?
-  metadata      Json? // Complete cached invoice payload
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  business Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer DebtCollectionCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  metadata      Json?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  business      Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer      DebtCollectionCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@unique([businessId, externalId])
   @@index([businessId, customerId])
@@ -757,123 +749,112 @@ model DebtCollectionAction {
   createdAt                      DateTime                        @default(now())
   updatedAt                      DateTime                        @default(now()) @updatedAt
   business                       Business                        @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  session                        DebtCollectionSession?          @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  session                        DebtCollectionSession?          @relation(fields: [sessionId], references: [id])
   debtCollectionCommunicationLog DebtCollectionCommunicationLog?
 
   @@index([businessId, externalInvoiceId])
 }
 
-// ==========================================
-// DEBT COLLECTION ENTERPRISE OBJECTS
-// ==========================================
-
 model DebtCollectionSequenceStep {
-  id              String   @id @default(uuid())
+  id              String                         @id @default(uuid())
   sequenceId      String
-  dayOffset       Int // e.g. 3 = send 3 days after invoice is overdue
-  actionType      String // EMAIL, SMS, CALL, MANUAL_TASK
-  templateId      String? // References DebtCollectionMessageTemplate
-  escalationLevel Int      @default(0) // Severity of the message
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  sequence DebtCollectionSequence         @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
-  template DebtCollectionMessageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  dayOffset       Int
+  actionType      String
+  templateId      String?
+  escalationLevel Int                            @default(0)
+  createdAt       DateTime                       @default(now())
+  updatedAt       DateTime                       @updatedAt
+  sequence        DebtCollectionSequence         @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  template        DebtCollectionMessageTemplate? @relation(fields: [templateId], references: [id])
 
   @@index([sequenceId])
 }
 
 model DebtCollectionSequenceRule {
-  id             String   @id @default(uuid())
+  id             String                 @id @default(uuid())
   sequenceId     String
-  conditionField String // e.g., 'balance', 'riskScore'
-  operator       String // e.g., '>', '==', 'includes'
-  value          String // e.g., '5000', 'High'
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  sequence DebtCollectionSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  conditionField String
+  operator       String
+  value          String
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  sequence       DebtCollectionSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
 
   @@index([sequenceId])
 }
 
 model DebtCollectionMessageTemplate {
-  id             String   @id @default(uuid())
+  id             String                       @id @default(uuid())
   businessId     String
   name           String
-  channel        String // EMAIL, SMS, SYSTEM
+  channel        String
   subject        String?
-  body           String   @db.Text
-  mergeVariables Json? // Documented list of variable keys used inside the body
-  tone           String   @default("Neutral")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  business Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  steps    DebtCollectionSequenceStep[]
+  body           String
+  mergeVariables Json?
+  tone           String                       @default("Neutral")
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+  business       Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  steps          DebtCollectionSequenceStep[]
 
   @@index([businessId])
 }
 
 model DebtCollectionCommunicationLog {
-  id               String   @id @default(uuid())
-  actionId         String   @unique
-  event            String // DELIVERED, OPENED, CLICKED, BOUNCED, REPLIED
-  providerResponse Json? // Raw callback from Postmark/Twilio/n8n
-  timestamp        DateTime @default(now())
-
-  action DebtCollectionAction @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  id               String               @id @default(uuid())
+  actionId         String               @unique
+  event            String
+  providerResponse Json?
+  timestamp        DateTime             @default(now())
+  action           DebtCollectionAction @relation(fields: [actionId], references: [id], onDelete: Cascade)
 }
 
 model DebtCollectionTask {
-  id              String    @id @default(uuid())
+  id              String                @id @default(uuid())
   businessId      String
   sessionId       String
   assignedUserId  String?
-  taskType        String // CALL, REVIEW_DISPUTE, ESCALATE_LEGAL
-  status          String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  taskType        String
+  status          String                @default("PENDING")
   dueDate         DateTime?
-  resolutionNotes String?   @db.Text
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  business     Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  session      DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  assignedUser User?                 @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+  resolutionNotes String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  assignedUser    User?                 @relation(fields: [assignedUserId], references: [id])
+  business        Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  session         DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([businessId, status])
   @@index([sessionId])
 }
 
 model DebtCollectionDispute {
-  id                 String    @id @default(uuid())
-  invoiceExternalId  String // Soft link to externalInvoiceId
+  id                 String                 @id @default(uuid())
+  invoiceExternalId  String
   customerExternalId String?
   sessionId          String?
-  status             String    @default("OPEN") // OPEN, INVESTIGATING, RESOLVED, DISMISSED
+  status             String                 @default("OPEN")
   reasonCategoryId   String?
-  details            String    @db.Text
-  resolutionNotes    String?   @db.Text
-  openedAt           DateTime  @default(now())
+  details            String
+  resolutionNotes    String?
+  openedAt           DateTime               @default(now())
   resolvedAt         DateTime?
-
-  session DebtCollectionSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  session            DebtCollectionSession? @relation(fields: [sessionId], references: [id])
 
   @@index([invoiceExternalId, status])
 }
 
 model DebtCollectionPromiseToPay {
-  id                String   @id @default(uuid())
+  id                String                @id @default(uuid())
   sessionId         String
-  invoiceExternalId String // Soft link
-  status            String   @default("ACTIVE") // ACTIVE, BROKEN, FULFILLED, RENEGOTIATED
+  invoiceExternalId String
+  status            String                @default("ACTIVE")
   promisedAmount    Float
   promisedDate      DateTime
-  terms             String?  @db.Text
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  session DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  terms             String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  session           DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@index([invoiceExternalId])
@@ -885,36 +866,34 @@ model DebtCollectionPartialPayment {
   amount            Float
   paymentMethod     String?
   recordedAt        DateTime @default(now())
-  syncStatus        String   @default("LOCAL") // LOCAL, ERP_CONFIRMED
+  syncStatus        String   @default("LOCAL")
 
   @@index([invoiceExternalId])
 }
 
 model DebtCollectionAuditLog {
-  id        String   @id @default(uuid())
+  id        String                @id @default(uuid())
   sessionId String
-  actorType String // SYSTEM, USER, CUSTOMER_REPLY, ERP_SYNC
-  actorId   String? // Could be userId or integration string
-  event     String // e.g. SEQUENCE_PAUSED, AMOUNT_UPDATED, DISPUTE_OPENED
-  reason    String?  @db.Text
-  timestamp DateTime @default(now())
-
-  session DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  actorType String
+  actorId   String?
+  event     String
+  reason    String?
+  timestamp DateTime              @default(now())
+  session   DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@index([timestamp])
 }
 
 model DebtCollectionStateHistory {
-  id             String   @id @default(uuid())
+  id             String                @id @default(uuid())
   sessionId      String
   previousStatus String
   newStatus      String
-  reason         String?  @db.Text
-  triggerSource  String   @default("SYSTEM") // e.g., SYSTEM, ERP_SYNC, NSF_REVERSAL, USER
-  timestamp      DateTime @default(now())
-
-  session DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  reason         String?
+  triggerSource  String                @default("SYSTEM")
+  timestamp      DateTime              @default(now())
+  session        DebtCollectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@index([timestamp])
@@ -948,84 +927,48 @@ model BusinessMetric {
   @@index([calculatedAt])
 }
 
-enum OnboardingStatus {
-  NOT_STARTED
-  IN_PROGRESS
-  COMPLETED
-}
-
-enum AccountType {
-  INDIVIDUAL
-  BUSINESS
-}
-
 model SmartDocument {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  type   String // 'INVOICE', 'RECEIPT', 'ESTIMATE'
-  status String @default("DRAFT") // 'DRAFT', 'GENERATED', 'SENT', 'VIEWED'
-
-  // Identifying info
+  id             String   @id @default(uuid())
+  userId         String
+  type           String
+  status         String   @default("DRAFT")
   documentNumber String
   issuedAt       DateTime @default(now())
-
-  // The Core Data (Line items, Customer info, Totals)
-  data Json
-
-  // The Visual Theme applied (Snapshot of branding at generation time)
-  theme Json
-
-  // Feature Configuration (Toggles for Upsells, Tutorials, etc.)
-  config Json
-
-  // Metadata for AI/System
-  metadata Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  data           Json
+  theme          Json
+  config         Json
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
 
   @@index([userId, type])
 }
 
-// ===================================
-// TRANSACTIONAL ENGINE - Phase 1
-// ===================================
-
 /// ProcessedDocument tracks all documents through the branding/email pipeline
 model ProcessedDocument {
-  id         String @id @default(uuid())
-  businessId String
-  appId      String // REQUIRED - all API calls must have App context
-  userId     String
-
-  // Source
-  provider     String // quickbooks, xero, zoho
-  resourceType String // invoice, estimate, contact, etc.
-  resourceId   String // External ID from ERP
-
-  // Processing
-  eventType      String // Scoped event name (floovioo_transactional_...)
-  status         String  @default("pending") // pending, processing, completed, failed
-  flooviooId     String? @unique
-  n8nExecutionId String?
-
-  // Results
-  brandedUrl     String?
-  emailSent      Boolean @default(false)
-  emailRecipient String?
-  emailMessageId String?
-
-  // Metadata
+  id               String   @id @default(uuid())
+  businessId       String
+  appId            String
+  userId           String
+  provider         String
+  resourceType     String
+  resourceId       String
+  eventType        String
+  status           String   @default("pending")
+  flooviooId       String?  @unique
+  n8nExecutionId   String?
+  brandedUrl       String?
+  emailSent        Boolean  @default(false)
+  emailRecipient   String?
+  emailMessageId   String?
   processingTimeMs Int?
   errorMessage     String?
   retryCount       Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-
-  app      App      @relation(fields: [appId], references: [id], onDelete: Cascade)
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  app              App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@index([businessId, createdAt(sort: Desc)])
   @@index([status])
@@ -1035,37 +978,213 @@ model ProcessedDocument {
 
 /// AuditLog provides universal audit trail for all API calls and n8n dispatches
 model AuditLog {
-  id        String   @id @default(uuid())
-  timestamp DateTime @default(now())
-
-  // Actor
-  userId     String?
-  appId      String?
-  businessId String?
-
-  // Action
-  actionType String // 'n8n_dispatch', 'n8n_response', 'api_call', 'erp_webhook'
-  serviceId  String?
-  eventType  String?
-
-  // Request
+  id             String   @id @default(uuid())
+  timestamp      DateTime @default(now())
+  userId         String?
+  appId          String?
+  businessId     String?
+  actionType     String
+  serviceId      String?
+  eventType      String?
   requestPayload Json?
   requestId      String?
-
-  // Response
   responseStatus Int?
   responseData   Json?
-
-  // Performance
-  durationMs Int?
-
-  // Result
-  success      Boolean
-  errorMessage String?
+  durationMs     Int?
+  success        Boolean
+  errorMessage   String?
 
   @@index([userId, timestamp(sort: Desc)])
   @@index([businessId, timestamp(sort: Desc)])
   @@index([eventType])
   @@index([actionType])
   @@index([requestId])
+}
+
+model UnifiedCustomer {
+  id            String            @id @default(uuid())
+  businessId    String
+  integrationId String
+  externalId    String
+  name          String
+  email         String?
+  phone         String?
+  source        String
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  business      Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  integration   Integration       @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  estimates     UnifiedEstimate[]
+  invoices      UnifiedInvoice[]
+  orders        UnifiedOrder[]
+  payments      UnifiedPayment[]
+
+  @@unique([businessId, integrationId, externalId])
+  @@index([businessId])
+}
+
+model UnifiedInvoice {
+  id            String          @id @default(uuid())
+  businessId    String
+  integrationId String
+  customerId    String
+  externalId    String
+  invoiceNumber String?
+  amount        Float           @default(0)
+  balance       Float           @default(0)
+  status        String
+  dueDate       DateTime?
+  issuedDate    DateTime?
+  source        String
+  metadata      Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  business      Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer      UnifiedCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  integration   Integration     @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, integrationId, externalId])
+  @@index([businessId, customerId])
+}
+
+model UnifiedProduct {
+  id            String      @id @default(uuid())
+  businessId    String
+  integrationId String
+  externalId    String
+  name          String
+  sku           String?
+  description   String?
+  price         Float?
+  currency      String      @default("USD")
+  source        String
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  business      Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, integrationId, externalId])
+  @@index([businessId])
+}
+
+model UnifiedOrder {
+  id            String                @id @default(uuid())
+  businessId    String
+  integrationId String
+  customerId    String
+  externalId    String
+  orderNumber   String?
+  amount        Float                 @default(0)
+  status        String
+  orderDate     DateTime?
+  source        String
+  metadata      Json?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  business      Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer      UnifiedCustomer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  integration   Integration           @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  shippingNotes UnifiedShippingNote[]
+
+  @@unique([businessId, integrationId, externalId])
+  @@index([businessId, customerId])
+}
+
+model UnifiedPayment {
+  id            String          @id @default(uuid())
+  businessId    String
+  integrationId String
+  customerId    String
+  externalId    String
+  amount        Float           @default(0)
+  method        String?
+  status        String
+  paymentDate   DateTime?
+  source        String
+  metadata      Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  business      Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer      UnifiedCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  integration   Integration     @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, integrationId, externalId])
+  @@index([businessId, customerId])
+}
+
+model UnifiedShippingNote {
+  id            String       @id @default(uuid())
+  businessId    String
+  integrationId String
+  orderId       String
+  externalId    String
+  trackingId    String?
+  carrier       String?
+  status        String
+  shippedDate   DateTime?
+  source        String
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  business      Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  integration   Integration  @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  order         UnifiedOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, integrationId, externalId])
+  @@index([businessId, orderId])
+}
+
+model UnifiedEstimate {
+  id            String          @id @default(uuid())
+  businessId    String
+  integrationId String
+  customerId    String
+  externalId    String
+  estimateNum   String?
+  amount        Float           @default(0)
+  status        String
+  estimateDate  DateTime?
+  expiryDate    DateTime?
+  source        String
+  metadata      Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  business      Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer      UnifiedCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  integration   Integration     @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, integrationId, externalId])
+  @@index([businessId, customerId])
+}
+
+model UnifiedSyncJob {
+  id            String      @id @default(uuid())
+  businessId    String
+  integrationId String
+  entityType    String
+  status        String      @default("PENDING")
+  startedAt     DateTime?
+  completedAt   DateTime?
+  recordsSynced Int         @default(0)
+  errorMessage  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  business      Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, integrationId, entityType])
+  @@index([status])
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum AccountType {
+  INDIVIDUAL
+  BUSINESS
 }
