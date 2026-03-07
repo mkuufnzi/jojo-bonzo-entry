@@ -315,11 +315,12 @@ app.use('/templates', templateRoutes);          // New Portable Template Loader
 
 // Dashboard & App Routes - Protected + Onboarding Check
 // Dashboard & App Routes - Protected
-app.use('/dashboard/connections', integrationsRoutes); // Integrations (Config allowed during onboarding)
+// Integrations (Platform connectivity) moved to management stack below
 app.use('/dashboard', requireAuth, checkOnboarding);
 app.use('/onboarding', businessRoutes);       // New Business Onboarding Wizard
 app.use('/dashboard/brand', brandingRoutes);     // Brand Standards
 app.use('/dashboard/workflows', workflowsRoutes); // Workflows
+app.use('/dashboard/integrations', integrationsRoutes); // Enterprise Integrations Hub
 
 // Recovery REST API (JSON) — uses own requireServiceAccess chain
 import recoveryApiRoutes from './routes/recovery-api.routes';
@@ -383,12 +384,14 @@ import aiRoutes from './routes/ai.routes';
 import jobsRoutes from './routes/jobs.routes';
 import transactionalRoutesV1 from './routes/v1/transactional.routes';
 import webhookRoutes from './routes/webhook.routes';
+import unifiedDataRoutes from './modules/unified-data/unified-data.routes';
 
 apiRouter.use('/', apiRoutes);       // /api/me, /api/usage, /api/services
 apiRouter.use('/pdf', pdfRoutes);    // /api/pdf/convert
 apiRouter.use('/ai', aiRoutes);      // /api/ai/generate
 apiRouter.use('/jobs', jobsRoutes);  // /api/jobs/status
-  apiRouter.use('/v1/transactional', transactionalRoutesV1); // Enterprise V1
+apiRouter.use('/v1/transactional', transactionalRoutesV1); // Enterprise V1
+apiRouter.use('/v1/unified-data', unifiedDataRoutes); // Aggregated Normalized Data
 // Mount API router
 // Mount API router
 app.use('/api/v1/webhooks', webhookRoutes); // Public Webhooks (Signature Verification handled inside)

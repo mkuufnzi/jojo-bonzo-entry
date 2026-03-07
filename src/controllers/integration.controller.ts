@@ -7,7 +7,48 @@ import { logger } from '../lib/logger';
 export class IntegrationController {
   
   /**
-   * GET /dashboard/connections
+   * GET /dashboard/integrations
+   * Enterprise Hub for data connectivity and sync health
+   */
+  static async dashboardIntegrations(req: Request, res: Response, next: NextFunction) {
+      try {
+          const userId = req.user?.id || req.session.userId!;
+          const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
+          
+          if (!user?.businessId) return res.redirect('/onboarding/wizard');
+
+          // 1. Fetch active connections
+          const activeConnections = await prisma.integration.findMany({
+              where: { businessId: user.businessId }
+          });
+
+          // 2. Fetch Recent Sync Jobs
+          const syncJobs = await prisma.unifiedSyncJob.findMany({
+              where: { businessId: user.businessId },
+              orderBy: { startedAt: 'desc' },
+              take: 10
+          });
+
+          // 3. Aggregate Total record counts (Simple sum for overview)
+          // [OPPORTUNITY] We could aggregate from actual tables (UnifiedInvoice, etc.) for real precision
+          const totalSyncedRecords = syncJobs.reduce((acc, job) => acc + (job.recordsSynced || 0), 0);
+
+          res.render('dashboard/services/integrations/index', {
+              title: 'Integrations Hub',
+              activeConnections,
+              syncJobs,
+              totalSyncedRecords,
+              activeService: 'integrations',
+              nonce: res.locals.nonce,
+              user: req.user
+          });
+      } catch (error) {
+          next(error);
+      }
+  }
+
+  /**
+   * GET /dashboard/integrations/connections
    * List all connected and available ERPs for the business
    */
   static async index(req: Request, res: Response, next: NextFunction) {
@@ -27,12 +68,13 @@ export class IntegrationController {
               where: { status: 'active' }
           });
 
-          res.render('dashboard/connections', {
-              title: 'Connections',
+          res.render('dashboard/services/integrations/connections', {
+              title: 'Authorized Connections',
               activeConnections,
               definitions,
-              activeService: 'transactional', // Keep in context
-              nonce: res.locals.nonce
+              activeService: 'integrations',
+              nonce: res.locals.nonce,
+              user: req.user
           });
       } catch (error) {
           next(error);
@@ -201,9 +243,9 @@ export class IntegrationController {
         if (config.accessType) authUrl += `&access_type=${config.accessType}`;
         if (config.provider === 'zoho') authUrl += '&prompt=consent'; // Optional, good for testing
 
-        // Handle generic fallback if config is strictly mock
-        if (config.provider === 'mock') {
-             authUrl = `/onboarding/api/business/oauth/callback/${slug}?code=mock_code&state=${state}`;
+        // Reject unconfigured providers instead of silently mocking
+        if (!config.provider || !config.authUrl) {
+             return res.status(400).json({ error: `Provider '${slug}' is not configured for OAuth.` });
         }
         
         // Render the Connector Page
@@ -240,7 +282,7 @@ export class IntegrationController {
             });
 
             if (!integration) {
-                return res.redirect('/dashboard/connections');
+                return res.redirect('/dashboard/integrations');
             }
 
             // 2. Fetch Definition (for Name, Logo)
@@ -353,7 +395,7 @@ export class IntegrationController {
                }
           }
 
-          res.redirect(`/dashboard/connections/${provider}?success=true`);
+          res.redirect(`/dashboard/integrations/${provider}?success=true`);
 
       } catch (error) {
           next(error);
@@ -387,7 +429,7 @@ export class IntegrationController {
           logger.info({ userId, provider, integrationId: integration.id }, '[IntegrationController] Disconnected integration');
           
           // Redirect back to connections list
-          res.redirect('/dashboard/apps?disconnected=' + provider);
+          res.redirect('/dashboard/integrations/connections?disconnected=' + provider);
       } catch (error: any) {
           logger.error({ error }, '[IntegrationController] Disconnect failed');
           res.redirect('/dashboard/apps?error=disconnect_failed');
@@ -433,50 +475,7 @@ export class IntegrationController {
           }
           
           if (integration.accessToken.includes('mock')) {
-              // Simulated Data
-              await new Promise(r => setTimeout(r, 800)); // Fake latency
-              
-              const mockDate = new Date().toISOString().split('T')[0];
-              
-              switch(entity) {
-                  case 'items':
-                       return res.json([
-                          { item_id: 'ITEM-001', name: 'Consulting Service', rate: 150.00, status: 'active', sku: 'SVC-001' },
-                          { item_id: 'ITEM-002', name: 'Software License', rate: 49.99, status: 'active', sku: 'SW-001' }
-                      ]);
-                  case 'invoices':
-                      return res.json([
-                          { invoice_id: 'INV-001', customer_name: 'Acme Corp', total: 1500.00, status: 'paid', date: mockDate, invoice_number: 'INV-001' },
-                          { invoice_id: 'INV-002', customer_name: 'Globex Inc', total: 2350.50, status: 'sent', date: mockDate, invoice_number: 'INV-002' }
-                      ]);
-                  case 'estimates':
-                      return res.json([
-                          { estimate_id: 'EST-001', customer_name: 'Acme Corp', total: 1500.00, status: 'accepted', date: mockDate },
-                          { estimate_id: 'EST-002', customer_name: 'Stark Ind', total: 50000.00, status: 'draft', date: mockDate }
-                      ]);
-                  case 'salesorders':
-                       return res.json([
-                          { salesorder_id: 'SO-001', customer_name: 'Acme Corp', total: 1500.00, status: 'confirmed', date: mockDate }
-                      ]);
-                  case 'purchaseorders':
-                       return res.json([
-                          { purchaseorder_id: 'PO-001', vendor_name: 'Paper Co', total: 200.00, status: 'issued', date: mockDate }
-                      ]);
-                  case 'bills':
-                       return res.json([
-                          { bill_id: 'BILL-001', vendor_name: 'Electricity Provider', total: 450.00, status: 'overdue', date: mockDate }
-                      ]);
-                   case 'payments':
-                       return res.json([
-                          { payment_id: 'PAY-001', customer_name: 'Acme Corp', amount: 1500.00, payment_mode: 'Credit Card', date: mockDate }
-                      ]);
-                  default: // contacts
-                      return res.json([
-                          { contact_id: 'CUST-001', contact_name: 'John Doe', email: 'john@acme.com', company_name: 'Acme Corp' },
-                          { contact_id: 'CUST-002', contact_name: 'Jane Smith', email: 'jane@globex.com', company_name: 'Globex Inc' }
-                      ]);
-              }
-              return; // End mock response
+              return res.status(400).json({ error: 'Mock data is no longer supported' });
           } 
           
           // REAL ERP FETCH (Universal Provider Pattern)

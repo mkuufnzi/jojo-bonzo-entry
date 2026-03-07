@@ -116,7 +116,7 @@
                              :class="{'border-blue-300 ring-4 ring-blue-50': item.connected, 'hover:border-blue-300': !item.connected}">
                             
                             <template x-if="item.connected">
-                                <a :href="'/dashboard/connections/' + item.slug" target="_blank" 
+                                <a :href="'/dashboard/integrations/' + item.slug" target="_blank" 
                                    class="absolute top-2 right-2 text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors z-10"
                                    title="Configure Integration">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1037,7 +1037,7 @@ function onboardingWizard(initialData) {
                  const entities = ['invoices', 'contacts', 'items'];
                  
                  await Promise.all(entities.map(async (entity) => {
-                     const url = `/dashboard/connections/${item.slug}/preview?entity=${entity}&refresh=true`;
+                     const url = `/dashboard/integrations/${item.slug}/preview?entity=${entity}&refresh=true`;
                      console.log(`📡 [Step 2: Preview] Loading ${entity}...`);
                      
                      try {

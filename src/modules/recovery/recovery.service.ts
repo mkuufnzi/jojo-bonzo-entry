@@ -4,6 +4,7 @@ import { RecoveryEventTypes } from '../../domain-events';
 import { RecoveryActionRequest, RecoveryStatus } from './recovery.types';
 import { notificationService } from '../../services/notification.service';
 import { SecurityUtils } from './security.utils';
+import { sseService } from '../../services/sse.service';
 
 const p = prisma as any;
 
@@ -175,23 +176,39 @@ export class RecoveryService {
                             await RecoveryService.enrichCustomerProfile(businessId, cid, dbCustomer.id, provider);
                         }
 
-                        for (const inv of profile.invoices) {
+                    for (const inv of profile.invoices) {
+                        try {
+                            const amount = parseFloat(inv.rawData.TotalAmt || '0');
+                            const balance = parseFloat(inv.rawData.Balance || '0');
+
                             await p.debtCollectionInvoice.upsert({
                                 where: { businessId_externalId: { businessId, externalId: inv.externalId } },
                                 update: {
-                                    amount: parseFloat(inv.rawData.TotalAmt || '0'),
-                                    balance: parseFloat(inv.rawData.Balance || '0'),
-                                    status: 'Open', dueDate: inv.dueDate, issuedDate: inv.date,
-                                    metadata: inv.rawData, updatedAt: new Date()
+                                    amount,
+                                    balance,
+                                    status: 'Open',
+                                    dueDate: inv.dueDate,
+                                    issuedDate: inv.date,
+                                    metadata: inv.rawData,
+                                    updatedAt: new Date()
                                 },
                                 create: {
-                                    businessId, customerId: dbCustomer.id, externalId: inv.externalId,
-                                    invoiceNumber: inv.externalId, amount: parseFloat(inv.rawData.TotalAmt || '0'),
-                                    balance: parseFloat(inv.rawData.Balance || '0'),
-                                    status: 'Open', dueDate: inv.dueDate, issuedDate: inv.date, metadata: inv.rawData
+                                    businessId,
+                                    customerId: dbCustomer.id,
+                                    externalId: inv.externalId,
+                                    invoiceNumber: inv.externalId,
+                                    amount,
+                                    balance,
+                                    status: 'Open',
+                                    dueDate: inv.dueDate,
+                                    issuedDate: inv.date,
+                                    metadata: inv.rawData
                                 }
                             });
+                        } catch (err: any) {
+                            console.error(`[TenantSync] ⚠️ Skipping invoice ${inv.externalId} due to error:`, err.message);
                         }
+                    }
                     }
                 }
                 // ==========================================
@@ -594,6 +611,7 @@ export class RecoveryService {
                             contactName: invoice.contactName,
                             customerEmail,
                             customerId,
+                            businessId,
                             currency: 'USD',
                             dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString() : new Date().toISOString()
                         },
@@ -1674,13 +1692,20 @@ export class RecoveryService {
                         });
 
                         await p.debtCollectionStateHistory.createMany({
-                            data: sessionIds.map(id => ({
+                            data: sessionIds.map((id: string) => ({
                                 sessionId: id,
                                 previousStatus: 'ACTIVE',
                                 newStatus: 'RECOVERED',
                                 reason: `Invoice marked Paid via incoming ERP webhook intercept ($${invoiceTotal})`,
-                                triggerSource: 'ERP_WEBHOOK'
+                                triggerSource: 'ERP_WEBHOOK',
+                                changedBy: 'SYSTEM'
                             }))
+                        });
+
+                        // Broadcast real-time update to the dashboard
+                        sseService.broadcast(businessId, 'invoice_paid', { 
+                            invoiceId: targetInvoiceId,
+                            amount: invoiceTotal
                         });
 
                         // Update the local invoice cache with BOTH balance=0 AND the correct amount

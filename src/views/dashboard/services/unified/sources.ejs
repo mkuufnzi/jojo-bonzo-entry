@@ -1,0 +1,207 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <a href="/dashboard/unified" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
+                <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[0.625rem] font-bold rounded-lg border border-blue-100 uppercase tracking-widest">Connections</span>
+                <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">Data Sources</h1>
+            </div>
+            <p class="text-slate-500 font-medium">Manage your enterprise connections and view synchronization history.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+             <a href="/dashboard/apps" class="bg-slate-900 text-white px-6 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                Add New Connection
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Column: Integrations -->
+        <div class="lg:col-span-2 space-y-6">
+            <h3 class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <i data-lucide="plug-2" class="w-3 h-3 text-blue-500"></i>
+                Active Integrations
+            </h3>
+
+            <% if (locals.integrations && locals.integrations.length > 0) { %>
+                <% locals.integrations.forEach(int => { %>
+                    <div class="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm group hover:border-emerald-200 transition-all duration-300">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div class="flex items-center gap-6">
+                                <div class="w-20 h-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center relative">
+                                    <i data-lucide="database" class="w-10 h-10 text-slate-400 group-hover:text-emerald-500 transition-colors"></i>
+                                    <div class="absolute -top-2 -right-2 px-2 py-1 bg-white border border-slate-200 rounded-lg text-[0.5rem] font-black uppercase tracking-tighter">
+                                        ERP
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-black text-slate-900 capitalize mb-1"><%= int.provider %></h4>
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <span class="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-widest text-emerald-600">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                            Connected
+                                        </span>
+                                        <span class="text-slate-300">|</span>
+                                        <span class="text-[0.625rem] font-bold uppercase tracking-widest text-slate-400">ID: <%= int.id.substring(0,8) %>...</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="triggerSync('<%= int.id %>', this)" 
+                                                class="px-4 py-2 bg-slate-900 text-white rounded-xl text-[0.625rem] font-bold uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center gap-2">
+                                            <i data-lucide="refresh-cw" class="w-3 h-3 sync-icon"></i>
+                                            Sync Now
+                                        </button>
+                                        <a href="/dashboard/integrations/<%= int.provider %>" class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-[0.625rem] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all">
+                                            Configure
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-8 pr-4">
+                                <div>
+                                    <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Last Sync</p>
+                                    <p class="text-sm font-black text-slate-900">
+                                        <%= int.updatedAt ? new Date(int.updatedAt).toLocaleDateString() : 'Never' %>
+                                    </p>
+                                    <p class="text-[0.5rem] text-slate-400 font-bold uppercase tracking-tighter">
+                                        <%= int.updatedAt ? new Date(int.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' %>
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                    <p class="text-sm font-black text-emerald-600 uppercase tracking-tighter">Healthy</p>
+                                    <p class="text-[0.5rem] text-slate-400 font-bold uppercase tracking-tighter">API V2.0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="bg-slate-50 border border-dashed border-slate-300 rounded-[2.5rem] p-12 text-center">
+                    <div class="w-20 h-20 bg-white rounded-3xl shadow-sm border border-slate-200 flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="plug-zap" class="w-10 h-10 text-slate-300"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-2 font-heading">No integrations found</h3>
+                    <p class="text-slate-500 mb-8 max-w-sm mx-auto">Connect your accounting, ERP, or CRM software to start aggregating your business data.</p>
+                    <a href="/dashboard/apps" class="inline-flex items-center px-8 py-4 bg-slate-900 text-white rounded-2xl text-[0.625rem] font-bold uppercase tracking-widest hover:bg-emerald-600 transition-all">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                        Get Started
+                    </a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Sidebar: Sync History -->
+        <div class="space-y-6">
+            <h3 class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <i data-lucide="history" class="w-3 h-3 text-emerald-500"></i>
+                Recent Operations
+            </h3>
+
+            <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+                <div class="space-y-6">
+                    <% if (locals.syncJobs && locals.syncJobs.length > 0) { %>
+                        <% locals.syncJobs.forEach(job => { %>
+                            <div class="relative pl-6 pb-6 border-l border-slate-100 last:pb-0 last:border-0">
+                                <span class="absolute left-[-5px] top-0 w-2.5 h-2.5 rounded-full border-2 border-white 
+                                    <%= job.status === 'COMPLETED' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : (job.status === 'FAILED' ? 'bg-red-500' : 'bg-blue-500 animate-pulse') %>">
+                                </span>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h5 class="text-[0.625rem] font-black text-slate-900 uppercase tracking-widest">
+                                        Sync: <%= job.entityType %>
+                                    </h5>
+                                    <span class="text-[0.5rem] font-bold text-slate-400">
+                                        <%= new Date(job.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                                    </span>
+                                </div>
+                                <p class="text-[0.625rem] text-slate-500 mb-2">
+                                    <%= job.status === 'COMPLETED' ? `Successfully merged ${job.recordsSynced} records.` : (job.status === 'FAILED' ? job.errorMessage || 'Unknown error occurred.' : 'Normalization in progress...') %>
+                                </p>
+                                <div class="flex items-center gap-2 text-[0.5rem] font-bold uppercase tracking-tighter text-slate-400 italic">
+                                    <i data-lucide="database" class="w-2.5 h-2.5"></i>
+                                    QBO Connector
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="text-center py-8">
+                            <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">No recent operations</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Health Snapshot Card -->
+            <div class="bg-slate-900 rounded-[2rem] p-8 shadow-xl text-white relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-700"></div>
+                <div class="relative z-10">
+                    <p class="text-[0.625rem] font-bold text-blue-400 uppercase tracking-widest mb-4">Instance Health</p>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-300">API Uptime</span>
+                            <span class="text-xs font-bold text-emerald-400">99.9%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div class="w-[99.9%] h-full bg-emerald-500"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-300">Normalization Rate</span>
+                            <span class="text-xs font-bold text-blue-400">2.4s / doc</span>
+                        </div>
+                         <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div class="w-[85%] h-full bg-blue-500"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+async function triggerSync(integrationId, btn) {
+    const icon = btn.querySelector('.sync-icon');
+    const originalContent = btn.innerHTML;
+    
+    // UI state: loading
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    if (icon) icon.classList.add('animate-spin');
+    
+    try {
+        const response = await fetch(`/dashboard/unified/sync/${integrationId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Sync Complete';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            throw new Error(data.error || 'Sync failed');
+        }
+    } catch (err) {
+        alert('Sync failed: ' + err.message);
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btn.innerHTML = originalContent;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

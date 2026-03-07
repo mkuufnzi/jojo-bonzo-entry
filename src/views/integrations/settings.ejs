@@ -26,7 +26,7 @@
             <a href="/onboarding/api/integrations/<%= provider %>/connect" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-block">
                 Re-connect
             </a>
-            <form method="POST" action="/dashboard/connections/<%= provider %>/disconnect" 
+            <form method="POST" action="/dashboard/integrations/<%= provider %>/disconnect" 
                   onsubmit="return confirm('Are you sure you want to disconnect <%= integrationDefinition.name %>? This action cannot be undone.');" class="inline">
                 <button type="submit" class="bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                     Disconnect
@@ -46,7 +46,7 @@
             this.loading = true;
             this.previewData = null;
             
-            const url = `/dashboard/connections/<%= provider %>/preview?entity=${entity}${force ? '&refresh=true' : ''}`;
+            const url = `/dashboard/integrations/<%= provider %>/preview?entity=${entity}${force ? '&refresh=true' : ''}`;
             
             fetch(url)
                 .then(res => res.json())

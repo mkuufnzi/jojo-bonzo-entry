@@ -18,6 +18,10 @@
         <i data-lucide="credit-card" class="<%= activeService === 'billing' ? 'text-emerald-500' : 'text-slate-500 group-hover:text-emerald-400' %> mr-3 h-5 w-5"></i>
         Billing
     </a>
+    <a href="/dashboard/integrations" class="<%= activeService === 'integrations' ? 'bg-slate-800 text-white shadow-sm shadow-black/20 font-bold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+        <i data-lucide="plug-2" class="<%= activeService === 'integrations' ? 'text-blue-500' : 'text-slate-500 group-hover:text-blue-400' %> mr-3 h-5 w-5"></i>
+        Integrations Hub
+    </a>
 
     <div class="mt-8 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Services</div>
     <a href="/dashboard/transactional" class="group flex items-center px-3 py-2 text-sm font-bold rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
@@ -35,6 +39,10 @@
     <a href="/dashboard/content" class="group flex items-center px-3 py-2 text-sm font-bold rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all mt-1">
         <span class="w-5 h-5 bg-purple-900/50 text-purple-200 border border-purple-800/50 rounded flex items-center justify-center text-[0.625rem] mr-3">C</span>
         Content Engine
+    </a>
+    <a href="/dashboard/unified" class="group flex items-center px-3 py-2 text-sm font-bold rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all mt-1">
+        <span class="w-5 h-5 bg-emerald-900/50 text-emerald-200 border border-emerald-800/50 rounded flex items-center justify-center text-[0.625rem] flex-shrink-0 mr-3">U</span>
+        Unified Data
     </a>
 
 <% } else { %>
@@ -55,8 +63,8 @@
 
         <!-- Setup -->
         <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Setup</div>
-        <a href="/dashboard/connections" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
-            <i data-lucide="link" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
+        <a href="/dashboard/integrations" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="plug-2" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
             Connections
         </a>
         <a href="/dashboard/brand" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
@@ -96,6 +104,32 @@
         <a href="/dashboard/retention/triggers" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
             <i data-lucide="alert-circle" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-teal-400"></i>
             Churn Triggers
+        </a>
+    <% } else if (activeService === 'unified') { %>
+        <a href="/dashboard/unified" class="<%= (locals.title === 'Unified Data Hub') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+            <i data-lucide="database" class="mr-3 h-5 w-5 text-emerald-500"></i>
+            Data Overview
+        </a>
+        <a href="/dashboard/unified/customers" class="<%= (locals.title === 'Unified Customers') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="users" class="mr-3 h-5 w-5 <%= (locals.title === 'Unified Customers') ? 'text-blue-500' : 'text-slate-500 group-hover:text-blue-400' %>"></i>
+            Customers
+        </a>
+        <a href="/dashboard/unified/transactions" class="<%= (locals.title === 'Unified Transactions') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="receipt" class="mr-3 h-5 w-5 <%= (locals.title === 'Unified Transactions') ? 'text-amber-500' : 'text-slate-500 group-hover:text-amber-400' %>"></i>
+            Transactions
+        </a>
+        <a href="/dashboard/integrations" class="text-slate-300 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="plug-2" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-purple-400"></i>
+            Sources
+        </a>
+    <% } else if (activeService === 'integrations') { %>
+        <a href="/dashboard/integrations" class="<%= (locals.title && locals.title.includes('Hub')) ? 'bg-slate-800 text-white shadow-sm shadow-black/20 font-bold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+            <i data-lucide="activity" class="mr-3 h-5 w-5 text-blue-500"></i>
+            Sync Hub
+        </a>
+        <a href="/dashboard/integrations/connections" class="<%= (locals.title && locals.title.includes('Connections')) ? 'bg-slate-800 text-white shadow-sm shadow-black/20 font-bold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+            <i data-lucide="plug-2" class="mr-3 h-5 w-5 text-slate-500 group-hover:text-blue-400"></i>
+            Platform Settings
         </a>
     <% } %>
 <% } %>

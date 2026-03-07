@@ -136,7 +136,7 @@
             </div>
 
             <!-- Sync Status -->
-            <a href="/dashboard/connections" class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden group hover:border-blue-500 transition-all">
+            <a href="/dashboard/integrations" class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden group hover:border-blue-500 transition-all">
                 <div class="absolute -right-4 -top-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
                     <i data-lucide="refresh-cw" class="w-24 h-24 text-indigo-600"></i>
                 </div>
@@ -233,6 +233,45 @@
                 </div>
             </div>
             <% } %>
+
+            <!-- Transactional Analytics Engine -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm mb-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-900 flex items-center gap-2 tracking-tight uppercase">
+                            <i data-lucide="activity" class="w-6 h-6 text-indigo-500"></i>
+                            Analytics Engine
+                        </h2>
+                        <p class="text-slate-500 mt-1 text-xs font-medium tracking-tight">Real-time health and throughput metrics of your Transactional Branding engine.</p>
+                    </div>
+                </div>
+
+                <!-- 1. Volume Trend (Full Width) -->
+                <div class="mb-8">
+                    <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-4">30-Day Document Volume</p>
+                    <div class="w-full h-64">
+                        <canvas id="transacVolumeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2. Dual Charts (Half Width) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Latency Trend -->
+                    <div>
+                        <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-4">14-Day Average Latency (ms)</p>
+                        <div class="w-full h-48">
+                            <canvas id="transacLatencyChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Success Ratio -->
+                    <div>
+                        <p class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest mb-4">All-Time Success Ratio</p>
+                        <div class="w-full h-48 flex justify-center">
+                            <canvas id="transacRatioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Branding History (The Engine in Action) -->
             <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
@@ -428,15 +467,180 @@
 </div>
 </div>
 
+<script id="transac-analytics-data" type="application/json">
+    <%- JSON.stringify(transactionalAnalytics || { volumeTrend: [], successRatio: [], latencyTrend: [] }) %>
+</script>
+
 <script nonce="<%= nonce %>">
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof lucide !== 'undefined') lucide.createIcons();
     
-    // --- End Playground Logic ---
+    // --- Transactional Analytics Engine (Chart.js) ---
+    const rawData = document.getElementById('transac-analytics-data')?.textContent;
+    if (rawData && typeof Chart !== 'undefined') {
+        try {
+            const txData = JSON.parse(rawData);
 
-    // --- End Playground Logic ---
+            // 1. Volume Trend Chart
+            const volCtx = document.getElementById('transacVolumeChart')?.getContext('2d');
+            if (volCtx) {
+                let labels = [];
+                let totals = [];
+                let successes = [];
 
-    // n8n Ping Check
+                if (txData.volumeTrend && txData.volumeTrend.length > 0) {
+                    labels = txData.volumeTrend.map(t => new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                    totals = txData.volumeTrend.map(t => t.volume);
+                    successes = txData.volumeTrend.map(t => t.successVolume);
+                } else {
+                    // Empty 30-day timeline
+                    const today = new Date();
+                    for (let i = 29; i >= 0; i--) {
+                        const d = new Date(today);
+                        d.setDate(d.getDate() - i);
+                        labels.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                        totals.push(0);
+                        successes.push(0);
+                    }
+                }
+
+                new Chart(volCtx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Total Docs',
+                                data: totals,
+                                borderColor: '#cbd5e1',
+                                borderDash: [5, 5],
+                                backgroundColor: 'transparent',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Successful',
+                                data: successes,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                borderWidth: 3,
+                                fill: true,
+                                pointBackgroundColor: '#ffffff',
+                                pointBorderColor: '#3b82f6',
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { size: 10, family: 'Inter' } } } },
+                        scales: {
+                            x: { grid: { display: false, drawBorder: false }, ticks: { font: { size: 10, family: 'Inter' }, color: '#94a3b8' } },
+                            y: { grid: { color: '#f1f5f9', drawBorder: false }, border: { dash: [4, 4] }, ticks: { font: { size: 10, family: 'Inter' }, color: '#94a3b8', stepSize: 1 } }
+                        }
+                    }
+                });
+            }
+
+            // 2. Latency Trend Chart
+            const latCtx = document.getElementById('transacLatencyChart')?.getContext('2d');
+            if (latCtx) {
+                let labels = [];
+                let latencies = [];
+
+                if (txData.latencyTrend && txData.latencyTrend.length > 0) {
+                    labels = txData.latencyTrend.map(t => new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                    latencies = txData.latencyTrend.map(t => t.avgLatencyMs);
+                } else {
+                    // Empty 14-day timeline
+                    const today = new Date();
+                    for (let i = 13; i >= 0; i--) {
+                        const d = new Date(today);
+                        d.setDate(d.getDate() - i);
+                        labels.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                        latencies.push(0);
+                    }
+                }
+
+                new Chart(latCtx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Avg Latency (ms)',
+                            data: latencies,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { grid: { color: '#f8fafc' }, ticks: { font: { size: 9 }, color: '#94a3b8' } }
+                        }
+                    }
+                });
+            }
+
+            // 3. Success Ratio Doughnut
+            const ratioCtx = document.getElementById('transacRatioChart')?.getContext('2d');
+            if (ratioCtx) {
+                let labels = ['No Logs'];
+                let counts = [0.01];
+                let bgColors = ['#f1f5f9'];
+
+                if (txData.successRatio && txData.successRatio.length > 0) {
+                    labels = txData.successRatio.map(r => r.status.toUpperCase());
+                    counts = txData.successRatio.map(r => r.count);
+                    // Map colors: success=green, error=red, pending=yellow
+                    bgColors = txData.successRatio.map(r => {
+                        if (r.status === 'success') return '#10b981';
+                        if (r.status === 'error' || r.status === 'failed') return '#ef4444';
+                        return '#f59e0b';
+                    });
+                }
+
+                new Chart(ratioCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: bgColors,
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 6, font: { size: 10, family: 'Inter' } } }
+                        }
+                    }
+                });
+            }
+
+        } catch (e) {
+            console.error('Failed to parse transactional analytics data', e);
+        }
+    }
+    // --- End Transactional Analytics ---
+
     const checkN8nStatus = async () => {
         const card = document.getElementById('n8nStatusCard');
         if (!card) return; // Guard

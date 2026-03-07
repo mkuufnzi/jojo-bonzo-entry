@@ -23,15 +23,13 @@ export class IntegrationsController {
     const { provider } = req.params;
 
     try {
-      // Mock OAuth Flow: Immediately connect
-      await integrationService.connectProvider(user.id, provider, { internal: true, scopes: '' });
-      
-      req.session.notification = { type: 'success', message: `${provider} connected successfully.` };
-      res.redirect('/dashboard/connections');
+      // Instead of mock flow, redirect to the actual OAuth initialization endpoint 
+      // managed by BusinessController. This ensures consistent OAuth state mechanics.
+      return res.redirect(`/api/business/oauth/${provider}`);
     } catch (error) {
       logger.error({ error }, 'Connect Error');
       req.session.notification = { type: 'error', message: 'Failed to connect provider.' };
-      res.redirect('/dashboard/connections');
+      res.redirect('/dashboard/integrations');
     }
   }
 
@@ -47,6 +45,6 @@ export class IntegrationsController {
       logger.error({ error }, 'Disconnect Error');
       req.session.notification = { type: 'error', message: 'Failed to disconnect.' };
     }
-    res.redirect('/dashboard/connections');
+    res.redirect('/dashboard/integrations');
   }
 }
