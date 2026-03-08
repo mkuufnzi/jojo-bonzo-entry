@@ -125,7 +125,7 @@ export class BrandingController {
         // ALIGNMENT: Use Business data when available
         profile = {
             ...(dbProfile || {}),
-            companyName: dbProfile?.companyName || (dbProfile as any)?.business?.name || (res.locals.user?.business?.name) || 'Your Brand',
+            companyName: dbProfile?.companyName || (dbProfile as any)?.business?.name || (res.locals.user?.business?.name) || 'FLOOVIOO',
             tagline: (dbProfile as any)?.tagline || (dbProfile?.fontSettings as any)?.tagline || 'Building the future of commerce.',
             logoUrl: dbProfile?.logoUrl || null,
             voiceProfile: (dbProfile as any)?.voiceProfile || {}
@@ -277,9 +277,9 @@ export class BrandingController {
             { icon: '🌟', headline: 'Thank you!', body: 'Your support helps us bring more sustainable products to you.' }
         ];
 
-        // Adding explicit model data common fields
+        const json = smartInvoice.toJSON();
         const modelData = {
-           ...smartInvoice.toJSON().data,
+           ...json.data,
            id: 'INV-PREVIEW-001',
            customerName: 'Valued Customer',
            customerEmail: 'customer@example.com',
@@ -302,11 +302,13 @@ export class BrandingController {
                     components,
                     profile: profile,
                     model: modelData,
-                    // NEW: Single source of truth from resolveLayout()
-                    layoutOrder: finalLayoutOrder,
-                    widgetStates: widgetStates,
-                    resolvedFrom: resolved.resolvedFrom
-                 },
+                     // NEW: Single source of truth from resolveLayout()
+                     layoutOrder: finalLayoutOrder,
+                     widgetStates: widgetStates,
+                     resolvedFrom: resolved.resolvedFrom,
+                     generateActionLink: (action: string) => '#' // Fix: Prevent EJS crash in interactive widgets
+                  },
+                 invoiceData: modelData,
                  nonce
              }, (err, str) => {
                  if (err) {

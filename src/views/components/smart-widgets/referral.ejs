@@ -7,9 +7,9 @@
             <div class="mt-2 flex items-center gap-2">
                 <input type="text" readonly value="https://ref.yourcompany.com/ABC123" 
                        class="text-xs bg-white border border-emerald-200 rounded px-3 py-1.5 w-64 font-mono">
-                <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-semibold no-print">
-                    Copy
-                </button>
+                <a href="<%= branding.generateActionLink('referral_click') %>" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-semibold no-print decoration-none">
+                    Copy Link
+                </a>
             </div>
         </div>
     </div>

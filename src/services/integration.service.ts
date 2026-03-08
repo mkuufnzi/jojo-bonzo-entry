@@ -152,6 +152,46 @@ export class IntegrationService {
       }
   }
 
+  /**
+   * Creates a secondary invoice in the connected ERP (e.g., QuickBooks).
+   * Used for upsells to avoid modifying the original transaction.
+   */
+  async createSecondaryInvoice(integrationId: string, data: { customerId?: string; items: any[]; metadata: any }) {
+    const integration = await prisma.integration.findUnique({
+        where: { id: integrationId },
+        include: { business: true }
+    });
+
+    if (!integration) throw new Error('Integration not found');
+
+    logger.info({ 
+        integrationId, 
+        businessId: integration.businessId,
+        provider: integration.provider 
+    }, '[IntegrationService] Creating secondary invoice in ERP');
+
+    // Implementation: In this architecture, we dispatch to n8n to handle the ERP-specific logic.
+    const { webhookService } = await import('./webhook.service');
+    
+    // We trigger an 'upsell_invoice' action on the transactional service
+    const response = await webhookService.dispatchAction('transactional-branding', 'upsell_invoice', {
+        integrationId: integration.id,
+        businessId: integration.businessId,
+        provider: integration.provider,
+        customerId: data.customerId,
+        items: data.items,
+        metadata: data.metadata
+    });
+
+    // For now, return a mock ID and URL as if it was created in the ERP
+    // Real n8n workflow would respond with the actual ERP Invoice details.
+    return {
+        id: `ERP-UPSELL-${Date.now()}`,
+        url: `https://app.${integration.provider}.com/invoice/mock-${Date.now()}`,
+        status: response.success ? 'pending' : 'failed'
+    };
+  }
+
   // Future: refreshToken, fetchResource, etc.
 }
 

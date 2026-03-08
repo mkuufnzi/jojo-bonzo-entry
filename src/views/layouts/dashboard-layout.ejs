@@ -14,6 +14,7 @@
     </style>
 </head>
 <body class="h-full font-sans antialiased bg-background text-text-primary" x-data="{ sidebarOpen: false, miniSidebar: false, aiPanelOpen: false }">
+    <% console.log(`[LAYOUT DEBUG] Available keys: ${Object.keys(locals).join(', ')}`); %>
     <% const currentService = typeof activeService !== 'undefined' ? activeService : 'hub'; %>
 
     <!-- Mobile sidebar backdrop (Visible < 1024px) -->

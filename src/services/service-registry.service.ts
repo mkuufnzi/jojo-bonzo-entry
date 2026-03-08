@@ -14,6 +14,7 @@ import { aiService } from './ai.service';
 import { designEngineService } from './design-engine.service';
 import { ServiceManifest } from '../types/service-manifest';
 import { ServiceSlug, ServiceConfig, ServiceSlugs } from '../types/service.types';
+import { recommendationService } from '../modules/recommendation/recommendation.service';
 
 export class ServiceRegistry {
     private static instance: ServiceRegistry;
@@ -66,7 +67,7 @@ export class ServiceRegistry {
                     label: 'Trigger Recovery Action',
                     description: 'Dispatches a recovery email/communication via n8n',
                     endpoint: '/recovery/action',
-                    method: 'POST',
+                    method: 'POST' as any,
                     isBillable: true
                 },
                 {
@@ -74,24 +75,32 @@ export class ServiceRegistry {
                     label: 'CRM Data Synchronization',
                     description: 'Pushes synchronized customer and invoice data to n8n CRM cache',
                     endpoint: '/recovery/sync',
-                    method: 'POST',
+                    method: 'POST' as any,
                     isBillable: false
                 }
             ],
             externalCalls: [
                 { domain: 'n8n.automation-for-smes.com', purpose: 'Recovery orchestration and CRM Cache' }
             ]
-        });
+        } as ServiceManifest);
+
+        // Recommendation Engine (Core Product)
+        this.registerManifest(recommendationService.getManifest());
         
         // Register Provider Instance for Execution
         this.registerProvider(ServiceSlugs.AI_DOC_GENERATOR, aiService);
         this.registerProvider(ServiceSlugs.DESIGN_ENGINE, designEngineService); 
         this.registerProvider(ServiceSlugs.TRANSACTIONAL_BRANDING, designEngineService); 
         this.registerProvider('transactional-core', designEngineService); // Legacy alias
+        this.registerProvider('recommendation-service', recommendationService);
 
         // Debt Collection Provider (Lazy-loaded to avoid circular imports)
         const { RecoveryService } = await import('../modules/recovery/recovery.service');
         this.registerProvider(ServiceSlugs.DEBT_COLLECTION, new RecoveryService());
+
+        // Integration Hub Provider
+        const { integrationService } = await import('./integration.service');
+        this.registerProvider(ServiceSlugs.INTEGRATION_HUB, integrationService);
 
         console.log(`   ✅ Loaded ${services.length} services & ${this.manifests.size} manifests into registry`);
     }
@@ -215,7 +224,11 @@ export class ServiceRegistry {
             throw new Error(`Service ${serviceSlug} not found in registry`);
         }
 
-        const baseUrl = process.env.APP_URL || 'http://localhost:3002';
+        // Resolving URL from DB Config (Enterprise Pattern)
+        // If the service has an internalUrl defined in its JSON config, use that.
+        // Otherwise, fallback to the global APP_URL or localhost.
+        const config = (service.config as any) || {};
+        const baseUrl = config.internalUrl || process.env.APP_URL || 'http://localhost:3002';
         const url = `${baseUrl}/api${endpoint}`;
 
         const response = await fetch(url, {

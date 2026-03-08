@@ -1,0 +1,156 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="/dashboard/unified" class="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all bg-white">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                </a>
+                <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">Unified Invoices</h1>
+            </div>
+            <p class="text-slate-500 font-medium">Detailed view of all sales and purchase invoices across your connected platforms.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+             <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 mr-2">
+                 <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400"></i>
+                 <select onchange="window.location.href='/dashboard/unified/invoices?source=' + this.value" class="bg-transparent border-none text-[0.625rem] font-bold text-slate-600 uppercase tracking-widest focus:ring-0 outline-none cursor-pointer">
+                     <option value="">All Sources</option>
+                     <% if (locals.connectedIntegrations) { %>
+                        <% connectedIntegrations.forEach(int => { %>
+                            <option value="<%= int.provider %>" <%= (locals.sourceFilter === int.provider) ? 'selected' : '' %>><%= int.provider %></option>
+                        <% }) %>
+                     <% } %>
+                 </select>
+             </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <% /* Diagnostic logs removed */ %>
+    <div class="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+        <% 
+            const displayInvoices = locals.unifiedInvoices || locals.invoices || []; 
+        %>
+        <% if (displayInvoices.length > 0) { %>
+            <div class="w-full relative overflow-x-auto text-left">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-[0.625rem] uppercase tracking-widest text-slate-400 bg-slate-50 border-y border-slate-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 font-bold rounded-l-xl">Invoice #</th>
+                            <th scope="col" class="px-6 py-4 font-bold">Customer</th>
+                            <th scope="col" class="px-6 py-4 font-bold">Source</th>
+                            <th scope="col" class="px-6 py-4 font-bold">Date</th>
+                            <th scope="col" class="px-6 py-4 font-bold">Due Date</th>
+                            <th scope="col" class="px-6 py-4 font-bold">Total</th>
+                            <th scope="col" class="px-6 py-4 font-bold rounded-r-xl text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <% displayInvoices.forEach(inv => { %>
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full <%= inv.status === 'PAID' ? 'bg-emerald-500' : (inv.status === 'OVERDUE' ? 'bg-red-500' : 'bg-blue-500') %>"></div>
+                                        <span class="font-mono text-xs font-bold text-slate-700"><%= inv.invoiceNumber || inv.externalId %></span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900"><%= inv.customer ? inv.customer.name : 'Unknown' %></div>
+                                    <div class="text-[10px] text-slate-400 font-medium"><%= inv.customer ? inv.customer.email : '' %></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded uppercase tracking-wider"><%= inv.source %></span>
+                                </td>
+                                <td class="px-6 py-4 text-xs font-medium text-slate-500">
+                                    <%= inv.issuedDate ? new Date(inv.issuedDate).toLocaleDateString() : 'N/A' %>
+                                </td>
+                                <td class="px-6 py-4 text-xs font-medium text-slate-500">
+                                    <%= inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : 'N/A' %>
+                                </td>
+                                <td class="px-6 py-4 font-black text-slate-900">
+                                    $<%= parseFloat(inv.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2}) %>
+                                    <% if (inv.balance > 0) { %>
+                                        <div class="text-[10px] text-red-500 mt-1">Due: $<%= parseFloat(inv.balance).toFixed(2) %></div>
+                                    <% } %>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <span class="px-3 py-1 text-[0.625rem] font-black rounded-lg uppercase tracking-widest 
+                                        <%= inv.status === 'PAID' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : (inv.status === 'OVERDUE' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-600 border border-blue-100') %>">
+                                        <%= inv.status || 'DRAFT' %>
+                                    </span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="text-center py-24 bg-slate-50 rounded-[2rem] border border-dashed border-slate-300">
+                <div class="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="file-text" class="w-8 h-8 text-slate-400"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-900 mb-2">No invoices found</h3>
+                <p class="text-xs text-slate-500 max-w-xs mx-auto mb-6 font-medium">Connect a data source or check your filters to view incoming capital.</p>
+                
+                <div class="flex flex-col items-center gap-4">
+                    <button onclick="triggerSync()" id="syncBtn" class="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 group">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500"></i>
+                        SYNC NOW
+                    </button>
+                    
+                    <a href="/dashboard/integrations" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors">
+                        Manage Data Sources
+                    </a>
+                </div>
+
+                <script nonce="<%= nonce %>">
+                    async function triggerSync() {
+                        const btn = document.getElementById('syncBtn');
+                        const originalHtml = btn.innerHTML;
+                        
+                        try {
+                            btn.disabled = true;
+                            btn.classList.add('opacity-50', 'cursor-not-allowed');
+                            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> SYNCING...';
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            
+                            const response = await fetch('/dashboard/unified/sync-all', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({})
+                            });
+                            
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Sync failed: ' + (result.error || 'Unknown error'));
+                                btn.disabled = false;
+                                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                btn.innerHTML = originalHtml;
+                                if (typeof lucide !== 'undefined') lucide.createIcons();
+                            }
+                        } catch (err) {
+                            console.error('Sync Error:', err);
+                            alert('An error occurred during sync');
+                            btn.disabled = false;
+                            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            btn.innerHTML = originalHtml;
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                        }
+                    }
+                </script>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

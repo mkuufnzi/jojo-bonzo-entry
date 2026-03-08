@@ -39,6 +39,7 @@ model User {
   notifications        Notification[]
   notificationConfig   NotificationConfig?
   paymentMethods       PaymentMethod[]
+  processedDocuments   ProcessedDocument[]
   smartDocuments       SmartDocument[]
   subscription         Subscription?
   logs                 UsageLog[]
@@ -967,8 +968,10 @@ model ProcessedDocument {
   retryCount       Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  rawPayload       Json?
   app              App      @relation(fields: [appId], references: [id], onDelete: Cascade)
   business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([businessId, createdAt(sort: Desc)])
   @@index([status])
@@ -1058,6 +1061,8 @@ model UnifiedProduct {
   description   String?
   price         Float?
   currency      String      @default("USD")
+  quantity      Int         @default(0)
+  category      String?
   source        String
   metadata      Json?
   createdAt     DateTime    @default(now())
@@ -1076,7 +1081,8 @@ model UnifiedOrder {
   customerId    String
   externalId    String
   orderNumber   String?
-  amount        Float                 @default(0)
+  totalAmount   Float                 @default(0)
+  totalPaid     Float                 @default(0)
   status        String
   orderDate     DateTime?
   source        String

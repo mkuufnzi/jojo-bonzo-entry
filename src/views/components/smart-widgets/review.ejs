@@ -3,16 +3,20 @@
     <div class="text-center">
         <div class="font-semibold text-sky-800 mb-2">How was your experience?</div>
         <!-- Alpine Rating if enabled, or just static links -->
-        <div class="flex justify-center gap-1 mb-3" x-data="{ rating: 0 }">
+        <div class="flex justify-center gap-1 mb-3">
             <% for(let i = 0; i < 5; i++) { %>
-            <button class="text-3xl hover:scale-110 transition-transform no-print" @click="rating = <%= i + 1 %>">
-                <span :class="rating > <%= i %> ? 'text-yellow-400' : 'text-gray-300'">★</span>
-            </button>
+            <a href="<%= branding.generateActionLink('review_prompt', { rating: i + 1 }) %>" 
+               target="_blank"
+               class="text-3xl hover:scale-110 transition-transform no-print decoration-none">
+                <span class="text-yellow-400">★</span>
+            </a>
             <% } %>
         </div>
         <div class="text-sm text-sky-600">Your feedback helps us improve</div>
-        <button class="mt-3 text-sky-700 hover:text-sky-800 text-sm font-semibold underline no-print">
+        <a href="<%= branding.generateActionLink('review_prompt') %>" 
+           target="_blank"
+           class="mt-3 text-sky-700 hover:text-sky-800 text-sm font-semibold underline no-print">
             Write a detailed review →
-        </button>
+        </a>
     </div>
 </div>

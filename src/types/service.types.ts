@@ -24,6 +24,8 @@ export const ServiceSlugs = {
     // V2 Services
     ONBOARDING: 'onboarding-service',
     DATA_SYNC: 'floovioo_transactional_data-sync',
+    RECOMMENDATIONS: 'recommendation-service',
+    INTEGRATION_HUB: 'floovioo_integration-hub',
 
 } as const;
 

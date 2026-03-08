@@ -1,0 +1,174 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<!-- Content Area -->
+<div class="max-w-6xl mx-auto space-y-8">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden rounded-3xl bg-indigo-600 p-8 md:p-12 text-white shadow-2xl shadow-indigo-500/20">
+                    <div class="relative z-10 max-w-2xl">
+                        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider mb-6">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-200"></i>
+                            <span>Smart Revenue Engine</span>
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-4">Increase Revenue with Smart Upsells</h1>
+                        <p class="text-indigo-100 text-lg leading-relaxed mb-8">
+                            Automatically recommend relevant products on every invoice, estimate, and document. Our engine analyzes purchase patterns to drive higher conversion rates.
+                        </p>
+                        <div class="flex flex-wrap gap-4">
+                            <button class="px-6 py-3 bg-white text-indigo-600 font-bold rounded-xl hover:bg-slate-50 transition-all shadow-lg hover:shadow-indigo-400/20 active:scale-95">
+                                Create Recommendation Rule
+                            </button>
+                            <a href="/dashboard/recommendations/analytics" class="px-6 py-3 bg-indigo-500/30 backdrop-blur-md text-white font-bold rounded-xl border border-white/20 hover:bg-indigo-500/40 transition-all active:scale-95">
+                                View Analytics
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Abstract Background Shapes -->
+                    <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+                    <div class="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-64 h-64 bg-indigo-400/20 rounded-full blur-2xl"></div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <% [
+                        { label: 'Total Upsells', value: analytics.impressions.toString(), icon: 'shopping-bag', color: 'blue' },
+                        { label: 'Conversion Rate', value: analytics.conversionRate, icon: 'trending-up', color: 'emerald' },
+                        { label: 'Additional Revenue', value: analytics.revenueLift, icon: 'pound-sterling', color: 'indigo' },
+                        { label: 'Active Rules', value: rules.length.toString(), icon: 'settings-2', color: 'amber' }
+                    ].forEach(stat => { %>
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow group">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-<%= stat.color %>-50 dark:bg-<%= stat.color %>-900/20 flex items-center justify-center text-<%= stat.color %>-600 dark:text-<%= stat.color %>-400 group-hover:scale-110 transition-transform">
+                                    <i data-lucide="<%= stat.icon %>" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1"><%= stat.label %></p>
+                            <h3 class="text-2xl font-bold text-slate-900 dark:white"><%= stat.value %></h3>
+                        </div>
+                    <% }); %>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Active Rules Table -->
+                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                        <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <h2 class="text-xl font-bold">Active Recommendation Rules</h2>
+                            <button class="text-blue-600 font-bold text-sm hover:underline">Manage All</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-[0.65rem] font-bold uppercase tracking-widest">
+                                    <tr>
+                                        <th class="px-8 py-4">Trigger</th>
+                                        <th class="px-8 py-4">Recommendation</th>
+                                        <th class="px-8 py-4">Priority</th>
+                                        <th class="px-8 py-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    <% if (rules.length > 0) { %>
+                                        <% rules.forEach(rule => { %>
+                                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
+                                                <td class="px-8 py-6">
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
+                                                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                                                        </div>
+                                                        <span class="font-bold text-sm text-slate-900 dark:text-white">
+                                                            <%= rule.triggerCategory || rule.triggerSku || 'Global fallback' %>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-8 py-6">
+                                                    <span class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                                        <%= rule.targetSku %>
+                                                    </span>
+                                                </td>
+                                                <td class="px-8 py-6">
+                                                    <div class="flex items-center">
+                                                        <div class="w-24 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mr-3" style="--rule-priority-width: <%= rule.priority * 10 %>%;">
+                                                            <div class="h-full bg-blue-500" style="width: var(--rule-priority-width);"></div>
+                                                        </div>
+                                                        <span class="text-xs font-bold text-slate-500"><%= rule.priority %></span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-8 py-6 text-right">
+                                                    <button class="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-400 hover:text-blue-600 transition-all opacity-0 group-hover:opacity-100">
+                                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="4" class="px-8 py-12 text-center">
+                                                <div class="max-w-xs mx-auto space-y-4">
+                                                    <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto">
+                                                        <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
+                                                    </div>
+                                                    <h3 class="font-bold text-slate-900 dark:text-white">No rules created yet</h3>
+                                                    <p class="text-sm text-slate-500">Add your first recommendation rule to start driving upsells.</p>
+                                                    <button class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg">Add Rule</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Quick Insights -->
+                    <div class="space-y-8">
+                        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xl">
+                            <h3 class="font-black text-xs uppercase tracking-widest text-slate-400 mb-6">Top Performers</h3>
+                            <div class="space-y-6">
+                                <% if (analytics.topPerformers.length > 0) { %>
+                                    <% analytics.topPerformers.forEach(p => { %>
+                                        <div class="flex items-center justify-between group cursor-pointer">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                                                    <%= p.img %>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-sm text-slate-900 dark:text-white truncate max-w-[120px]"><%= p.name %></p>
+                                                    <p class="text-[0.65rem] font-bold text-emerald-500 uppercase">Top Seller</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="font-black text-sm text-slate-900 dark:text-white"><%= p.conversions %></p>
+                                                <p class="text-[0.625rem] text-slate-400">Monthly Upsells</p>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                <% } else { %>
+                                    <div class="text-center py-6">
+                                        <p class="text-xs text-slate-400">No performance data yet</p>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden group">
+                            <div class="relative z-10">
+                                <h3 class="font-bold text-lg mb-2">Upgrade to AI Recs</h3>
+                                <p class="text-indigo-100 text-sm leading-relaxed mb-6">
+                                    Unlock advanced purchase affinity analysis using predictive machine learning.
+                                </p>
+                                <button class="w-full py-3 bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-sm font-bold hover:bg-white/30 transition-all">
+                                    Explore Pro Features
+                                </button>
+                            </div>
+                            <i data-lucide="sparkles" class="absolute -bottom-4 -right-4 w-32 h-32 text-white/10 -rotate-12 group-hover:rotate-0 transition-transform duration-700"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Rule Modal Placeholder -->
+
+    <%- include('../../partials/sidebar-script') %>
+</body>
+</html>

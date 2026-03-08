@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Preview</title>
+    <!-- Core Dependencies for Smart Documents -->
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="//unpkg.com/alpinejs" defer></script>
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+    <style nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>">
+        [x-cloak] { display: none !important; }
+        
+        /* Universal Document Config */
+        :root {
+            --page-width: 210mm;
+            --page-height: 297mm;
+        }
+
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        /* Pagination Containers */
+        #source-document { display: none; }
+        
+        #preview-stage {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sheet {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: width 0.3s, height 0.3s;
+            border-radius: 4px;
+        }
+
+        .sheet.A4 { width: 210mm; min-height: 297mm; }
+        .sheet.A4.landscape { width: 297mm; min-height: 210mm; }
+        .sheet.Letter { width: 215.9mm; min-height: 279.4mm; }
+        .sheet.Letter.landscape { width: 279.4mm; min-height: 215.9mm; }
+    </style>
+</head>
+<body x-data="smartInvoice()" x-cloak>
+    
+    <!-- Source Document -->
+    <div id="source-document" x-ignore>
+        <%- html %>
+    </div>
+
+    <!-- Pagination Stage -->
+    <div id="preview-wrapper" class="w-full flex justify-center items-start overflow-y-auto overflow-x-hidden min-h-screen">
+        <div id="preview-stage" class="origin-top my-4"></div>
+    </div>
+
+    <!-- Core Engines -->
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="/engines/paginator-v1.js"></script>
+
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>">
+        // Auto-scale the A4 document to fit the iframe wrapper
+        function fitPreview() {
+            const wrapper = document.getElementById('preview-wrapper');
+            const stage = document.getElementById('preview-stage');
+            if(!wrapper || !stage) return;
+
+            // A4 width in pixels at 96 DPI is ~794px. We want some padding.
+            const A4_WIDTH = 794; 
+            const availableWidth = wrapper.clientWidth - 40; // 40px padding
+            
+            // Calculate scale ratio
+            const scale = Math.min(1, availableWidth / A4_WIDTH);
+            
+            // Apply scale
+            stage.style.transform = `scale(${scale})`;
+            
+            // IMPORTANT: transform: scale visually shrinks the element, but it still 
+            // reserves the original unscaled height in the DOM. To fix the massive scrolling gaps,
+            // we must adjust the wrapper's or stage's margin-bottom to compensate.
+            
+            // We wait for sheets to be paginated, then fix the height:
+            setTimeout(() => {
+                const sheets = stage.querySelectorAll('.sheet');
+                if(sheets.length > 0) {
+                    const totalOriginalHeight = Array.from(sheets).reduce((sum, sheet) => sum + sheet.offsetHeight + 32, 0); // 32px is the mb-8 roughly
+                    const scaledHeight = totalOriginalHeight * scale;
+                    const heightDifference = totalOriginalHeight - scaledHeight;
+                    stage.style.marginBottom = `-${heightDifference}px`;
+                }
+            }, 500);
+        }
+
+        // Run on load and resize
+        window.addEventListener('load', () => {
+            setTimeout(fitPreview, 100); // Give paginator a moment
+        });
+        window.addEventListener('resize', fitPreview);
+    </script>
+
+</body>
+</html>

@@ -22,6 +22,8 @@ export interface ERPDocument {
 }
 
 export interface IERPProvider {
+    readonly slug: string;
+
     /**
      * initializes the provider with integration credentials
      */

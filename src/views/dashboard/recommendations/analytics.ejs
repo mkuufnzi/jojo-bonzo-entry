@@ -1,0 +1,217 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<!-- Content Area -->
+<div class="max-w-6xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl font-black text-slate-900 dark:text-white">Recommendation Insights</h1>
+                        <p class="text-slate-500 dark:text-slate-400">Track how upsells are driving revenue for your business.</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <select class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-bold outline-none">
+                            <option>Last 30 Days</option>
+                            <option>Last 90 Days</option>
+                            <option>This Year</option>
+                        </select>
+                        <button class="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 transition-colors">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Analytics Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Product Category Analysis -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xl">
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="font-bold text-lg">Product Category Distribution</h3>
+                            <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-500"></i>
+                        </div>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Customer Behavioral Clusters -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xl">
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="font-bold text-lg">Customer Clusters (RFM)</h3>
+                            <i data-lucide="users" class="w-5 h-5 text-emerald-500"></i>
+                        </div>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="clusterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Side Stats & Affinity -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                        <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <h2 class="text-xl font-bold">Top Affinity Pairs</h2>
+                            <span class="text-xs font-bold text-slate-400">Frequently Bought Together</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-[0.65rem] font-bold uppercase tracking-widest">
+                                    <tr>
+                                        <th class="px-8 py-4">Pair Identification</th>
+                                        <th class="px-8 py-4 text-center">Strength</th>
+                                        <th class="px-8 py-4 text-right">Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    <% if (affinities && affinities.length > 0) { %>
+                                        <% affinities.forEach(a => { %>
+                                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td class="px-8 py-4">
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center rounded-lg">
+                                                            <span class="text-sm">🔗</span>
+                                                        </div>
+                                                        <div>
+                                                            <p class="text-xs font-black text-slate-900 dark:text-white"><%= a.baseProduct %></p>
+                                                            <p class="text-[0.65rem] text-slate-400">matches with <b><%= a.matchedProduct %></b></p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-8 py-4 text-center">
+                                                    <span class="text-sm font-black text-slate-900 dark:text-white"><%= a.strength %></span>
+                                                </td>
+                                                <td class="px-8 py-4 text-right">
+                                                    <span class="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[0.6rem] font-black uppercase rounded"><%= a.confidence %></span>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="3" class="px-8 py-12 text-center text-slate-400 text-sm italic">
+                                                Analyzing purchase affinity patterns...
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="space-y-6">
+                        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
+                            <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Total Impressions</p>
+                            <h4 class="text-3xl font-black text-slate-900 dark:text-white"><%= metrics.totalImpressions %></h4>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
+                            <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Conversions</p>
+                            <h4 class="text-3xl font-black text-slate-900 dark:text-white"><%= metrics.totalConversions %></h4>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
+                            <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Conversion Rate</p>
+                            <h4 class="text-3xl font-black text-slate-900 dark:text-white"><%= metrics.conversionRate %></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance per Rule -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                    <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800">
+                        <h2 class="text-xl font-bold">Top Performing Products</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                             <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-[0.65rem] font-bold uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-8 py-4">Product</th>
+                                    <th class="px-8 py-4">Conversions</th>
+                                    <th class="px-8 py-4 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <% if (topPerformers.length > 0) { %>
+                                    <% topPerformers.forEach(p => { %>
+                                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <td class="px-8 py-6">
+                                                <div class="flex items-center space-x-3">
+                                                    <span class="text-xl"><%= p.img %></span>
+                                                    <p class="font-black text-sm text-slate-900 dark:text-white"><%= p.name %></p>
+                                                </div>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <span class="text-sm font-bold text-blue-600"><%= p.conversions %> conversions</span>
+                                            </td>
+                                            <td class="px-8 py-6 text-right">
+                                                <span class="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[0.6rem] font-black uppercase rounded">Top Seller</span>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="3" class="px-8 py-12 text-center text-slate-400 text-sm">No conversion data recorded yet</td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Chart.js and Initialization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const categoryData = <%- JSON.stringify(categoryDistribution) %>;
+            const clusterData = <%- JSON.stringify(customerClusters) %>;
+
+            // Category Chart
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: categoryData.map(d => d.name),
+                    datasets: [{
+                        data: categoryData.map(d => d.value),
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10, weight: 'bold' } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // Cluster Chart
+            new Chart(document.getElementById('clusterChart'), {
+                type: 'bar',
+                data: {
+                    labels: clusterData.map(d => d.name),
+                    datasets: [{
+                        label: 'Customers',
+                        data: clusterData.map(d => d.value),
+                        backgroundColor: '#10b981',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' } } }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <%- include('../../partials/sidebar-script') %>
+</body>
+</html>

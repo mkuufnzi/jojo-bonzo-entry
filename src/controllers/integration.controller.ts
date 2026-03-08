@@ -15,7 +15,18 @@ export class IntegrationController {
           const userId = req.user?.id || req.session.userId!;
           const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
           
-          if (!user?.businessId) return res.redirect('/onboarding/wizard');
+          if (!user?.businessId) {
+              return res.render('dashboard/services/integrations/index', {
+                  title: 'Integrations Hub',
+                  activeConnections: [],
+                  syncJobs: [],
+                  totalSyncedRecords: 0,
+                  activeService: 'integrations',
+                  nonce: res.locals.nonce,
+                  user: req.user,
+                  noBusiness: true
+              });
+          }
 
           // 1. Fetch active connections
           const activeConnections = await prisma.integration.findMany({
@@ -56,7 +67,17 @@ export class IntegrationController {
           const userId = req.user?.id || req.session.userId!;
           const user = await prisma.user.findUnique({ where: { id: userId }, select: { businessId: true } });
           
-          if (!user?.businessId) return res.redirect('/onboarding/wizard');
+          if (!user?.businessId) {
+              return res.render('dashboard/services/integrations/connections', {
+                  title: 'Authorized Connections',
+                  activeConnections: [],
+                  definitions: await prisma.integrationDefinition.findMany({ where: { status: 'active' } }),
+                  activeService: 'integrations',
+                  nonce: res.locals.nonce,
+                  user: req.user,
+                  noBusiness: true
+              });
+          }
 
           // Fetch active connections
           const activeConnections = await prisma.integration.findMany({

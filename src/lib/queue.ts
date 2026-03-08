@@ -71,5 +71,6 @@ export const QUEUES = {
     WEBHOOKS: 'webhooks',
     ONBOARDING_SYNC: 'onboarding-sync',
     REVENUE_ENGINE: 'revenue-engine',
-    RECOVERY_ENGINE: 'recovery-engine'
+    RECOVERY_ENGINE: 'recovery-engine',
+    INTEGRATION_SYNC: 'integration-sync'
 } as const;

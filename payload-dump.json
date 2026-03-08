@@ -1,0 +1,415 @@
+{
+  "data": {
+    "brand": {
+      "id": "c9abb2d1-a439-4414-8b7a-da6e6aad5e4a",
+      "name": "Default Brand",
+      "logoUrl": "/uploads/logos/181a05e7-66b0-47e0-94fe-1f7bbaaca735-1772790668963-WhatsApp_Image_2025-08-06_at_16.49.09.jpeg",
+      "business": {
+        "id": "181a05e7-66b0-47e0-94fe-1f7bbaaca735",
+        "zip": null,
+        "city": null,
+        "name": "BrandWithJojo",
+        "state": null,
+        "taxId": "sdfdsf23f",
+        "sector": "technology",
+        "address": null,
+        "country": null,
+        "website": "",
+        "metadata": {
+          "about": "About the Business\n",
+          "niche": "Niche",
+          "slogan": "Slogan",
+          "skippedSteps": [],
+          "documentTypes": [
+            "invoice",
+            "receipt",
+            "estimate",
+            "quote",
+            "order",
+            "offer",
+            "statement",
+            "credit_note"
+          ],
+          "needsRemediation": false
+        },
+        "createdAt": "2026-03-03T10:32:22.262Z",
+        "updatedAt": "2026-03-06T09:51:29.919Z",
+        "onboardingStatus": "COMPLETED",
+        "currentOnboardingStep": 4
+      },
+      "metadata": null,
+      "createdAt": "2026-03-03T10:32:38.480Z",
+      "isDefault": true,
+      "templates": null,
+      "updatedAt": "2026-03-06T14:55:15.228Z",
+      "businessId": "181a05e7-66b0-47e0-94fe-1f7bbaaca735",
+      "components": {
+        "footer": {
+          "enabled": true
+        },
+        "header": {
+          "enabled": true
+        },
+        "totals": {
+          "enabled": true
+        },
+        "spacer_1": {
+          "enabled": true
+        },
+        "spacer_2": {
+          "enabled": false
+        },
+        "line_items": {
+          "enabled": true
+        },
+        "layoutOrder": [
+          "header",
+          "customer_support",
+          "customer_info",
+          "line_items",
+          "totals",
+          "product_recommendations",
+          "marketing_banner",
+          "product_support",
+          "payment_details",
+          "spacer_1",
+          "spacer_2",
+          "footer"
+        ],
+        "customer_info": {
+          "enabled": true
+        },
+        "payment_details": {
+          "enabled": true
+        },
+        "product_support": {
+          "enabled": true
+        },
+        "customer_support": {
+          "enabled": true
+        },
+        "marketing_banner": {
+          "enabled": true
+        },
+        "product_recommendations": {
+          "config": {
+            "layout": "grid"
+          },
+          "enabled": true
+        }
+      },
+      "faviconUrl": null,
+      "brandColors": {},
+      "fontSettings": {},
+      "upsellConfig": {},
+      "voiceProfile": {
+        "aiRules": "Use clear, jargon-free language. Be helpful and solution-oriented. End communications with a call to action.",
+        "persona": "The Innovative Partner",
+        "emailSignature": "Best regards,\r\nThe Floovioo Team\r\nsupport@floovioo.com",
+        "toneAdjectives": [
+          "Professional",
+          "Warm",
+          "Concise"
+        ]
+      },
+      "supportConfig": {},
+      "activeTemplateId": "smart_invoice_v1"
+    },
+    "action": "apply_branding",
+    "config": {
+      "type": "apply_branding",
+      "profileId": "default"
+    },
+    "trigger": {
+      "Id": "54",
+      "id": "54",
+      "Line": [
+        {
+          "Id": "1",
+          "Amount": 60,
+          "LineNum": 1,
+          "DetailType": "SalesItemLineDetail",
+          "Description": "AI Document Generator",
+          "CustomExtensions": [],
+          "SalesItemLineDetail": {
+            "Qty": 1,
+            "ItemRef": {
+              "name": "SaaS:AI Document Generator",
+              "value": "5"
+            },
+            "UnitPrice": 60,
+            "ItemAccountRef": {
+              "name": "Services",
+              "value": "69"
+            }
+          }
+        },
+        {
+          "Id": "2",
+          "Amount": 360,
+          "LineNum": 2,
+          "DetailType": "SalesItemLineDetail",
+          "Description": "AI Document Generator",
+          "CustomExtensions": [],
+          "SalesItemLineDetail": {
+            "Qty": 60,
+            "ItemRef": {
+              "name": "SaaS:AI Document Generator",
+              "value": "5"
+            },
+            "UnitPrice": 6,
+            "ItemAccountRef": {
+              "name": "Services",
+              "value": "69"
+            }
+          }
+        },
+        {
+          "Id": "3",
+          "Amount": 594,
+          "LineNum": 3,
+          "DetailType": "SalesItemLineDetail",
+          "CustomExtensions": [],
+          "SalesItemLineDetail": {
+            "Qty": 66,
+            "ItemRef": {
+              "name": "Services",
+              "value": "1"
+            },
+            "UnitPrice": 9,
+            "ItemAccountRef": {
+              "name": "Services",
+              "value": "69"
+            }
+          }
+        },
+        {
+          "Amount": 1014,
+          "DetailType": "SubTotalLineDetail",
+          "SubTotalLineDetail": {}
+        }
+      ],
+      "_raw": {
+        "Id": "54",
+        "Line": [
+          {
+            "Id": "1",
+            "Amount": 60,
+            "LineNum": 1,
+            "DetailType": "SalesItemLineDetail",
+            "Description": "AI Document Generator",
+            "CustomExtensions": [],
+            "SalesItemLineDetail": {
+              "Qty": 1,
+              "ItemRef": {
+                "name": "SaaS:AI Document Generator",
+                "value": "5"
+              },
+              "UnitPrice": 60,
+              "ItemAccountRef": {
+                "name": "Services",
+                "value": "69"
+              }
+            }
+          },
+          {
+            "Id": "2",
+            "Amount": 360,
+            "LineNum": 2,
+            "DetailType": "SalesItemLineDetail",
+            "Description": "AI Document Generator",
+            "CustomExtensions": [],
+            "SalesItemLineDetail": {
+              "Qty": 60,
+              "ItemRef": {
+                "name": "SaaS:AI Document Generator",
+                "value": "5"
+              },
+              "UnitPrice": 6,
+              "ItemAccountRef": {
+                "name": "Services",
+                "value": "69"
+              }
+            }
+          },
+          {
+            "Id": "3",
+            "Amount": 594,
+            "LineNum": 3,
+            "DetailType": "SalesItemLineDetail",
+            "CustomExtensions": [],
+            "SalesItemLineDetail": {
+              "Qty": 66,
+              "ItemRef": {
+                "name": "Services",
+                "value": "1"
+              },
+              "UnitPrice": 9,
+              "ItemAccountRef": {
+                "name": "Services",
+                "value": "69"
+              }
+            }
+          },
+          {
+            "Amount": 1014,
+            "DetailType": "SubTotalLineDetail",
+            "SubTotalLineDetail": {}
+          }
+        ],
+        "domain": "QBO",
+        "sparse": false,
+        "Balance": 1014,
+        "DueDate": "2026-04-06",
+        "TxnDate": "2026-03-07",
+        "BillAddr": {
+          "Id": "82",
+          "Line1": "Alpha Bonnie Testor",
+          "Line2": "BrandWithJojo",
+          "Line3": "Kiambu",
+          "Line4": "Boniface Gachui Muthaka",
+          "Line5": "06040 Kiambu Kenya"
+        },
+        "MetaData": {
+          "CreateTime": "2026-03-07T11:00:13-08:00",
+          "LastUpdatedTime": "2026-03-07T11:00:13-08:00",
+          "LastModifiedByRef": {
+            "value": "9341456222209716"
+          }
+        },
+        "ShipAddr": {
+          "Id": "73",
+          "City": "Kiambu",
+          "Line1": "Kiambu",
+          "Line2": "Boniface Gachui Muthaka",
+          "Country": "Kenya",
+          "PostalCode": "06040"
+        },
+        "TotalAmt": 1014,
+        "BillEmail": {
+          "Address": "bonzocreatives@gmail.com"
+        },
+        "DocNumber": "1051",
+        "LinkedTxn": [],
+        "SyncToken": "0",
+        "CurrencyRef": {
+          "name": "Kenyan Shilling",
+          "value": "KES"
+        },
+        "CustomField": [],
+        "CustomerRef": {
+          "name": "Alpha Bonnie Testor",
+          "value": "3"
+        },
+        "EmailStatus": "NotSet",
+        "PrintStatus": "NotSet",
+        "SalesTermRef": {
+          "value": "3"
+        },
+        "AllowIPNPayment": false,
+        "FreeFormAddress": false,
+        "AllowOnlinePayment": false,
+        "GlobalTaxCalculation": "NotApplicable",
+        "AllowOnlineACHPayment": false,
+        "AllowOnlineCreditCardPayment": false
+      },
+      "name": "Invoice",
+      "type": "invoice.created",
+      "_event": {
+        "type": "invoice.created",
+        "entityId": "54",
+        "provider": "quickbooks",
+        "tenantId": "9341456222209689",
+        "entityType": "invoice",
+        "originalEvent": "Create",
+        "normalizedEventType": "floovioo_transactional_branding_automation_request_apply_invoice"
+      },
+      "domain": "QBO",
+      "sparse": false,
+      "Balance": 1014,
+      "DueDate": "2026-04-06",
+      "TxnDate": "2026-03-07",
+      "BillAddr": {
+        "Id": "82",
+        "Line1": "Alpha Bonnie Testor",
+        "Line2": "BrandWithJojo",
+        "Line3": "Kiambu",
+        "Line4": "Boniface Gachui Muthaka",
+        "Line5": "06040 Kiambu Kenya"
+      },
+      "MetaData": {
+        "CreateTime": "2026-03-07T11:00:13-08:00",
+        "LastUpdatedTime": "2026-03-07T11:00:13-08:00",
+        "LastModifiedByRef": {
+          "value": "9341456222209716"
+        }
+      },
+      "ShipAddr": {
+        "Id": "73",
+        "City": "Kiambu",
+        "Line1": "Kiambu",
+        "Line2": "Boniface Gachui Muthaka",
+        "Country": "Kenya",
+        "PostalCode": "06040"
+      },
+      "TotalAmt": 1014,
+      "entityId": "54",
+      "provider": "quickbooks",
+      "BillEmail": {
+        "Address": "bonzocreatives@gmail.com"
+      },
+      "DocNumber": "1051",
+      "LinkedTxn": [],
+      "SyncToken": "0",
+      "_enriched": true,
+      "operation": "Create",
+      "entityType": "invoice",
+      "CurrencyRef": {
+        "name": "Kenyan Shilling",
+        "value": "KES"
+      },
+      "CustomField": [],
+      "CustomerRef": {
+        "name": "Alpha Bonnie Testor",
+        "value": "3"
+      },
+      "EmailStatus": "NotSet",
+      "PrintStatus": "NotSet",
+      "lastUpdated": "2026-03-07T19:00:13.000Z",
+      "SalesTermRef": {
+        "value": "3"
+      },
+      "original_pdf": "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p/RrSozywa3li9bUQ8yfV014Jfj+YU6MPL1mY+tuJuva6V1+f/cZ5meEQwxEUTJwUCPDq1hlY9WUMgmcOE+ccsCe4b7ELrj7viW3AZHRzAmaPv4XGfI3IAplbmRzdHJlYW0KZW5kb2JqCjEyIDAgb2JqCjw8L1R5cGUgL0ZvbnREZXNjcmlwdG9yCi9Gb250TmFtZSAvQUFBQUFBK0hlbHZldGljYU5ldWVMVFcxRy1CZAovRmxhZ3MgNAovQXNjZW50IDk3My4xNDQ1MwovRGVzY2VudCAtMjg3LjEwOTM4Ci9TdGVtViA3Ni4xNzE4NzUKL0NhcEhlaWdodCA3MTMuODY3MTkKL0l0YWxpY0FuZ2xlIDAKL0ZvbnRCQm94IFstMTY2LjAxNTYyNSAtMjQ3LjU1ODU5IDEwODQuOTYwOTQgOTczLjE0NDUzXQovRm9udEZpbGUyIDExIDAgUj4+CmVuZG9iagoxMyAwIG9iago8PC9UeXBlIC9Gb250Ci9Gb250RGVzY3JpcHRvciAxMiAwIFIKL0Jhc2VGb250IC9BQUFBQUErSGVsdmV0aWNhTmV1ZUxUVzFHLUJkCi9TdWJ0eXBlIC9DSURGb250VHlwZTIKL0NJRFRvR0lETWFwIC9JZGVudGl0eQovQ0lEU3lzdGVtSW5mbyA8PC9SZWdpc3RyeSAoQWRvYmUpCi9PcmRlcmluZyAoSWRlbnRpdHkpCi9TdXBwbGVtZW50IDA+PgovVyBbMCBbNTEyLjIwNzAzXSAzIDE3IDI3Ny44MzIwMyAxOSAyMyA1NTYuMTUyMzQgMzYgWzY4NS4wNTg1OSA3MDQuMTAxNTYgNzQxLjIxMDk0IDc0MS4yMTA5NCA2NDcuOTQ5MjIgNTkyLjc3MzQ0IDc1OC43ODkwNiAwIDI5NC45MjE4OCAwIDcyMi4xNjc5NyAwIDAgNzQxLjIxMDk0IDc3Ny44MzIwMyAwIDAgMCA2NDguOTI1NzggNjEwLjgzOTg0IDAgNjI5Ljg4MjgxXSA2OCA3MCA1NzQuMjE4NzUgNzEgWzYxMC44Mzk4NCA1NzQuMjE4NzUgMCAwIDU5Mi43NzM0NCAyNTcuODEyNSAwIDAgMjU3LjgxMjUgOTA1Ljc2MTcyIDU5Mi43NzM0NCA2MTAuODM5ODQgNjEwLjgzOTg0IDAgMzg5LjE2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m7duCsm2cmnc2BEQyMX5fWP5vqXrpWZ6SiCsd4X2/wbPgPxiCmVuZHN0cmVhbQplbmRvYmoKMTYgMCBvYmoKPDwvVHlwZSAvRm9udERlc2NyaXB0b3IKL0ZvbnROYW1lIC9CQUFBQUErSGVsdmV0aWNhTmV1ZUxUVzFHLVJvbWFuCi9GbGFncyA0Ci9Bc2NlbnQgOTczLjE0NDUzCi9EZXNjZW50IC0yODcuMTA5MzgKL1N0ZW1WIDQ1Ljg5ODQzOAovQ2FwSGVpZ2h0IDcxMy44NjcxOQovSXRhbGljQW5nbGUgMAovRm9udEJCb3ggWy0xNjYuMDE1NjI1IC0yNDcuNTU4NTkgMTA3Ni4xNzE4OCA5NzMuMTQ0NTNdCi9Gb250RmlsZTIgMTUgMCBSPj4KZW5kb2JqCjE3IDAgb2JqCjw8L1R5cGUgL0ZvbnQKL0ZvbnREZXNjcmlwdG9yIDE2IDAgUgovQmFzZUZvbnQgL0JBQUFBQStIZWx2ZXRpY2FOZXVlTFRXMUctUm9tYW4KL1N1YnR5cGUgL0NJREZvbnRUeXBlMgovQ0lEVG9HSURNYXAgL0lkZW50aXR5Ci9DSURTeXN0ZW1JbmZvIDw8L1JlZ2lzdHJ5IChBZG9iZSkKL09yZGVyaW5nIChJZGVudGl0eSkKL1N1cHBsZW1lbnQgMD4+Ci9XIFswIFs1MTIuMjA3MDMgMCAwIDI3Ny44MzIwMyAwIDAgNTU2LjE1MjM0XSAxNCBbNjAwLjA5NzY2IDI3Ny44MzIwMyAwIDI3Ny44MzIwMyAzMzMuMDA3ODFdIDE5IDI4IDU1Ni4xNTIzNCAyOSBbMjc3LjgzMjAzIDAgMCA2MDAuMDk3NjYgMCAwIDc5OS44MDQ2OSA2NDcuOTQ5MjIgNjg1LjA1ODU5IDcyMi4xNjc5NyA3MDQuMTAxNTYgMCAwIDc1OC43ODkwNiAwIDI1OC43ODkwNiA1MTkuMDQyOTcgNjY2Ljk5MjE5IDAgODcxLjA5Mzc1IDcyMi4xNjc5NyAwIDY0Ny45NDkyMiA3NTkuNzY1NjMgNjg1LjA1ODU5IDAgNTc0LjIxODc1IDcyMi4xNjc5NyAwIDkyNS43ODEyNV0gNjggWzUzNy4xMDkzOCA1OTIuNzczNDQgNTM3LjEwOTM4IDU5Mi43NzM0NCA1MzcuMTA5MzggMjk1Ljg5ODQ0IDU3NC4yMTg3NSA1NTYuMTUyMzQgMjIyLjE2Nzk3IDIyMi4xNjc5NyA1MTkuMDQyOTcgMjIyLjE2Nzk3IDg1My4wMjczNCA1NTYuMTUyMzQgNTc0LjIxODc1IDU5Mi43NzM0NCAwIDMzMy4wMDc4MSA1MDAgMzE0Ljk0MTQxIDU1Ni4xNTIzNCA1MDAgMCAwIDUwMCA0NzkuOTgwNDddIDk4IFsyNzcuODMyMDNdIDMwNyBbNTc3LjE0ODQ0XV0KL0RXIDA+PgplbmRvYmoKMTggMCBvYmoKPDwvRmlsdGVyIC9GbGF0ZURlY29kZQovTGVuZ3RoIDM0Nj4+IHN0cmVhbQp4nF2Sy26DMBBF93yFl+0iwg8IjYSQ8pRY9KHSfgCxhxSpGMuQBX9fM0MSqZYAnfHcmWvG8b48lLYdWfzhe13ByJrWGg9Df/Ua2BkurY2EZKbV40L41l3tojiIq2kYoStt00d5zlj8GXaH0U/saWv6MzxH8bs34Ft7YU/f+ypwdXXuFzqwI+NRUTADTaj0Wru3ugMWo2xVmrDfjtMqaB4ZX5MDJpEFudG9gcHVGnxtLxDlPKyC5aewigis+befkerc6J/aY7YK2ZxLXiCtiRSS5EjqQLRFSjIkRZQSrSXSFqsINdc87YKR2cHSS/Bb64fTI6r4iZrusJQQSOJAwSP1XlxmZIHMyv0tBYMb8rV4pioJWVckVyl5JrmiYuqFggkGk4SIBGuBwXTRbfCTSQpS95R8ZpvlrHS4+cfPF+Q+VX31PgwUbxFOcp5ha+F+0VzvZtX8/AEXbbJJCmVuZHN0cmVhbQplbmRvYmoKNSAwIG9iago8PC9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMAovQmFzZUZvbnQgL0JBQUFBQStIZWx2ZXRpY2FOZXVlTFRXMUctUm9tYW4KL0VuY29kaW5nIC9JZGVudGl0eS1ICi9EZXNjZW5kYW50Rm9udHMgWzE3IDAgUl0KL1RvVW5pY29kZSAxOCAwIFI+PgplbmRvYmoKeHJlZgowIDE5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxNSAwMDAwMCBuIAowMDAwMDA0NDkzIDAwMDAwIG4gCjAwMDAwMDAxNTUgMDAwMDAgbiAKMDAwMDAxMjE4NSAwMDAwMCBuIAowMDAwMDIyMjMzIDAwMDAwIG4gCjAwMDAwMDAxOTIgMDAwMDAgbiAKMDAwMDAwMDM2NyAwMDAwMCBuIAowMDAwMDAwNTI4IDAwMDAwIG4gCjAwMDAwMDQ3MzMgMDAwMDAgbiAKMDAwMDAwNDc4OCAwMDAwMCBuIAowMDAwMDA0ODM2IDAwMDAwIG4gCjAwMDAwMTA5MDYgMDAwMDAgbiAKMDAwMDAxMTE2MiAwMDAwMCBuIAowMDAwMDExNzc2IDAwMDAwIG4gCjAwMDAwMTIzMzggMDAwMDAgbiAKMDAwMDAyMDc1NCAwMDAwMCBuIAowMDAwMDIxMDEzIDAwMDAwIG4gCjAwMDAwMjE4MTYgMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDE5Ci9Sb290IDEwIDAgUgovSW5mbyAxIDAgUj4+CnN0YXJ0eHJlZgoyMjM4OQolJUVPRg==",
+      "AllowIPNPayment": false,
+      "FreeFormAddress": false,
+      "AllowOnlinePayment": false,
+      "normalizedEventType": "floovioo_transactional_branding_automation_request_apply_invoice",
+      "GlobalTaxCalculation": "NotApplicable",
+      "AllowOnlineACHPayment": false,
+      "AllowOnlineCreditCardPayment": false
+    },
+    "workflow_id": "a80bebc6-65dc-4050-8bfd-b157e38167e5",
+    "callback_url": "https://lakia-dreich-foamingly.ngrok-free.dev/api/callbacks/recommendations/sync",
+    "smart_content": {
+      "offers": [],
+      "timestamp": "2026-03-07T19:00:19.284Z",
+      "has_offers": false,
+      "personal_message": "Thank you for being a valued customer!"
+    }
+  },
+  "html": "\r\n\r\n<!-- Standard Document Configuration -->\r\n<div id=\"doc-config\" \r\n    data-page-size=\"A4\" \r\n    data-orientation=\"portrait\" \r\n    data-margin-top=\"50\" \r\n    data-margin-bottom=\"50\"\r\n    class=\"hidden\"></div>\r\n\r\n<!-- Universal Smart Document Logic -->\r\n<!-- Injects Data and Loads the Smart Engine -->\r\n<script nonce=\"ssr-nonce\">\r\n    window.DOC_DATA = {\r\n        theme: {\"name\":\"BrandWithJojo\",\"primary\":\"#6366F1\",\"secondary\":\"#8B5CF6\",\"accent\":\"#C4B5FD\",\"light\":\"#F5F3FF\",\"text\":\"#1e293b\",\"logoUrl\":\"/uploads/logos/181a05e7-66b0-47e0-94fe-1f7bbaaca735-1772790668963-WhatsApp_Image_2025-08-06_at_16.49.09.jpeg\",\"tagline\":\"Building the future of commerce.\",\"gradient\":\"linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)\",\"layoutOrder\":[\"header\",\"customer_support\",\"customer_info\",\"line_items\",\"totals\",\"product_recommendations\",\"marketing_banner\",\"product_support\",\"payment_details\",\"spacer_1\",\"spacer_2\",\"footer\"]},\r\n        config: {},\r\n        items: [],\r\n        \r\n        // Standardized Features Data (Matched to Manifest IDs)\r\n        features: {\r\n            marketing_banner: [],\r\n            product_recommendations: [],\r\n            product_support: [],\r\n            customer_support: [],\r\n            payment_details: null,\r\n            reviews: []\r\n        },\r\n\r\n        totals: {\r\n            updated: false,\r\n            subtotal: 0,\r\n            tax: 0,\r\n            total: 0\r\n        },\r\n        \r\n        // Brand & Business Context\r\n        business: {\r\n            name: \"BrandWithJojo\",\r\n            address: \"\",\r\n            website: \"\",\r\n            email: \"\",\r\n            voice: {\"aiRules\":\"Use clear, jargon-free language. Be helpful and solution-oriented. End communications with a call to action.\",\"persona\":\"The Innovative Partner\",\"emailSignature\":\"Best regards,\\r\\nThe Floovioo Team\\r\\nsupport@floovioo.com\",\"toneAdjectives\":[\"Professional\",\"Warm\",\"Concise\"]}\r\n        }\r\n    };\r\n\r\n    // Compatibility Layer for Revenue Machine & V1 Templates\r\n    window.INVOICE_DATA = {\r\n        theme: window.DOC_DATA.theme,\r\n        config: window.DOC_DATA.config,\r\n        items: window.DOC_DATA.items,\r\n        recommendations: window.DOC_DATA.features.product_recommendations,\r\n        nurtureMessages: window.DOC_DATA.features.marketing_banner,\r\n        backendTotals: window.DOC_DATA.totals\r\n    };\r\n\r\n    // Helper for templates to trigger re-pagination after state changes\r\n    window.rePaginate = function() {\r\n        console.log('[App] Re-pagination triggered...');\r\n        const p = new Paginator('#source-document', '#preview-stage');\r\n        p.paginate();\r\n    };\r\n</script>\r\n\r\n<!-- Load the Smart Engine (Logic) -->\r\n<script src=\"/engines/smart-engine-v1.js\" nonce=\"ssr-nonce\"></script>\r\n\r\n<script nonce=\"ssr-nonce\">\r\n    // Signal that engine is ready after data is injected AND assets loaded\r\n    window.addEventListener('load', () => {\r\n        // Give Alpine a moment to finish its DOM manipulations\r\n        setTimeout(() => {\r\n            console.log('[App] Page assets loaded & Alpine initialized. Triggering Paginator.');\r\n            window.dispatchEvent(CustomEvent ? new CustomEvent('smart-engine:ready') : { type: 'smart-engine:ready' });\r\n        }, 300);\r\n    });\r\n</script>\r\n\r\n\r\n<!-- \r\n  ============================================================================\r\n  SMART INVOICE TEMPLATE v2.0\r\n  ============================================================================\r\n  Architecture: Widget Registry Pattern\r\n  - Single source of truth: branding.layoutOrder (from controller's resolveLayout)\r\n  - Deterministic rendering: widgets render in exact layoutOrder sequence\r\n  - No conditional if/else chains that can skip or reorder widgets\r\n  ============================================================================\r\n-->\r\n\r\n<!-- Template Interface -->\r\n<div class=\"font-sans text-slate-800 antialiased\" style=\"font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;\">\r\n    \r\n    <!-- Page Overlay -->\r\n    <div data-page-overlay class=\"fixed inset-0 pointer-events-none z-0\" \r\n         :style=\"'background: ' + theme.pattern\"></div>\r\n\r\n    <!-- Main Document Wrapper - Width and Padding managed by Paginator Sheet (A4 Layer) -->\r\n    <div class=\"mx-auto relative z-10\" \r\n         style=\"width: 100% !important; max-width: 100% !important; padding: 0 !important;\">\r\n        \r\n        \r\n        \r\n        <!-- DEBUG: Unified Layout from resolveLayout() -->\r\n        <script>console.log('[EJS v2.1] layoutOrder:', [&#34;header&#34;,&#34;customer_support&#34;,&#34;customer_info&#34;,&#34;line_items&#34;,&#34;totals&#34;,&#34;product_recommendations&#34;,&#34;marketing_banner&#34;,&#34;product_support&#34;,&#34;payment_details&#34;,&#34;spacer_1&#34;,&#34;spacer_2&#34;,&#34;footer&#34;], 'resolvedFrom:', 'manifest');</script>\r\n\r\n        <!-- =============== PINNED HEADER =============== -->\r\n        \r\n            <div class=\"doc-section w-full block\" data-widget-id=\"header\" data-no-split=\"true\" \r\n                 style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                <!-- Header Banner -->\r\n<div class=\"relative px-6 py-6 rounded-2xl overflow-hidden shadow-sm z-10\" \r\n     :style=\"'background: ' + theme.gradient\">\r\n    <!-- Decorative Circles -->\r\n    <div class=\"absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10\"></div>\r\n    <div class=\"absolute -bottom-5 left-16 w-24 h-24 rounded-full bg-white/5\"></div>\r\n    \r\n    <div class=\"relative flex justify-between items-start text-white z-10\">\r\n        <div>\r\n            <div class=\"flex items-center gap-3 mb-1.5\">\r\n                <!-- Logo with robust fallback -->\r\n                <div class=\"flex-shrink-0\">\r\n                    <template x-if=\"theme.logoUrl\">\r\n                        <img :src=\"theme.logoUrl\" alt=\"Logo\" class=\"h-10 w-10 object-contain rounded-full bg-white p-1\">\r\n                    </template>\r\n                    <template x-if=\"!theme.logoUrl\">\r\n                        <div class=\"flex items-center justify-center h-10 w-10 bg-white/20 rounded-full font-bold text-lg\" \r\n                             x-text=\"(theme.name || 'B').charAt(0)\"></div>\r\n                    </template>\r\n                </div>\r\n                \r\n                <div>\r\n                    <div class=\"text-xl font-bold tracking-wide font-sans\" x-text=\"theme.name\"></div>\r\n                    <div class=\"text-[10.5px] tracking-[0.15em] uppercase opacity-70 font-sans\" x-text=\"theme.tagline\"></div>\r\n                </div>\r\n            </div>\r\n        </div>\r\n        <div class=\"text-right\">\r\n            <div class=\"text-[10px] uppercase tracking-[0.15em] opacity-60 font-sans\">Invoice</div>\r\n            <div class=\"text-2xl font-bold font-sans\">#INV-2025-0847</div>\r\n            <div class=\"text-[10.5px] mt-0.5 opacity-60 font-sans\">Feb 1, 2025</div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n            </div>\r\n        \r\n\r\n        <!-- =============== DYNAMIC WIDGETS (in layoutOrder sequence) =============== -->\r\n        <!-- =============== DYNAMIC WIDGETS (in layoutOrder sequence) =============== -->\r\n        \r\n            \r\n            \r\n                \r\n                    <!-- Widget: customer_support (position: 1) -->\r\n                    <div class=\"doc-section w-full block\" \r\n                         data-widget-id=\"customer_support\" \r\n                         data-no-split=\"true\"\r\n                         style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                        <!-- Component: Customer Support Widget (Card Style) -->\r\n<div class=\"mt-8 border-t border-gray-100\" x-show=\"config.customerSupportResult !== false\">\r\n    <div class=\"bg-slate-50 rounded-xl px-6 py-5 border border-slate-100\">\r\n        <div class=\"flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4\">\r\n            \r\n            <!-- Headline -->\r\n            <div class=\"flex items-center gap-3\">\r\n                <div class=\"flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white text-lg shadow-sm\"\r\n                     :style=\"'background: ' + theme.primary\">\r\n                    ?\r\n                </div>\r\n                <div>\r\n                    <h4 class=\"font-bold text-sm text-slate-800\">Need help with your order?</h4>\r\n                    <p class=\"text-xs text-slate-500 mt-0.5\" style=\"margin-left: 0 !important;\">Our support team is available 24/7.</p>\r\n                </div>\r\n            </div>\r\n\r\n            <!-- Actions -->\r\n            <div class=\"flex items-center gap-2 w-full sm:w-auto\">\r\n                <a href=\"#\" class=\"flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm\">\r\n                    <span class=\"text-sm\">📧</span> Email Us\r\n                </a>\r\n                <a href=\"#\" class=\"flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm\">\r\n                    <span class=\"text-sm\">💬</span> Live Chat\r\n                </a>\r\n            </div>\r\n\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n                    </div>\r\n                \r\n            \r\n            \r\n             \r\n        \r\n            \r\n            \r\n                \r\n                    <!-- Widget: customer_info (position: 2) -->\r\n                    <div class=\"doc-section w-full block\" \r\n                         data-widget-id=\"customer_info\" \r\n                         data-no-split=\"true\"\r\n                         style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                        <!-- Customer & Status/Shipping Row -->\r\n\r\n<div class=\"font-sans\" \r\n     style=\"margin-top: 8px !important; margin-bottom: 8px !important; padding: 12px 0 !important; border-bottom: 1px solid #f1f5f9; width: 100% !important; display: block !important;\">\r\n    \r\n    <table style=\"width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important;\" \r\n           data-no-split=\"true\">\r\n        <tr>\r\n            <!-- Column 1: Bill To -->\r\n            <td style=\"width: 33.33% !important; vertical-align: top !important; padding: 0 !important;\">\r\n                <div class=\"text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60\" :style=\"'color: ' + theme.muted\">Bill To</div>\r\n                <div class=\"text-[14px] font-bold text-slate-900\" :style=\"'color: ' + theme.text\">Sarah Mitchell</div>\r\n                <div class=\"text-[11px] text-gray-400 mt-1\">sarah.mitchell@email.com</div>\r\n                <div class=\"text-[11px] text-gray-400\">Member since 2023 · 14 orders</div>\r\n            </td>\r\n\r\n            <!-- Column 2: Shipping Address -->\r\n            <td style=\"width: 33.33% !important; vertical-align: top !important; padding: 0 !important; padding-left: 30px !important;\">\r\n                <div class=\"text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60\" :style=\"'color: ' + theme.muted\">Shipping Address</div>\r\n                <div class=\"text-[13px] text-slate-600 leading-relaxed font-medium\" \r\n                     style=\"line-height: 1.6 !important; color: #475569 !important; mt-1\">\r\n                    123 Ceremony Way,<br>\r\n                    Bamboo Grove, CA 90210\r\n                </div>\r\n            </td>\r\n\r\n            <!-- Column 3: Status & Loyalty -->\r\n            <td style=\"width: 33.33% !important; vertical-align: top !important; padding: 0 !important; text-align: right !important;\">\r\n                <div style=\"display: flex !important; flex-direction: column !important; align-items: flex-end !important; gap: 8px !important;\">\r\n                    <div style=\"text-align: right !important;\">\r\n                        <div class=\"text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60\" :style=\"'color: ' + theme.muted\">Status</div>\r\n                        <span class=\"px-3 py-1 rounded-full text-[11px] font-bold\" \r\n                              style=\"display: inline-block !important; padding: 4px 12px !important; border-radius: 9999px !important; white-space: nowrap !important;\"\r\n                              :style=\"'background: ' + theme.accent + '; color: ' + theme.primary\">Paid ✓</span>\r\n                    </div>\r\n                    <div style=\"text-align: right !important;\">\r\n                         <div class=\"text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60\" :style=\"'color: ' + theme.muted\">Loyalty</div>\r\n                         <span class=\"bg-amber-100 text-amber-600 px-3 py-1 rounded-full text-[11px] font-bold\"\r\n                               style=\"display: inline-block !important; padding: 4px 12px !important; border-radius: 9999px !important; background: #FEF3C7 !important; color: #D97706 !important; white-space: nowrap !important;\">★ Gold</span>\r\n                    </div>\r\n                </div>\r\n            </td>\r\n        </tr>\r\n    </table>\r\n</div>\r\n\r\n                    </div>\r\n                \r\n            \r\n            \r\n             \r\n        \r\n                        <!-- GROUPED: Line Items + Totals (Prevent Splitting) -->\r\n                        <div class=\"doc-section w-full block\" \r\n                             data-widget-id=\"group-details\" \r\n                             data-no-split=\"true\"\r\n                             style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                             \r\n                             <!-- Line Items -->\r\n<div class=\"mt-1\">\r\n    <table class=\"w-full border-collapse\">\r\n        <thead>\r\n            <tr class=\"border-b-2\" :style=\"'border-color: ' + theme.accent\">\r\n                <th class=\"py-2 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans\" :style=\"'color: ' + theme.muted\"></th>\r\n                <th class=\"py-2 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans\" :style=\"'color: ' + theme.muted\">Product</th>\r\n                <th class=\"py-2 text-left text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans\" :style=\"'color: ' + theme.muted\">SKU</th>\r\n                <th class=\"py-2 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans\" :style=\"'color: ' + theme.muted\">Qty</th>\r\n                <th class=\"py-2 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans\" :style=\"'color: ' + theme.muted\">Unit</th>\r\n                <th class=\"py-2 text-right text-[9.5px] font-bold uppercase tracking-widest opacity-60 font-sans\" :style=\"'color: ' + theme.muted\">Total</th>\r\n            </tr>\r\n        </thead>\r\n        <tbody class=\"font-sans\">\r\n            <template x-for=\"item in items\" :key=\"item.id\">\r\n                <tr class=\"border-b border-gray-100\">\r\n                    <td class=\"py-2 w-9\">\r\n                        <div class=\"w-9 h-9 rounded-lg flex items-center justify-center text-lg bg-gray-50\" :style=\"'background: ' + theme.light\" x-text=\"item.img\"></div>\r\n                    </td>\r\n                    <td class=\"py-2 pl-3\">\r\n                        <div class=\"text-[13px] font-bold\" :style=\"'color: ' + theme.text\" x-text=\"item.name\"></div>\r\n                        <div class=\"text-[10px] text-gray-400\" x-text=\"item.category\"></div>\r\n                    </td>\r\n                    <td class=\"py-2 text-[11px] text-gray-400\" x-text=\"item.sku\"></td>\r\n                    <td class=\"py-2 text-right text-[13px]\" :style=\"'color: ' + theme.text\" x-text=\"item.qty\"></td>\r\n                    <td class=\"py-2 text-right text-[13px] text-gray-500\" x-text=\"'$' + item.price.toFixed(2)\"></td>\r\n                    <td class=\"py-2 text-right text-[13px] font-bold\" :style=\"'color: ' + theme.text\" x-text=\"'$' + (item.price * item.qty).toFixed(2)\"></td>\r\n                </tr>\r\n            </template>\r\n        </tbody>\r\n    </table>\r\n</div>\r\n\r\n<!-- Added Upsells (Part of Line Items Logic) -->\r\n<div class=\"mt-4\" x-show=\"addedItems.length > 0\">\r\n    <div class=\"rounded-lg p-3\" :style=\"'background: ' + theme.light\">\r\n        <div class=\"text-[9.5px] font-bold uppercase tracking-widest mb-2 font-sans\" :style=\"'color: ' + theme.secondary\">⚡ Added to Order</div>\r\n        <template x-for=\"id in addedItems\" :key=\"id\">\r\n             <div class=\"flex justify-between items-center py-1.5 border-b border-black/5 last:border-0 font-sans\">\r\n                 <div class=\"text-xs font-medium text-black\">\r\n                     <span x-text=\"getRec(id) ? getRec(id).img : '?'\"></span> <span x-text=\"getRec(id) ? getRec(id).name : 'Unknown Item'\"></span>\r\n                 </div>\r\n                 <div class=\"flex items-center gap-3\">\r\n                     <span class=\"text-xs font-bold text-black\" x-text=\"'$' + (getRec(id) ? getRec(id).price : 0).toFixed(2)\"></span>\r\n                     <button @click=\"toggleAdd(id)\" class=\"text-red-500 hover:text-red-700 font-bold leading-none text-sm\">&times;</button>\r\n                 </div>\r\n             </div>\r\n        </template>\r\n    </div>\r\n</div>\r\n\r\n\r\n                             <div class=\"doc-section py-2 flex justify-end font-sans\" :style=\"'color: ' + theme.text\">\r\n    <div class=\"w-60\">\r\n        <div class=\"flex justify-between text-xs py-1 opacity-60\">\r\n            <span>Subtotal</span>\r\n            <span x-text=\"'$' + subtotal.toFixed(2)\"></span>\r\n        </div>\r\n        <div class=\"flex justify-between text-xs py-1 opacity-60\">\r\n            <span>Tax (8%)</span>\r\n            <span x-text=\"'$' + tax.toFixed(2)\"></span>\r\n        </div>\r\n        <div x-show=\"addedTotal > 0\" class=\"flex justify-between text-xs py-1 opacity-60\">\r\n            <span>Upsell Add-ons</span>\r\n            <span x-text=\"'$' + addedTotal.toFixed(2)\"></span>\r\n        </div>\r\n        \r\n        <div class=\"flex justify-between mt-3 pt-3 border-t-2\" :style=\"'border-color: ' + theme.accent\">\r\n            <span class=\"text-[15px] font-bold\">Total</span>\r\n            <span class=\"text-[15px] font-bold\" :style=\"'color: ' + theme.primary\" x-text=\"'$' + total.toFixed(2)\"></span>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n                        </div>\r\n        \r\n            \r\n            \r\n                \r\n                    <!-- Widget: product_recommendations (position: 5) -->\r\n                    <div class=\"doc-section w-full block\" \r\n                         data-widget-id=\"product_recommendations\" \r\n                         data-no-split=\"true\"\r\n                         style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                        <!-- RECOMMENDATIONS (UPSELL) — Dual Layout v3.0 -->\r\n\r\n<div class=\"mt-4 font-sans\">\r\n    <!-- Header Row -->\r\n    <div class=\"flex justify-between items-center mb-2.5\">\r\n        <div class=\"flex items-center gap-1.5\">\r\n            <span class=\"text-[12px] font-bold text-slate-800\" :style=\"'color: ' + theme.text\">🎯 Recommended for You</span>\r\n            <span class=\"text-[8px] font-bold px-1.5 py-0.5 rounded-md tracking-wide uppercase\" \r\n                  :style=\"'color: ' + theme.primary + '; background: ' + theme.light\">AI-Powered</span>\r\n        </div>\r\n        <span class=\"text-[9px] text-gray-400\">Personalized for your order</span>\r\n    </div>\r\n    \r\n    \r\n    <!-- ============ GRID LAYOUT (Compact Tiles) ============ -->\r\n    <div class=\"grid grid-cols-3 gap-2\">\r\n        \r\n    </div>\r\n\r\n    \r\n</div>\r\n\r\n                    </div>\r\n                \r\n            \r\n            \r\n             \r\n        \r\n            \r\n            \r\n                \r\n                    <!-- Widget: marketing_banner (position: 6) -->\r\n                    <div class=\"doc-section w-full block\" \r\n                         data-widget-id=\"marketing_banner\" \r\n                         data-no-split=\"true\"\r\n                         style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                        <!-- MARKETING NURTURE BANNER -->\r\n<!-- Expects: nurtureMsg (Alpine) or server-side data -->\r\n<div class=\"mt-5 rounded-2xl px-6 py-5 cursor-pointer relative overflow-hidden shadow-lg transition-transform hover:scale-[1.01]\"\r\n     :style=\"'background: linear-gradient(135deg, #1E293B 0%, #334155 100%)'\"\r\n     @click=\"cycleNurture\">\r\n     <div class=\"absolute -top-5 -right-5 w-24 h-24 rounded-full bg-white/5\"></div>\r\n     \r\n     <div class=\"relative flex items-start gap-3.5 z-10\">\r\n         <div class=\"text-2xl leading-none\" x-text=\"nurtureMsg.icon\"></div>\r\n         <div class=\"flex-1\">\r\n             <div class=\"text-[13px] font-bold text-white mb-1 font-sans\" x-text=\"nurtureMsg.headline\"></div>\r\n             <div class=\"text-[11px] text-white/60 leading-relaxed font-sans\" x-text=\"nurtureMsg.body\"></div>\r\n         </div>\r\n         <div class=\"text-[9px] text-white/30 uppercase tracking-widest mt-1\">tap &rarr;</div>\r\n     </div>\r\n     \r\n     <div class=\"flex gap-1.5 justify-center mt-3\">\r\n         <template x-for=\"(msg, idx) in nurtureMessages\">\r\n             <div class=\"h-1.5 rounded-full transition-all duration-300\"\r\n                  :style=\"{ width: idx === nurtureMsgIdx ? '18px' : '6px', background: idx === nurtureMsgIdx ? (theme.secondary || '#C9A227') : 'rgba(255,255,255,0.2)' }\"></div>\r\n         </template>\r\n     </div>\r\n</div>\r\n\r\n                    </div>\r\n                \r\n            \r\n            \r\n             \r\n        \r\n            \r\n            \r\n                \r\n                    <!-- Widget: product_support (position: 7) -->\r\n                    <div class=\"doc-section w-full block\" \r\n                         data-widget-id=\"product_support\" \r\n                         data-no-split=\"true\"\r\n                         style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                        <!-- SUPPORT / TUTORIALS -->\r\n\r\n\r\n<div class=\"mt-8 font-sans w-full block\" \r\n     style=\"display: block !important; width: 100% !important;\"\r\n     data-split=\"false\">\r\n     \r\n     <div class=\"mb-5\" style=\"margin-bottom: 20px !important;\">\r\n         <div class=\"text-[14px] font-bold text-slate-800\" style=\"color: #1e293b\">📚 Product Support & Guides</div>\r\n         <div class=\"text-[11px] text-gray-400 mt-1\">Personalized resources for your purchase</div>\r\n     </div>\r\n     \r\n     <div class=\"flex flex-col gap-6 w-full\" \r\n          style=\"display: flex !important; flex-direction: column !important; width: 100% !important; gap: 24px !important;\">\r\n         \r\n             <div class=\"bg-white rounded-xl shadow-sm border transition-all overflow-hidden w-full block\"\r\n                  x-data=\"{ isOpen: true }\"\r\n                  style=\"display: block !important; width: 100% !important; border-width: 1px !important;\"\r\n                  :style=\"{ borderColor: isOpen ? '#C4B5FD' : '#f1f5f9' }\">\r\n                 \r\n                 <!-- Card Header -->\r\n                 <div class=\"flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50/50 transition-colors w-full\" \r\n                      style=\"display: flex !important; flex-direction: row !important; align-items: center !important; width: 100% !important; padding: 20px !important;\"\r\n                      @click=\"isOpen = !isOpen\">\r\n                     <div class=\"w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0 shadow-sm border border-black/5\" \r\n                          style=\"background: #F5F3FF; width: 48px !important; height: 48px !important; flex-shrink: 0 !important;\">🚀</div>\r\n                     <div class=\"flex-1 min-w-0\">\r\n                         <div class=\"flex flex-col\" style=\"display: flex !important; flex-direction: column !important;\">\r\n                             <div class=\"flex items-center gap-2\" style=\"display: flex !important; flex-direction: row !important; align-items: center !important;\">\r\n                                <span class=\"text-[13px] font-bold text-slate-800 truncate\" style=\"color: #1e293b\">Quick Guide</span>\r\n                                <span class=\"text-[9px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider shrink-0\"\r\n                                      style=\"background: #F5F3FF; color: #6366F1\">\r\n                                      guide\r\n                                </span>\r\n                             </div>\r\n                             <div class=\"text-[11px] text-gray-400 mt-1 truncate font-medium\">\r\n                                 For: <span class=\"text-slate-600 font-bold\">General Access</span> · ⏱ <span class=\"text-slate-600\">2 min</span>\r\n                             </div>\r\n                         </div>\r\n                     </div>\r\n                     <div class=\"text-gray-400 transition-transform text-lg font-bold ml-2 shrink-0\" \r\n                          style=\"font-size: 20px !important;\"\r\n                          :class=\"isOpen ? 'rotate-90 text-slate-800' : ''\">›</div>\r\n                 </div>\r\n\r\n                 <!-- Card Details (Expanded Content) -->\r\n                <div x-show=\"isOpen\" \r\n                     x-collapse \r\n                     class=\"border-t px-8 py-6 flex flex-col gap-5 w-full block\" \r\n                     style=\"background: #F5F3FF10; border-color: #F5F3FF; display: flex !important; flex-direction: column !important; width: 100% !important; border-top-width: 1px !important; padding: 24px !important;\">\r\n                     \r\n                     <div class=\"text-[10px] font-bold uppercase tracking-[0.15em] mb-1 opacity-50\" \r\n                          style=\"color: #64748b; margin-bottom: 12px !important; letter-spacing: 0.15em !important;\">Steps for Success</div>\r\n                     \r\n                     <!-- Steps List - FORCED VERTICAL -->\r\n                     <div class=\"flex flex-col gap-5 w-full\" \r\n                          style=\"display: flex !important; flex-direction: column !important; width: 100% !important; gap: 20px !important;\">\r\n                        \r\n                            <div class=\"flex items-start gap-5 w-full mb-2\" \r\n                                 style=\"display: flex !important; flex-direction: row !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                                <div class=\"w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0 shadow-sm mt-0.5\" \r\n                                     style=\"background: #6366F1; width: 32px !important; height: 32px !important; flex-shrink: 0 !important;\">1</div>\r\n                                <div class=\"flex-1 text-[13px] leading-relaxed text-slate-700 font-medium pt-0.5\" \r\n                                     style=\"color: #1e293b; line-height: 1.6 !important;\">\r\n                                    Check your settings\r\n                                </div>\r\n                            </div>\r\n                        \r\n                            <div class=\"flex items-start gap-5 w-full mb-2\" \r\n                                 style=\"display: flex !important; flex-direction: row !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                                <div class=\"w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0 shadow-sm mt-0.5\" \r\n                                     style=\"background: #6366F1; width: 32px !important; height: 32px !important; flex-shrink: 0 !important;\">2</div>\r\n                                <div class=\"flex-1 text-[13px] leading-relaxed text-slate-700 font-medium pt-0.5\" \r\n                                     style=\"color: #1e293b; line-height: 1.6 !important;\">\r\n                                    Connect your account\r\n                                </div>\r\n                            </div>\r\n                        \r\n                            <div class=\"flex items-start gap-5 w-full mb-2\" \r\n                                 style=\"display: flex !important; flex-direction: row !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                                <div class=\"w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0 shadow-sm mt-0.5\" \r\n                                     style=\"background: #6366F1; width: 32px !important; height: 32px !important; flex-shrink: 0 !important;\">3</div>\r\n                                <div class=\"flex-1 text-[13px] leading-relaxed text-slate-700 font-medium pt-0.5\" \r\n                                     style=\"color: #1e293b; line-height: 1.6 !important;\">\r\n                                    Launch your first flow\r\n                                </div>\r\n                            </div>\r\n                        \r\n                     </div>\r\n                     \r\n                     <!-- Action Button -->\r\n                     <div class=\"pt-4 w-full\" style=\"padding-top: 16px !important;\">\r\n                        <button class=\"w-full py-3 rounded-lg text-[11px] font-bold border bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all flex items-center justify-center gap-2\"\r\n                                style=\"border-color: #6366F130; color: #6366F1; display: flex !important; align-items: center !important; justify-center !important;\">\r\n                            <span class=\"text-sm\">📺</span> Watch Full Tutorial\r\n                        </button>\r\n                     </div>\r\n                 </div>\r\n             </div>\r\n         \r\n     </div>\r\n</div>\r\n\r\n                    </div>\r\n                \r\n            \r\n            \r\n             \r\n        \r\n            \r\n            \r\n                \r\n                    <!-- Widget: payment_details (position: 8) -->\r\n                    <div class=\"doc-section w-full block\" \r\n                         data-widget-id=\"payment_details\" \r\n                         data-no-split=\"true\"\r\n                         style=\"display: block !important; width: 100% !important; margin-bottom: 8px !important;\">\r\n                        <!-- PAYMENT DETAILS WIDGET -->\r\n<div class=\"mt-8 p-6 bg-gray-50 rounded-xl border border-gray-100\">\r\n    <div class=\"text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2\">Payment Details</div>\r\n    <div class=\"flex justify-between items-start text-xs text-slate-600\">\r\n        <div>\r\n            <div class=\"font-bold text-slate-800\">Bank Transfer</div>\r\n            <div>Acct: **** 4829</div>\r\n            <div>Routing: 021000021</div>\r\n        </div>\r\n        <div class=\"text-right\">\r\n            <div class=\"font-bold text-slate-800\">Total Due</div>\r\n            <div class=\"text-lg text-emerald-600 font-bold\" x-text=\"'$' + total.toFixed(2)\">$0.00</div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n                    </div>\r\n                \r\n            \r\n            \r\n             \r\n        \r\n            \r\n            \r\n                \r\n                    <!-- Spacer: spacer_1 -->\r\n                    <div class=\"doc-section w-full block\" \r\n                         data-widget-id=\"spacer_1\" \r\n                         data-no-split=\"true\"\r\n                         style=\"display: block !important; width: 100% !important; height: 20px !important; min-height: 20px !important; margin-top: 0 !important; margin-bottom: 0 !important;\">\r\n                    </div>\r\n                \r\n            \r\n            \r\n             \r\n        \r\n            \r\n            \r\n            \r\n             \r\n        \r\n\r\n        <!-- =============== PINNED FOOTER =============== -->\r\n        \r\n            <div class=\"doc-section w-full block\" data-widget-id=\"footer\" data-no-split=\"true\" \r\n                 style=\"display: block !important; width: 100% !important; margin-top: 60px !important; border-top: 1px solid #f1f5f9; padding-top: 20px !important;\">\r\n                <!-- FOOTER -->\r\n<div class=\"mt-7 bg-white rounded-xl p-6 text-center shadow-sm font-sans\">\r\n    <!-- Logo fallback logic -->\r\n    <div class=\"mb-2\">\r\n        <template x-if=\"theme.logoUrl\">\r\n            <img :src=\"theme.logoUrl\" alt=\"Logo\" class=\"h-8 w-auto mx-auto object-contain\">\r\n        </template>\r\n        <template x-if=\"!theme.logoUrl\">\r\n            <div class=\"w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 font-bold text-lg\" \r\n                 x-text=\"(theme.name || 'B').charAt(0)\"></div>\r\n        </template>\r\n    </div>\r\n    <div class=\"text-[13px] font-bold mt-1.5\" :style=\"'color: ' + theme.text\">\r\n        Thank you for your order, <span x-text=\"document ? document.customerName : 'Valued Customer'\"></span>!\r\n    </div>\r\n    <div class=\"text-[11px] text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed\">\r\n        We appreciate your business at <strong :style=\"'color: ' + theme.primary\" x-text=\"theme.name\"></strong>.\r\n    </div>\r\n    \r\n    <div class=\"flex justify-center gap-2.5 mt-4 flex-wrap\">\r\n        <button class=\"px-4 py-2 rounded-lg text-[11px] font-bold text-white border-0\"\r\n                :style=\"'background: ' + theme.gradient\">\r\n            <span x-text=\"addedItems.length > 0 ? 'Place Order (+$' + addedTotal.toFixed(2) + ')' : 'Browse Store'\"></span>\r\n        </button>\r\n        <button class=\"px-4 py-2 rounded-lg text-[11px] font-bold bg-transparent border-2\"\r\n                :style=\"'border-color: ' + theme.accent + '; color: ' + theme.primary\">\r\n            Share & Earn\r\n        </button>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"text-center mt-5 text-[9.5px] text-gray-400 font-sans\">\r\n     Smart Invoice Engine v2.1 · Personalized recommendations · Brand-themed delivery\r\n</div>\r\n\r\n            </div>\r\n        \r\n\r\n    </div>\r\n</div>\r\n",
+  "context": {
+    "app_id": "1cc57fb6-314f-4344-a05b-48b140e829c7",
+    "plan_id": "47c30ac2-e6d0-418a-b249-a1dd4fcc68d8",
+    "brand_id": "c9abb2d1-a439-4414-8b7a-da6e6aad5e4a",
+    "request_id": "req_a80bebc6_1772910019270_842",
+    "service_id": "transactional-branding",
+    "business_id": "181a05e7-66b0-47e0-94fe-1f7bbaaca735",
+    "environment": "development",
+    "service_tenant_id": "181a05e7-66b0-47e0-94fe-1f7bbaaca735"
+  },
+  "eventType": "floovioo_transactional_branding_automation_request_apply_invoice",
+  "timestamp": "2026-03-07T19:00:19.414Z",
+  "floovioo_id": "06663d73-ee45-4764-8519-2ee0a2eeff79",
+  "workflow_mode": "active"
+}

@@ -1,6 +1,9 @@
 import prisma from '../lib/prisma';
 import { aiService } from './ai.service';
 import { logger } from '../lib/logger';
+import { serviceRegistry } from './service-registry.service';
+import { ServiceSlugs } from '../types/service.types';
+import { SmartInvoice } from '../models/smart-documents/smart-invoice.model';
 
 export class TemplateGeneratorService {
 
@@ -13,7 +16,6 @@ export class TemplateGeneratorService {
         logger.info({ userId, type }, '🎨 Initiating AI Template Design');
 
         // 1. Construct the System Prompt
-        // We instruct the AI to act as a Frontend Expert and output ONLY valid HTML/EJS.
         const systemPrompt = `
            ACT AS: Expert Frontend Developer & UI Designer.
            TASK: Create a single-file HTML/CSS template for a business document.
@@ -25,7 +27,7 @@ export class TemplateGeneratorService {
            2. Make it look PREMIUM, like a Canva design.
            3. YOU MUST USE THESE PLACEHOLDERS for dynamic data:
               - {{businessName}}
-              - {{logoUrl}} (Use <img> tag, handle empty if needed)
+              - {{logoUrl}}
               - {{addressHtml}}
               - {{contactHtml}}
               - {{customerName}}
@@ -33,12 +35,12 @@ export class TemplateGeneratorService {
               - {{docNumber}}
               - {{date}}
               - {{dueDate}}
-              - {{items_table}} (This is critical - place this where the list of items should go)
+              - {{items_table}}
               - {{subtotal}}
               - {{tax}}
               - {{total}}
               - {{currency}}
-              - {{primaryColor}} (Use this for main accents)
+              - {{primaryColor}}
               - {{secondaryColor}}
             
             4. Do NOT output Markdown. Do NOT output \`\`\`html blocks. Output RAW HTML only.
@@ -46,14 +48,12 @@ export class TemplateGeneratorService {
         `;
 
         // 2. Call the AI Service
-        // We use the 'generate' action which corresponds to the main generation webhook.
-        // We pass the prompt constructed above.
         const result = await aiService.generateHtmlDocument(
             systemPrompt, 
             userId, 
             type, 
             {
-                action: 'generate', // Use the 'generate' endpoint
+                action: 'generate',
                 tone: 'professional',
                 appId: 'template-generator'
             }
@@ -72,7 +72,7 @@ export class TemplateGeneratorService {
                 businessId: user.businessId,
                 name: `${userPrompt.substring(0, 20)}... (${type})`,
                 documentType: type,
-                htmlContent: result.html, // The AI's generated HTML
+                htmlContent: result.html,
                 source: 'ai_generated',
                 status: 'active'
             }
@@ -85,20 +85,14 @@ export class TemplateGeneratorService {
      * Generate HTML for a transaction document using local EJS templates
      * and external N8n AI data.
      */
-    async generateHtml(userId: string, businessId: string, documentType: string, payload: any): Promise<string> {
+    async generateHtml(userId: string, businessId: string, documentType: string, payload: any, nonce?: string): Promise<string> {
         const { brandingService } = require('./branding.service');
         const { templateRegistry } = require('./template-registry.service');
         const { resolveLayout } = require('./layout-resolution.service');
-        const { RevenueService } = require('../modules/transactional/revenue/revenue.service');
-        const { webhookService } = require('./webhook.service');
-        const { SmartInvoice } = require('../models/smart-documents/smart-invoice.model');
         const ejs = require('ejs');
         const path = require('path');
-        const axios = require('axios');
 
-        const revenueService = new RevenueService();
-
-        logger.info({ businessId, documentType }, '📄 [TemplateGeneratorService] Generating local template HTML');
+        logger.info({ businessId, documentType }, '📄 [TemplateGeneratorService] Generating local template HTML (Unified Path)');
 
         // 1. Fetch Branding Profile
         const profile = await brandingService.getProfile(userId) || await (prisma as any).brandingProfile.findFirst({
@@ -114,6 +108,7 @@ export class TemplateGeneratorService {
         
         let templateHtml = '';
         let absoluteViewPath = '';
+        let manifest: any = null;
         let layoutOrder: string[] = [];
         let widgetStates: any = {};
         
@@ -122,7 +117,7 @@ export class TemplateGeneratorService {
             const userTemplate = await brandingService.getUserTemplate(customId);
             if (userTemplate) templateHtml = userTemplate.htmlContent;
         } else {
-            const manifest = templateRegistry.getById(templateId);
+            manifest = templateRegistry.getById(templateId);
             if (!manifest) throw new Error(`Template manifest not found for ${templateId}`);
 
             const resolved = resolveLayout(manifest, profile.components);
@@ -133,12 +128,11 @@ export class TemplateGeneratorService {
             absoluteViewPath = path.join(process.cwd(), 'src/views', `${viewPathRelativeToViews}.ejs`);
         }
 
-        // 2. Prepare Base Theme Data (similar to BrandingController.getPreview)
+        // 2. Prepare Base Theme Data
         const dbProfile = profile;
         const business = (dbProfile as any).business || await (prisma as any).business.findUnique({ where: { id: businessId } });
         
-        const profileName = profile.name || 'Your Company'; 
-        const businessName = business?.name || profileName;
+        const businessName = profile.companyName || business?.name || 'Your Company';
         const brandColors = (dbProfile.brandColors as any) || {};
         
         const themeData = {
@@ -148,111 +142,83 @@ export class TemplateGeneratorService {
             accent: brandColors.accent || '#C4B5FD',
             light: brandColors.light || '#F5F3FF',
             text: brandColors.text || '#1e293b',
-            pattern: '', 
-            logo: dbProfile.logoUrl || '⚡',
             logoUrl: dbProfile.logoUrl,
             tagline: dbProfile.tagline || (dbProfile.fontSettings as any)?.tagline || 'Building the future of commerce.',
             gradient: `linear-gradient(135deg, ${brandColors.primary || '#6366F1'} 0%, ${brandColors.secondary || '#8B5CF6'} 100%)`,
             layoutOrder: layoutOrder
         };
 
-        const config = dbProfile.config || {};
-        const components = dbProfile.components || {};
+        const config = (dbProfile.config as any) || {};
+        const components = (dbProfile.components as any) || {};
 
-        // 3. Transform Payload to Document Model
-        const items = payload.items || [];
-        const customer = payload.customer || { name: 'Valued Customer', email: '' };
-        const amount = payload.amount || payload.total || 0;
-        const currency = payload.currency || 'USD';
+        // 3. GET ENRICHED CONTEXT (Recommendations/Upsells)
+        let smartContent: any = payload.smartContent || null;
+        logger.info({ hasSmartContent: !!smartContent, smartContentKeys: smartContent ? Object.keys(smartContent) : [] }, '📦 [TemplateGeneratorService] smartContent from payload');
         
-        const smartInvoice = new SmartInvoice(
-            payload.entityId || payload.id || `INV-${Date.now()}`,
-            themeData,
+        if (!smartContent) {
+            try {
+                let appId = (payload as any).appId || (dbProfile as any).appId;
+                let apiKey = (payload as any).apiKey || (dbProfile as any).apiKey;
+
+                if (!appId || !apiKey) {
+                    const defaultApp = await (prisma as any).app.findFirst({
+                        where: { userId, name: 'Default App', isActive: true }
+                    });
+                    if (defaultApp) {
+                        appId = defaultApp.id;
+                        apiKey = defaultApp.apiKey;
+                    }
+                }
+
+                if (appId && apiKey) {
+                    const recommendationResponse = await serviceRegistry.callInternalService(
+                        ServiceSlugs.RECOMMENDATIONS,
+                        '/recommendations/document',
+                        'POST',
+                        {
+                            items: (payload.items || []).map((i: any) => i.name || i.description),
+                            limit: 3,
+                            businessId
+                        },
+                        {
+                            'x-app-id': appId,
+                            'x-api-key': apiKey
+                        }
+                    );
+
+                    if (recommendationResponse.success) {
+                        smartContent = { recommendations: recommendationResponse.data };
+                    }
+                }
+            } catch (e: any) {
+                logger.warn({ err: e.message }, '⚠️ [TemplateGeneratorService] Could not enrich context');
+            }
+        }
+
+        // 4. Normalize via SmartInvoice Model
+        const docId = payload.documentId || payload.entityId || payload.id || `INV-${Date.now()}`;
+        const smartInvoice = SmartInvoice.fromPayload(
+            docId,
+            themeData as any,
             config,
-            [], [], [], [], {}
+            { ...payload, smartContent }
         );
 
-        items.forEach((item: any, idx: number) => {
-            smartInvoice.addItem({
-                id: idx + 1,
-                name: item.description || item.name || 'Item',
-                sku: item.sku || `SKU-${idx + 1}`,
-                qty: item.quantity || 1,
-                price: item.unitPrice || item.rate || item.amount || 0,
-                img: item.img || '📦',
-                category: item.category || 'General'
-            });
-        });
-
-        // 4. Fetch Smart Enrichment (AI Upsells / Recommendations / Support)
-        const upsell = (profile.upsellConfig as any) || {};
-        let smartContent: any = {};
-        
-        if (upsell.active || config.upsellEnabled) {
-             const itemNames = items.map((i: any) => i.description || i.name);
-             try {
-                 smartContent = await revenueService.getEnrichedContext(businessId, itemNames);
-             } catch (e) {
-                 logger.warn({ err: e }, 'Smart Enrichment failed during local template generation fallback to mock');
-                 smartContent = { tutorials: [], recommendations: [] };
-             }
-        }
-        
-        try {
-            if (!smartContent.recommendations || smartContent.recommendations.length === 0) {
-                 const aiUrl = await webhookService.getEndpoint('transactional-branding', 'ai_recommendations');
-                 if (aiUrl && aiUrl !== '') {
-                      const response = await axios.post(aiUrl, { items: items.map((i:any) => i.name || i.description), businessId });
-                      if (response.data && response.data.recommendations) {
-                          smartContent.recommendations = response.data.recommendations;
-                      }
-                 }
-            }
-        } catch (e: any) {
-             logger.debug('Failed external AI webhook call, proceeding with defaults');
-        }
-
-        smartInvoice.recommendations = smartContent.recommendations || [];
-        smartInvoice.tutorials = smartContent.tutorials || [];
-        smartInvoice.nurtureMessages = smartContent.nurtureMessages || [];
-
-        const modelData = {
-           ...smartInvoice.toJSON().data,
-           id: payload.entityId || payload.id || `INV-${Date.now()}`,
-           customerName: customer.name || 'Valued Customer',
-           customerEmail: customer.email || '',
-           customerAddress: customer.address || 'Address not provided',
-           businessName: businessName,
-           businessAddress: business?.address || '',
-           businessWebsite: business?.website || '',
-           businessEmail: (dbProfile.supportConfig as any)?.email || '',
-           voiceProfile: dbProfile.voiceProfile || {},
-           subtotal: payload.subtotal || amount,
-           tax: payload.tax || 0,
-           total: amount,
-           currency: currency,
-           date: payload.date || new Date().toLocaleDateString(),
-           dueDate: payload.dueDate || ''
-        };
+        const modelData = smartInvoice.toJSON().data;
+        logger.info({ recommendationsCount: modelData.recommendations?.length || 0, tutorialsCount: modelData.tutorials?.length || 0 }, '📦 [TemplateGeneratorService] SmartInvoice modelData built');
+        const portal_url = payload.portal_url || '';
+        const interactive_link = payload.interactive_link || '';
 
         // 5. Compile HTML
         if (templateHtml) {
-             // It's a custom DB template (HTML string)
-             // Use simple replace logic identical to preview
-               let rendered = templateHtml
+               return templateHtml
                     .replace(/{{businessName}}/g, businessName)
-                    .replace(/{{customerName}}/g, modelData.customerName)
-                    .replace(/{{docNumber}}/g, modelData.id)
-                    .replace(/{{date}}/g, modelData.date)
-                    .replace(/{{subtotal}}/g, modelData.subtotal.toString())
-                    .replace(/{{tax}}/g, modelData.tax.toString())
-                    .replace(/{{total}}/g, modelData.total.toString())
-                    .replace(/{{currency}}/g, modelData.currency);
-               return rendered;
+                    .replace(/{{customerName}}/g, payload.customer?.name || 'Customer')
+                    .replace(/{{docNumber}}/g, docId)
+                    .replace(/{{total}}/g, smartInvoice.total.toFixed(2))
+                    .replace(/{{currency}}/g, payload.currency || 'USD');
         }
 
-        // Standard EJS render
-        let _layoutPath: string | null = null;
         const renderContext: any = {
             branding: {
                 theme: themeData,
@@ -260,31 +226,30 @@ export class TemplateGeneratorService {
                 config,
                 components,
                 profile: dbProfile,
-                model: modelData,
+                model: {
+                    ...modelData,
+                    portal_url,
+                    interactive_link
+                },
                 layoutOrder,
                 widgetStates,
+                documentId: docId,
+                generateActionLink: (action: string, params: any = {}) => {
+                    const { linkService } = require('./link.service');
+                    return linkService.generateActionLink(action, { docId, ...params });
+                },
                 resolvedFrom: 'manifest'
             },
-            nonce: 'ssr-nonce',
-            document: { id: payload.entityId },
-            layout: (layoutName: string) => {
-                _layoutPath = layoutName;
-            },
+            invoiceData: payload,
+            nonce: nonce || 'ssr-nonce',
+            document: { id: docId },
+            layout: (layoutName: string) => {},
             block: (name: string) => ''
         };
 
         try {
-            let bodyHtml = await ejs.renderFile(absoluteViewPath, renderContext);
-            
-            if (_layoutPath) {
-                // Determine absolute path of the layout EJS file
-                // layout paths are usually 'layouts/document-master'
-                const layoutAbsolutePath = path.join(process.cwd(), 'src/views', `${_layoutPath}.ejs`);
-                const layoutContext = { ...renderContext, body: bodyHtml };
-                bodyHtml = await ejs.renderFile(layoutAbsolutePath, layoutContext);
-            }
-            
-            logger.info('✅ [TemplateGeneratorService] HTML compiled successfully');
+            const bodyHtml = await ejs.renderFile(absoluteViewPath, renderContext);
+            logger.info('✅ [TemplateGeneratorService] Unified HTML compiled');
             return bodyHtml;
         } catch (error: any) {
             logger.error({ err: error, path: absoluteViewPath }, '❌ [TemplateGeneratorService] EJS Render Error');
@@ -292,8 +257,5 @@ export class TemplateGeneratorService {
         }
     }
 }
-
-
-
 
 export const templateGenerator = new TemplateGeneratorService();

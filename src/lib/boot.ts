@@ -114,6 +114,28 @@ export class BootManager {
       });
       logger.info('   ✅ Boot-time Orchestrator queued (15s delay)');
 
+      // 3. Unified Hub Sync Orchestrator (Every 6 hours)
+      // Fans out per-tenant hub sync jobs to keep data fresh.
+      const integrationQueue = createQueue(QUEUES.INTEGRATION_SYNC);
+      await integrationQueue.add('unified:orchestrate', {}, {
+        repeat: {
+          pattern: '0 */6 * * *'  // Every 6 hours
+        },
+        jobId: 'unified-hub-orchestrate-v1'
+      });
+      logger.info('   ✅ Unified Hub Sync Orchestrator Scheduled (0 */6 * * *)');
+
+      // 4. Boot-time Unified Orchestrate
+      await integrationQueue.add('unified:orchestrate', {
+        trigger: 'boot',
+        bootTime: new Date().toISOString()
+      }, {
+        delay: 30000,  // 30s — stagger after recovery orchestrator
+        jobId: `unified-boot-orchestrate-${Date.now()}`,
+        removeOnComplete: true
+      });
+      logger.info('   ✅ Boot-time Unified Orchestrator queued (30s delay)');
+
     } catch (error: any) {
       logger.error({ err: error }, '   ⚠️ Failed to schedule cron jobs');
     }

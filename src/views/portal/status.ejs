@@ -1,0 +1,51 @@
+<% layout('layouts/portal-layout') %>
+<div class="p-8 md:p-12 h-full flex flex-col items-center justify-center text-center">
+    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mb-8 shadow-inner">
+        <% if (status === 'success') { %>
+            ✅
+        <% } else if (status === 'added') { %>
+            🛒
+        <% } else { %>
+            ✨
+        <% } %>
+    </div>
+
+    <h1 class="text-3xl font-display font-bold text-slate-800 mb-4">
+        <% if (status === 'success') { %>
+            Action Completed!
+        <% } else if (status === 'added') { %>
+            Product Added to Order
+        <% } else { %>
+            Request Processed
+        <% } %>
+    </h1>
+
+    <p class="text-slate-500 max-w-md mx-auto mb-10 leading-relaxed">
+        <% if (status === 'success') { %>
+            Your request has been successfully processed and synchronized with our records. You will receive a confirmation email shortly.
+        <% } else if (status === 'added') { %>
+            We've updated your order with the selected product. The business has been notified and will include it in your shipment.
+        <% } else { %>
+            Thank you for interacting with our smart document. Your preferences have been recorded.
+        <% } %>
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+        <a href="/p/<%= document.id %>/view" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:-translate-y-0.5 transition-transform text-center">
+            Return to Page
+        </a>
+        <button onclick="window.close()" class="flex-1 bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold hover:bg-slate-200 transition-colors">
+            Close Portal
+        </button>
+    </div>
+
+    <div class="mt-12 pt-12 border-t border-slate-100 flex flex-col items-center gap-4">
+        <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">What happens next?</div>
+        <div class="flex gap-2">
+            <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+            <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        </div>
+        <p class="text-[11px] text-slate-400 italic">Synchronizing with Business ERP...</p>
+    </div>
+</div>

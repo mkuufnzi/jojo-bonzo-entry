@@ -128,6 +128,23 @@ recoveryWorker.on('failed', (job, err) => {
 
 logger.info(`✅ Recovery Worker listening on: ${QUEUES.RECOVERY_ENGINE}`);
 
+// Initialize Unified Hub Sync Worker
+import { unifiedSyncProcessor } from './unified-sync.processor';
+const unifiedSyncWorker = createWorker(QUEUES.INTEGRATION_SYNC, unifiedSyncProcessor, {
+    concurrency: config.NODE_ENV === 'production' ? 3 : 1
+});
+
+unifiedSyncWorker.on('completed', job => {
+    logger.info({ jobId: job.id, queue: QUEUES.INTEGRATION_SYNC }, '[UnifiedSync] Job completed');
+});
+
+unifiedSyncWorker.on('failed', (job, err) => {
+    logger.error({ jobId: job?.id, err, queue: QUEUES.INTEGRATION_SYNC }, '[UnifiedSync] Job failed');
+    Sentry.captureException(err, { tags: { job_id: job?.id, queue: QUEUES.INTEGRATION_SYNC } });
+});
+
+logger.info(`✅ Unified Sync Worker listening on: ${QUEUES.INTEGRATION_SYNC}`);
+
 // Keep process alive
 process.on('SIGTERM', async () => {
     logger.info('SIGTERM received. Closing workers...');
@@ -137,7 +154,8 @@ process.on('SIGTERM', async () => {
         aiWorker.close(), 
         onboardingWorker.close(),
         analyticsWorker.close(),
-        recoveryWorker.close()
+        recoveryWorker.close(),
+        unifiedSyncWorker.close()
     ]);
     process.exit(0);
 });

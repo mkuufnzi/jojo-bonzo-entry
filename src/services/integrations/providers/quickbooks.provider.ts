@@ -4,6 +4,7 @@ import { TokenManager } from '../token.manager';
 import { EventSegments, buildScopedEventName } from '../../../types/service.types';
 
 export class QBOProvider implements IERPProvider {
+    readonly slug: string = 'quickbooks';
     private integration: Integration | null = null;
     private baseUrl: string = 'https://sandbox-quickbooks.api.intuit.com/v3/company';
     private realmId: string = '';

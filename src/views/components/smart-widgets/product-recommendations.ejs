@@ -3,14 +3,30 @@
     const recs = branding.model?.recommendations || []; 
     const theme = branding.themeData || {};
     const recLayout = branding.components?.product_recommendations?.config?.layout || 'grid';
+    
+    // Unique ID for scoping CSS variables
+    const scopeId = 'rec_' + Math.floor(Math.random() * 1000000).toString(16);
 %>
-<div class="mt-4 font-sans">
+
+<style>
+    .product-recommendations-widget {
+        /* CSS Variables provided via inline style on root for linter-safety */
+        --rec-primary: var(--rec-primary, #6366f1);
+        --rec-accent: var(--rec-accent, #c4b5fd);
+        --rec-light: var(--rec-light, #f5f3ff);
+        --rec-text: var(--rec-text, #1e293b);
+        --rec-gradient: var(--rec-gradient, linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%));
+    }
+</style>
+
+<div class="mt-4 font-sans product-recommendations-widget" 
+     style="--rec-primary: <%= theme.primary || '#6366f1' %>; --rec-accent: <%= theme.accent || '#c4b5fd' %>; --rec-light: <%= theme.light || '#f5f3ff' %>; --rec-text: <%= theme.text || '#1e293b' %>; --rec-gradient: <%= theme.gradient || 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' %>;">
     <!-- Header Row -->
     <div class="flex justify-between items-center mb-2.5">
         <div class="flex items-center gap-1.5">
-            <span class="text-[12px] font-bold text-slate-800" :style="'color: ' + theme.text">🎯 Recommended for You</span>
+            <span class="text-[12px] font-bold text-slate-800" style="color: var(--rec-text)">🎯 Recommended for You</span>
             <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-md tracking-wide uppercase" 
-                  :style="'color: ' + theme.primary + '; background: ' + theme.light">AI-Powered</span>
+                  style="color: var(--rec-primary); background: var(--rec-light)">AI-Powered</span>
         </div>
         <span class="text-[9px] text-gray-400">Personalized for your order</span>
     </div>
@@ -20,7 +36,7 @@
     <div class="grid grid-cols-3 gap-2">
         <% recs.forEach(rec => { %>
             <div class="bg-white rounded-lg border overflow-hidden transition-all hover:shadow-sm"
-                 :style="'border-color: ' + (addedItems.includes(<%= rec.id %>) ? theme.primary : '#e5e7eb')">
+                 :style="addedItems.includes(<%= rec.id %>) ? 'border-color: var(--rec-primary)' : 'border-color: #e5e7eb'">
                 
                 <!-- Product Image -->
                 <div class="w-full h-16 bg-gray-50 overflow-hidden">
@@ -32,22 +48,23 @@
 
                 <!-- Info -->
                 <div class="px-2 py-1.5">
-                    <div class="text-[10px] font-bold leading-tight truncate" :style="'color: ' + theme.text"><%= rec.name %></div>
+                    <div class="text-[10px] font-bold leading-tight truncate" style="color: var(--rec-text)"><%= rec.name %></div>
                     <div class="flex items-center justify-between mt-1">
-                        <span class="text-[11px] font-bold" :style="'color: ' + theme.primary">$<%= rec.price.toFixed(2) %></span>
+                        <span class="text-[11px] font-bold" style="color: var(--rec-primary)">$<%= rec.price.toFixed(2) %></span>
                         <span class="text-[7px] font-bold px-1 py-0.5 rounded uppercase tracking-wider" 
-                              :style="'background: ' + theme.accent + '; color: ' + theme.primary"><%= rec.badge %></span>
+                              style="background: var(--rec-accent); color: var(--rec-primary)"><%= rec.badge %></span>
                     </div>
                     <div class="text-[8px] text-gray-400 mt-0.5 truncate">💡 <%= rec.reason %></div>
                 </div>
 
                 <!-- Add Button -->
                 <div class="px-2 pb-2">
-                    <button @click="toggleAdd(<%= rec.id %>)" 
-                            class="w-full py-1 rounded text-[9px] font-bold transition-all border-none cursor-pointer"
-                            :style="addedItems.includes(<%= rec.id %>) ? 'background: ' + theme.accent + '; color: ' + theme.primary : 'background: ' + theme.gradient + '; color: #fff'">
+                    <a href="<%= branding.generateActionLink('add_to_order', { sku: rec.sku }) %>" 
+                       target="_blank"
+                       class="w-full py-1 rounded text-[9px] font-bold transition-all border-none cursor-pointer block no-underline text-center"
+                       :style="addedItems.includes(<%= rec.id %>) ? 'background: var(--rec-accent); color: var(--rec-primary)' : 'background: var(--rec-gradient); color: #fff'">
                         <span x-text="addedItems.includes(<%= rec.id %>) ? '✓ Added' : '+ Add'"></span>
-                    </button>
+                    </a>
                 </div>
             </div>
         <% }); %>
@@ -57,9 +74,8 @@
     <!-- ============ LIST LAYOUT (Compact Rows) ============ -->
     <div class="border rounded-lg overflow-hidden" style="border-color: #e5e7eb;">
         <% recs.forEach((rec, idx) => { %>
-            <div class="flex items-center gap-2.5 px-2.5 py-2 bg-white transition-colors<%= idx < recs.length - 1 ? ' border-b' : '' %>"
-                 style="<%= idx < recs.length - 1 ? 'border-color: #f3f4f6;' : '' %>"
-                 :style="addedItems.includes(<%= rec.id %>) ? { background: theme.light } : {}">
+            <div class="flex items-center gap-2.5 px-2.5 py-2 bg-white transition-colors <%= idx < recs.length - 1 ? 'border-b border-gray-100' : '' %>"
+                 :style="addedItems.includes(<%= rec.id %>) ? 'background-color: var(--rec-light)' : ''">
                 
                 <!-- Product Thumbnail -->
                 <div class="w-8 h-8 rounded overflow-hidden shrink-0 bg-gray-50">
@@ -72,23 +88,24 @@
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] font-bold truncate" :style="'color: ' + theme.text"><%= rec.name %></span>
+                        <span class="text-[10px] font-bold truncate" style="color: var(--rec-text)"><%= rec.name %></span>
                         <span class="text-[7px] font-bold px-1 py-0.5 rounded uppercase tracking-wider shrink-0" 
-                              :style="'background: ' + theme.accent + '; color: ' + theme.primary"><%= rec.badge %></span>
+                              style="background: var(--rec-accent); color: var(--rec-primary)"><%= rec.badge %></span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="text-[10px] font-bold" :style="'color: ' + theme.primary">$<%= rec.price.toFixed(2) %></span>
+                        <span class="text-[10px] font-bold" style="color: var(--rec-primary)">$<%= rec.price.toFixed(2) %></span>
                         <span class="text-[8px] text-gray-400">· <%= rec.match %>% match</span>
                         <span class="text-[8px] text-gray-400 truncate">· <%= rec.reason %></span>
                     </div>
                 </div>
 
                 <!-- Action -->
-                <button @click="toggleAdd(<%= rec.id %>)" 
-                        class="shrink-0 px-2.5 py-1 rounded text-[9px] font-bold transition-all border-none cursor-pointer"
-                        :style="addedItems.includes(<%= rec.id %>) ? 'background: ' + theme.accent + '; color: ' + theme.primary : 'background: ' + theme.gradient + '; color: #fff'">
+                <a href="<%= branding.generateActionLink('add_to_order', { sku: rec.sku }) %>" 
+                   target="_blank"
+                   class="shrink-0 px-2.5 py-1 rounded text-[9px] font-bold transition-all border-none cursor-pointer no-underline text-center"
+                   :style="addedItems.includes(<%= rec.id %>) ? 'background: var(--rec-accent); color: var(--rec-primary)' : 'background: var(--rec-gradient); color: #fff'">
                     <span x-text="addedItems.includes(<%= rec.id %>) ? '✓' : '+ Add'"></span>
-                </button>
+                </a>
             </div>
         <% }); %>
     </div>

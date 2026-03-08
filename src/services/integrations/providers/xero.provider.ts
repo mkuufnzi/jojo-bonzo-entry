@@ -10,6 +10,7 @@ import { EventSegments, buildScopedEventName } from '../../../types/service.type
  */
 
 export class XeroProvider implements IERPProvider {
+    readonly slug: string = 'xero';
     private integration: Integration | null = null;
     private baseUrl: string = 'https://api.xero.com/api.xro/2.0';
     private tenantId: string = '';

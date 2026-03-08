@@ -27,6 +27,8 @@ export class RevenueService {
     async getRecommendations(req: RecommendationRequest): Promise<Offer[]> {
         const { businessId, items } = req;
         const offers: Offer[] = [];
+        
+        logger.info({ businessId, items }, '🧠 [RevenueService.getRecommendations] Input received');
 
         try {
             // 1. Fetch Rules (Cached in Redis ideally, currently DB)
@@ -39,6 +41,8 @@ export class RevenueService {
                 orderBy: { priority: 'desc' }
             });
 
+            logger.info({ businessId, ruleCount: rules.length }, '🧠 [RevenueService.getRecommendations] Active rules found for business');
+
             if (rules.length === 0) return [];
 
             // 2. Logic Engine: Find best match
@@ -46,6 +50,7 @@ export class RevenueService {
                 // Exact Match
                 const skuMatch = rules.find(r => r.triggerSku && item.includes(r.triggerSku));
                 if (skuMatch) {
+                    logger.info({ item, ruleId: skuMatch.id, targetSku: skuMatch.targetSku }, '🧠 [RevenueService.getRecommendations] Exact SKU match found');
                     await this.addOffer(offers, skuMatch, businessId);
                     continue;
                 }
@@ -55,10 +60,14 @@ export class RevenueService {
             if (offers.length === 0) {
                 const globalRule = rules.find(r => !r.triggerSku && !r.triggerCategory);
                 if (globalRule) {
+                    logger.info({ ruleId: globalRule.id, targetSku: globalRule.targetSku }, '🧠 [RevenueService.getRecommendations] Using global fallback rule');
                     await this.addOffer(offers, globalRule, businessId);
+                } else {
+                    logger.info('🧠 [RevenueService.getRecommendations] No global rule found');
                 }
             }
 
+            logger.info({ offersCount: offers.length, offers: offers.map(o => o.sku) }, '🧠 [RevenueService.getRecommendations] Final offers generated');
             return offers;
 
         } catch (error) {
@@ -70,33 +79,69 @@ export class RevenueService {
     /**
      * Context Provider: Gets enriched "Smart Content" for a document dispatch.
      * Consolidates personal message and potential upsells into a single block.
+     * 
+     * DELEGATES to the canonical RecommendationService which properly queries
+     * the Product table with category matching and fallback padding.
      */
     async getEnrichedContext(businessId: string, items: string[]): Promise<any> {
-        logger.info({ businessId, itemCount: items.length }, '🧠 [RevenueService] Generating Enriched Context');
+        logger.info({ businessId, itemCount: items.length, items }, '🧠 [RevenueService.getEnrichedContext] Starting Context Gen (delegating to RecommendationService)');
         
-        const offers = await this.getRecommendations({ 
-            businessId, 
-            items, 
-            totalAmount: 0 // Amount check logic can be expanded later
-        });
+        // Import the canonical RecommendationService (lazy to avoid circular)
+        const { recommendationService } = require('../../recommendation/recommendation.service');
 
-        // Format for n8n consumption (Strict Schema)
-        return {
-            has_offers: offers.length > 0,
-            offers: offers.map(o => ({
-                sku: o.sku,
+        let recommendations: any[] = [];
+        try {
+            recommendations = await recommendationService.getRecommendations({
+                businessId,
+                items,
+                limit: 3
+            });
+            logger.info({ businessId, count: recommendations.length }, '🧠 [RevenueService.getEnrichedContext] RecommendationService returned');
+        } catch (err: any) {
+            logger.warn({ err: err.message, businessId }, '🧠 [RevenueService.getEnrichedContext] RecommendationService failed, falling back');
+            // Fallback to legacy matching if new service fails
+            const offers = await this.getRecommendations({ businessId, items, totalAmount: 0 });
+            recommendations = offers.map(o => ({
+                id: o.sku,
                 name: o.productName,
-                copy: o.copy,
-                price: o.price,
-                currency: o.currency,
+                price: o.price || 0,
+                currency: o.currency || 'USD',
+                sku: o.sku,
+                img: '✨',
                 reason: o.reason
+            }));
+        }
+
+        // Format for downstream consumption (n8n + SmartInvoice.fromPayload)
+        // Emit BOTH `offers` (for n8n envelope) and `recommendations` (for SmartInvoice bridge)
+        const enriched = {
+            has_offers: recommendations.length > 0,
+            offers: recommendations.map(r => ({
+                sku: r.sku || 'N/A',
+                name: r.name,
+                copy: r.description || r.reason || 'Recommended for you',
+                price: r.price,
+                currency: r.currency || 'USD',
+                reason: r.reason || 'Popular choice'
             })),
-            // Default personal message if no specific logic exists yet
-            personal_message: offers.length > 0 
-                ? `We thought you might like these additions to your ${items[0] || 'order'}!`
-                : "Thank you for being a valued customer!",
+            recommendations: recommendations.map(r => ({
+                id: r.id,
+                name: r.name,
+                price: r.price || 0,
+                img: r.img || '✨',
+                sku: r.sku || 'N/A',
+                reason: r.reason || 'Recommended',
+                match: 90,
+                badge: 'Smart Match',
+                sales: ''
+            })),
+            personal_message: "",
+            product_support: {},
             timestamp: new Date().toISOString()
         };
+
+        logger.info({ smartContentHasOffers: enriched.has_offers, recsCount: enriched.recommendations.length }, '🧠 [RevenueService.getEnrichedContext] Context built and returning');
+        return enriched;
     }
 
     private async addOffer(offers: Offer[], rule: any, businessId: string) {

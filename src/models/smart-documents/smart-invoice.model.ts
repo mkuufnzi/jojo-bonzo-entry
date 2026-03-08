@@ -15,6 +15,7 @@ export interface Recommendation {
     name: string;
     price: number;
     img: string;
+    sku?: string;
     reason: string;
     match: number;
     badge: string;
@@ -81,6 +82,61 @@ export class SmartInvoice extends SmartDocument {
     public removeItem(itemId: number): void {
         this.items = this.items.filter(i => i.id !== itemId);
         this.calculateTotals();
+    }
+
+    /**
+     * Map raw payload from ERP/Webhook to SmartInvoice model
+     */
+    public static fromPayload(id: string, theme: SmartDocumentTheme, config: SmartDocumentConfig, payload: any): SmartInvoice {
+        const items: LineItem[] = (payload.items || []).map((item: any, index: number) => ({
+            id: index + 1,
+            name: item.name || item.description || 'Product',
+            sku: item.sku || 'N/A',
+            qty: item.quantity || item.qty || 1,
+            price: item.price || item.rate || 0,
+            img: (item.metadata as any)?.img || '📦',
+            category: item.category || 'General'
+        }));
+
+        // Bridge: RevenueService returns { offers: [...] }, legacy/mock data uses { recommendations: [...] }
+        const rawRecs = payload.smartContent?.recommendations || [];
+        const rawOffers = payload.smartContent?.offers || [];
+        const mergedRecs = rawRecs.length > 0 ? rawRecs : rawOffers;
+
+        const recommendations: Recommendation[] = mergedRecs.map((rec: any, index: number) => ({
+            id: rec.id || index + 1,
+            name: rec.name || rec.productName || 'Product',
+            price: typeof rec.price === 'number' ? rec.price : parseFloat(rec.price) || 0,
+            img: rec.img || '✨',
+            sku: rec.sku || `SKU-${index + 1}`,
+            reason: rec.reason || rec.copy || 'Recommended',
+            match: rec.match || 90,
+            badge: rec.badge || (rec.reason ? 'Smart Match' : 'AI'),
+            sales: rec.sales || ''
+        }));
+
+        const tutorials: Tutorial[] = (payload.smartContent?.tutorials || []).map((tut: any, index: number) => ({
+            id: tut.id || index + 1,
+            title: tut.title,
+            duration: tut.duration || '5 mins',
+            type: tut.type || 'tutorial',
+            thumb: tut.thumb || '📺',
+            steps: tut.steps || [],
+            forProduct: tut.forProduct || ''
+        }));
+
+        const nurtureMessages: NurtureMessage[] = (payload.smartContent?.nurtureMessages || []);
+
+        return new SmartInvoice(
+            id,
+            theme,
+            config,
+            items,
+            recommendations,
+            tutorials,
+            nurtureMessages,
+            { provider: payload.provider, originalId: payload.id }
+        );
     }
 
     /**

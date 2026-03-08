@@ -146,7 +146,20 @@
                         <% } %>
                     </a>
                 <% }); %>
-            <% } else { %>
+
+                <!-- Core Recommendation Product -->
+                <a href="/dashboard/recommendations"
+                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 <%= (typeof currentPath !== 'undefined' && currentPath === '/dashboard/recommendations') ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' %> relative">
+                    <% if (typeof currentPath !== 'undefined' && currentPath === '/dashboard/recommendations') { %>
+                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-600 rounded-r-full sidebar-active-indicator"></div>
+                    <% } %>
+                    <div class="w-5 h-5 flex-shrink-0 flex items-center justify-center transition-all duration-200 group-hover:scale-110">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
+                    <span class="sidebar-text ml-3 truncate flex-1">Recommendations</span>
+                    <span class="sidebar-tooltip hidden">Recommendations</span>
+                </a>
+<% } else { %>
                 <div class="sidebar-text px-3 py-2 text-xs text-slate-500 italic">No workflows active</div>
             <% } %>
         </div>

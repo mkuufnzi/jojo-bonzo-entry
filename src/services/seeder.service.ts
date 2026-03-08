@@ -103,6 +103,12 @@ export class SeederService {
                 name: 'Unlimited PDF Conversions',
                 description: 'Remove daily/monthly limits on PDF conversions.',
                 category: 'pro'
+            },
+            {
+                key: 'recommendation_engine',
+                name: 'Smart Recommendation Engine',
+                description: 'Upsell relevant products on transactional documents.',
+                category: 'revenue'
             }
         ];
 
@@ -123,9 +129,9 @@ export class SeederService {
         const planFeatureMap: { [key: string]: string[] } = {
             'Free': [],
             'Teaser': ['ai_generation', 'pdf_conversion'],
-            'Starter': ['ai_generation', 'pdf_conversion', 'api_access'],
-            'Pro': ['ai_generation', 'pdf_conversion', 'api_access'],
-            'Enterprise': ['ai_generation', 'pdf_conversion', 'api_access', 'unlimited_pdf']
+            'Starter': ['ai_generation', 'pdf_conversion', 'api_access', 'recommendation_engine'],
+            'Pro': ['ai_generation', 'pdf_conversion', 'api_access', 'recommendation_engine'],
+            'Enterprise': ['ai_generation', 'pdf_conversion', 'api_access', 'unlimited_pdf', 'recommendation_engine']
         };
 
         for (const [planName, featureKeys] of Object.entries(planFeatureMap)) {
@@ -543,6 +549,39 @@ export class SeederService {
                     externalCalls: [
                         { domain: 'n8n.automation-for-smes.com', purpose: 'Recovery email orchestration & AI content generation' },
                         { domain: 'quickbooks.api.intuit.com', purpose: 'ERP invoice sync for overdue detection' }
+                    ]
+                }
+            },
+            {
+                name: 'Smart Recommendation Engine',
+                slug: 'recommendation-service',
+                description: 'Boost revenue by upselling relevant products on transactional documents.',
+                pricePerRequest: 0.02,
+                requiredFeatureKey: 'recommendation_engine',
+                config: {
+                    webhooks: {
+                        get_recommendations: { label: 'Get Recommendations', url: process.env.N8N_WEBHOOK_RECOMMENDATIONS || 'https://n8n.automation-for-smes.com/webhook/recommendations/match', method: 'POST' },
+                        erp_product_sync: { label: 'Sync ERP Products', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/sync-products', method: 'POST' },
+                        erp_order_sync: { label: 'Sync ERP Orders', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/sync-orders', method: 'POST' },
+                        conversion_callback: { label: 'Record Conversion', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/conversion', method: 'POST' },
+                        rule_import: { label: 'Import Rules', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/rule-import', method: 'POST' },
+                        recommendation_impression: { label: 'Log Impression', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/log-impression', method: 'POST' },
+                        upsell_conversion_recorded: { label: 'Log Conversion', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/log-conversion', method: 'POST' },
+                        sync_status_update: { label: 'Sync Status Update', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/sync-status', method: 'POST' },
+                        rule_violation: { label: 'Rule Violation Alert', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/rule-alert', method: 'POST' },
+                        analytics_report: { label: 'Daily Analytics Report', url: 'https://n8n.automation-for-smes.com/webhook/recommendations/analytics', method: 'POST' }
+                    },
+                    endpoints: [
+                        { path: '/dashboard/recommendations', method: 'GET', description: 'Recommendations Dashboard' },
+                        { path: '/api/recommendations/document', method: 'POST', description: 'Get Recommendations via API', billable: true },
+                        { path: '/api/recommendations/rules', method: 'GET', description: 'List Recommendation Rules' },
+                        { path: '/api/recommendations/rules', method: 'POST', description: 'Create Recommendation Rule' },
+                        { path: '/api/recommendations/analytics/overview', method: 'GET', description: 'Get Analytics Overview' },
+                        { path: '/api/recommendations/sync/products', method: 'POST', description: 'Trigger Manual Product Sync' },
+                        { path: '/api/recommendations/sync/orders', method: 'POST', description: 'Trigger Manual Order Sync' },
+                        { path: '/api/recommendations/status', method: 'GET', description: 'Service Health Status' },
+                        { path: '/api/recommendations/test-rule', method: 'POST', description: 'Test Rule Logic' },
+                        { path: '/api/callbacks/recommendations/sync', method: 'POST', description: 'N8N Sync Callback' }
                     ]
                 }
             },

@@ -119,7 +119,7 @@ export class DeliveryService {
              if (!wf) throw new Error(`Workflow ${workflowId} not found`);
 
              logger.debug({ traceId, workflowId }, '   Job: Executing Named Workflow');
-             return await workflowService.executeAction(wf.id, wf.actionConfig, payload, userId, user.businessId);
+             return await workflowService.executeAction(wf.id, wf.actionConfig as unknown as import('../../types/workflow.types').ActionConfig, payload, userId, user.businessId);
         }
 
         // B. Event Broadcast

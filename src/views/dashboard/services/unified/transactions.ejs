@@ -1,0 +1,229 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[0.625rem] font-bold rounded-lg border border-amber-100 uppercase tracking-widest">Core Data</span>
+                <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">Unified Transactions</h1>
+            </div>
+            <p class="text-slate-500 font-medium">Orders, Invoices, and Payments aggregated across your entire business stack.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+             <!-- Source Filter -->
+             <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
+                 <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400"></i>
+                 <select onchange="window.location.href='/dashboard/unified/transactions?source=' + this.value" class="bg-transparent border-none text-[0.625rem] font-bold text-slate-600 uppercase tracking-widest focus:ring-0 outline-none cursor-pointer pr-8">
+                     <option value="">All Sources</option>
+                     <% if (locals.business?.integrations) { %>
+                        <% business.integrations.forEach(int => { %>
+                            <option value="<%= int.provider %>" <%= (locals.req && req.query.source === int.provider) ? 'selected' : '' %>><%= int.provider %></option>
+                        <% }) %>
+                     <% } %>
+                 </select>
+             </div>
+
+             <div class="flex rounded-xl overflow-hidden border border-slate-200 shadow-sm text-[0.625rem] font-bold uppercase tracking-widest bg-white">
+                <button class="px-4 py-2 hover:bg-slate-50 bg-slate-100 text-slate-900 border-r border-slate-200">History</button>
+             </div>
+        </div>
+    </div>
+
+    <!-- Tabbed Interface -->
+    <div class="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden mb-8" x-data="{ tab: 'invoices' }">
+        <div class="px-8 py-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+            <div class="flex items-center gap-4">
+                <button @click="tab = 'invoices'" :class="tab === 'invoices' ? 'text-blue-600 bg-white shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Invoices</button>
+                <button @click="tab = 'orders'" :class="tab === 'orders' ? 'text-emerald-600 bg-white shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Orders</button>
+                <button @click="tab = 'payments'" :class="tab === 'payments' ? 'text-purple-600 bg-white shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Payments</button>
+                <button @click="tab = 'estimates'" :class="tab === 'estimates' ? 'text-amber-600 bg-white shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Estimates</button>
+            </div>
+            
+            <div class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">
+                Showing data for <span class="text-slate-900 font-black"><%= business?.name || 'Primary Business' %></span>
+            </div>
+        </div>
+
+        <!-- Invoices Tab -->
+        <div x-show="tab === 'invoices'" class="animate-in fade-in duration-300">
+            <% const invoiceList = typeof invoices !== 'undefined' ? invoices : (locals.invoices || []) %>
+            <% if (invoiceList.length > 0) { %>
+                <div class="w-full relative overflow-x-auto text-left">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-[0.625rem] uppercase tracking-widest text-slate-400 bg-white border-b border-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 font-bold">Invoice #</th>
+                                <th scope="col" class="px-6 py-4 font-bold">Customer</th>
+                                <th scope="col" class="px-6 py-4 font-bold">Date</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Amount</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <% invoiceList.forEach(t => { %>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-slate-700"><%= t.invoiceNumber || t.externalId %></td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-slate-900"><%= t.customer ? t.customer.name : 'Unknown' %></div>
+                                        <div class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-tighter"><%= t.source %></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs font-medium text-slate-500"><%= t.issuedDate ? new Date(t.issuedDate).toLocaleDateString() : 'N/A' %></td>
+                                    <td class="px-6 py-4 text-right font-bold text-slate-900">$<%= parseFloat(t.amount).toFixed(2) %></td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2 text-right">
+                                            <span class="px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider 
+                                                <%= t.status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-blue-50 text-blue-700 border border-blue-200' %>">
+                                                <%= t.status %>
+                                            </span>
+                                            <% if (t.customerId) { %>
+                                                <a href="/dashboard/unified/customers/<%= t.customerId %>" class="p-1.5 bg-slate-50 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all" title="View Customer Profile">
+                                                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                                                </a>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-20 bg-slate-50/30">
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">No unified invoices found</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Orders Tab -->
+        <div x-show="tab === 'orders'" class="animate-in fade-in duration-300">
+            <% const orderList = typeof orders !== 'undefined' ? orders : (locals.orders || []) %>
+            <% if (orderList.length > 0) { %>
+                <div class="w-full relative overflow-x-auto text-left">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-[0.625rem] uppercase tracking-widest text-slate-400 bg-white border-b border-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 font-bold">Order #</th>
+                                <th scope="col" class="px-6 py-4 font-bold">Customer</th>
+                                <th scope="col" class="px-6 py-4 font-bold">Date</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Amount</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <% orderList.forEach(t => { %>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-slate-700"><%= t.orderNumber || t.externalId %></td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-slate-900"><%= t.customer ? t.customer.name : 'Unknown' %></div>
+                                        <div class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-tighter"><%= t.source %></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs font-medium text-slate-500"><%= t.orderDate ? new Date(t.orderDate).toLocaleDateString() : 'N/A' %></td>
+                                    <td class="px-6 py-4 text-right font-bold text-slate-900">$<%= parseFloat(t.amount).toFixed(2) %></td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="px-2.5 py-1 text-[0.625rem] font-bold rounded-md uppercase tracking-wider 
+                                            <%= t.status === 'FULFILLED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200' %>">
+                                            <%= t.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-20 bg-slate-50/30">
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">No unified orders found</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Payments Tab -->
+        <div x-show="tab === 'payments'" class="animate-in fade-in duration-300">
+            <% const paymentList = typeof payments !== 'undefined' ? payments : (locals.payments || []) %>
+            <% if (paymentList.length > 0) { %>
+                <div class="w-full relative overflow-x-auto text-left">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-[0.625rem] uppercase tracking-widest text-slate-400 bg-white border-b border-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 font-bold">Internal ID</th>
+                                <th scope="col" class="px-6 py-4 font-bold">Method</th>
+                                <th scope="col" class="px-6 py-4 font-bold">Date</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Amount</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <% paymentList.forEach(t => { %>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-slate-700"><%= t.externalId %></td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-slate-900"><%= t.method || 'Unknown' %></div>
+                                        <div class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-tighter"><%= t.source %></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs font-medium text-slate-500"><%= t.paymentDate ? new Date(t.paymentDate).toLocaleDateString() : 'N/A' %></td>
+                                    <td class="px-6 py-4 text-right font-bold text-slate-900">$<%= parseFloat(t.amount).toFixed(2) %></td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="px-2.5 py-1 text-[0.625rem] font-bold rounded-md uppercase tracking-wider 
+                                            <%= t.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200' %>">
+                                            <%= t.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-20 bg-slate-50/30">
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">No unified payments found</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Estimates Tab -->
+        <div x-show="tab === 'estimates'" class="animate-in fade-in duration-300">
+            <% const estimateList = typeof estimates !== 'undefined' ? estimates : (locals.estimates || []) %>
+            <% if (estimateList.length > 0) { %>
+                <div class="w-full relative overflow-x-auto text-left">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-[0.625rem] uppercase tracking-widest text-slate-400 bg-white border-b border-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 font-bold">Estimate #</th>
+                                <th scope="col" class="px-6 py-4 font-bold">Customer</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Amount</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <% estimateList.forEach(t => { %>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-slate-700"><%= t.estimateNum || t.externalId %></td>
+                                    <td class="px-6 py-4 font-bold text-slate-900"><%= t.customer ? t.customer.name : 'Unknown' %></td>
+                                    <td class="px-6 py-4 text-right font-bold text-slate-900">$<%= parseFloat(t.amount).toFixed(2) %></td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="px-2.5 py-1 text-[0.625rem] font-bold rounded-md uppercase tracking-wider 
+                                            <%= t.status === 'ACCEPTED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200' %>">
+                                            <%= t.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-20 bg-slate-50/30">
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">No unified estimates found</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

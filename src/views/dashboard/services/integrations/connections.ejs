@@ -1,0 +1,136 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12 flex items-center justify-between">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="/dashboard/integrations" class="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all bg-white">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                </a>
+                <h1 class="text-3xl font-heading font-black text-slate-900 tracking-tight">Integrations Catalog</h1>
+            </div>
+            <p class="text-slate-500 font-medium">Link your accounting, CRM, and enterprise platforms to the Floovioo engine.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[0.625rem] font-bold rounded-full border border-emerald-100 uppercase tracking-widest">
+                <%= activeConnections.length %> Connected
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Connected List -->
+        <div class="lg:col-span-2 space-y-8">
+            <h3 class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-3 h-3 text-emerald-500"></i>
+                Authorized Platforms
+            </h3>
+
+            <% if (activeConnections.length > 0) { %>
+                <div class="grid grid-cols-1 gap-4">
+                    <% activeConnections.forEach(conn => { %>
+                        <% const def = definitions.find(d => d.slug === conn.provider || d.slug === (conn.provider + '-online')); %>
+                        <div class="bg-white border <%= conn.status === 'connected' ? 'border-slate-200 shadow-sm' : 'border-red-200 bg-red-50/10' %> rounded-[2rem] p-8 hover:border-blue-400 hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between group gap-6 shadow-slate-100">
+                            <div class="flex items-center gap-6">
+                                <div class="w-16 h-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-white transition-colors relative overflow-hidden">
+                                    <% if (def && def.logoUrl) { %>
+                                        <img src="<%= def.logoUrl %>" class="w-10 h-10 object-contain relative z-10" alt="">
+                                    <% } else { %>
+                                        <span class="text-2xl font-black text-slate-300 relative z-10"><%= conn.provider[0].toUpperCase() %></span>
+                                    <% } %>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-black text-slate-900 capitalize"><%= conn.provider %></h4>
+                                    <div class="flex items-center gap-3 mt-1">
+                                        <span class="flex items-center gap-1.5 text-[0.625rem] font-bold text-emerald-500 uppercase tracking-widest">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                            <%= conn.status === 'connected' ? 'Synced' : 'Error' %>
+                                        </span>
+                                        <span class="text-slate-300">|</span>
+                                        <span class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest">Enterprise API</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 w-full sm:w-auto">
+                                <a href="/dashboard/integrations/<%= conn.provider %>" class="w-full sm:w-auto text-center px-6 py-3 bg-slate-900 text-white rounded-2xl text-[0.625rem] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-slate-200">
+                                    Configure
+                                </a>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="bg-slate-50 border border-dashed border-slate-200 rounded-[2.5rem] p-16 text-center">
+                    <div class="w-16 h-16 bg-white rounded-2xl border border-slate-200 flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <i data-lucide="plug-2" class="w-8 h-8 text-slate-300"></i>
+                    </div>
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">No active connections</p>
+                    <p class="text-slate-500 text-sm mt-3 max-w-xs mx-auto font-medium">Connect your first platform below to start automating your enterprise data flow.</p>
+                </div>
+            <% } %>
+
+            <!-- Available List -->
+            <div class="pt-12">
+                <h3 class="text-[0.625rem] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-8">
+                    <i data-lucide="plus-circle" class="w-3 h-3 text-blue-500"></i>
+                    Marketplace Integrations
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <% definitions.filter(d => !activeConnections.some(c => c.provider === d.slug || (d.slug === 'zoho-crm' && c.provider === 'zoho'))).forEach(item => { %>
+                        <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm hover:border-blue-200 hover:shadow-md transition-all flex items-center justify-between group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-blue-50 transition-colors">
+                                    <img src="<%= item.logoUrl %>" class="w-7 h-7 object-contain" alt="">
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors"><%= item.name %></h4>
+                                    <p class="text-[0.5rem] font-black text-slate-400 uppercase tracking-widest mt-0.5"><%= item.category %></p>
+                                </div>
+                            </div>
+                            <a href="/onboarding/api/integrations/<%= item.slug %>/connect" class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Rules -->
+        <div class="space-y-8">
+            <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden group">
+                <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-700"></div>
+                <h3 class="text-xl font-black tracking-tight mb-6 flex items-center gap-3">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-blue-400"></i>
+                    Encryption
+                </h3>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed mb-8">
+                    Bank-level Oauth2.0 encryption. We never store raw login credentials. All tokens are rotated automatically.
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center">
+                            <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
+                        </div>
+                        <span class="text-[0.625rem] font-black uppercase tracking-widest text-slate-200">AES-256 Protocol</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+                <h3 class="text-[0.625rem] font-black text-slate-400 uppercase tracking-widest mb-4">Sync Engine</h3>
+                <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                    By default, the <strong>Floovioo Aggregator</strong> synchronizes data every 15 minutes. High-priority items can be synced manually from the Sources page.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>

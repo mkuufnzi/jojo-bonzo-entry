@@ -132,6 +132,24 @@ export class WebhookService {
     }
 
     /**
+     * Dispatch a specific action to a service (Wait for response)
+     */
+    async dispatchAction(serviceSlug: string, action: string, payload: any): Promise<any> {
+        try {
+            const url = await this.getEndpoint(serviceSlug, action);
+            const response = await axios.post(url, {
+                action,
+                timestamp: new Date().toISOString(),
+                ...payload
+            });
+            return response.data;
+        } catch (error: any) {
+            logger.error({ serviceSlug, action, error: error.message }, '[WebhookService] Action dispatch failed');
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
      * Trigger a generic event (Fire-and-forget)
      */
     async sendTrigger(serviceSlug: string, event: string, payload: any) {

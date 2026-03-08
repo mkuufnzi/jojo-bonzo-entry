@@ -10,6 +10,7 @@ import { EventSegments, buildScopedEventName } from '../../../types/service.type
  */
 
 export class ZohoProvider implements IERPProvider {
+    readonly slug: string = 'zoho';
     private integration: Integration | null = null;
     private baseUrl: string = 'https://www.zohoapis.com/books/v3';
     private orgId: string = '';

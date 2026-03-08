@@ -1,0 +1,56 @@
+<% layout('layouts/portal-layout') %>
+<div class="p-8 md:p-12 h-full flex flex-col">
+    <div class="mb-8">
+        <h1 class="text-3xl font-display font-bold text-slate-800 mb-2">Support Hub</h1>
+        <p class="text-slate-500">How can we help you with document <span class="font-mono text-primary"><%= document.id.substring(0,8) %></span>?</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <!-- Live Chat Card -->
+        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:border-primary transition-all group cursor-pointer" @click="sidebarOpen = true">
+            <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">💬</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Smart AI Chat</h3>
+            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                Connect with our AI assistant to track delivery, update your order, or get instant answers about this document.
+            </p>
+            <div class="flex items-center gap-2 text-primary font-bold text-sm">
+                Start Chatting
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </div>
+        </div>
+
+        <!-- Email Support Card -->
+        <a href="mailto:support@floovioo.com?subject=Inquiry regarding Document <%= document.id %>" class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:border-primary transition-all group">
+            <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">✉️</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Email Support</h3>
+            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                Send a detailed inquiry to our team. We usually respond within 24 hours for all document-related queries.
+            </p>
+            <div class="flex items-center gap-2 text-emerald-600 font-bold text-sm">
+                Send Email
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </div>
+        </a>
+    </div>
+
+    <!-- FAQ Section (Optional) -->
+    <div class="mt-12 bg-slate-50 rounded-2xl p-8 border border-dashed border-slate-200">
+        <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Quick FAQ</h4>
+        <div class="space-y-4">
+            <details class="group">
+                <summary class="list-none flex justify-between items-center cursor-pointer font-semibold text-slate-700 hover:text-primary">
+                    How do I update my order?
+                    <span class="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <p class="mt-2 text-sm text-slate-500">You can add recommended products directly from the interactive view of this document. Any changes will be reflected instantly.</p>
+            </details>
+            <details class="group">
+                <summary class="list-none flex justify-between items-center cursor-pointer font-semibold text-slate-700 hover:text-primary">
+                    Is this document secure?
+                    <span class="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <p class="mt-2 text-sm text-slate-500">Yes, your access is protected by an HMAC-signed token, ensuring that only you can view and interact with this document.</p>
+            </details>
+        </div>
+    </div>
+</div>

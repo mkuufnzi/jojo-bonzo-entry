@@ -136,7 +136,7 @@ export class RecoveryController {
             return res.render('dashboard/recovery/index', {
                 title: 'Smart Recovery | Floovioo',
                 recovery: status,
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: '/dashboard/recovery',
                 nonce: res.locals.nonce,
                 customerSessions: status.customerSessions || [],
@@ -301,7 +301,7 @@ export class RecoveryController {
 
             return res.render('dashboard/recovery/settings', {
                 title: sequence ? `Edit ${sequence.name}` : 'Recovery Settings',
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: req.url,
                 nonce: res.locals.nonce,
                 user: (req as AuthRequest).user,
@@ -364,7 +364,7 @@ export class RecoveryController {
 
             return res.render('dashboard/recovery/sequences', {
                 title: 'Recovery Campaigns',
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: req.path,
                 nonce: res.locals.nonce,
                 user: (req as AuthRequest).user,
@@ -434,7 +434,7 @@ export class RecoveryController {
 
             return res.render('dashboard/recovery/sessions', {
                 title: displayTitle,
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: req.path,
                 currentFilter: allowedFilters.includes(filterQuery) ? filterQuery : 'ACTIVE',
                 nonce: res.locals.nonce,
@@ -489,7 +489,7 @@ export class RecoveryController {
             // Render View
             res.render('dashboard/recovery/onboarding', {
                 title: 'Set up Smart Recovery',
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: req.path,
                 nonce: res.locals.nonce,
                 user: (req as AuthRequest).user,
@@ -592,7 +592,7 @@ export class RecoveryController {
             
             let data: any = {
                 title: 'Recovery Activity',
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: req.path,
                 nonce: res.locals.nonce,
                 user: (req as AuthRequest).user,
@@ -693,7 +693,7 @@ export class RecoveryController {
 
             return res.render('dashboard/recovery/unpaid', {
                 title: 'Unpaid Invoices',
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: '/dashboard/recovery/unpaid',
                 nonce: res.locals.nonce,
                 user: (req as AuthRequest).user,
@@ -813,7 +813,7 @@ export class RecoveryController {
 
             return res.render('dashboard/recovery/customer', {
                 title: `${dbCustomer.name || 'Customer'} | Recovery`,
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: `/dashboard/recovery/customers/${customerId}`,
                 nonce: res.locals.nonce,
                 user: (req as AuthRequest).user,
@@ -1074,7 +1074,7 @@ export class RecoveryController {
 
             return res.render('dashboard/recovery/action-detail', {
                 title: `Dunning Event — ${action.actionType}`,
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: `/dashboard/recovery/actions/${id}`,
                 nonce: res.locals.nonce,
                 user: (req as AuthRequest).user,
@@ -1251,7 +1251,7 @@ export class RecoveryController {
                 title: 'Customer Clusters | Floovioo',
                 clusters,
                 customers,
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: '/dashboard/recovery/clusters',
                 nonce: res.locals.nonce,
                 breadcrumbs: [
@@ -1388,7 +1388,7 @@ export class RecoveryController {
                 title: 'Event Log | Floovioo',
                 events,
                 stats,
-                activeService: 'transactional',
+                activeService: 'recovery',
                 currentPath: '/dashboard/recovery/webhooks',
                 nonce: res.locals.nonce,
                 breadcrumbs: [

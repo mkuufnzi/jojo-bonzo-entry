@@ -9,14 +9,35 @@
     const lightColor = theme.light || '#f8fafc';
     const textColor = theme.text || '#1e293b';
     const mutedColor = theme.muted || '#64748b';
+    
+    // Pre-calculate translucent colors
+    const primaryUltraLight = primaryColor + '08';   // 3% opacity hex
+    const accentAlpha = accentColor + '30';        // 18% opacity hex
+
+    // Unique ID for scoping CSS variables
+    const scopeId = 'tut_' + Math.floor(Math.random() * 1000000).toString(16);
 %>
+
+<style>
+    .tutorials-widget {
+        /* CSS Variables provided via inline style on root for linter-safety */
+        --tut-primary: var(--tut-primary, #6366f1);
+        --tut-accent: var(--tut-accent, #6366f1);
+        --tut-light: var(--tut-light, #f8fafc);
+        --tut-text: var(--tut-text, #1e293b);
+        --tut-muted: var(--tut-muted, #64748b);
+        --tut-bg-light: var(--tut-bg-light, transparent);
+        --tut-accent-alpha: var(--tut-accent-alpha, transparent);
+    }
+</style>
+
 <%# [FIX] CRITICAL: Using inline styles to force vertical list view and prevent horizontal collapse %>
-<div class="mt-8 font-sans w-full block" 
-     style="display: block !important; width: 100% !important;"
+<div class="mt-8 font-sans w-full block tutorials-widget" 
+     style="--tut-primary: <%= primaryColor %>; --tut-accent: <%= accentColor %>; --tut-light: <%= lightColor %>; --tut-text: <%= textColor %>; --tut-muted: <%= mutedColor %>; --tut-bg-light: <%= primaryUltraLight %>; --tut-accent-alpha: <%= accentAlpha %>; display: block !important; width: 100% !important;"
      data-split="false">
      
      <div class="mb-5" style="margin-bottom: 20px !important;">
-         <div class="text-[14px] font-bold text-slate-800" style="color: <%= textColor %>">📚 Product Support & Guides</div>
+         <div class="text-[14px] font-bold text-slate-800" style="color: var(--tut-text)">📚 Product Support & Guides</div>
          <div class="text-[11px] text-gray-400 mt-1">Personalized resources for your purchase</div>
      </div>
      
@@ -26,22 +47,22 @@
              <div class="bg-white rounded-xl shadow-sm border transition-all overflow-hidden w-full block"
                   x-data="{ isOpen: <%= idx === 0 ? 'true' : 'false' %> }"
                   style="display: block !important; width: 100% !important; border-width: 1px !important;"
-                  :style="{ borderColor: isOpen ? '<%= accentColor %>' : '#f1f5f9' }">
+                  :style="isOpen ? 'border-color: var(--tut-accent)' : 'border-color: #f1f5f9'">
                  
                  <!-- Card Header -->
                  <div class="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50/50 transition-colors w-full" 
                       style="display: flex !important; flex-direction: row !important; align-items: center !important; width: 100% !important; padding: 20px !important;"
                       @click="isOpen = !isOpen">
                      <div class="w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0 shadow-sm border border-black/5" 
-                          style="background: <%= lightColor %>; width: 48px !important; height: 48px !important; flex-shrink: 0 !important;"><%= tut.thumb || '📝' %></div>
+                          style="background: var(--tut-light); width: 48px !important; height: 48px !important; flex-shrink: 0 !important;"><%= tut.thumb || '📝' %></div>
                      <div class="flex-1 min-w-0">
                          <div class="flex flex-col" style="display: flex !important; flex-direction: column !important;">
                              <div class="flex items-center gap-2" style="display: flex !important; flex-direction: row !important; align-items: center !important;">
-                                <span class="text-[13px] font-bold text-slate-800 truncate" style="color: <%= textColor %>"><%= tut.title %></span>
-                                <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider shrink-0"
-                                      style="<%= tut.type === 'recipe' ? 'background: #FEF3C7; color: #D97706' : 'background: ' + lightColor + '; color: ' + primaryColor %>">
-                                      <%= tut.type %>
-                                </span>
+                                <span class="text-[13px] font-bold text-slate-800 truncate" style="color: var(--tut-text)"><%= tut.title %></span>
+                                 <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full tracking-wider shrink-0"
+                                       style="background-color: <%= tut.type === 'recipe' ? '#FEF3C7' : 'var(--tut-light)' %>; color: <%= tut.type === 'recipe' ? '#D97706' : 'var(--tut-primary)' %>;">
+                                       <%= tut.type %>
+                                 </span>
                              </div>
                              <div class="text-[11px] text-gray-400 mt-1 truncate font-medium">
                                  For: <span class="text-slate-600 font-bold"><%= tut.forProduct %></span> · ⏱ <span class="text-slate-600"><%= tut.duration %></span>
@@ -52,15 +73,15 @@
                           style="font-size: 20px !important;"
                           :class="isOpen ? 'rotate-90 text-slate-800' : ''">›</div>
                  </div>
-
+ 
                  <!-- Card Details (Expanded Content) -->
                 <div x-show="isOpen" 
                      x-collapse 
                      class="border-t px-8 py-6 flex flex-col gap-5 w-full block" 
-                     style="background: <%= lightColor %>10; border-color: <%= lightColor %>; display: flex !important; flex-direction: column !important; width: 100% !important; border-top-width: 1px !important; padding: 24px !important;">
+                     style="background-color: var(--tut-bg-light); border-color: var(--tut-light); display: flex !important; flex-direction: column !important; width: 100% !important; border-top-width: 1px !important; padding: 24px !important;">
                      
                      <div class="text-[10px] font-bold uppercase tracking-[0.15em] mb-1 opacity-50" 
-                          style="color: <%= mutedColor %>; margin-bottom: 12px !important; letter-spacing: 0.15em !important;">Steps for Success</div>
+                          style="color: var(--tut-muted); margin-bottom: 12px !important; letter-spacing: 0.15em !important;">Steps for Success</div>
                      
                      <!-- Steps List - FORCED VERTICAL -->
                      <div class="flex flex-col gap-5 w-full" 
@@ -69,9 +90,9 @@
                             <div class="flex items-start gap-5 w-full mb-2" 
                                  style="display: flex !important; flex-direction: row !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 8px !important;">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0 shadow-sm mt-0.5" 
-                                     style="background: <%= primaryColor %>; width: 32px !important; height: 32px !important; flex-shrink: 0 !important;"><%= i + 1 %></div>
+                                     style="background: var(--tut-primary); width: 32px !important; height: 32px !important; flex-shrink: 0 !important;"><%= i + 1 %></div>
                                 <div class="flex-1 text-[13px] leading-relaxed text-slate-700 font-medium pt-0.5" 
-                                     style="color: <%= textColor %>; line-height: 1.6 !important;">
+                                     style="color: var(--tut-text); line-height: 1.6 !important;">
                                     <%= step %>
                                 </div>
                             </div>
@@ -80,10 +101,12 @@
                      
                      <!-- Action Button -->
                      <div class="pt-4 w-full" style="padding-top: 16px !important;">
-                        <button class="w-full py-3 rounded-lg text-[11px] font-bold border bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-                                style="border-color: <%= primaryColor %>30; color: <%= primaryColor %>; display: flex !important; align-items: center !important; justify-center !important;">
+                        <a href="<%= branding.generateActionLink('tutorial_view', { tutorialId: tut.id }) %>" 
+                           target="_blank"
+                           class="w-full py-3 rounded-lg text-[11px] font-bold border bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all flex items-center justify-center gap-2 decoration-none"
+                           style="border-color: var(--tut-accent-alpha); color: var(--tut-primary); display: flex !important; align-items: center !important; justify-content: center !important;">
                             <span class="text-sm">📺</span> Watch Full Tutorial
-                        </button>
+                        </a>
                      </div>
                  </div>
              </div>

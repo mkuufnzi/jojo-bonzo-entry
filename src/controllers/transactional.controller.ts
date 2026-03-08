@@ -71,6 +71,7 @@ export class TransactionalController {
      * @query page - Page number (1-indexed, defaults to 1)
      */
     static async renderHistory(req: Request, res: Response): Promise<void> {
+        logger.info({ url: req.originalUrl, query: req.query }, 'HIT: TransactionalController.renderHistory');
         try {
             const userId = TransactionalController.getUserId(req);
             if (!userId) { res.redirect('/auth/login'); return; }
@@ -241,39 +242,21 @@ export class TransactionalController {
 
             const { templateGenerator } = await import('../services/template-generator.service');
             
-            // 3. If rawPayload is missing (e.g. historic/synced invoice), build a synthetic one using DB fields
-            let envelope: any;
-            if (document.rawPayload) {
-                envelope = document.rawPayload;
-            } else {
-                envelope = {
-                    trigger: {
-                        customer: {
-                            name: 'Historic Customer',
-                            email: '',
-                            address: 'Address not provided'
-                        },
-                        items: [
-                           {
-                               id: 1,
-                               name: 'Synced Document Balance',
-                               sku: 'historical',
-                               qty: 1,
-                               price: 0,
-                               category: 'General',
-                               img: '📝'
-                           }
-                        ],
-                        subtotal: 0,
-                        total: 0,
-                        Id: document.resourceId,
-                        DueDate: document.createdAt.toISOString()
-                    },
-                    data: {
-                        brand: { business: document.business || {} }
-                    }
-                };
+            // 3. If rawPayload is missing (e.g. older historic/synced invoice before the field was added)
+            // we cannot generate a smart preview.
+            if (!document.rawPayload) {
+                logger.warn({ id }, 'Cannot render JIT preview: rawPayload is missing from ProcessedDocument');
+                res.status(404).send(`
+                    <div style="font-family: sans-serif; padding: 2rem; color: #64748b; text-align: center;">
+                        <h3 style="color: #334155;">Preview Data Unavailable</h3>
+                        <p>This historical document was synced before the raw payload capture feature was enabled.</p>
+                        <p>No document details are available to populate the template.</p>
+                    </div>
+                `);
+                return;
             }
+            
+            const envelope: any = document.rawPayload;
             
             // Extract core payload (handles both DB structure 'data.trigger' and synthetic fallback 'trigger')
             const trigger = envelope.data?.trigger || envelope.trigger || {};
@@ -289,7 +272,8 @@ export class TransactionalController {
                     .filter((l: any) => l.DetailType === 'SalesItemLineDetail')
                     .map((l: any, i: number) => ({
                         id: i + 1,
-                        name: l.Description || (l.SalesItemLineDetail?.ItemRef?.name || 'Item'),
+                        name: l.SalesItemLineDetail?.ItemRef?.name || l.Description || 'Item',
+                        description: l.Description || '',
                         sku: l.SalesItemLineDetail?.ItemRef?.value || 'SKU',
                         qty: l.SalesItemLineDetail?.Qty || 1,
                         price: l.SalesItemLineDetail?.UnitPrice || l.Amount || 0,
@@ -324,6 +308,7 @@ export class TransactionalController {
             }
 
             const payload = {
+                documentId: document.id,
                 ...trigger,
                 items: items,
                 customer: customerDetails,
@@ -334,6 +319,15 @@ export class TransactionalController {
                 businessWebsite: envelope.data?.brand?.business?.website || '',
                 smartContent: envelope.data?.smart_content || {}
             };
+
+            logger.info({
+                documentId: document.id,
+                hasSmartContent: !!payload.smartContent,
+                smartContentKeys: payload.smartContent ? Object.keys(payload.smartContent) : [],
+                offersCount: payload.smartContent?.offers?.length || 0,
+                recommendationsCount: payload.smartContent?.recommendations?.length || 0,
+                itemsCount: items.length
+            }, '📦 [TransactionalController.renderPreview] Payload built for template generation');
 
             const html = await templateGenerator.generateHtml(
                 document.userId || userId,
@@ -348,6 +342,70 @@ export class TransactionalController {
             const message = error instanceof Error ? error.message : String(error);
             logger.error({ error: message, docId: req.params.id }, 'Error rendering JIT preview');
             res.status(500).send(`Error generating live preview: ${message}`);
+        }
+    }
+
+    /**
+     * Handle interactions from Smart Widgets (e.g., Add to Order, Support CTA)
+     * GET /dashboard/transactional/history/:id/interact
+     */
+    static async handleInteraction(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const { action, sku, channel } = req.query;
+
+            const document = await prisma.processedDocument.findUnique({
+                where: { id },
+                include: { business: true }
+            });
+
+            if (!document) {
+                res.status(404).send('Document not found');
+                return;
+            }
+
+            // Log the interaction (Fire-and-forget for speed)
+            logger.info({
+                documentId: id,
+                businessId: document.businessId,
+                action,
+                sku,
+                channel
+            }, '[Interaction] Smart Widget Clicked');
+
+            // Optionally: prisma.analyticsEvent.create({...}) could go here 
+            // once the Analytics module supports interaction events.
+
+            // Action Routing Logic
+            const businessUrl = document.business?.website || 'https://example.com';
+
+            if (action === 'add_to_order' && sku) {
+                // E.g. Redirect to a Shopify cart permalink or custom checkout flow.
+                // For now, redirect to the business's main website with a simulated cart param
+                res.redirect(`${businessUrl}/cart/add?sku=${sku}&ref=floovioo_smart_doc_${id}`);
+                return;
+            }
+
+            if (action === 'support') {
+                if (channel === 'email') {
+                    // Redirect to a mailto link or support desk
+                    res.redirect(`mailto:support@business.com?subject=Help with Order associated with Document ${document.resourceId}`);
+                } else if (channel === 'chat') {
+                    // Redirect to a live chat portal or contact page
+                    res.redirect(`${businessUrl}/contact?ref=floovioo_smart_doc`);
+                } else {
+                    res.redirect(businessUrl);
+                }
+                return;
+            }
+
+            // Default fallback
+            res.redirect(businessUrl);
+
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.error({ error: message, docId: req.params.id }, 'Error handling widget interaction');
+            res.status(500).send('An error occurred during redirect.');
         }
     }
 }

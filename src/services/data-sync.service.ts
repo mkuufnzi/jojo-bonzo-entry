@@ -145,6 +145,12 @@ export class DataSyncService {
                 // Log but continue
             }
         }
+
+        // C. Recommendation Bridge: Sync to Product table if entity is 'items'
+        if ((entity === 'items' || entity === 'products') && docs.length > 0) {
+            const { productService } = await import('./product.service');
+            await productService.syncProductsFromERP(businessId, integrationId, provider.slug, docs);
+        }
         
         return {
             entity,

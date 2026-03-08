@@ -9,18 +9,26 @@
             <!-- Column 1: Bill To -->
             <td style="width: 33.33% !important; vertical-align: top !important; padding: 0 !important;">
                 <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Bill To</div>
-                <div class="text-[14px] font-bold text-slate-900" :style="'color: ' + theme.text">Sarah Mitchell</div>
-                <div class="text-[11px] text-gray-400 mt-1">sarah.mitchell@email.com</div>
-                <div class="text-[11px] text-gray-400">Member since 2023 · 14 orders</div>
+                <div class="text-[14px] font-bold text-slate-900" :style="'color: ' + theme.text"><%= invoiceData.customer?.name || invoiceData.CustomerRef?.name || 'Customer' %></div>
+                <div class="text-[11px] text-gray-400 mt-1"><%= invoiceData.customer?.email || invoiceData.BillEmail?.Address || '' %></div>
+                <div class="text-[11px] text-gray-400"><%= invoiceData.Id ? 'Order #' + invoiceData.Id : '' %></div>
             </td>
 
             <!-- Column 2: Shipping Address -->
             <td style="width: 33.33% !important; vertical-align: top !important; padding: 0 !important; padding-left: 30px !important;">
                 <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Shipping Address</div>
-                <div class="text-[13px] text-slate-600 leading-relaxed font-medium" 
-                     style="line-height: 1.6 !important; color: #475569 !important; mt-1">
-                    123 Ceremony Way,<br>
-                    Bamboo Grove, CA 90210
+                <div class="text-[13px] text-slate-600 leading-relaxed font-medium mt-1" 
+                     style="line-height: 1.6 !important; color: #475569 !important;">
+                    <% if (invoiceData.ShipAddr || invoiceData.BillAddr) { %>
+                        <% const addr = invoiceData.ShipAddr || invoiceData.BillAddr; %>
+                        <%= addr.Line1 || '' %><br>
+                        <%= addr.City || '' %><% if (addr.City && (addr.CountrySubDivisionCode || addr.Region)) { %>, <% } %><%= addr.CountrySubDivisionCode || addr.Region || addr.state || '' %> <%= addr.PostalCode || addr.zip || '' %>
+                    <% } else if (invoiceData.customer?.address) { %>
+                        <%= invoiceData.customer.address.line1 || '' %><br>
+                        <%= invoiceData.customer.address.city || '' %>, <%= invoiceData.customer.address.state || '' %> <%= invoiceData.customer.address.postal_code || '' %>
+                    <% } else { %>
+                        Address not provided
+                    <% } %>
                 </div>
             </td>
 
@@ -36,7 +44,7 @@
                     <div style="text-align: right !important;">
                          <div class="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60" :style="'color: ' + theme.muted">Loyalty</div>
                          <span class="bg-amber-100 text-amber-600 px-3 py-1 rounded-full text-[11px] font-bold"
-                               style="display: inline-block !important; padding: 4px 12px !important; border-radius: 9999px !important; background: #FEF3C7 !important; color: #D97706 !important; white-space: nowrap !important;">★ Gold</span>
+                               style="display: inline-block !important; padding: 4px 12px !important; border-radius: 9999px !important; background-color: #FEF3C7 !important; color: #D97706 !important; white-space: nowrap !important;">★ Gold</span>
                     </div>
                 </div>
             </td>

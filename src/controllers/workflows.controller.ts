@@ -178,10 +178,10 @@ export class WorkflowsController {
       const { id } = req.params;
 
       try {
-          const result = await workflowService.testWorkflow(user.id, id);
+          const result = await workflowService.testWorkflow(user.id, id, req.body.payload || {});
           
           // Enhanced Success Message with Data Preview if possible
-          const cleanData = JSON.stringify(result.data || result, null, 2);
+          const cleanData = JSON.stringify('data' in result ? result.data : result, null, 2);
           
           req.session.notification = { 
               type: 'success', 

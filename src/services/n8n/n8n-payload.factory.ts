@@ -307,7 +307,7 @@ export class N8nPayloadFactory {
      * Transform: Workflow Execution Payload
      * Wraps user-defined workflow execution data
      */
-    createWorkflowExecutionPayload(workflowId: string, actionType: string, triggerPayload: any, actionConfig: any, brandProfile: any, userId: string, context: ServiceContext, overrideEventType?: string, smartContent?: any) {
+    createWorkflowExecutionPayload(workflowId: string, actionType: string, triggerPayload: any, actionConfig: any, brandProfile: any, userId: string, context: ServiceContext, overrideEventType?: string, smartContent?: any, callbackUrl?: string) {
         
         const data = {
             workflow_id: workflowId,
@@ -315,7 +315,8 @@ export class N8nPayloadFactory {
             trigger: triggerPayload,
             config: actionConfig,
             brand: brandProfile,
-            smart_content: smartContent || {}
+            smart_content: smartContent || {},
+            callback_url: callbackUrl
         };
 
         return this._wrap(overrideEventType || 'workflow_execution', data, userId, context, {

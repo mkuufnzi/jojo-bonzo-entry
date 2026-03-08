@@ -1,4 +1,6 @@
 <%- layout('layouts/dashboard-layout') %>
+<% console.log(`[EJS DEBUG INDEX] Available keys: ${Object.keys(locals).join(', ')}`); %>
+<% console.log(`[EJS DEBUG INDEX] Stats: ${JSON.stringify(locals.stats)}`); %>
 
 <div class="max-w-6xl mx-auto">
     <!-- Header -->

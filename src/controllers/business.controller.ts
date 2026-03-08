@@ -44,18 +44,18 @@ export class BusinessController {
           try {
               // Always fetch connection stats to show transparency
               const integrations = await integrationService.listIntegrations(userId);
-              const connectedProvider = integrations.find(i => i.status === 'active' || i.status === 'connected')?.provider;
-              
-              const isNewlyConnected = req.query.connected === connectedProvider;
+              const connectedIntegration = integrations.find(i => i.status === 'active' || i.status === 'connected');
+              const isNewlyConnected = req.query.connected === connectedIntegration?.provider;
 
-              if (connectedProvider) {
+              if (connectedIntegration) {
                   const contactCount = await prisma.contact.count({ where: { businessId: business.id } });
                   const productCount = await prisma.product.count({ where: { businessId: business.id } });
                   importStats = { 
                       contactCount, 
                       productCount, 
-                      provider: connectedProvider,
-                      isNewlyConnected: isNewlyConnected || !!req.query.connected
+                      provider: connectedIntegration.provider,
+                      isNewlyConnected: isNewlyConnected || !!req.query.connected,
+                      lastSync: connectedIntegration.updatedAt
                   };
               }
           } catch (e) {
@@ -428,6 +428,20 @@ export class BusinessController {
                     const { designEngineService } = await import('../services/design-engine.service');
                     await designEngineService.syncIntegrationConnection(userId, integration.id, dbProvider);
                     console.log(`[BusinessController] Synced Connection for ${userId}`);
+
+                    // [NEW] Automatic Sync to Unified Hub
+                    try {
+                        const business = await businessService.getBusinessByUserId(userId);
+                        if (business) {
+                            const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                            // Trigger async sync - don't wait for completion to avoid blocking redirect
+                            unifiedDataService.syncIntegrationData(business.id, integration.id)
+                                .then(count => console.log(`[BusinessController] Initial Sync Complete: ${count} records`))
+                                .catch(err => console.error(`[BusinessController] Initial Sync Failed:`, err));
+                        }
+                    } catch (e) {
+                        console.error('[BusinessController] Failed to trigger Unified Sync:', e);
+                    }
                 } else {
                     console.warn(`[BusinessController] Could not find 'connected' integration for ${provider} after OAuth.`);
                 }

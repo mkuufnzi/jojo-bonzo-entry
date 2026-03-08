@@ -31,7 +31,7 @@
         
         <!-- Onboarding Hero (Show if not ready or skipped) -->
         <% const isOnboardingComplete = business && business.onboardingStatus === 'COMPLETED'; %>
-        <% if (!isReady) { %>
+        <% if (!isReady && typeof hasStartedOnboarding !== 'undefined' && hasStartedOnboarding) { %>
             <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-950 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-2xl group border border-blue-500/30">
                 <div class="absolute right-0 top-0 h-full w-1/2 bg-[url('/assets/pattern-white.svg')] opacity-5"></div>
                 
@@ -329,7 +329,7 @@
                         <i data-lucide="terminal" class="w-4 h-4 text-slate-400"></i>
                         Conversion logs
                     </h3>
-                    <a href="#" class="text-[0.625rem] font-bold text-blue-600 uppercase tracking-widest hover:underline">Full Archive</a>
+                    <a href="/dashboard/transactional/history" class="text-[0.625rem] font-bold text-blue-600 uppercase tracking-widest hover:underline">Full Archive</a>
                 </div>
                 <div class="overflow-hidden">
                     <table class="w-full divide-y divide-slate-100">

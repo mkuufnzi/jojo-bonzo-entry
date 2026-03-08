@@ -3,6 +3,7 @@ import { ApiController } from '../controllers/api.controller';
 import onboardingRoutes from './onboarding.routes';
 import analyticsRoutes from './analytics.routes';
 import transactionalAnalyticsRoutes from './transactional-analytics.routes';
+import integrationHubApiRoutes from './api/integration-hub.api.routes';
 
 const router = Router();
 
@@ -89,5 +90,6 @@ router.get('/services', ApiController.getServices);
 router.use('/onboarding', onboardingRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/transactional/analytics', transactionalAnalyticsRoutes);
+router.use('/integration-hub', integrationHubApiRoutes);
 
 export default router;

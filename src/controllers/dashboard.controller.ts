@@ -117,6 +117,7 @@ export class DashboardController {
         const isBrandingSkipped = skippedSteps.includes(3) || skippedSteps.includes('branding');
         
         const isReady = !!business && business.onboardingStatus === 'COMPLETED' && !isIntegrationSkipped;
+        const hasStartedOnboarding = !!business && (business.currentOnboardingStep || 0) >= 1;
 
         // [REVENUE MACHINE] Fetch Branding History & Recovery Opportunities
         const { dunningService } = await import('../services/dunning.service');
@@ -173,7 +174,8 @@ export class DashboardController {
         // 4. Calculate Real Total Revenue
         console.log(`[Dashboard Debug] Calculating revenue from ${brandingHistory.length} documents.`);
         const totalRevenue = brandingHistory.reduce((sum, doc) => {
-            const amount = (doc.normalized as any)?.total || (doc.normalized as any)?.amount || 0;
+            const normalized = doc.normalized as any;
+            const amount = normalized?.total || normalized?.amount || 0;
             return sum + Number(amount);
         }, 0);
 
@@ -437,9 +439,11 @@ export class DashboardController {
             }
 
             // Fetch ALL integrations (not filtered by status) so Sources count is accurate
+            console.log(`[DASHBOARD UNIFIED] Resolving business context...`);
             const business = await (DashboardController as any).resolveBusinessContext(user, { integrations: true });
             console.log(`[DASHBOARD UNIFIED] Resolved Business:`, business ? business.id : 'NULL');
             
+            console.log(`[DASHBOARD UNIFIED] Importing services...`);
             const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
             const { unifiedAnalyticsService } = await import('../modules/unified-data/unified-analytics.service');
             
@@ -489,16 +493,21 @@ export class DashboardController {
                 console.warn(`[UnifiedDashboard] ⚠️ Business is null for user=${user.email} (user.businessId=${user.businessId})`);
             }
 
+
+            // Direct assignment to res.locals to ensure ejs-mate preserves it
+            res.locals.stats = stats;
+            res.locals.recentTransactions = recentTransactions;
+            res.locals.integrations = integrations;
+            res.locals.analytics = { revenueTrend: analyticsTrend, topCustomers, salesBySource };
+            res.locals.salesBySource = salesBySource;
+
             res.render('dashboard/services/unified/index', { 
+                ...res.locals,
+                locals: res.locals,
                 user, 
                 business,
                 title: 'Unified Data Hub', 
                 activeService: 'unified',
-                stats,
-                recentTransactions,
-                integrations,
-                analytics: { revenueTrend: analyticsTrend, topCustomers, salesBySource },
-                salesBySource,
                 nonce: res.locals.nonce
             });
         } catch (err: any) {
@@ -521,6 +530,8 @@ export class DashboardController {
             });
 
             res.render('dashboard/services/unified/sources', {
+                ...res.locals,
+                locals: res.locals,
                 user,
                 business,
                 title: 'Data Sources & Sync',
@@ -557,25 +568,35 @@ export class DashboardController {
             const user = res.locals.user;
             if (!user?.id) return res.redirect('/auth/login');
 
-            const business = await (DashboardController as any).resolveBusinessContext(user);
+            const business = await (DashboardController as any).resolveBusinessContext(user, {
+                integrations: { where: { status: 'connected' } }
+            });
 
             let customers: any[] = [];
             const sourceFilter = req.query.source as string;
+            const connectedIntegrations = business?.integrations || [];
 
             if (business) {
                 console.log(`[UnifiedCustomers] ✅ Business: ${business.id} | Source: ${sourceFilter || 'ALL'}`);
                 const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
                 customers = await unifiedDataService.getUnifiedCustomers(business.id, 1, 100, { source: sourceFilter });
-            } else {
-                console.log(`[UnifiedCustomers] ❌ Business: NULL`);
             }
 
+            // Direct assignment to res.locals to ensure ejs-mate preserves it
+            res.locals.unifiedCustomers = customers;
+            res.locals.customers = customers;
+            res.locals.connectedIntegrations = connectedIntegrations;
+            res.locals.sourceFilter = sourceFilter;
+
+            console.log(`[UnifiedCustomers] Rendering with ${customers.length} customers. Locals keys: ${Object.keys(res.locals).join(', ')}`);
+
             res.render('dashboard/services/unified/customers', { 
+                ...res.locals,
+                locals: res.locals, // [DIAGNOSTIC] Pass locals explicitly
                 user, 
                 business,
                 title: 'Unified Customers', 
                 activeService: 'unified',
-                customers,
                 nonce: res.locals.nonce
             });
         } catch (err: any) {
@@ -589,13 +610,16 @@ export class DashboardController {
             const user = res.locals.user;
             if (!user?.id) return res.redirect('/auth/login');
 
-            const business = await (DashboardController as any).resolveBusinessContext(user);
+            const business = await (DashboardController as any).resolveBusinessContext(user, {
+                integrations: { where: { status: 'connected' } }
+            });
 
             let orders: any[] = [];
             let invoices: any[] = [];
             let payments: any[] = [];
             let estimates: any[] = [];
             const sourceFilter = req.query.source as string;
+            const connectedIntegrations = business?.integrations || [];
 
             if (business) {
                 console.log(`[UnifiedTransactions] ✅ Business: ${business.id} | Source: ${sourceFilter || 'ALL'}`);
@@ -604,6 +628,7 @@ export class DashboardController {
                 invoices = await unifiedDataService.getUnifiedInvoices(business.id, 1, 50, { source: sourceFilter });
                 payments = await unifiedDataService.getUnifiedPayments(business.id, 1, 50, { source: sourceFilter });
                 estimates = await unifiedDataService.getUnifiedEstimates(business.id, 1, 50, { source: sourceFilter });
+                console.log(`[UnifiedTransactions] Found: ${orders.length} orders, ${invoices.length} invoices, ${payments.length} payments, ${estimates.length} estimates`);
             } else {
                 console.log(`[UnifiedTransactions] ❌ Business: NULL`);
             }
@@ -613,15 +638,194 @@ export class DashboardController {
                 business,
                 title: 'Unified Transactions', 
                 activeService: 'unified',
+                unifiedOrders: orders,
+                unifiedInvoices: invoices,
+                unifiedPayments: payments,
+                unifiedEstimates: estimates,
                 orders,
                 invoices,
                 payments,
                 estimates,
-                nonce: res.locals.nonce
+                connectedIntegrations,
+                sourceFilter,
+                nonce: res.locals.nonce,
+                renderTime: new Date().toISOString()
             });
         } catch (err: any) {
             console.log(`[UnifiedTransactions] ❌ Error: ${err.message}`);
             res.status(500).render('error', { message: 'Failed to load transactions', error: err });
+        }
+    }
+
+    static async dashboardUnifiedInvoices(req: Request, res: Response) {
+        console.log(`\n[DASHBOARD INVOICES] ====== ROUTE HIT ======`);
+        try {
+            const user = res.locals.user;
+            console.log(`[DASHBOARD INVOICES] User: ${user?.email}, user.id: ${user?.id}, user.businessId: ${user?.businessId}`);
+            if (!user?.id) return res.redirect('/auth/login');
+            const business = await (DashboardController as any).resolveBusinessContext(user, {
+                integrations: { where: { status: 'connected' } }
+            });
+            console.log(`[DASHBOARD INVOICES] Business resolved: ${business?.id || 'NULL'}`);
+            const sourceFilter = req.query.source as string;
+            const connectedIntegrations = business?.integrations || [];
+
+            let invoices: any[] = [];
+            if (business) {
+                const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                invoices = await unifiedDataService.getUnifiedInvoices(business.id, 1, 100, { source: sourceFilter });
+                console.log(`[DASHBOARD INVOICES] ✅ Fetched ${invoices.length} invoices for business ${business.id}`);
+            } else {
+                console.log(`[DASHBOARD INVOICES] ❌ No business context - cannot fetch invoices`);
+            }
+
+            console.log(`[DASHBOARD INVOICES] Final Render - Invoices count: ${invoices.length}`);
+            
+            // Direct assignment to res.locals to ensure ejs-mate preserves it
+            res.locals.unifiedInvoices = invoices;
+            res.locals.invoices = invoices;
+            res.locals.connectedIntegrations = connectedIntegrations;
+            res.locals.sourceFilter = sourceFilter;
+
+            console.log(`[DASHBOARD INVOICES] Rendering with ${invoices.length} invoices. Locals keys: ${Object.keys(res.locals).join(', ')}`);
+
+            res.render('dashboard/services/unified/invoices', { 
+                ...res.locals,
+                locals: res.locals,
+                user, 
+                business,
+                title: 'Unified Invoices', 
+                activeService: 'unified',
+                nonce: res.locals.nonce,
+                renderTime: new Date().toISOString()
+            });
+        } catch (err: any) {
+            console.error(`[DASHBOARD INVOICES] ❌ FATAL ERROR:`, err.message, err.stack);
+            res.status(500).render('error', { message: 'Failed to load invoices', error: err });
+        }
+    }
+
+    static async dashboardUnifiedOrders(req: Request, res: Response) {
+        try {
+            const user = res.locals.user;
+            if (!user?.id) return res.redirect('/auth/login');
+            const business = await (DashboardController as any).resolveBusinessContext(user, {
+                integrations: { where: { status: 'connected' } }
+            });
+            const sourceFilter = req.query.source as string;
+            const connectedIntegrations = business?.integrations || [];
+
+            console.log(`[DASHBOARD ORDERS] User: ${user.email}, Business: ${business?.id}`);
+
+            let orders: any[] = [];
+            if (business) {
+                const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                orders = await unifiedDataService.getUnifiedOrders(business.id, 1, 100, { source: sourceFilter });
+                console.log(`[DASHBOARD ORDERS] Found ${orders.length} orders`);
+            }
+
+            // Direct assignment to res.locals to ensure ejs-mate preserves it
+            res.locals.unifiedOrders = orders;
+            res.locals.orders = orders;
+            res.locals.connectedIntegrations = connectedIntegrations;
+            res.locals.sourceFilter = sourceFilter;
+
+            res.render('dashboard/services/unified/orders', { 
+                ...res.locals,
+                locals: res.locals,
+                user, 
+                business,
+                title: 'Unified Orders', 
+                activeService: 'unified',
+                nonce: res.locals.nonce,
+                renderTime: new Date().toISOString()
+            });
+        } catch (err: any) {
+            res.status(500).render('error', { message: 'Failed to load orders', error: err });
+        }
+    }
+
+    static async dashboardUnifiedPayments(req: Request, res: Response) {
+        try {
+            const user = res.locals.user;
+            if (!user?.id) return res.redirect('/auth/login');
+            const business = await (DashboardController as any).resolveBusinessContext(user, {
+                integrations: { where: { status: 'connected' } }
+            });
+            const sourceFilter = req.query.source as string;
+            const connectedIntegrations = business?.integrations || [];
+
+            console.log(`[DASHBOARD PAYMENTS] User: ${user.email}, Business: ${business?.id}`);
+
+            let payments: any[] = [];
+            if (business) {
+                const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                payments = await unifiedDataService.getUnifiedPayments(business.id, 1, 100, { source: sourceFilter });
+                console.log(`[DASHBOARD PAYMENTS] Found ${payments.length} payments`);
+            }
+
+            // Direct assignment to res.locals to ensure ejs-mate preserves it
+            res.locals.unifiedPayments = payments;
+            res.locals.payments = payments;
+            res.locals.connectedIntegrations = connectedIntegrations;
+            res.locals.sourceFilter = sourceFilter;
+
+            res.render('dashboard/services/unified/payments', { 
+                ...res.locals,
+                locals: res.locals,
+                user, 
+                business,
+                title: 'Unified Payments', 
+                activeService: 'unified',
+                nonce: res.locals.nonce,
+                renderTime: new Date().toISOString()
+            });
+        } catch (err: any) {
+            res.status(500).render('error', { message: 'Failed to load payments', error: err });
+        }
+    }
+
+    static async dashboardUnifiedInventory(req: Request, res: Response) {
+        console.log(`\n[DASHBOARD INVENTORY] ====== ROUTE HIT ======`);
+        try {
+            const user = res.locals.user;
+            console.log(`[DASHBOARD INVENTORY] User: ${user?.email}, user.id: ${user?.id}, user.businessId: ${user?.businessId}`);
+            if (!user?.id) return res.redirect('/auth/login');
+            const business = await (DashboardController as any).resolveBusinessContext(user, {
+                integrations: { where: { status: 'connected' } }
+            });
+            console.log(`[DASHBOARD INVENTORY] Business resolved: ${business?.id || 'NULL'}`);
+            const sourceFilter = req.query.source as string;
+            const connectedIntegrations = business?.integrations || [];
+
+            let products: any[] = [];
+            if (business) {
+                const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+                products = await unifiedDataService.getUnifiedProducts(business.id, 1, 100, { source: sourceFilter });
+                console.log(`[DASHBOARD INVENTORY] ✅ Fetched ${products.length} products for business ${business.id}`);
+            } else {
+                console.log(`[DASHBOARD INVENTORY] ❌ No business context - cannot fetch products`);
+            }
+
+            // Direct assignment to res.locals to ensure ejs-mate preserves it
+            res.locals.unifiedProducts = products;
+            res.locals.products = products;
+            res.locals.connectedIntegrations = connectedIntegrations;
+            res.locals.sourceFilter = sourceFilter;
+
+            res.render('dashboard/services/unified/inventory', { 
+                ...res.locals,
+                locals: res.locals,
+                user, 
+                business,
+                title: 'Unified Inventory', 
+                activeService: 'unified',
+                nonce: res.locals.nonce,
+                renderTime: new Date().toISOString()
+            });
+        } catch (err: any) {
+            console.error(`[DASHBOARD INVENTORY] ❌ FATAL ERROR:`, err.message, err.stack);
+            res.status(500).render('error', { message: 'Failed to load inventory', error: err });
         }
     }
     static async dashboardUnifiedCustomerDetail(req: Request, res: Response) {
@@ -634,12 +838,15 @@ export class DashboardController {
 
             if (!business) return res.status(404).render('error', { message: 'Business context not found' });
 
+            console.log(`[UnifiedCustomerDetail] ✅ Business: ${business.id}, CustomerId: ${id}`);
             const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
             const customer = await unifiedDataService.getUnifiedCustomerDetail(business.id, id);
 
             if (!customer) return res.status(404).render('error', { message: 'Customer not found' });
 
             res.render('dashboard/services/unified/customer-detail', { 
+                ...res.locals,
+                locals: res.locals,
                 user, 
                 business,
                 title: `Customer: ${customer.name}`, 
@@ -650,6 +857,49 @@ export class DashboardController {
         } catch (err: any) {
             console.log(`[UnifiedCustomerDetail] ❌ Error: ${err.message}`);
             res.status(500).render('error', { message: 'Failed to load customer details', error: err });
+        }
+    }
+
+    static async syncAllIntegrations(req: Request, res: Response) {
+        console.log(`\n[SYNC ALL] ====== TRIGGERED ======`);
+        try {
+            const user = res.locals.user;
+            const businessId = user.businessId || user.business?.id;
+
+            if (!businessId) {
+                console.error('[SYNC ALL] ❌ Business context missing');
+                return res.status(400).json({ error: 'Business context missing' });
+            }
+
+            const business = await prisma.business.findUnique({
+                where: { id: businessId },
+                include: { integrations: { where: { status: 'connected' } } }
+            });
+
+            if (!business || !business.integrations.length) {
+                console.warn('[SYNC ALL] ⚠️ No connected integrations found for business:', businessId);
+                return res.json({ success: true, message: 'No active integrations to sync', recordsSynced: 0 });
+            }
+
+            console.log(`[SYNC ALL] Syncing ${business.integrations.length} integrations for Business ${businessId}`);
+            const { unifiedDataService } = await import('../modules/unified-data/unified-data.service');
+            
+            let totalSynced = 0;
+            for (const integration of business.integrations) {
+                try {
+                    console.log(`[SYNC ALL] -> Syncing ${integration.provider} (${integration.id})`);
+                    const count = await unifiedDataService.syncIntegrationData(businessId, integration.id);
+                    totalSynced += count;
+                } catch (e: any) {
+                    console.error(`[SYNC ALL] ❌ Error syncing ${integration.provider}:`, e.message);
+                }
+            }
+
+            console.log(`[SYNC ALL] ✅ Sync Completed. Total records: ${totalSynced}`);
+            res.json({ success: true, recordsSynced: totalSynced });
+        } catch (err: any) {
+            console.error('[SYNC ALL] ❌ Global Error:', err.message);
+            res.status(500).json({ error: err.message });
         }
     }
 
@@ -675,14 +925,13 @@ export class DashboardController {
                 orderBy: { createdAt: 'asc' },
                 include
             });
-            
             if (business) {
                 console.log(`[DashboardController] Resolved Business via Fallback for ${user.email}: ${business.id}`);
             }
         }
 
         if (!business) {
-            console.warn(`[DashboardController] Failed to resolve Business context for User: ${user.email}`);
+            console.warn(`[DashboardController] ❌ FAILED to resolve Business context for User: ${user.email} (ID: ${user.id})`);
         }
 
         return business;

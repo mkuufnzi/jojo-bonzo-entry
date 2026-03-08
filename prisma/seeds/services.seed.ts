@@ -203,6 +203,31 @@ const coreServices = [
       ml: { ltvModel: 'prophet', churnModel: 'random-forest', retrainInterval: '30d' },
       campaigns: { defaultJourney: [{ trigger: 'purchase', delay: '1h', action: 'send-thank-you' }] }
     }
+  },
+  {
+    slug: 'floovioo_integration-hub',
+    name: 'Integration Hub',
+    description: 'Enterprise Hub for managing external ERP/CRM connectivity, data normalization, and sync orchestration.',
+    tier: 'core',
+    requiredFeatureKey: 'integration_sync',
+    dependencies: ['floovioo_transactional_data-sync'],
+    provides: ['data-normalization', 'oauth-orchestration', 'provider-management'],
+    endpoints: [
+      { path: '/api/v1/integration-hub/catalog', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/integration-hub/connections', method: 'GET', scopes: ['read'] },
+      { path: '/api/v1/integration-hub/{provider}/sync', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/integration-hub/{provider}/disconnect', method: 'POST', scopes: ['write'] },
+      { path: '/api/v1/integration-hub/{provider}/status', method: 'GET', scopes: ['read'] }
+    ],
+    defaultConfig: {
+      paths: [
+        { path: '/catalog', billable: false },
+        { path: '/connections', billable: false },
+        { path: '/status', billable: false },
+        { path: '/sync', billable: true },
+        { path: '/disconnect', billable: false }
+      ]
+    }
   }
 ];
 
@@ -227,6 +252,7 @@ async function main() {
           webhooks: service.defaultConfig?.webhooks || {}
         },
         defaultConfig: service.defaultConfig,
+        requiredFeatureKey: (service as any).requiredFeatureKey,
         updatedAt: new Date()
       },
       create: {
@@ -246,6 +272,7 @@ async function main() {
           webhooks: service.defaultConfig?.webhooks || {}
         },
         defaultConfig: service.defaultConfig,
+        requiredFeatureKey: (service as any).requiredFeatureKey,
         createdAt: new Date(),
         updatedAt: new Date()
       }

@@ -1,4 +1,4 @@
-<% layout('layouts/document-master') %>
+<% layout(typeof branding !== 'undefined' && branding.layout ? branding.layout : 'layouts/document-master') %>
 
 <!-- Standard Document Configuration -->
 <div id="doc-config" 
@@ -68,8 +68,15 @@
            });
         %>
         
-        <!-- DEBUG: Unified Layout from resolveLayout() -->
-        <script>console.log('[EJS v2.1] layoutOrder:', <%= JSON.stringify(layoutOrder) %>, 'resolvedFrom:', '<%= branding.resolvedFrom || "unknown" %>');</script>
+        <!-- Data for Debugging/Engines -->
+        <div id="layout-metadata" 
+             data-layout-order='<%- JSON.stringify(branding.layoutOrder || layoutOrder) %>'
+             data-resolved-from="<%= branding.resolvedFrom || 'unknown' %>"
+             class="hidden"></div>
+        <script nonce="<%= nonce %>">
+            const meta = document.getElementById('layout-metadata');
+            console.log('[EJS v2.1] layoutOrder:', JSON.parse(meta.dataset.layoutOrder), 'resolvedFrom:', meta.dataset.resolvedFrom);
+        </script>
 
         <!-- =============== PINNED HEADER =============== -->
         <% if (widgetStates.header?.enabled !== false) { %>
@@ -124,7 +131,7 @@
                     <div class="doc-section w-full block" 
                          data-widget-id="<%= widgetId %>" 
                          data-no-split="true"
-                         style="display: block !important; width: 100% !important; height: <%= state?.value || 20 %>px !important; min-height: <%= state?.value || 20 %>px !important; margin-top: 0 !important; margin-bottom: 0 !important;">
+                         style="display: block !important; width: 100% !important; height: var(--spacer-height, 20px) !important; min-height: var(--spacer-height, 20px) !important; margin-top: 0 !important; margin-bottom: 0 !important; --spacer-height: <%= state?.value || 20 %>px;">
                     </div>
                 <% } else if (widget?.path) { %>
                     <!-- Widget: <%= widgetId %> (position: <%= i + 1 %>) -->

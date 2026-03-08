@@ -52,6 +52,11 @@ import * as Sentry from '@sentry/node';
 
 // [DEBUG] Ultra-Early Request Logger (Before Sentry/Helmet)
 app.use((req, res, next) => {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] ${req.method} ${req.url} (Early)\n`;
+    try {
+        fs.appendFileSync(path.join(process.cwd(), 'early_debug.log'), logEntry);
+    } catch (e) {}
     if (req.url.startsWith('/admin')) {
         console.log(`[Ultra-Early Admin] ${req.method} ${req.url} | Headers: ${JSON.stringify(req.headers)}`);
     }
@@ -105,6 +110,7 @@ app.use((req, res, next) => {
         }
         return originalStatus.call(this, code);
     };
+
     next();
 });
 
@@ -153,7 +159,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", config.APP_URL],
       imgSrc: ["'self'", "data:", "https:", "blob:", config.APP_URL],
       connectSrc: ["'self'", "https://cdn.jsdelivr.net", "https://api.stripe.com", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://ka-f.fontawesome.com", "https://cdnjs.cloudflare.com", config.APP_URL],
-      frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com", "blob:", config.APP_URL],
+      frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com", "blob:", "mailto:", "tel:", config.APP_URL],
     },
   },
   crossOriginEmbedderPolicy: false, // [FIX] allow iframes to load subresources (avoids NotSameOrigin error)
@@ -309,8 +315,20 @@ app.use('/', landingRoutes);
 
 app.use('/auth', authRoutes);                   // Login, register, social auth
 app.use('/invoice', docRoutes);                 // Public Smart Invoice Viewer
+
+// Public Smart Document Interactions
+import { PublicInteractionController } from './controllers/public-interaction.controller';
+app.get('/i/:token', PublicInteractionController.handle);
+
 import templateRoutes from './routes/template.routes';
+import checkoutRoutes from './routes/checkout.routes';
+
 app.use('/templates', templateRoutes);          // New Portable Template Loader
+app.use('/checkout', checkoutRoutes);           // Secure One-Click Checkout
+
+// Public Document Portal (Interactive View, Support, Status)
+import publicPortalRoutes from './routes/public-portal.routes';
+app.use('/p', publicPortalRoutes);
 
 
 // Dashboard & App Routes - Protected + Onboarding Check
@@ -385,6 +403,7 @@ import jobsRoutes from './routes/jobs.routes';
 import transactionalRoutesV1 from './routes/v1/transactional.routes';
 import webhookRoutes from './routes/webhook.routes';
 import unifiedDataRoutes from './modules/unified-data/unified-data.routes';
+import recommendationApiRoutes from './routes/api/recommendation.api.routes';
 
 apiRouter.use('/', apiRoutes);       // /api/me, /api/usage, /api/services
 apiRouter.use('/pdf', pdfRoutes);    // /api/pdf/convert
@@ -392,6 +411,7 @@ apiRouter.use('/ai', aiRoutes);      // /api/ai/generate
 apiRouter.use('/jobs', jobsRoutes);  // /api/jobs/status
 apiRouter.use('/v1/transactional', transactionalRoutesV1); // Enterprise V1
 apiRouter.use('/v1/unified-data', unifiedDataRoutes); // Aggregated Normalized Data
+apiRouter.use('/recommendations', recommendationApiRoutes); // Recommendation Engine
 // Mount API router
 // Mount API router
 app.use('/api/v1/webhooks', webhookRoutes); // Public Webhooks (Signature Verification handled inside)
