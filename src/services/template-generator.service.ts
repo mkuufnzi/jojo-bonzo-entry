@@ -243,13 +243,20 @@ export class TemplateGeneratorService {
             invoiceData: payload,
             nonce: nonce || 'ssr-nonce',
             document: { id: docId },
-            layout: (layoutName: string) => {},
-            block: (name: string) => ''
+            settings: {
+                views: path.join(process.cwd(), 'src/views')
+            }
         };
 
         try {
-            const bodyHtml = await ejs.renderFile(absoluteViewPath, renderContext);
-            logger.info('✅ [TemplateGeneratorService] Unified HTML compiled');
+            const engine = require('ejs-mate');
+            const bodyHtml = await new Promise<string>((resolve, reject) => {
+                engine(absoluteViewPath, renderContext, (err: any, html: string) => {
+                    if (err) return reject(err);
+                    resolve(html);
+                });
+            });
+            logger.info('✅ [TemplateGeneratorService] Unified HTML compiled with ejs-mate');
             return bodyHtml;
         } catch (error: any) {
             logger.error({ err: error, path: absoluteViewPath }, '❌ [TemplateGeneratorService] EJS Render Error');
