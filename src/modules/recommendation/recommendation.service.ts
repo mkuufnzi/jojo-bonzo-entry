@@ -96,24 +96,30 @@ export class RecommendationService {
             if (clusterCustomers.length === 0) return this._padRecommendations(businessId, [], [], limit);
 
             // Find top products for these customers
-            const orderMetadata = clusterCustomers.flatMap(c => c.orders.map(o => (o.metadata as any)));
-            const skuCounts = new Map<string, number>();
-
-            orderMetadata.forEach((meta: any) => {
-                const items = meta?.line_items || [];
-                items.forEach((item: any) => {
-                    if (item.sku) skuCounts.set(item.sku, (skuCounts.get(item.sku) || 0) + 1);
-                });
+            const cluster = await prisma.debtCollectionCluster.findFirst({
+                where: { businessId, name: clusterName }
             });
 
-            const topSkus = [...skuCounts.entries()]
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, limit)
-                .map(([sku]) => sku);
+            if (!cluster || !cluster.ruleLogic) {
+                logger.warn({ businessId, clusterName }, '[RecommendationService] Cluster not found or no ruleLogic, falling back.');
+                return this._padRecommendations(businessId, [], [], limit);
+            }
+
+            const ruleLogic = cluster.ruleLogic as any;
+            const topSkus = ruleLogic.topSkus || [];
+            
+            // Take a larger pool and shuffle for variety
+            const pool = topSkus.slice(0, 20); 
+            const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, limit);
 
             const products = await prisma.unifiedProduct.findMany({
-                where: { businessId, sku: { in: topSkus } }
+                where: { businessId, sku: { in: shuffled } }
             });
+
+            if (products.length === 0) {
+                logger.info({ businessId, clusterName }, '[RecommendationService] No products found for cluster, falling back.');
+                return this._padRecommendations(businessId, [], [], limit);
+            }
 
             return products.map(p => ({
                 id: p.id,
@@ -122,12 +128,12 @@ export class RecommendationService {
                 price: p.price || 0,
                 currency: p.currency || 'GBP',
                 sku: p.sku || 'N/A',
-                img: (p.metadata as any)?.img || '🎯',
-                reason: `Popular among similar ${clusterName.split(' ')[0]} customers`
+                img: (p.metadata as any)?.img || '✨',
+                reason: `Highly rated in ${clusterName}`
             }));
 
         } catch (error) {
-            logger.error({ businessId, clusterName, error }, '[RecommendationService] Cluster recommendations failed');
+            logger.error({ businessId, clusterName, error }, '[RecommendationService] Cluster recommendations failed, falling back.');
             return this._padRecommendations(businessId, [], [], limit);
         }
     }
@@ -460,28 +466,39 @@ export class RecommendationService {
         const ghostKeywords = ['delete', 'test', 'sample', 'example', 'mock', 'guide'];
         const normalizedExcluded = excludedSkus.map(s => s.toLowerCase());
 
+        // Pull a much larger pool to allow for shuffling
+        const poolSize = Math.max(50, count * 5);
         const fallbackProducts = await prisma.unifiedProduct.findMany({
             where: {
                 businessId,
                 AND: [
                     { price: { gt: 0 } },
-                    { sku: { notIn: excludedSkus } }, // Direct exclusion
+                    { sku: { notIn: excludedSkus } },
                     ...ghostKeywords.map(kw => ({
                         NOT: { OR: [{ name: { contains: kw } }, { description: { contains: kw } }] }
                     }))
                 ]
             },
             orderBy: { createdAt: 'desc' },
-            take: count * 3 // Take more to filter manually
+            take: poolSize
         });
 
-        // Manual case-insensitive filtering
-        const filtered = fallbackProducts
+        // Filter and Shuffle in memory for a "live" feel
+        const shuffled = fallbackProducts
             .filter(p => p.sku && !normalizedExcluded.includes(p.sku.toLowerCase()))
+            .sort(() => Math.random() - 0.5)
             .slice(0, count);
 
-        return filtered.map(p => {
+        return shuffled.map(p => {
             const cat = (p.metadata as any)?.category;
+            const reasons = [
+                cat ? `Trending in ${cat}` : 'Customer Favorite',
+                'Recommended for you',
+                'People also viewed',
+                'New Arrivals'
+            ];
+            const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
+            
             return {
                 id: p.id,
                 name: p.name,
@@ -490,7 +507,7 @@ export class RecommendationService {
                 currency: p.currency || 'GBP',
                 sku: p.sku || 'N/A',
                 img: (p.metadata as any)?.img || '✨',
-                reason: cat ? `Trending in ${cat}` : 'Customer Favorite'
+                reason: randomReason
             };
         });
     }
