@@ -1,0 +1,36 @@
+[dotenv@17.2.3] injecting env (4) from environments\.env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[TemplateRegistry] Scanning for templates in: D:\apps\websites\saas\afs_doc_tools_source\src\views\templates
+[TemplateRegistry] Registered: Classic Invoice (invoice_classic)
+[TemplateRegistry] Registered: Revenue Machine Invoice (invoice_revenue_machine_v1)
+[TemplateRegistry] Registered: Smart Invoice (Ceremonial) (smart_invoice_v1)
+[TemplateRegistry] Registered: Modern Proposal (quote_proposal)
+[TemplateRegistry] Registered: Smart Receipt (smart_receipt_v1)
+[2026-03-09 04:59:45.449 +0300] [34mDEBUG[39m: [36mInitializing Prisma Client for PostgreSQL...[39m
+[2026-03-09 04:59:52.035 +0300] [34mDEBUG[39m: [36mInitializing Redis Client...[39m
+[2026-03-09 04:59:56.908 +0300] [33mWARN[39m: [36mSENTRY_DSN not found. Sentry disabled.[39m
+[2026-03-09 04:59:56.908 +0300] [32mINFO[39m: [36m------------------------------------------------[39m
+[2026-03-09 04:59:56.908 +0300] [32mINFO[39m: [36m[Startup] APP_URL Configured as: 'https://lakia-dreich-foamingly.ngrok-free.dev'[39m
+[2026-03-09 04:59:56.908 +0300] [32mINFO[39m: [36m[Startup] DATABASE_URL Configured as: 'postgresql://root_admin:****@127.0.0.1:5432/postgres?schema=application'[39m
+[2026-03-09 04:59:56.908 +0300] [32mINFO[39m: [36m------------------------------------------------[39m
+[2026-03-09 04:59:56.925 +0300] [32mINFO[39m: [36mCSP Configured[39m
+[2026-03-09 04:59:58.937 +0300] [34mDEBUG[39m: [36m🔧 Initializing Stripe[39m
+    [35mversion[39m: "2024-06-20"
+    [35mkeyPartial[39m: "Present"
+D:\apps\websites\saas\afs_doc_tools_source\node_modules\ts-node\src\index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/controllers/recommendation.controller.ts(284,55): error TS2339: Property 'getProductInsights' does not exist on type 'RecommendationService'.
+
+    at createTSError (D:\apps\websites\saas\afs_doc_tools_source\node_modules\ts-node\src\index.ts:859:12)
+    at reportTSError (D:\apps\websites\saas\afs_doc_tools_source\node_modules\ts-node\src\index.ts:863:19)
+    at getOutput (D:\apps\websites\saas\afs_doc_tools_source\node_modules\ts-node\src\index.ts:1077:36)
+    at Object.compile (D:\apps\websites\saas\afs_doc_tools_source\node_modules\ts-node\src\index.ts:1433:41)
+    at Module.m._compile (D:\apps\websites\saas\afs_doc_tools_source\node_modules\ts-node\src\index.ts:1617:30)
+    at node:internal/modules/cjs/loader:1708:10
+    at Object.require.extensions.<computed> [as .ts] (D:\apps\websites\saas\afs_doc_tools_source\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1318:32)
+    at Function._load (node:internal/modules/cjs/loader:1128:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) {
+  diagnosticCodes: [ 2339 ]
+}

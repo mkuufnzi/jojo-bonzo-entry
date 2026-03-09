@@ -595,7 +595,7 @@ export class QBOProvider implements IERPProvider {
 
     async getItems(params?: FetchParams): Promise<ERPDocument[]> {
         const limit = params?.limit || 100;
-        const query = `select * from Item WHERE Type IN ('Inventory', 'Service') MAXRESULTS ${limit}`;
+        const query = `select * from Item WHERE Type IN ('Inventory', 'Service', 'NonInventory') MAXRESULTS ${limit}`;
         const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
         
         return (data.QueryResponse?.Item || []).map((item: any) => ({
@@ -768,8 +768,8 @@ export class QBOProvider implements IERPProvider {
         if (!this.integration) throw new Error('Not Initialized');
 
         // 1. Fetch from QBO
-        // QSQL does not support invalid OR usage. Use IN ('Inventory', 'Service')
-        const result = await this.fetchRaw("/query?query=select * from Item WHERE Type IN ('Inventory', 'Service') MAXRESULTS 1000");
+        // QSQL does not support invalid OR usage. Use IN ('Inventory', 'Service', 'NonInventory')
+        const result = await this.fetchRaw("/query?query=select * from Item WHERE Type IN ('Inventory', 'Service', 'NonInventory') MAXRESULTS 1000");
         const items = result.QueryResponse?.Item || [];
         
         if (items.length === 0) return 0;
@@ -779,6 +779,32 @@ export class QBOProvider implements IERPProvider {
 
         let count = 0;
         for (const item of items) {
+            // First, record in ExternalDocument for the Unified Hub flow
+            await prisma.externalDocument.upsert({
+                where: {
+                    businessId_provider_externalId_type: {
+                        businessId: this.integration.businessId,
+                        provider: 'quickbooks',
+                        externalId: item.Id,
+                        type: 'product'
+                    }
+                },
+                update: {
+                    rawData: item,
+                    updatedAt: new Date(),
+                    status: 'synced'
+                },
+                create: {
+                    businessId: this.integration.businessId,
+                    provider: 'quickbooks',
+                    externalId: item.Id,
+                    type: 'product',
+                    rawData: item,
+                    status: 'synced'
+                }
+            });
+
+            // Fallback: Also update Legacy Product table for direct UI compatibility
             await prisma.product.upsert({
                 where: {
                     businessId_source_externalId: {
@@ -808,9 +834,9 @@ export class QBOProvider implements IERPProvider {
             });
             count++;
         }
+        
         return count;
     }
-
     async syncInvoices(userId: string): Promise<number> {
         if (!this.integration) throw new Error('Not Initialized');
 

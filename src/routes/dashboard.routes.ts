@@ -30,6 +30,26 @@ router.get('/transactional/analytics/:integrationId', BusinessAnalyticsControlle
 // Recommendation Engine (Core Product)
 router.get('/recommendations', RecommendationDashboardController.index);
 router.get('/recommendations/analytics', RecommendationDashboardController.analytics);
+router.get('/recommendations/catalog', RecommendationDashboardController.catalog);
+router.get('/recommendations/rules', RecommendationDashboardController.rules);
+router.get('/recommendations/segments', RecommendationDashboardController.segments);
+router.get('/recommendations/segments/:clusterId', RecommendationDashboardController.segmentDetail);
+router.get('/recommendations/sync', RecommendationDashboardController.sync);
+
+// UI API Endpoints
+router.get('/recommendations/api/stats', RecommendationDashboardController.getStats);
+router.get('/recommendations/api/rules', RecommendationDashboardController.getRules);
+router.get('/recommendations/api/catalog', RecommendationDashboardController.getCatalog);
+router.get('/recommendations/api/clusters', RecommendationDashboardController.getClusters);
+router.post('/recommendations/api/test', RecommendationDashboardController.testRecommendations);
+router.get('/recommendations/api/search', RecommendationDashboardController.searchAutocomplete);
+
+router.post('/recommendations/rules', RecommendationDashboardController.createRule);
+router.post('/recommendations/rules/default', RecommendationDashboardController.createDefaultRules);
+router.put('/recommendations/rules/:id', RecommendationDashboardController.updateRule);
+router.delete('/recommendations/rules/:id', RecommendationDashboardController.deleteRule);
+router.post('/recommendations/sync/products', RecommendationDashboardController.syncProducts);
+router.post('/recommendations/sync/orders', RecommendationDashboardController.syncOrders);
 
 router.get('/unified', DashboardController.dashboardUnified);
 router.get('/unified/customers', DashboardController.dashboardUnifiedCustomers);

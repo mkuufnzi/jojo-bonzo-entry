@@ -1,131 +1,65 @@
-npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
-npm info using npm@10.9.0
-npm info using node@v22.12.0
-npm verbose title npm test src/tests/unit/recovery.service.test.ts
-npm verbose argv "test" "src/tests/unit/recovery.service.test.ts" "--loglevel" "verbose"
-npm verbose logfile logs-max:10 dir:C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-02-22T03_36_37_634Z-
-npm verbose logfile C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-02-22T03_36_37_634Z-debug-0.log
+FAIL src/tests/unit/quickbooks.provider.test.ts (32.21 s)
+  QBOProvider
+    initialize
+      ΓêÜ should properly set baseUrl and realmId form metadata (3 ms)
+      ΓêÜ should use sandbox url by default (2 ms)
+    getContacts
+      ├ù should fetch customers using correct query (6500 ms)
+      ├ù should handle empty response gracefully (6269 ms)
+    getItems
+      ├ù should fetch items (Inventory/Service) using correct query (6312 ms)
 
-> afs_doc_tools@1.0.0 test
-> jest src/tests/unit/recovery.service.test.ts
+  ΓùÅ QBOProvider ΓÇ║ getContacts ΓÇ║ should fetch customers using correct query
 
-  console.log
-    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+    [QBOProvider] Γ¥î Exhausted all 3 retries. Final Error: Cannot read properties of undefined (reading 'ok')
 
-      at _log (node_modules/dotenv/lib/main.js:142:11)
+      147 |         }
+      148 |         
+    > 149 |         throw new Error(`[QBOProvider] Γ¥î Exhausted all ${maxRetries} retries. Final Error: ${lastError?.message}`);
+          |               ^
+      150 |     }
+      151 |
+      152 |     // --- Webhook Validation ---
 
-FAIL src/tests/unit/recovery.service.test.ts (10.21 s)
-  RecoveryService
-    syncOverdueInvoices
-      ├ù should create sessions from manual invoices and bypass QBO (18 ms)
-      ├ù should resolve customer emails correctly in manual mode (3 ms)
-    findApplicableSequence
-      ΓêÜ should select sequence based on amount rules (3 ms)
-      ΓêÜ should fallback to default sequence if no rules match
-    processRecovery
-      ΓêÜ should dispatch to workflowService for recovery_email action (27 ms)
-      ΓêÜ should advance step index and calculate nextActionAt (2 ms)
-    Utility Logic
-      ΓêÜ calculateNextActionDate should respect day offsets (1 ms)
-      ΓêÜ injectVariables should replace {{key}} with data[key] (1 ms)
-    processBusinessOverdues
-      ΓêÜ should queue actions for sessions due now (2 ms)
+      at QBOProvider.fetchRaw (src/services/integrations/providers/quickbooks.provider.ts:149:15)
+      at async QBOProvider.getContacts (src/services/integrations/providers/quickbooks.provider.ts:582:22)
+      at async Object.<anonymous> (src/tests/unit/quickbooks.provider.test.ts:79:30)
 
-  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should create sessions from manual invoices and bypass QBO
+  ΓùÅ QBOProvider ΓÇ║ getContacts ΓÇ║ should handle empty response gracefully
 
-    TypeError: contacts is not iterable
+    [QBOProvider] Γ¥î Exhausted all 3 retries. Final Error: Cannot read properties of undefined (reading 'ok')
 
-      116 |
-      117 |                 logger.info({ businessId, contactsType: typeof contacts, isArray: Array.isArray(contacts) }, '≡ƒöì [Recovery] Contacts fetched');
-    > 118 |                 for (const contact of contacts) {
-          |                                       ^
-      119 |                     if (contact.email) {
-      120 |                         customerEmailMap.set(contact.externalId, contact.email);
-      121 |                     }
+      147 |         }
+      148 |         
+    > 149 |         throw new Error(`[QBOProvider] Γ¥î Exhausted all ${maxRetries} retries. Final Error: ${lastError?.message}`);
+          |               ^
+      150 |     }
+      151 |
+      152 |     // --- Webhook Validation ---
 
-      at RecoveryService.syncOverdueInvoices (src/modules/transactional/recovery/recovery.service.ts:118:39)
-      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:100:28)
+      at QBOProvider.fetchRaw (src/services/integrations/providers/quickbooks.provider.ts:149:15)
+      at async QBOProvider.getContacts (src/services/integrations/providers/quickbooks.provider.ts:582:22)
+      at async Object.<anonymous> (src/tests/unit/quickbooks.provider.test.ts:99:30)
 
-  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should resolve customer emails correctly in manual mode
+  ΓùÅ QBOProvider ΓÇ║ getItems ΓÇ║ should fetch items (Inventory/Service) using correct query
 
-    TypeError: contacts is not iterable
+    [QBOProvider] Γ¥î Exhausted all 3 retries. Final Error: Cannot read properties of undefined (reading 'ok')
 
-      116 |
-      117 |                 logger.info({ businessId, contactsType: typeof contacts, isArray: Array.isArray(contacts) }, '≡ƒöì [Recovery] Contacts fetched');
-    > 118 |                 for (const contact of contacts) {
-          |                                       ^
-      119 |                     if (contact.email) {
-      120 |                         customerEmailMap.set(contact.externalId, contact.email);
-      121 |                     }
+      147 |         }
+      148 |         
+    > 149 |         throw new Error(`[QBOProvider] Γ¥î Exhausted all ${maxRetries} retries. Final Error: ${lastError?.message}`);
+          |               ^
+      150 |     }
+      151 |
+      152 |     // --- Webhook Validation ---
 
-      at RecoveryService.syncOverdueInvoices (src/modules/transactional/recovery/recovery.service.ts:118:39)
-      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:124:13)
+      at QBOProvider.fetchRaw (src/services/integrations/providers/quickbooks.provider.ts:149:15)
+      at async QBOProvider.getItems (src/services/integrations/providers/quickbooks.provider.ts:599:22)
+      at async Object.<anonymous> (src/tests/unit/quickbooks.provider.test.ts:122:27)
 
-[2026-02-22 06:36:54.783 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mmanualMode[39m: true
 Test Suites: 1 failed, 1 total
-Tests:       2 failed, 7 passed, 9 total
+Tests:       3 failed, 2 passed, 5 total
 Snapshots:   0 total
-Time:        10.375 s, estimated 11 s
-Ran all test suites matching src/tests/unit/recovery.service.test.ts.
-[2026-02-22 06:36:54.785 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Contacts fetched[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mcontactsType[39m: "undefined"
-    [35misArray[39m: false
-[2026-02-22 06:36:54.785 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Sync failed[39m
-    [35mbusinessId[39m: "biz_test_123"
-    err: {
-      "type": "TypeError",
-      "message": "contacts is not iterable",
-      "stack":
-          TypeError: contacts is not iterable
-              at RecoveryService.syncOverdueInvoices (D:\apps\websites\saas\afs_doc_tools_source\src\modules\transactional\recovery\recovery.service.ts:118:39)
-              at processTicksAndRejections (node:internal/process/task_queues:105:5)
-              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:100:28)
-    }
-[2026-02-22 06:36:54.802 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mmanualMode[39m: true
-[2026-02-22 06:36:54.802 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Contacts fetched[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mcontactsType[39m: "undefined"
-    [35misArray[39m: false
-[2026-02-22 06:36:54.803 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Sync failed[39m
-    [35mbusinessId[39m: "biz_test_123"
-    err: {
-      "type": "TypeError",
-      "message": "contacts is not iterable",
-      "stack":
-          TypeError: contacts is not iterable
-              at RecoveryService.syncOverdueInvoices (D:\apps\websites\saas\afs_doc_tools_source\src\modules\transactional\recovery\recovery.service.ts:118:39)
-              at processTicksAndRejections (node:internal/process/task_queues:105:5)
-              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:124:13)
-    }
-[2026-02-22 06:36:54.811 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dunning action created[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35msession[39m: "session_1"
-    [35mstep[39m: 1
-    [35mactionType[39m: "email"
-[2026-02-22 06:36:54.834 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dispatching recovery email action[39m
-    [35msessionId[39m: "session_1"
-    [35mtype[39m: "recovery_email"
-[2026-02-22 06:36:54.839 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dunning action created[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35msession[39m: "session_1"
-    [35mstep[39m: 1
-    [35mactionType[39m: "email"
-[2026-02-22 06:36:54.839 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dispatching recovery email action[39m
-    [35msessionId[39m: "session_1"
-    [35mtype[39m: "recovery_email"
-[2026-02-22 06:36:54.847 +0300] [32mINFO[39m: [36mΓÜí [Recovery] Queued due actions[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mqueuedCount[39m: 1
-    [35mtotalActive[39m: 1
+Time:        32.376 s
+Ran all test suites matching src/tests/unit/quickbooks.provider.test.ts.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
-npm verbose cwd D:\apps\websites\saas\afs_doc_tools_source
-npm verbose os Windows_NT 10.0.19045
-npm verbose node v22.12.0
-npm verbose npm  v10.9.0
-npm verbose exit 1
-npm verbose code 1

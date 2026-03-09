@@ -1,0 +1,30 @@
+[dotenv@17.2.3] injecting env (0) from environments\.env.development  -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+Note: .env file not found, using system environment variables.
+❌ Invalid environment variables: {
+  "_errors": [],
+  "DATABASE_URL": {
+    "_errors": [
+      "Required"
+    ]
+  },
+  "SESSION_SECRET": {
+    "_errors": [
+      "Required"
+    ]
+  },
+  "STRIPE_SECRET_KEY": {
+    "_errors": [
+      "Required"
+    ]
+  },
+  "STRIPE_WEBHOOK_SECRET": {
+    "_errors": [
+      "Required"
+    ]
+  },
+  "STRIPE_PUBLIC_KEY": {
+    "_errors": [
+      "Required"
+    ]
+  }
+}

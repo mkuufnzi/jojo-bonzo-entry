@@ -62,15 +62,54 @@
         Back to Dashboard
     </a>
 
-    <div class="px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Smart Revenue Engine</div>
-    <a href="/dashboard/recommendations" class="<%= (locals.title === 'Recommendations Manager') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
-        <i data-lucide="settings-2" class="mr-3 h-5 w-5 <%= (locals.title === 'Recommendations Manager') ? 'text-blue-500' : 'text-slate-500 group-hover:text-blue-400' %>"></i>
-        Rule Manager
+    <div class="px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Core Engine</div>
+    <a href="/dashboard/recommendations" class="<%= (locals.title === 'Recommendations Dashboard') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+        <i data-lucide="layout-dashboard" class="mr-3 h-5 w-5 <%= (locals.title === 'Recommendations Dashboard') ? 'text-blue-500' : 'text-slate-500 group-hover:text-blue-400' %>"></i>
+        <div>
+            <span class="block">Overview</span>
+            <span class="block text-[0.6rem] font-normal text-slate-500">Engine status & insights</span>
+        </div>
     </a>
-    <a href="/dashboard/recommendations/analytics" class="<%= (locals.title === 'Recommendation Insights') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
-        <i data-lucide="bar-chart-3" class="mr-3 h-5 w-5 <%= (locals.title === 'Recommendation Insights') ? 'text-indigo-500' : 'text-slate-500 group-hover:text-indigo-400' %>"></i>
-        Analytics
+    <a href="/dashboard/recommendations/rules" class="<%= (locals.title === 'Recommendation Rules') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+        <i data-lucide="list-checks" class="mr-3 h-5 w-5 <%= (locals.title === 'Recommendation Rules') ? 'text-amber-500' : 'text-slate-500 group-hover:text-amber-400' %>"></i>
+        <div>
+            <span class="block">Recommendation Rules</span>
+            <span class="block text-[0.6rem] font-normal text-slate-500">Manage manual upsell triggers</span>
+        </div>
     </a>
+    
+    <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Intelligence</div>
+    <a href="/dashboard/recommendations/analytics" class="<%= (locals.title === 'Performance Analytics') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
+        <i data-lucide="bar-chart-3" class="mr-3 h-5 w-5 <%= (locals.title === 'Performance Analytics') ? 'text-indigo-500' : 'text-slate-500 group-hover:text-indigo-400' %>"></i>
+        <div>
+            <span class="block">Analytics</span>
+            <span class="block text-[0.6rem] font-normal text-slate-500">Revenue lift & conversion data</span>
+        </div>
+    </a>
+    <a href="/dashboard/recommendations/catalog" class="<%= (locals.title && locals.title.includes('Catalog')) ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+        <i data-lucide="package" class="mr-3 h-5 w-5 <%= (locals.title === 'Product Catalog') ? 'text-emerald-500' : 'text-slate-500 group-hover:text-emerald-400' %>"></i>
+        <div>
+            <span class="block">Product Catalog</span>
+            <span class="block text-[0.6rem] font-normal text-slate-500">Synced inventory & pricing</span>
+        </div>
+    </a>
+    <a href="/dashboard/recommendations/segments" class="<%= (locals.title && locals.title.includes('Segments')) ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+        <i data-lucide="users" class="mr-3 h-5 w-5 <%= (locals.title && locals.title.includes('Segments')) ? 'text-amber-500' : 'text-slate-500 group-hover:text-amber-400' %>"></i>
+        <div>
+            <span class="block">Customer Segments</span>
+            <span class="block text-[0.6rem] font-normal text-slate-500">Buyer clusters & affinity</span>
+        </div>
+    </a>
+
+    <div class="mt-6 px-3 text-[0.625rem] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">Control Plane</div>
+    <a href="/dashboard/recommendations/sync" class="<%= (locals.title === 'Recommendation Sync') ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all mt-1">
+        <i data-lucide="refresh-cw" class="mr-3 h-5 w-5 <%= (locals.title === 'Recommendation Sync') ? 'text-blue-500' : 'text-slate-500 group-hover:text-blue-400' %>"></i>
+        <div>
+            <span class="block">Data Sync</span>
+            <span class="block text-[0.6rem] font-normal text-slate-500">Refresh data from your ERP</span>
+        </div>
+    </a>
+
 
 <% } else if (activeService === 'recovery') { %>
     <!-- Recovery Specific Context -->
@@ -245,6 +284,7 @@
     <% } %>
 <% } %>
 
+<% if (activeService !== 'recommendations') { %>
 <div class="mt-auto pt-8">
     <div class="h-px bg-slate-800 mb-4 mx-3"></div>
     <a href="/dashboard/settings" class="<%= activeService === 'settings' ? 'bg-slate-800 text-white shadow-sm shadow-black/20' : 'text-slate-400 hover:text-white hover:bg-slate-800' %> group flex items-center px-3 py-2 text-sm font-bold rounded-xl transition-all">
@@ -256,3 +296,4 @@
         Sign Out
     </a>
 </div>
+<% } %>

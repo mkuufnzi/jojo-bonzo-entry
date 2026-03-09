@@ -1,0 +1,151 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<!-- Content Area -->
+<div class="max-w-7xl mx-auto space-y-8" x-data="syncDashboard()" x-init="initDashboard()">
+    
+    <!-- Hero Section -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 py-6">
+        <div class="space-y-3">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[0.65rem] font-black uppercase tracking-[0.1em] text-blue-600 mb-2">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Data Proximity Control</span>
+            </div>
+            <h1 class="text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">Sync Command Center</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-2xl text-lg">Orchestrate real-time data flow between your ERP integrations and the Recommendation Engine.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button id="syncHubBtn" @click="syncAll()" :disabled="syncing" class="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-2xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-2xl active:scale-95 flex items-center group disabled:opacity-50">
+                <i data-lucide="zap" class="w-5 h-5 mr-3" :class="syncing ? 'animate-pulse text-amber-500' : ''"></i>
+                <span x-text="syncing ? 'SYNC IN PROGRESS...' : 'EXECUTE FULL SYNC'" class="uppercase tracking-widest text-xs"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sync Status Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Sync Control -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Sync History</h3>
+                    <span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-[0.6rem] font-black rounded-lg">Last 10 Events</span>
+                </div>
+
+                <div class="space-y-4">
+                    <% if (syncStatus && syncStatus.length > 0) { %>
+                        <% syncStatus.forEach(job => { %>
+                            <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 group hover:border-blue-500/30 transition-all">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center <%= job.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : (job.status === 'failed' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500') %>">
+                                        <i data-lucide="<%= job.status === 'completed' ? 'check-circle' : (job.status === 'failed' ? 'x-circle' : 'loader-2') %>" class="w-5 h-5 <%= job.status === 'running' ? 'animate-spin' : '' %>"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                                            <%= job.type || 'Full Sync' %> 
+                                            <span class="text-[0.6rem] ml-2 text-slate-400 font-normal"><%= job.id.split('-')[0] %></span>
+                                        </p>
+                                        <p class="text-[0.65rem] text-slate-500 font-bold mt-0.5">
+                                            <%= new Date(job.createdAt).toLocaleString() %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[0.6rem] font-black uppercase px-2 py-0.5 rounded-md <%= job.status === 'completed' ? 'bg-emerald-500/10 text-emerald-600' : (job.status === 'failed' ? 'bg-rose-500/10 text-rose-600' : 'bg-blue-500/10 text-blue-600') %>">
+                                        <%= job.status %>
+                                    </span>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="py-20 text-center space-y-4">
+                            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                                <i data-lucide="history" class="w-8 h-8"></i>
+                            </div>
+                            <p class="text-slate-500 font-medium">No synchronization history found.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="space-y-8">
+            <div class="bg-indigo-600 p-8 rounded-[2.5rem] border border-indigo-500 shadow-2xl text-white relative overflow-hidden group">
+                <div class="relative z-10">
+                    <i data-lucide="help-circle" class="w-10 h-10 mb-6 text-indigo-200"></i>
+                    <h3 class="text-xl font-black mb-4 leading-tight">Why Sync?</h3>
+                    <p class="text-indigo-100/80 text-sm font-medium leading-relaxed">
+                        The Recommendation Engine uses your **Unified Data Hub** as its primary intelligence source. Manual sync ensures that the latest purchase patterns, SKUs, and customer clusters are updated immediately after changes in your ERP.
+                    </p>
+                    <div class="mt-8 pt-8 border-t border-indigo-500/50 flex items-center justify-between">
+                        <span class="text-[0.65rem] font-black uppercase tracking-widest text-indigo-300">Auto-Sync Health</span>
+                        <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[0.6rem] font-black rounded uppercase">Healthy</span>
+                    </div>
+                </div>
+                <!-- Decoration -->
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+            </div>
+
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                <h4 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Synchronization Scopes</h4>
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="mt-1 w-2 h-2 rounded-full bg-blue-500"></div>
+                        <div>
+                            <p class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">Product Catalog</p>
+                            <p class="text-[0.65rem] text-slate-500 mt-1">Updates names, SKUs, categories, and inventory counts.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="mt-1 w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <div>
+                            <p class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">Transaction History</p>
+                            <p class="text-[0.65rem] text-slate-500 mt-1">Refines purchase affinity maps and revenue lift analytics.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="mt-1 w-2 h-2 rounded-full bg-amber-500"></div>
+                        <div>
+                            <p class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">Customer CRM</p>
+                            <p class="text-[0.65rem] text-slate-500 mt-1">Recalculates RFM clusters and behavioral segments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('syncDashboard', () => ({
+            syncing: false,
+            
+            async initDashboard() {
+                if (window.lucide) window.lucide.createIcons();
+            },
+
+            async syncAll() {
+                this.syncing = true;
+                try {
+                    // Start multiple syncs for better hub coverage
+                    await Promise.all([
+                        fetch('/dashboard/recommendations/sync/products', { method: 'POST' }),
+                        fetch('/dashboard/recommendations/sync/orders', { method: 'POST' })
+                    ]);
+                    
+                    // Show success
+                    const text = document.getElementById('syncText');
+                    window.location.reload();
+                } catch (e) {
+                    console.error('Sync failed', e);
+                } finally {
+                    this.syncing = false;
+                }
+            }
+        }));
+    });
+</script>
+
+<%- include('../../partials/sidebar-script') %>

@@ -1,0 +1,185 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<!-- Content Area -->
+<div class="max-w-7xl mx-auto space-y-8" x-data="segmentDetail()">
+    
+    <!-- Hero Section -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 py-6">
+        <div class="space-y-3">
+            <a href="/dashboard/recommendations/segments" class="inline-flex items-center space-x-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors mb-4 group font-bold text-sm">
+                <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform text-slate-400"></i>
+                <span>Back to Segments</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-2xl bg-<%= cluster.color %>-500/10 border border-<%= cluster.color %>-500/20 flex items-center justify-center text-<%= cluster.color %>-500">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight"><%= cluster.name %></h1>
+                    <div class="flex items-center space-x-4 mt-1">
+                        <span class="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[0.65rem]">Target Behavioral Segment</span>
+                        <div class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+                        <span class="text-<%= cluster.color %>-500 font-black uppercase tracking-widest text-[0.65rem]"><%= cluster.size %> active customers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button class="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-xs uppercase tracking-widest flex items-center">
+                <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                Export List
+            </button>
+            <button class="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-xl hover:scale-105 transition-all text-xs uppercase tracking-widest flex items-center shadow-xl">
+                <i data-lucide="send" class="w-4 h-4 mr-2"></i>
+                Set Campaign
+            </button>
+        </div>
+    </div>
+
+    <!-- Cluster Intelligence Dashboard -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Main Stats -->
+        <div class="lg:col-span-3 space-y-8">
+            <!-- Strategic Directive -->
+            <div class="bg-gradient-to-br from-<%= cluster.color %>-500 to-<%= cluster.color %>-700 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-3">
+                            <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[0.6rem] font-black uppercase tracking-widest">Active Strategy</span>
+                            <% if (cluster.avgOrderValue) { %>
+                                <span class="px-3 py-1 bg-black/20 backdrop-blur-md rounded-lg text-[0.6rem] font-black uppercase tracking-widest">AOV: <%= cluster.avgOrderValue %></span>
+                            <% } %>
+                        </div>
+                        <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center">
+                            <i data-lucide="zap" class="w-5 h-5 text-white animate-pulse"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 leading-tight">Recommended Action Protocol</h3>
+                    <p class="text-white/90 text-lg font-medium leading-relaxed max-w-2xl mb-8">
+                        <%= cluster.strategy %>
+                    </p>
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20">
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="shield-check" class="w-6 h-6 text-white shrink-0 mt-1"></i>
+                            <div>
+                                <p class="text-sm font-black uppercase tracking-tight mb-1">AI Recommendation Context</p>
+                                <p class="text-xs text-white/80 font-medium leading-relaxed opacity-80">
+                                    This cluster has a <%= cluster.size > 10 ? 'high' : 'medium' %> probability of responding to bundle-based upsell logic. We suggest prioritizing high-margin items in the <%= analytics.categoryDistribution && analytics.categoryDistribution[0] ? analytics.categoryDistribution[0].name : 'Primary' %> category.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Decoration -->
+                <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+            </div>
+
+            <!-- Representative Customers (Mocked for UI visualization) -->
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Recent Activity</h3>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest">Live Feed active</span>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-100 dark:border-slate-800">
+                                <th class="text-left py-4 text-[0.625rem] font-black text-slate-400 uppercase tracking-widest px-4">Customer ID</th>
+                                <th class="text-left py-4 text-[0.625rem] font-black text-slate-400 uppercase tracking-widest px-4">Recency</th>
+                                <th class="text-left py-4 text-[0.625rem] font-black text-slate-400 uppercase tracking-widest px-4">Purchases</th>
+                                <th class="text-right py-4 text-[0.625rem] font-black text-slate-400 uppercase tracking-widest px-4">Est. LTV</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 dark:divide-slate-800/50">
+                            <!-- Mocked data for UI wow -->
+                             <template x-for="(cus, i) in mockCustomers" :key="i">
+                                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all cursor-default">
+                                    <td class="py-5 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[0.6rem] font-black" x-text="'C' + (i + 1)"></div>
+                                            <p class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight" x-text="cus.id"></p>
+                                        </div>
+                                    </td>
+                                    <td class="py-5 px-4 text-xs font-bold text-slate-500" x-text="cus.recency"></td>
+                                    <td class="py-5 px-4">
+                                        <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md text-[0.65rem] font-black text-slate-600 dark:text-slate-400" x-text="cus.orders + ' Orders'"></span>
+                                    </td>
+                                    <td class="py-5 px-4 text-right font-black text-slate-900 dark:text-white text-sm" x-text="'£' + cus.ltv"></td>
+                                </tr>
+                             </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Cluster Traits -->
+        <div class="space-y-8 text-white">
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
+                <h4 class="text-[0.65rem] font-black text-slate-500 uppercase tracking-[0.2em] mb-8">Behavioral DNA</h4>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[0.65rem] font-black uppercase tracking-tight text-slate-400 text-white">Purchase Velocity</span>
+                            <span class="text-[0.65rem] font-black text-emerald-400 uppercase">High</span>
+                        </div>
+                        <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500 rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[0.65rem] font-black uppercase tracking-tight text-slate-400 text-white">Price Sensitivity</span>
+                            <span class="text-[0.65rem] font-black text-amber-400 uppercase">Low</span>
+                        </div>
+                        <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-500 rounded-full" style="width: 30%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[0.65rem] font-black uppercase tracking-tight text-slate-400 text-white">Brand Affinity</span>
+                            <span class="text-[0.65rem] font-black text-blue-400 uppercase">Elevated</span>
+                        </div>
+                        <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500 rounded-full" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+                <h4 class="text-[0.65rem] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Cluster Analysis</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed italic">
+                    "This segment represents customers who have made more than <%= cluster.name.includes('VIP') ? '5 purchases' : '1 purchase' %> and show strong affinity for premium product categories. Their current health score is optimized."
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('segmentDetail', () => ({
+            mockCustomers: [
+                { id: 'CUST-8821', recency: '2 hours ago', orders: 12, ltv: '1,240.00' },
+                { id: 'CUST-4512', recency: '1 day ago', orders: 8, ltv: '890.50' },
+                { id: 'CUST-9901', recency: '3 days ago', orders: 6, ltv: '560.00' },
+                { id: 'CUST-3341', recency: '1 week ago', orders: 5, ltv: '420.10' },
+                { id: 'CUST-2100', recency: '2 weeks ago', orders: 7, ltv: '980.00' }
+            ],
+            
+            init() {
+                if (window.lucide) window.lucide.createIcons();
+                // Filter mock data based on cluster size if needed for more realism
+            }
+        }));
+    });
+</script>
+
+<%- include('../../partials/sidebar-script') %>

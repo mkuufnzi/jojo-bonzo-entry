@@ -1,0 +1,376 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<!-- Content Area -->
+<div class="max-w-7xl mx-auto space-y-8" x-data="catalogDashboard()" x-init="initDashboard()">
+    
+    <!-- Hero Section -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 py-6">
+        <div class="space-y-3">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[0.65rem] font-black uppercase tracking-[0.1em] text-emerald-600 mb-2">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Inventory Intelligence</span>
+            </div>
+            <h1 class="text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">Product Catalog</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-2xl text-lg">Manage your unified items synced from ERP integrations. These entities power your automated recommendation logic.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button id="syncHubBtn" @click="syncHubData()" class="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-2xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-2xl active:scale-95 flex items-center group">
+                <i data-lucide="refresh-cw" class="w-5 h-5 mr-3 group-hover:rotate-180 transition-transform duration-500" id="syncIcon"></i>
+                <span id="syncText" class="uppercase tracking-widest text-xs">Sync Hub Data</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- API Loading State -->
+    <div x-show="loading" class="flex justify-center flex-col items-center py-32 min-h-[500px]">
+        <div class="relative w-20 h-20 mb-6">
+            <div class="absolute inset-0 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+            <div class="absolute inset-4 border-4 border-emerald-500/10 border-b-emerald-400 rounded-full animate-spin-reverse"></div>
+        </div>
+        <span class="text-slate-500 font-black uppercase tracking-[0.2em] text-xs">Calibrating Catalog...</span>
+    </div>
+
+    <!-- Content (Hidden while loading) -->
+    <div x-cloak x-show="!loading" class="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl group hover:border-emerald-500/30 transition-all">
+                <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">System SKUs</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-4xl font-black text-slate-900 dark:text-white" x-text="catalog.products?.length || 0"></h3>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                        <i data-lucide="box" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl group hover:border-emerald-500/30 transition-all">
+                <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Taxonomies</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-4xl font-black text-slate-900 dark:text-white" x-text="categories.length"></h3>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500">
+                        <i data-lucide="tag" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl group hover:border-emerald-500/30 transition-all">
+                <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Sync Consistency</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-4xl font-black text-slate-900 dark:text-white">100%</h3>
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500">
+                        <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl group hover:border-emerald-500/30 transition-all">
+                <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Last Integrity Check</p>
+                <div class="flex flex-col">
+                    <span class="text-sm font-black text-slate-900 dark:text-white" x-text="lastSync.split(',')[0]"></span>
+                    <span class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest mt-1" x-text="lastSync.split(',')[1]"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls & Filters -->
+        <div class="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm p-4 lg:p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row gap-6 items-center">
+            
+            <div class="relative flex-grow w-full">
+                <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" x-model="searchQuery" placeholder="Search by SKU, Name, or Description..." 
+                       class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all">
+            </div>
+
+            <div class="flex items-center gap-3 w-full lg:w-auto">
+                <select x-model="selectedCategory" class="flex-grow lg:w-48 px-4 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <option value="">All Categories</option>
+                    <template x-for="cat in categories" :key="cat">
+                        <option :value="cat" x-text="cat"></option>
+                    </template>
+                </select>
+
+                <select x-model="selectedSource" class="flex-grow lg:w-40 px-4 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <option value="">All Sources</option>
+                    <template x-for="src in sources" :key="src">
+                        <option :value="src" x-text="src"></option>
+                    </template>
+                </select>
+
+                <button @click="groupByCategory = !groupByCategory" 
+                        :class="groupByCategory ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white dark:bg-slate-950 text-slate-500 border-slate-200 dark:border-slate-800'"
+                        class="px-5 py-4 border rounded-2xl text-xs font-black uppercase tracking-widest flex items-center transition-all whitespace-nowrap">
+                    <i data-lucide="layers" class="w-4 h-4 mr-2"></i>
+                    Group
+                </button>
+            </div>
+        </div>
+
+        <!-- Inventory View -->
+        <div class="space-y-12">
+            
+            <!-- Grouped View -->
+            <template x-if="groupByCategory">
+                <div class="space-y-12">
+                    <template x-for="group in groupedProducts" :key="group.name">
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-4 px-2">
+                                <div class="h-10 w-1 bg-emerald-500 rounded-full"></div>
+                                <h2 class="text-2xl font-black text-slate-800 dark:text-white" x-text="group.name"></h2>
+                                <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 text-[0.65rem] font-black rounded-lg" x-text="group.items.length + ' items'"></span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <template x-for="product in group.items" :key="product.id">
+                                    <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all group relative overflow-hidden" 
+                                         x-data="{ expanded: false }">
+                                        
+                                        <!-- Source Tag -->
+                                        <div class="absolute top-0 right-0 px-4 py-2 bg-slate-50 dark:bg-slate-800 text-[0.55rem] font-black uppercase text-slate-400 tracking-tighter">
+                                            <span x-text="product.source"></span>
+                                        </div>
+
+                                        <div class="flex items-start justify-between mb-4">
+                                            <div class="space-y-1">
+                                                <code class="text-[0.65rem] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded" x-text="product.sku"></code>
+                                                <h4 class="text-lg font-black text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors" x-text="product.name"></h4>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-end justify-between mt-auto">
+                                            <div class="text-2xl font-black text-slate-900 dark:text-white" x-text="formatCurrency(product.price)"></div>
+                                            <button @click="expanded = !expanded" class="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all text-slate-400">
+                                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform" :class="expanded ? 'rotate-180' : ''"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Expandable Metadata -->
+                                        <div x-show="expanded" x-collapse class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                                            <div class="space-y-2">
+                                                <p class="text-[0.6rem] font-black uppercase text-slate-400">Description</p>
+                                                <p class="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed" x-text="product.description || 'No description available.'"></p>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-[0.5rem] font-black uppercase text-slate-400">Quantity</p>
+                                                    <p class="text-sm font-black text-slate-800 dark:text-white" x-text="product.quantity || 0"></p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-[0.5rem] font-black uppercase text-slate-400">Integr_ID</p>
+                                                    <p class="text-[0.6rem] font-mono text-slate-500" x-text="product.integrationId.split('-')[0] + '...'"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Table View (Standard List) -->
+            <template x-if="!groupByCategory">
+                <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 text-[0.65rem] font-black uppercase tracking-[0.2em]">
+                                <tr>
+                                    <th class="px-10 py-6">SKU / Identity</th>
+                                    <th class="px-10 py-6">Product Details</th>
+                                    <th class="px-10 py-6">Intelligence Meta</th>
+                                    <th class="px-10 py-6 text-right">Market Price</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <template x-if="filteredProducts.length > 0">
+                                    <template x-for="product in filteredProducts" :key="product.id">
+                                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
+                                            <td class="px-10 py-8">
+                                                <div class="flex items-center space-x-4">
+                                                    <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-500 group-hover:scale-110 transition-transform">
+                                                        <i data-lucide="package" class="w-5 h-5"></i>
+                                                    </div>
+                                                    <div>
+                                                        <span class="block text-xs font-black font-mono text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded w-max mb-1" x-text="product.sku"></span>
+                                                        <span class="block text-[0.6rem] text-slate-400 font-bold" x-text="product.source"></span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-10 py-8">
+                                                <span class="block text-sm font-black text-slate-900 dark:text-white" x-text="product.name"></span>
+                                                <span class="block text-xs text-slate-500 mt-1 line-clamp-1" x-text="product.description || 'No description'"></span>
+                                            </td>
+                                            <td class="px-10 py-8">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <span class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[0.6rem] font-black uppercase tracking-widest rounded-lg border border-indigo-100 dark:border-indigo-800" 
+                                                          x-text="product.category || 'NO CATEGORY'"></span>
+                                                </div>
+                                                <div class="flex items-center text-[0.6rem] text-slate-400 font-bold">
+                                                    <i data-lucide="database" class="w-3 h-3 mr-1"></i>
+                                                    <span x-text="'Stock: ' + (product.quantity || 0)"></span>
+                                                </div>
+                                            </td>
+                                            <td class="px-10 py-8 text-right">
+                                                <span class="text-xl font-black text-slate-900 dark:text-white tracking-tighter" x-text="formatCurrency(product.price)"></span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </template>
+
+                                <!-- Empty State -->
+                                <template x-if="filteredProducts.length === 0">
+                                    <tr>
+                                        <td colspan="4" class="px-10 py-32 text-center text-slate-400 font-medium">
+                                            <div class="max-w-md mx-auto">
+                                                <div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                                                    <i data-lucide="package-search" class="w-10 h-10 text-slate-300"></i>
+                                                </div>
+                                                <h3 class="text-2xl font-black text-slate-900 dark:text-white mb-2 underline decoration-emerald-500 decoration-4 underline-offset-8">No Matched Entities</h3>
+                                                <p class="text-slate-500 mt-6 leading-relaxed">
+                                                    We couldn't find any products matching your current filters. 
+                                                    Try adjusting your search or sync newly added products from your integrations.
+                                                </p>
+                                                <button @click="resetFilters()" class="mt-8 text-emerald-600 font-black uppercase text-xs tracking-widest hover:text-emerald-500 underline decoration-2 underline-offset-4">Reset Parameters</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+    </div>
+</div>
+
+<script nonce="<%= nonce %>">
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('catalogDashboard', () => ({
+            catalog: {},
+            loading: true,
+            searchQuery: '',
+            selectedCategory: '',
+            selectedSource: '',
+            groupByCategory: false,
+            lastSync: 'Unknown',
+            
+            async initDashboard() {
+                try {
+                    const res = await fetch('/dashboard/recommendations/api/catalog');
+                    const json = await res.json();
+                    this.catalog = json.data || { products: [] };
+                    
+                    const date = new Date();
+                    this.lastSync = date.toLocaleDateString('en-GB', { weekday: 'long' }) + ', ' + 
+                                   date.toLocaleTimeString('en-GB', { hour: '2-digit', minute:'2-digit' });
+                } catch(e) {
+                    console.error('Failed to load catalog', e);
+                } finally {
+                    this.loading = false;
+                    this.$nextTick(() => { if(window.lucide) window.lucide.createIcons(); });
+                }
+            },
+
+            get categories() {
+                if (!this.catalog || !this.catalog.products) return [];
+                const cats = new Set(this.catalog.products.map(p => p.category).filter(Boolean));
+                return Array.from(cats).sort();
+            },
+
+            get sources() {
+                if (!this.catalog || !this.catalog.products) return [];
+                const srcs = new Set(this.catalog.products.map(p => p.source).filter(Boolean));
+                return Array.from(srcs).sort();
+            },
+
+            get filteredProducts() {
+                if (!this.catalog || !this.catalog.products) return [];
+                
+                const query = (this.searchQuery || '').toLowerCase();
+                
+                return this.catalog.products.filter(p => {
+                    const sku = (p.sku || '').toLowerCase();
+                    const name = (p.name || '').toLowerCase();
+                    const desc = (p.description || '').toLowerCase();
+                    
+                    const matchesSearch = !query || 
+                                        sku.includes(query) || 
+                                        name.includes(query) ||
+                                        desc.includes(query);
+                    
+                    const matchesCategory = !this.selectedCategory || p.category === this.selectedCategory;
+                    const matchesSource = !this.selectedSource || p.source === this.selectedSource;
+                    
+                    return matchesSearch && matchesCategory && matchesSource;
+                });
+            },
+
+            get groupedProducts() {
+                const filtered = this.filteredProducts;
+                const groups = {};
+                
+                filtered.forEach(p => {
+                    const cat = p.category || 'Uncategorized';
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(p);
+                });
+                
+                return Object.entries(groups)
+                    .map(([name, items]) => ({ name, items }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+            },
+
+            resetFilters() {
+                this.searchQuery = '';
+                this.selectedCategory = '';
+                this.selectedSource = '';
+                this.groupByCategory = false;
+            },
+
+            formatCurrency(val) {
+                if (val === undefined || val === null || val === 0) return '—';
+                return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(val);
+            },
+
+            async syncHubData() {
+                const btn = document.getElementById('syncHubBtn');
+                const icon = document.getElementById('syncIcon');
+                const text = document.getElementById('syncText');
+                
+                btn.disabled = true;
+                icon.classList.add('animate-spin');
+                text.textContent = 'EXECUTING SYNC...';
+                
+                try {
+                    await fetch('/dashboard/recommendations/sync/products', { method: 'POST' });
+                    text.textContent = 'SYNC COMMAND SENT';
+                    setTimeout(() => window.location.reload(), 1500);
+                } catch (error) {
+                    text.textContent = 'SYNC FAILED';
+                    btn.disabled = false;
+                    icon.classList.remove('animate-spin');
+                }
+            }
+        }));
+    });
+</script>
+
+<style>
+    [x-cloak] { display: none !important; }
+    .animate-spin-reverse { animation: spin-reverse 2s linear infinite; }
+    @keyframes spin-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+    
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+<%- include('../../partials/sidebar-script') %>

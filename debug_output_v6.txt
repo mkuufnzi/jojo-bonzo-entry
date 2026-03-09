@@ -1,0 +1,153 @@
+[dotenv@17.2.3] injecting env (4) from environments\.env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+[TemplateRegistry] Scanning for templates in: D:\apps\websites\saas\afs_doc_tools_source\src\views\templates
+[TemplateRegistry] Registered: Classic Invoice (invoice_classic)
+[TemplateRegistry] Registered: Revenue Machine Invoice (invoice_revenue_machine_v1)
+[TemplateRegistry] Registered: Smart Invoice (Ceremonial) (smart_invoice_v1)
+[TemplateRegistry] Registered: Modern Proposal (quote_proposal)
+[TemplateRegistry] Registered: Smart Receipt (smart_receipt_v1)
+[2026-03-09 05:26:40.614 +0300] [34mDEBUG[39m: [36mInitializing Prisma Client for PostgreSQL...[39m
+[2026-03-09 05:26:51.819 +0300] [34mDEBUG[39m: [36mInitializing Redis Client...[39m
+[2026-03-09 05:26:59.282 +0300] [33mWARN[39m: [36mSENTRY_DSN not found. Sentry disabled.[39m
+[2026-03-09 05:26:59.282 +0300] [32mINFO[39m: [36m------------------------------------------------[39m
+[2026-03-09 05:26:59.282 +0300] [32mINFO[39m: [36m[Startup] APP_URL Configured as: 'https://lakia-dreich-foamingly.ngrok-free.dev'[39m
+[2026-03-09 05:26:59.283 +0300] [32mINFO[39m: [36m[Startup] DATABASE_URL Configured as: 'postgresql://root_admin:****@127.0.0.1:5432/postgres?schema=application'[39m
+[2026-03-09 05:26:59.283 +0300] [32mINFO[39m: [36m------------------------------------------------[39m
+[2026-03-09 05:26:59.311 +0300] [32mINFO[39m: [36mCSP Configured[39m
+[2026-03-09 05:27:03.127 +0300] [34mDEBUG[39m: [36m🔧 Initializing Stripe[39m
+    [35mversion[39m: "2024-06-20"
+    [35mkeyPartial[39m: "Present"
+[2026-03-09 05:27:05.147 +0300] [32mINFO[39m: [36mServer running on port 3002[39m
+[2026-03-09 05:27:05.147 +0300] [32mINFO[39m: [36mDashboard available at http://localhost:3002/dashboard[39m
+[2026-03-09 05:27:05.147 +0300] [32mINFO[39m: [36m🚀 Starting Boot Sequence...[39m
+[2026-03-09 05:27:05.147 +0300] [34mDEBUG[39m: [36m🔍 Checking Database Connection...[39m
+[2026-03-09 05:27:05.208 +0300] [32mINFO[39m: [36m✅ Redis Client connected[39m
+[2026-03-09 05:27:05.311 +0300] [32mINFO[39m: [36m✅ Redis Client ready[39m
+[2026-03-09 05:27:05.315 +0300] [32mINFO[39m: [36m✅ Database Connected.[39m
+[2026-03-09 05:27:05.316 +0300] [34mDEBUG[39m: [36m🔍 Checking Database Schema...[39m
+🌱 Starting Database Seed...
+[2026-03-09 05:27:05.330 +0300] [34mDEBUG[39m: [36m✅ Schema appears valid.[39m
+[2026-03-09 05:27:05.330 +0300] [32mINFO[39m: [36m🌱 Seeding Core Data...[39m
+✅ Plans seeded.
+✅ Features seeded.
+✅ Plan Features linked.
+
+⚠️  [SECURITY NOTICE] -----------------------------------------------------------
+   No INITIAL_ADMIN_PASSWORD found in env.
+   Generated Random Password for new Admins: 62790f73f140dd139f46db2f5dfe7441
+   Please change this immediately after login!
+--------------------------------------------------------------------------------
+
+✅ Admin Roles verification complete.
+✅ Services seeded.
+✅ All services enabled for Guest App.
+🌱 Seeding Integration Catalog...
+✅ Integration Catalog seeded.
+🌱 Database Seed Completed.
+🎯 Seeding Features...
+[2026-03-09 05:27:07.037 +0300] [32mINFO[39m: [36m🌱 Seeding Features and Plans...[39m
+   ✅ Created/Updated 8 features
+   ✅ Assigned 2 features to Free
+   ✅ Assigned 2 features to Teaser
+   ✅ Assigned 3 features to Starter
+   ✅ Assigned 5 features to Pro
+   ✅ Assigned 7 features to Enterprise
+   ✅ Assigned 4 features to BrandWithJojo - Branded Document Creation and Management Workflows
+✅ Feature seeding complete!
+🔄 [WebhookService] Cache invalidated — will refresh on next access.
+🔄 [WebhookService] Refreshing configuration from Database...
+[2026-03-09 05:27:07.291 +0300] [32mINFO[39m: [36m🔄 Forcing WebhookService cache refresh after seeding...[39m
+   [WebhookService] html-to-pdf.convert → 
+   [WebhookService] recommendation-service.rule_import → https://n8n.automation-for-smes.com/webhook/recommendations/rule-import
+   [WebhookService] recommendation-service.erp_order_sync → https://n8n.automation-for-smes.com/webhook/recommendations/sync-orders
+   [WebhookService] recommendation-service.rule_violation → https://n8n.automation-for-smes.com/webhook/recommendations/rule-alert
+   [WebhookService] recommendation-service.analytics_report → https://n8n.automation-for-smes.com/webhook/recommendations/analytics
+   [WebhookService] recommendation-service.erp_product_sync → https://n8n.automation-for-smes.com/webhook/recommendations/sync-products
+   [WebhookService] recommendation-service.sync_status_update → https://n8n.automation-for-smes.com/webhook/recommendations/sync-status
+   [WebhookService] recommendation-service.conversion_callback → https://n8n.automation-for-smes.com/webhook/recommendations/conversion
+   [WebhookService] recommendation-service.get_recommendations → https://n8n.automation-for-smes.com/webhook/recommendations/match
+   [WebhookService] recommendation-service.recommendation_impression → https://n8n.automation-for-smes.com/webhook/recommendations/log-impression
+   [WebhookService] recommendation-service.upsell_conversion_recorded → https://n8n.automation-for-smes.com/webhook/recommendations/log-conversion
+   [WebhookService] ai-doc-generator.format → 
+   [WebhookService] ai-doc-generator.analyze → 
+   [WebhookService] ai-doc-generator.generate → 
+   [WebhookService] transactional-core.default → 
+   [WebhookService] transactional-core.invoice_created → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-core.periodic_report → 
+   [WebhookService] transactional-core.receipt_created → 
+   [WebhookService] transactional-core.onboarding_profile → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-core.onboarding_branding → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-core.onboarding_integration → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-branding.default → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-branding.data_sync → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-branding.apply_invoice → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-branding.apply_estimate → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-branding.deliver_document → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-branding.ai_product_support → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] transactional-branding.ai_recommendations → https://n8n.automation-for-smes.com/webhook/d8045423-38f0-48eb-97c9-89171fb9c080
+   [WebhookService] floovioo_transactional_debt-collection.data_sync → https://n8n.automation-for-smes.com/webhook/ce76d8c1-5242-49c7-a350-02f55b7c2db4
+   [WebhookService] floovioo_transactional_debt-collection.recovery_action → https://n8n.automation-for-smes.com/webhook/ce76d8c1-5242-49c7-a350-02f55b7c2db4
+✅ [WebhookService] Registry ready (6 services, TTL=60000ms).
+[2026-03-09 05:27:07.299 +0300] [32mINFO[39m: [36m✅ WebhookService cache warmed with current DB config.[39m
+🔍 Fetching prices from Stripe...
+   Mode: TEST
+[2026-03-09 05:27:07.308 +0300] [32mINFO[39m: [36m📊 Data Verification[39m
+    [35mserviceCount[39m: 14
+    [35mplanCount[39m: 6
+[2026-03-09 05:27:07.309 +0300] [32mINFO[39m: [36m🔗 Syncing Stripe Price IDs...[39m
+[2026-03-09 05:27:07.309 +0300] [34mDEBUG[39m: [36m🔧 Initializing Stripe[39m
+    [35mversion[39m: "2024-06-20"
+    [35mkeyPartial[39m: "Present"
+📊 Stripe returned 8 active prices
+   → Starter: $12 (price_1SnffYCx25d8iv4n4TppYidh)
+   → Teaser: $0.1 (price_1SnffXCx25d8iv4nLdH5B5Pd)
+   → Pro: $0.1 (price_1Sl0JjCx25d8iv4nqDiluWoM)
+   → Pro: $0.01 (price_1SkzwRCx25d8iv4nBBzSFlME)
+   → Enterprise: $15 (price_1SjRbVCx25d8iv4n38sNUeqA)
+   → Enterprise: $15 (price_1SjRY0Cx25d8iv4n0cbImgnK)
+   → Pro: $2.99 (price_1SjRXyCx25d8iv4nVTk69PkR)
+   → BrandWithJojo - Branded Document Creation and Management Workflows: $8.99 (price_1SjQW4Cx25d8iv4nyEHXqY1Z)
+📦 After deduplication: 5 unique products
+[2026-03-09 05:27:08.452 +0300] [32mINFO[39m: [36m✅ Stripe Price IDs already in sync.[39m
+[2026-03-09 05:27:08.452 +0300] [32mINFO[39m: [36m🚀 Initializing V2 Services...[39m
+[2026-03-09 05:27:08.509 +0300] [32mINFO[39m: [36m   ✅ Debt-Collection AI initialized[39m
+    [35mwebhook[39m: "✅"
+    [35mactiveSequences[39m: 4
+[2026-03-09 05:27:08.509 +0300] [32mINFO[39m: [36m✅ V2 Architecture Active.[39m
+[2026-03-09 05:27:08.509 +0300] [32mINFO[39m: [36m⏰ Scheduling Cron Jobs...[39m
+[2026-03-09 05:27:08.685 +0300] [32mINFO[39m: [36m   ✅ Recovery Orchestrator Scheduled (*/15 * * * *)[39m
+[2026-03-09 05:27:08.702 +0300] [32mINFO[39m: [36m   ✅ Boot-time Orchestrator queued (15s delay)[39m
+[2026-03-09 05:27:08.918 +0300] [32mINFO[39m: [36m   ✅ Unified Hub Sync Orchestrator Scheduled (0 */6 * * *)[39m
+[2026-03-09 05:27:08.935 +0300] [32mINFO[39m: [36m   ✅ Boot-time Unified Orchestrator queued (30s delay)[39m
+[2026-03-09 05:27:08.935 +0300] [32mINFO[39m: [36m✅ Boot Sequence Completed Successfully.[39m
+[2026-03-09 05:27:08.935 +0300] [32mINFO[39m: [36m🔧 Initializing Service Registry...[39m
+   ✅ Loaded 14 services & 6 manifests into registry
+[2026-03-09 05:27:08.947 +0300] [32mINFO[39m: [36m   ✅ Service registry initialized[39m
+[0mHEAD /dashboard/recommendations [36m302[0m 207.809 ms - 33[0m
+[Session] Enrichment for bonzocreatives@gmail.com. isAdmin default: false, Computed: false
+[Session] No Promotion. Role is 'USER'
+[Session] Enrichment for bonzocreatives@gmail.com. isAdmin default: false, Computed: false
+[Session] No Promotion. Role is 'USER'
+[ServiceRepo] findAllActive found 14 services
+[ServiceRepo] findAllActive found 14 services
+[2026-03-09 05:27:55.559 +0300] [32mINFO[39m: [36m[RecommendationService] Fetching rich analytics from Unified Hub[39m
+    [35mbusinessId[39m: "211697f7-22e5-4f21-b218-daf742db70db"
+[LAYOUT DEBUG] Available keys: blocks
+[0mGET /dashboard/recommendations/analytics [32m200[0m 3679.287 ms - -[0m
+[0mGET /assets/css/style.css [36m304[0m 7.264 ms - -[0m
+[0mGET /assets/css/mobile-custom.css [36m304[0m 1.352 ms - -[0m
+[Session] Enrichment for bonzocreatives@gmail.com. isAdmin default: false, Computed: false
+[Session] No Promotion. Role is 'USER'
+[Session] Enrichment for bonzocreatives@gmail.com. isAdmin default: false, Computed: false
+[Session] No Promotion. Role is 'USER'
+[ServiceRepo] findAllActive found 14 services
+[ServiceRepo] findAllActive found 14 services
+[2026-03-09 05:28:31.569 +0300] [32mINFO[39m: [36m[RecommendationService] Fetching rich analytics from Unified Hub[39m
+    [35mbusinessId[39m: "211697f7-22e5-4f21-b218-daf742db70db"
+[LAYOUT DEBUG] Available keys: blocks
+[0mGET /dashboard/recommendations/analytics [32m200[0m 3607.221 ms - -[0m
+[0mGET /assets/css/style.css [36m304[0m 1.589 ms - -[0m
+[0mGET /assets/css/mobile-custom.css [36m304[0m 1.533 ms - -[0m
+[2026-03-09 05:28:42.376 +0300] [32mINFO[39m: [36mDisconnecting Redis Client...[39m
+[2026-03-09 05:28:42.377 +0300] [32mINFO[39m: [36mDisconnecting Prisma Client...[39m
+[2026-03-09 05:28:42.381 +0300] [32mINFO[39m: [36mRedis Client disconnected[39m
+Terminate batch job (Y/N)? 

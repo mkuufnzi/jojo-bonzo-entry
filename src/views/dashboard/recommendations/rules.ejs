@@ -1,0 +1,520 @@
+<%- layout('layouts/dashboard-layout') %>
+
+<!-- Content Area -->
+<div class="max-w-6xl mx-auto space-y-8" 
+     x-data="rulesManager()" 
+     x-init="init()">
+
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Recommendation Rules</h1>
+            <p class="text-slate-500 font-medium">Define and manage manual upsell triggers based on SKU or Category.</p>
+        </div>
+        <div class="flex items-center gap-3">
+             <button @click="openModal()" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center group">
+                <i data-lucide="plus" class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform"></i>
+                Create New Rule
+            </button>
+        </div>
+    </div>
+
+    <!-- API Loading State -->
+    <div x-show="loading" class="flex justify-center flex-col items-center py-20 min-h-[400px]">
+        <i data-lucide="loader-2" class="w-12 h-12 text-indigo-500 animate-spin mb-4"></i>
+        <span class="text-slate-500 font-medium">Loading rules...</span>
+    </div>
+
+    <!-- Rules Table -->
+    <div x-cloak x-show="!loading" class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+        <div class="px-8 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20 flex items-center justify-between">
+            <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Active Rules Engine</h3>
+            <div class="flex items-center space-x-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span class="text-[0.6rem] font-bold text-slate-400 uppercase">Live & Validated</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-[0.65rem] font-bold uppercase tracking-widest">
+                    <tr>
+                        <th class="px-8 py-4">Status</th>
+                        <th class="px-8 py-4">Name</th>
+                        <th class="px-8 py-4">Trigger Condition</th>
+                        <th class="px-8 py-4">Recommended SKU</th>
+                        <th class="px-8 py-4">Priority</th>
+                        <th class="px-8 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <template x-if="rules && rules.length > 0">
+                        <template x-for="rule in rules" :key="rule.id">
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
+                                <td class="px-8 py-6">
+                                    <span :class="rule.isActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'" 
+                                          class="px-2 py-1 rounded-lg text-[0.6rem] font-black uppercase tracking-tighter"
+                                          x-text="rule.isActive ? 'Active' : 'Paused'"></span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span class="font-bold text-sm text-slate-900 dark:text-white" x-text="rule.name"></span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                                        </div>
+                                        <span class="text-sm text-slate-600 dark:text-slate-400 font-medium" 
+                                              x-text="rule.triggerCategory ? 'Category: ' + rule.triggerCategory : (rule.triggerSku ? 'SKU: ' + rule.triggerSku : 'Global fallback')"></span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <code class="text-xs bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded border border-indigo-100 dark:border-indigo-900/50" x-text="rule.targetSku"></code>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center">
+                                        <div class="w-16 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mr-3">
+                                            <div class="h-full bg-indigo-500" :style="'width: ' + (rule.priority * 10) + '%;'"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-500" x-text="rule.priority"></span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <button @click="editRule(rule)" class="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-400 hover:text-blue-600 transition-all opacity-0 group-hover:opacity-100">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </button>
+                                        <button @click="deleteRule(rule.id)" class="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </template>
+
+                    <!-- Empty State -->
+                    <template x-if="rules && rules.length === 0">
+                        <tr>
+                            <td colspan="6" class="px-8 py-20 text-center">
+                                <div class="max-w-sm mx-auto space-y-4">
+                                    <div class="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                                        <i data-lucide="inbox" class="w-10 h-10 text-slate-300"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">No active rules</h3>
+                                    <p class="text-slate-500 text-sm mb-8 font-medium">Create your first recommendation rule to start triggering intelligent cross-sells on your invoices.</p>
+                                    <button @click="openModal()" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg active:scale-95">
+                                        Create First Rule
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- AI Test Playground -->
+    <div class="bg-slate-900 rounded-[3rem] p-12 border border-slate-800 shadow-2xl relative overflow-hidden group">
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div class="space-y-8">
+                <div>
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[0.6rem] font-black uppercase tracking-widest text-blue-400 mb-4">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span>AI Simulation Env</span>
+                    </div>
+                    <h2 class="text-3xl font-black text-white tracking-tight mb-4">Test Playground</h2>
+                    <p class="text-slate-400 font-medium leading-relaxed">
+                        Simulate real-world recommendation requests to see how your manual rules interact with the AI behavioral engine.
+                    </p>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="space-y-2 relative" x-data="autocomplete('product')" @item-selected.stop="testItems = $event.detail.value">
+                        <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-500 ml-1">Simulate Cart Items (SKUs)</label>
+                        <div class="relative group/input">
+                            <input type="text" x-model="testItems" @input.debounce.300ms="query = $el.value; search()" placeholder="e.g. SKU-123, SKU-456" 
+                                   class="w-full px-6 py-4 bg-white/5 border border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none text-white font-medium pr-12">
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+                                <i data-lucide="search" class="w-4 h-4 text-slate-500"></i>
+                                <button type="button" @click="toggle()" class="p-1 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white">
+                                    <i data-lucide="chevron-down" class="w-4 h-4" :class="show ? 'rotate-180' : ''"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Suggestions Dropdown -->
+                        <div x-show="show" @click.away="show = false" class="absolute z-50 w-full mt-2 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl bg-slate-800/90">
+                            <template x-for="item in suggestions" :key="item.id">
+                                <button type="button" @click="select(item)" class="w-full px-4 py-3 text-left hover:bg-blue-900/30 flex flex-col border-b border-slate-800/50 last:border-0 transition-colors">
+                                    <span class="text-xs font-black text-white" x-text="item.name"></span>
+                                    <span class="text-[0.6rem] font-bold text-blue-400 uppercase" x-text="item.sku"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="space-y-2 relative" x-data="autocomplete('customer')" @item-selected.stop="testCustomerId = $event.detail.value">
+                        <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-500 ml-1">Target Customer ID (Personalization)</label>
+                        <div class="relative group/input">
+                            <input type="text" x-model="testCustomerId" @input.debounce.300ms="query = $el.value; search()" placeholder="Optional CID" 
+                                   class="w-full px-6 py-4 bg-white/5 border border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none text-white font-medium pr-12">
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+                                <i data-lucide="user" class="w-4 h-4 text-slate-500"></i>
+                                <button type="button" @click="toggle()" class="p-1 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white">
+                                    <i data-lucide="chevron-down" class="w-4 h-4" :class="show ? 'rotate-180' : ''"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Suggestions Dropdown -->
+                        <div x-show="show" @click.away="show = false" class="absolute z-50 w-full mt-2 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl bg-slate-800/90">
+                            <template x-for="item in suggestions" :key="item.id">
+                                <button type="button" @click="select(item)" class="w-full px-4 py-3 text-left hover:bg-blue-900/30 flex flex-col border-b border-slate-800/50 last:border-0 transition-colors">
+                                    <span class="text-xs font-black text-white" x-text="item.name"></span>
+                                    <span class="text-[0.6rem] font-bold text-slate-400 uppercase" x-text="item.id"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    <button @click="runTest()" :disabled="testing" 
+                            class="w-full py-4 bg-white text-slate-900 font-black rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center group disabled:opacity-50 shadow-xl">
+                        <span x-show="!testing" class="flex items-center uppercase tracking-widest text-xs">
+                             <i data-lucide="play" class="w-4 h-4 mr-2 group-hover:text-blue-600 transition-colors"></i>
+                             Run Simulation
+                        </span>
+                        <span x-show="testing" class="flex items-center">
+                            <i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>
+                            Calculating...
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Preview -->
+            <div class="bg-black/20 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/5 min-h-[400px] flex flex-col">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-[0.65rem] font-black text-slate-500 uppercase tracking-widest">Simulation Results</h3>
+                    <template x-if="testResults.length > 0">
+                        <span class="text-[0.6rem] font-bold text-emerald-500 uppercase px-2 py-1 bg-emerald-500/10 rounded-lg" x-text="testResults.length + ' Matches found'"></span>
+                    </template>
+                </div>
+
+                <div class="space-y-4 flex-1">
+                    <template x-if="testResults.length === 0 && !testing">
+                        <div class="flex flex-col items-center justify-center h-full space-y-4 py-20 opacity-40">
+                            <i data-lucide="terminal" class="w-12 h-12 text-slate-500"></i>
+                            <p class="text-sm font-medium text-slate-400">Enter parameters to see AI response</p>
+                        </div>
+                    </template>
+
+                    <template x-for="rec in testResults">
+                        <div class="bg-white/5 border border-white/5 hover:border-white/10 p-5 rounded-2xl transition-all group/res">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-xl" x-text="rec.img"></div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="text-sm font-black text-white group-hover/res:text-blue-400 transition-colors" x-text="rec.name"></p>
+                                        <span class="text-xs font-black text-emerald-400" x-text="'£' + rec.price"></span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-[0.6rem] font-bold text-slate-500 uppercase" x-text="rec.sku"></span>
+                                        <div class="w-1 h-1 rounded-full bg-slate-700"></div>
+                                        <span class="text-[0.6rem] font-bold text-blue-400 uppercase tracking-tight" x-text="rec.reason"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-white/5">
+                    <p class="text-[0.55rem] text-slate-500 font-medium leading-relaxed uppercase tracking-tighter">
+                        * This simulation runs the actual <span class="text-blue-400">RecommendationService</span> logic including RFM clustering and affinity mapping.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decor -->
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-blue-500/20 transition-all duration-1000"></div>
+    </div>
+
+<!-- Rule Modal -->
+<div id="ruleModal" x-cloak x-show="modalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="modalOpen = false"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <h2 class="text-xl font-bold" x-text="modalTitle"></h2>
+            <button @click="modalOpen = false" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <form @submit.prevent="saveRule()" class="p-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2 md:col-span-2">
+                    <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 ml-1">Rule Name</label>
+                    <input type="text" x-model="formData.name" required placeholder="e.g., Summer Upsell Bundle" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium text-sm">
+                </div>
+                
+                <div class="space-y-2 relative" x-data="autocomplete('product')" @item-selected.stop="formData.triggerSku = $event.detail.value">
+                    <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 ml-1">Trigger SKU</label>
+                    <div class="relative">
+                        <input type="text" x-model="formData.triggerSku" @input.debounce.300ms="query = $el.value; search()" placeholder="e.g., SKU-123" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium text-sm text-indigo-600 pr-10">
+                        <button type="button" @click="toggle()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
+                            <i data-lucide="chevron-down" class="w-4 h-4" :class="show ? 'rotate-180' : ''"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Suggestions Dropdown -->
+                    <div x-show="show" @click.away="show = false" class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl bg-white/90 dark:bg-slate-800/90">
+                        <template x-for="item in suggestions" :key="item.id">
+                            <button type="button" @click="select(item)" class="w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex flex-col border-b border-slate-50 dark:border-slate-800/50 last:border-0 transition-colors">
+                                <span class="text-xs font-black text-slate-900 dark:text-white" x-text="item.name"></span>
+                                <span class="text-[0.6rem] font-bold text-indigo-500 uppercase" x-text="item.sku"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 ml-1">Trigger Category</label>
+                    <input type="text" x-model="formData.triggerCategory" placeholder="e.g., Footwear" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium text-sm">
+                </div>
+
+                <div class="space-y-2 relative" x-data="autocomplete('product')" @item-selected.stop="formData.targetSku = $event.detail.value">
+                    <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 ml-1">Recommended SKU</label>
+                    <div class="relative">
+                        <input type="text" x-model="formData.targetSku" @input.debounce.300ms="query = $el.value; search()" required placeholder="e.g., SKU-789" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium text-sm text-emerald-600 pr-10">
+                        <button type="button" @click="toggle()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
+                            <i data-lucide="chevron-down" class="w-4 h-4" :class="show ? 'rotate-180' : ''"></i>
+                        </button>
+                    </div>
+                    
+                    <div x-show="show" @click.away="show = false" class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-xl bg-white/90 dark:bg-slate-800/90">
+                        <template x-for="item in suggestions" :key="item.id">
+                            <button type="button" @click="select(item)" class="w-full px-4 py-3 text-left hover:bg-emerald-50 dark:hover:bg-emerald-900/30 flex flex-col border-b border-slate-50 dark:border-slate-800/50 last:border-0 transition-colors">
+                                <span class="text-xs font-black text-slate-900 dark:text-white" x-text="item.name"></span>
+                                <span class="text-[0.6rem] font-bold text-emerald-500 uppercase" x-text="item.sku"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 ml-1">Priority (1-10)</label>
+                    <input type="number" x-model.number="formData.priority" min="1" max="10" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium text-sm">
+                </div>
+                <div class="space-y-2 md:col-span-2">
+                    <label class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-400 ml-1">Advanced AI Context (Logic & Persona)</label>
+                    <textarea x-model="formData.aiPromptContext" rows="3" placeholder="When this rule matches, what else should the AI consider?" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium text-sm"></textarea>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 pt-2">
+                <input type="checkbox" id="ruleActive" x-model="formData.isActive" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
+                <label for="ruleActive" class="text-sm font-bold text-slate-600 dark:text-slate-400 cursor-pointer">Enable this rule immediately</label>
+            </div>
+            <div class="flex justify-end space-x-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" @click="modalOpen = false" class="px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Cancel</button>
+                <button type="submit" class="px-8 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl hover:bg-indigo-700 transition-all shadow-lg active:scale-95">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</div>
+
+<script nonce="<%= nonce %>">
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('autocomplete', (type = 'product') => ({
+            query: '',
+            suggestions: [],
+            show: false,
+            loading: false,
+
+            async search() {
+                if (this.query.length < 2) {
+                    this.suggestions = [];
+                    this.show = false;
+                    return;
+                }
+                this.loading = true;
+                try {
+                    const res = await fetch(`/dashboard/recommendations/api/search?type=${type}&query=${encodeURIComponent(this.query)}`);
+                    const json = await res.json();
+                    this.suggestions = json.data || [];
+                    this.show = this.suggestions.length > 0;
+                } catch (e) {
+                    console.error('Autocomplete error', e);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async toggle() {
+                if (this.show) {
+                    this.show = false;
+                } else {
+                    // If narrow, show top 10 general results if possible, or just search current query
+                    if (!this.query) {
+                        this.loading = true;
+                        try {
+                            const res = await fetch(`/dashboard/recommendations/api/search?type=${type}&query=`);
+                            const json = await res.json();
+                            this.suggestions = json.data || [];
+                            this.show = true;
+                        } catch(e) {} finally { this.loading = false; }
+                    } else {
+                        await this.search();
+                    }
+                }
+            },
+
+            select(item) {
+                this.query = type === 'product' ? item.sku : item.id;
+                this.show = false;
+                this.$dispatch('item-selected', { value: this.query, item });
+            }
+        }));
+
+        Alpine.data('rulesManager', () => ({
+            rules: [],
+            loading: true,
+
+            // Modal State
+            modalOpen: false,
+            modalTitle: 'Create Recommendation Rule',
+            formData: {
+                id: '',
+                name: '',
+                triggerSku: '',
+                triggerCategory: '',
+                targetSku: '',
+                priority: 5,
+                aiPromptContext: '',
+                isActive: true
+            },
+            
+            // Safe helper for modal state
+            isModalOpen() { return !!this.modalOpen; },
+            getModalTitle() { return this.modalTitle || 'Rule Editor'; },
+            getFormData() { return this.formData || {}; },
+
+            async init() {
+                try {
+                    const res = await fetch('/dashboard/recommendations/api/rules');
+                    const json = await res.json();
+                    this.rules = json.data || [];
+                } catch(e) {
+                    console.error('Fetch error', e);
+                } finally {
+                    this.loading = false;
+                    this.$nextTick(() => { if(window.lucide) window.lucide.createIcons(); });
+                }
+            },
+
+            openModal() {
+                this.modalTitle = 'Create Recommendation Rule';
+                this.formData = {
+                    id: '',
+                    name: '',
+                    triggerSku: '',
+                    triggerCategory: '',
+                    targetSku: '',
+                    priority: 5,
+                    aiPromptContext: '',
+                    isActive: true
+                };
+                this.modalOpen = true;
+            },
+
+            editRule(rule) {
+                this.modalTitle = 'Edit Recommendation Rule';
+                this.formData = {
+                    id: rule.id,
+                    name: rule.name,
+                    triggerSku: rule.triggerSku || '',
+                    triggerCategory: rule.triggerCategory || '',
+                    targetSku: rule.targetSku,
+                    priority: rule.priority,
+                    aiPromptContext: rule.aiPromptContext || '',
+                    isActive: rule.isActive
+                };
+                this.modalOpen = true;
+            },
+
+            async saveRule() {
+                const method = this.formData.id ? 'PUT' : 'POST';
+                const url = this.formData.id ? `/dashboard/recommendations/rules/${this.formData.id}` : '/dashboard/recommendations/rules';
+
+                try {
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.formData)
+                    });
+
+                    if(res.ok) {
+                        this.modalOpen = false;
+                        await this.init();
+                    } else {
+                        alert('Operation failed. Check inputs.');
+                    }
+                } catch (e) {
+                    console.error('Save error', e);
+                    alert('Request failed');
+                }
+            },
+
+            async deleteRule(id) {
+                if (!confirm('Permanently delete this rule?')) return;
+                const res = await fetch('/dashboard/recommendations/rules/' + id, { method: 'DELETE' });
+                if(res.ok) this.init();
+            },
+
+            // Playground Logic
+            testItems: '',
+            testCustomerId: '',
+            testResults: [],
+            testing: false,
+
+            async runTest() {
+                if (!this.testItems.trim() && !this.testCustomerId.trim()) {
+                    alert('Please enter at least one SKU or a Customer ID to test.');
+                    return;
+                }
+
+                this.testing = true;
+                this.testResults = [];
+
+                try {
+                    const res = await fetch('/dashboard/recommendations/api/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            items: this.testItems.split(',').map(s => s.trim()).filter(Boolean),
+                            customerId: this.testCustomerId.trim() || undefined,
+                            limit: 3
+                        })
+                    });
+
+                    const json = await res.json();
+                    if (json.success) {
+                        this.testResults = json.data || [];
+                    } else {
+                        alert(json.error || 'Test failed');
+                    }
+                } catch (e) {
+                    console.error('Test error', e);
+                    alert('Request failed');
+                } finally {
+                    this.testing = false;
+                    this.$nextTick(() => { if(window.lucide) window.lucide.createIcons(); });
+                }
+            }
+        }));
+    });
+</script>
+
+<style>
+    [x-cloak] { display: none !important; }
+</style>

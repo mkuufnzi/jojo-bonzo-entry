@@ -206,12 +206,88 @@ export class RecommendationController {
     /**
      * Trigger product data sync from the connected ERP.
      * POST /api/recommendations/sync/products
-     *
-     * Currently queues the sync — actual data pull happens via n8n workflow.
      */
-    static async syncProducts(_req: Request, res: Response): Promise<void> {
-        logger.info('[RecommendationController] Triggering product sync via n8n');
-        res.json({ success: true, message: 'Sync queued' } as ApiResponse);
+    static async syncProducts(req: Request, res: Response): Promise<void> {
+        try {
+            const businessId = RecommendationController.resolveBusinessId(req, res);
+            if (!businessId) {
+                RecommendationController.sendError(res, 401, 'Authentication required');
+                return;
+            }
+
+            await recommendationService.syncUnifiedInventory(businessId);
+            res.json({ success: true, message: 'Inventory sync triggered' } as ApiResponse);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.error({ error: message }, '[RecommendationController] syncProducts failed');
+            RecommendationController.sendError(res, 500, message);
+        }
+    }
+
+    /**
+     * Trigger order and invoice data sync from the connected ERP.
+     * POST /api/recommendations/sync/orders
+     */
+    static async syncOrders(req: Request, res: Response): Promise<void> {
+        try {
+            const businessId = RecommendationController.resolveBusinessId(req, res);
+            if (!businessId) {
+                RecommendationController.sendError(res, 401, 'Authentication required');
+                return;
+            }
+
+            await recommendationService.syncUnifiedOrders(businessId);
+            res.json({ success: true, message: 'Order sync triggered' } as ApiResponse);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.error({ error: message }, '[RecommendationController] syncOrders failed');
+            RecommendationController.sendError(res, 500, message);
+        }
+    }
+
+    /**
+     * Get recommendations for a specific customer cluster.
+     * GET /api/recommendations/cluster/:clusterId
+     */
+    static async getClusterRecommendations(req: Request, res: Response): Promise<void> {
+        try {
+            const businessId = RecommendationController.resolveBusinessId(req, res);
+            if (!businessId) {
+                RecommendationController.sendError(res, 401, 'Authentication required');
+                return;
+            }
+
+            const clusterId = req.params.clusterId;
+            const limit = parseInt(req.query.limit as string) || 3;
+
+            const recommendations = await recommendationService.getClusterRecommendations(businessId, clusterId, limit);
+            res.json({ success: true, data: recommendations } as ApiResponse);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.error({ error: message }, '[RecommendationController] getClusterRecommendations failed');
+            RecommendationController.sendError(res, 500, message);
+        }
+    }
+
+    /**
+     * Get detailed inventory statistics for the dashboard.
+     * GET /api/recommendations/analytics/inventory
+     */
+    static async getInventoryStats(req: Request, res: Response): Promise<void> {
+        try {
+            const businessId = RecommendationController.resolveBusinessId(req, res);
+            if (!businessId) {
+                RecommendationController.sendError(res, 401, 'Authentication required');
+                return;
+            }
+
+            const stats = await recommendationService.getCatalogInsights(businessId);
+            res.json({ success: true, data: stats } as ApiResponse);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.error({ error: message }, '[RecommendationController] getInventoryStats failed');
+            RecommendationController.sendError(res, 500, message);
+        }
     }
 
     /**

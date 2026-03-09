@@ -1,91 +1,65 @@
+FAIL src/tests/unit/quickbooks.provider.test.ts (35.819 s)
+  QBOProvider
+    initialize
+      ΓêÜ should properly set baseUrl and realmId form metadata (3 ms)
+      ΓêÜ should use sandbox url by default (4 ms)
+    getContacts
+      ├ù should fetch customers using correct query (6581 ms)
+      ├ù should handle empty response gracefully (6605 ms)
+    getItems
+      ├ù should fetch items (Inventory/Service) using correct query (6714 ms)
 
-> afs_doc_tools@1.0.0 test
-> jest src/tests/unit/recovery.service.test.ts
+  ΓùÅ QBOProvider ΓÇ║ getContacts ΓÇ║ should fetch customers using correct query
 
-  console.log
-    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+    [QBOProvider] Γ¥î Exhausted all 3 retries. Final Error: Cannot read properties of undefined (reading 'ok')
 
-      at _log (node_modules/dotenv/lib/main.js:142:11)
+      147 |         }
+      148 |         
+    > 149 |         throw new Error(`[QBOProvider] Γ¥î Exhausted all ${maxRetries} retries. Final Error: ${lastError?.message}`);
+          |               ^
+      150 |     }
+      151 |
+      152 |     // --- Webhook Validation ---
 
-FAIL src/tests/unit/recovery.service.test.ts (13.248 s)
-  RecoveryService
-    syncOverdueInvoices
-      ΓêÜ should create sessions from manual invoices and bypass QBO (151 ms)
-      ├ù should resolve customer emails correctly in manual mode (12 ms)
-    findApplicableSequence
-      ΓêÜ should select sequence based on amount rules (1 ms)
-      ΓêÜ should fallback to default sequence if no rules match (1 ms)
-    processRecovery
-      ΓêÜ should dispatch to workflowService for recovery_email action (35 ms)
-      ΓêÜ should advance step index and calculate nextActionAt (2 ms)
-    Utility Logic
-      ΓêÜ calculateNextActionDate should respect day offsets (1 ms)
-      ΓêÜ injectVariables should replace {{key}} with data[key] (2 ms)
-    processBusinessOverdues
-      ΓêÜ should queue actions for sessions due now (3 ms)
+      at QBOProvider.fetchRaw (src/services/integrations/providers/quickbooks.provider.ts:149:15)
+      at async QBOProvider.getContacts (src/services/integrations/providers/quickbooks.provider.ts:582:22)
+      at async Object.<anonymous> (src/tests/unit/quickbooks.provider.test.ts:79:30)
 
-  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should resolve customer emails correctly in manual mode
+  ΓùÅ QBOProvider ΓÇ║ getContacts ΓÇ║ should handle empty response gracefully
 
-    expect(received).toBe(expected) // Object.is equality
+    [QBOProvider] Γ¥î Exhausted all 3 retries. Final Error: Cannot read properties of undefined (reading 'ok')
 
-    Expected: "test-customer-cust_1@example.com"
-    Received: "N/A"
+      147 |         }
+      148 |         
+    > 149 |         throw new Error(`[QBOProvider] Γ¥î Exhausted all ${maxRetries} retries. Final Error: ${lastError?.message}`);
+          |               ^
+      150 |     }
+      151 |
+      152 |     // --- Webhook Validation ---
 
-      126 |
-      127 |             const createCall = (prisma.recoverySession.create as jest.Mock).mock.calls[0][0];
-    > 128 |             expect(createCall.data.metadata.customerEmail).toBe('test-customer-cust_1@example.com');
-          |                                                            ^
-      129 |         });
-      130 |     });
-      131 |
+      at QBOProvider.fetchRaw (src/services/integrations/providers/quickbooks.provider.ts:149:15)
+      at async QBOProvider.getContacts (src/services/integrations/providers/quickbooks.provider.ts:582:22)
+      at async Object.<anonymous> (src/tests/unit/quickbooks.provider.test.ts:99:30)
 
-      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:128:60)
+  ΓùÅ QBOProvider ΓÇ║ getItems ΓÇ║ should fetch items (Inventory/Service) using correct query
+
+    [QBOProvider] Γ¥î Exhausted all 3 retries. Final Error: Cannot read properties of undefined (reading 'ok')
+
+      147 |         }
+      148 |         
+    > 149 |         throw new Error(`[QBOProvider] Γ¥î Exhausted all ${maxRetries} retries. Final Error: ${lastError?.message}`);
+          |               ^
+      150 |     }
+      151 |
+      152 |     // --- Webhook Validation ---
+
+      at QBOProvider.fetchRaw (src/services/integrations/providers/quickbooks.provider.ts:149:15)
+      at async QBOProvider.getItems (src/services/integrations/providers/quickbooks.provider.ts:599:22)
+      at async Object.<anonymous> (src/tests/unit/quickbooks.provider.test.ts:122:27)
 
 Test Suites: 1 failed, 1 total
-Tests:       1 failed, 8 passed, 9 total
+Tests:       3 failed, 2 passed, 5 total
 Snapshots:   0 total
-Time:        13.424 s
-Ran all test suites matching src/tests/unit/recovery.service.test.ts.
-[2026-02-22 06:45:50.411 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mmanualMode[39m: true
+Time:        36.026 s
+Ran all test suites matching src/tests/unit/quickbooks.provider.test.ts.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
-[2026-02-22 06:45:50.414 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mcustomersResolved[39m: 1
-    [35mtotal[39m: 1
-[2026-02-22 06:45:50.513 +0300] [32mINFO[39m: [36mΓ£à [Recovery V2] Sync complete[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mnewSessionsCreated[39m: 1
-    [35mtotal[39m: 1
-[2026-02-22 06:45:50.559 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mmanualMode[39m: true
-[2026-02-22 06:45:50.559 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mcustomersResolved[39m: 1
-    [35mtotal[39m: 1
-[2026-02-22 06:45:50.560 +0300] [32mINFO[39m: [36mΓ£à [Recovery V2] Sync complete[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mnewSessionsCreated[39m: 1
-    [35mtotal[39m: 1
-[2026-02-22 06:45:50.590 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dunning action created[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35msession[39m: "session_1"
-    [35mstep[39m: 1
-    [35mactionType[39m: "email"
-[2026-02-22 06:45:50.623 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dispatching recovery email action[39m
-    [35msessionId[39m: "session_1"
-    [35mtype[39m: "recovery_email"
-[2026-02-22 06:45:50.625 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dunning action created[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35msession[39m: "session_1"
-    [35mstep[39m: 1
-    [35mactionType[39m: "email"
-[2026-02-22 06:45:50.625 +0300] [32mINFO[39m: [36m≡ƒôñ [Recovery] Dispatching recovery email action[39m
-    [35msessionId[39m: "session_1"
-    [35mtype[39m: "recovery_email"
-[2026-02-22 06:45:50.633 +0300] [32mINFO[39m: [36mΓÜí [Recovery] Queued due actions[39m
-    [35mbusinessId[39m: "biz_test_123"
-    [35mqueuedCount[39m: 1
-    [35mtotalActive[39m: 1

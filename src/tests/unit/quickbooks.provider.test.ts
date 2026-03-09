@@ -6,6 +6,19 @@ import { Integration } from '@prisma/client';
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
+// Mock Prisma
+const mockPrisma = {
+    product: { upsert: jest.fn().mockResolvedValue({}) },
+    externalDocument: { upsert: jest.fn().mockResolvedValue({}) },
+    auditLog: { create: jest.fn().mockResolvedValue({}) }
+};
+
+jest.mock('@prisma/client', () => ({
+    PrismaClient: jest.fn().mockImplementation(() => mockPrisma)
+}));
+
+jest.setTimeout(30000);
+
 describe('QBOProvider', () => {
     let provider: QBOProvider;
     let mockIntegration: Integration;
@@ -109,7 +122,7 @@ describe('QBOProvider', () => {
             const items = await provider.getItems();
 
             expect(mockFetch).toHaveBeenCalledWith(
-                expect.stringContaining("select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory'%2C%20'Service')%20MAXRESULTS%20100"),
+                expect.stringContaining("select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory'%2C%20'Service'%2C%20'NonInventory')%20MAXRESULTS%20100"),
                 expect.anything()
             );
 
