@@ -1,12 +1,21 @@
 <!-- Universal Smart Document Logic -->
 <!-- Injects Data and Loads the Smart Engine -->
 <script nonce="<%= nonce %>">
+    /**
+     * UNIVERSAL DATA INJECTION LAYER
+     * 
+     * This script bridges the server-side EJS context (Node.js) to the client-side 
+     * JavaScript context (Alpine.js + Smart Engine).
+     * 
+     * Source: The `branding` object is prepared in `TemplateGeneratorService.ts`
+     * and contains the output of `SmartInvoice.toJSON()`.
+     */
     window.DOC_DATA = {
         theme: <%- JSON.stringify(branding.themeData || {}) %>,
         config: <%- JSON.stringify(branding.config || {}) %>,
         items: <%- JSON.stringify((branding.model?.items?.length) ? branding.model.items : []) %>,
         
-        // Standardized Features Data (Matched to Manifest IDs)
+        // Standardized Features Data: Mapped to their respective widget manifest IDs.
         features: {
             marketing_banner: <%- JSON.stringify((branding.model?.nurtureMessages?.length) ? branding.model.nurtureMessages : []) %>,
             product_recommendations: <%- JSON.stringify((branding.model?.recommendations?.length) ? branding.model.recommendations : []) %>,
@@ -16,6 +25,7 @@
             reviews: <%- JSON.stringify((branding.model?.reviews?.length) ? branding.model.reviews : []) %>
         },
 
+        // Financials: Preferring normalized values from branding.model.
         totals: {
             updated: <%- JSON.stringify(!!branding.model?.total) %>,
             subtotal: <%- JSON.stringify(branding.model?.subtotal || 0) %>,
@@ -23,7 +33,7 @@
             total: <%- JSON.stringify(branding.model?.total || 0) %>
         },
 
-        // Normalized Invoice Metadata (DocNumber, Date, Status, Addresses)
+        // Normalized Metadata (Invoice #, Date, Status, Addresses)
         invoiceMeta: <%- JSON.stringify(branding.model?.invoiceMeta || {}) %>,
         
         // Brand & Business Context

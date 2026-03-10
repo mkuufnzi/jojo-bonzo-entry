@@ -610,8 +610,18 @@ export class WorkflowService {
             '✅ [WorkflowService] n8n Dispatch Successful'
           );
 
-          // If we already have a local HTML snapshot, mark as completed immediately.
-          // The n8n callback can still update with a PDF URL later via CallbackController.
+          /**
+           * STATUS AUTO-COMPLETION STRATEGY:
+           * If we already have a local HTML snapshot (`compiledHtml`), we mark the document as 'completed'
+           * immediately upon a successful n8n dispatch (HTTP 2xx).
+           * 
+           * RATIONALE: 
+           * 1. The document is effectively "ready" for the user to view in Branding History.
+           * 2. n8n callbacks can be unreliable due to network issues or tunnel timeouts.
+           * 3. The `CallbackController` can still update the record with a PDF URL later if it succeeds.
+           * 
+           * This prevents documents from being stuck in 'processing' indefinitely in the UI.
+           */
           if (compiledHtml) {
             await prisma.processedDocument
               .update({

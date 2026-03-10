@@ -40,19 +40,27 @@ export interface NurtureMessage {
 
 /**
  * Normalized invoice metadata extracted from any ERP (QBO, Xero, Zoho).
+ * This structure ensures that templates have a consistent contract regardless of the data source.
  */
 export interface InvoiceMetadata {
-    docNumber: string;
-    txnDate: string;
-    dueDate: string;
-    status: string;
-    currency: string;
+    docNumber: string;      // The invoice number (e.g., INV-001)
+    txnDate: string;        // The transaction date (YYYY-MM-DD)
+    dueDate: string;        // The due date (YYYY-MM-DD)
+    status: string;         // 'Paid', 'Open', 'Overdue'
+    currency: string;       // 'USD', 'GBP', etc.
     customerName: string;
     customerEmail: string;
     billAddress: { line1: string; line2: string; city: string; state: string; zip: string; country: string };
     shipAddress: { line1: string; line2: string; city: string; state: string; zip: string; country: string };
 }
 
+/**
+ * SmartInvoice Model
+ * 
+ * This model represents a branding-enriched invoice document. It handles the mapping 
+ * between raw ERP payloads (like QuickBooks) and a standardized format suitable 
+ * for rendering in EJS templates and Alpine.js frontend.
+ */
 export class SmartInvoice extends SmartDocument {
     public items: LineItem[];
     public recommendations: Recommendation[];
@@ -60,7 +68,7 @@ export class SmartInvoice extends SmartDocument {
     public nurtureMessages: NurtureMessage[];
     public invoiceMeta: InvoiceMetadata;
     
-    // Financial totals — may be sourced from ERP or calculated from items
+    // Financial totals — either sourced directly from ERP or calculated from items.
     public subtotal: number = 0;
     public tax: number = 0;
     public total: number = 0;
@@ -98,7 +106,14 @@ export class SmartInvoice extends SmartDocument {
     }
 
     /**
-     * Use real ERP totals when available; fall back to item-level calculation.
+     * Calculates document totals.
+     * 
+     * STRATEGY: 
+     * If `erpTotals` are provided (meaning the ERP already calculated them), we use those 
+     * as the "source of truth" to avoid rounding discrepancies between our local JS 
+     * floats and the ERP's internal accounting logic. Otherwise, we calculate from line items.
+     * 
+     * @param erpTotals Optional totals directly from the ERP payload (e.g., QBO TotalAmt).
      */
     public calculateTotals(erpTotals?: { subtotal?: number; tax?: number; total?: number }): void {
         if (erpTotals?.total) {
@@ -107,7 +122,7 @@ export class SmartInvoice extends SmartDocument {
             this.subtotal = erpTotals.subtotal ?? (this.total - this.tax);
         } else {
             this.subtotal = this.items.reduce((acc, item) => acc + (item.price * item.qty), 0);
-            this.tax = this.subtotal * 0.08;
+            this.tax = this.subtotal * 0.08; // Fallback tax calculation
             this.total = this.subtotal + this.tax;
         }
     }
