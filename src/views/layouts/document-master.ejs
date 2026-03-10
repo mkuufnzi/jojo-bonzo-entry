@@ -6,15 +6,14 @@
     <title><%= typeof title !== 'undefined' ? title : 'Document Preview' %></title>
     
     <!-- Core Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="//unpkg.com/alpinejs" defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- <link href="/assets/css/style.css" rel="stylesheet"> -->
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="//unpkg.com/alpinejs" defer></script>
+    <link href="/assets/css/style.css" rel="stylesheet" nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>">
     
     <!-- Template-Specific Head Content -->
     <%- block('head') %>
 
-    <style>
+    <style nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>">
         [x-cloak] { display: none !important; }
         
         /* Universal Document Config */

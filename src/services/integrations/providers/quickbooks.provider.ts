@@ -1,4 +1,5 @@
 import { Integration } from '@prisma/client';
+import prisma from '../../../lib/prisma';
 import { IERPProvider, FetchParams, ERPDocument, NormalizedWebhookEvent } from './types';
 import { TokenManager } from '../token.manager';
 import { EventSegments, buildScopedEventName } from '../../../types/service.types';
@@ -1018,6 +1019,36 @@ export class QBOProvider implements IERPProvider {
         return allCustomers;
     }
 
+    /**
+     * Fetches specific invoices by their DocNumbers (external IDs) in batch.
+     * Prevents N+1 queries during reconciliation.
+     */
+    async getInvoicesByIds(ids: string[]): Promise<any[]> {
+        if (!this.integration) throw new Error('Not Initialized');
+        if (ids.length === 0) return [];
+
+        const batchSize = 40; // Intuit recommends small batches for IN clauses
+        let allResults: any[] = [];
+
+        for (let i = 0; i < ids.length; i += batchSize) {
+            const batch = ids.slice(i, i + batchSize);
+            const idList = batch.map(id => `'${id}'`).join(',');
+            const query = `SELECT * FROM Invoice WHERE DocNumber IN (${idList})`;
+            
+            console.log(`[QBOProvider] 🔍 Batch Querying Invoices (${batch.length} IDs)`);
+
+            try {
+                const data = await this.fetchRaw(`/query?query=${encodeURIComponent(query)}`);
+                const batchInvoices = data.QueryResponse?.Invoice || [];
+                allResults = [...allResults, ...batchInvoices];
+            } catch (e: any) {
+                console.error('[QBOProvider] ❌ Failed to fetch invoice batch:', e);
+            }
+        }
+
+        return allResults;
+    }
+
     async getInvoiceStats(daysThreshold: number = 0): Promise<{ total: number, unpaid: number, overdue: number }> {
         if (!this.integration) throw new Error('Not Initialized');
         
@@ -1046,5 +1077,4 @@ export class QBOProvider implements IERPProvider {
             return { total: 0, unpaid: 0, overdue: 0 };
         }
     }
-
 }

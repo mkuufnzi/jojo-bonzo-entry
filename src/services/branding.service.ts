@@ -183,9 +183,9 @@ export class BrandingService {
              smartContent = {
                  personal_message: "Thank you for your business!",
                  recommendations: [
-                     { id: 'rec_1', name: "Premium Service", price: 99.00, match: 95, img: '🚀', reason: 'Upgrade for faster delivery', badge: 'Upgrade', sales: 'Popular' },
-                     { id: 'rec_2', name: "Maintenance Kit", price: 29.99, img: '🛠️', reason: 'Keep your items fresh', badge: 'Care', sales: 'Trending' },
-                     { id: 'rec_3', name: "Extended Warranty", price: 49.00, img: '🛡️', reason: 'Protect your investment', badge: 'Safety', sales: 'Recommended' }
+                     { id: 'rec_1', name: "Premium Service", price: 99.00, match: 95, img: '/images/placeholders/product-placeholder.png', reason: 'Upgrade for faster delivery', badge: 'Upgrade', sales: 'Popular' },
+                     { id: 'rec_2', name: "Maintenance Kit", price: 29.99, img: '/images/placeholders/product-placeholder.png', reason: 'Keep your items fresh', badge: 'Care', sales: 'Trending' },
+                     { id: 'rec_3', name: "Extended Warranty", price: 49.00, img: '/images/placeholders/product-placeholder.png', reason: 'Protect your investment', badge: 'Safety', sales: 'Recommended' }
                  ]
              };
          }
@@ -196,7 +196,7 @@ export class BrandingService {
              id: `tut_${i}`,
              title: i === 0 ? `Brewing Guide: ${item.description}` : `Care Plan: ${item.description}`,
              type: i === 0 ? 'recipe' : 'guide',
-             thumb: i === 0 ? '🍲' : '✨',
+             thumb: i === 0 ? '/images/placeholders/product-placeholder.png' : '/images/placeholders/product-placeholder.png',
              forProduct: item.description,
              duration: i === 0 ? '5 min' : '3 min',
              steps: i === 0 ? [

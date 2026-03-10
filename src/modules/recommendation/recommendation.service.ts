@@ -128,7 +128,7 @@ export class RecommendationService {
                 price: p.price || 0,
                 currency: p.currency || 'GBP',
                 sku: p.sku || 'N/A',
-                img: (p.metadata as any)?.img || '✨',
+                img: (p as any).imageUrl || '/images/placeholders/product-placeholder.png',
                 reason: `Highly rated in ${clusterName}`
             }));
 
@@ -377,7 +377,7 @@ export class RecommendationService {
                             price: p.price || 0,
                             currency: p.currency || 'GBP',
                             sku: p.sku || 'N/A',
-                            img: (p.metadata as any)?.img || '💫',
+                            img: (p as any).imageUrl || '/images/placeholders/product-placeholder.png',
                             reason: `Frequently bought with ${inputSkus.includes(aff.baseProduct.toLowerCase()) ? aff.baseProduct : aff.matchedSku}`
                         });
                     }
@@ -456,7 +456,7 @@ export class RecommendationService {
                 price: p.price || 0,
                 currency: p.currency || 'USD',
                 sku: p.sku || 'N/A',
-                img: (p.metadata as any)?.img || '✨',
+                img: (p as any).imageUrl || '/images/placeholders/product-placeholder.png',
                 reason: rule?.aiPromptContext || 'Rule-based match'
             };
         });
@@ -506,7 +506,7 @@ export class RecommendationService {
                 price: p.price || 0,
                 currency: p.currency || 'GBP',
                 sku: p.sku || 'N/A',
-                img: (p.metadata as any)?.img || '✨',
+                img: (p as any).imageUrl || '/images/placeholders/product-placeholder.png',
                 reason: randomReason
             };
         });
@@ -552,7 +552,7 @@ export class RecommendationService {
 
         const topPerformers = topProducts.map(p => ({
             name: p.name,
-            img: (p.metadata as any)?.img || '📦',
+            img: (p as any).imageUrl || '/images/placeholders/product-placeholder.png',
             conversions: skuCounts.get(p.sku!) || 0
         }));
 

@@ -174,7 +174,7 @@ function recoverySessions() {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    this.showToast(data.message || '⚡ Instant-fire dispatched! Check n8n.', 'success');
+                    this.showToast(data.message || 'Instant-fire dispatched! Check n8n.', 'success');
                     console.log('[Instant Fire] Response:', data);
                     setTimeout(() => window.location.reload(), 2000);
                 } else {

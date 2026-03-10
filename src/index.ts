@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
@@ -50,18 +50,8 @@ import { logger } from './lib/logger';
 import { healthCheck } from './lib/redis';
 import * as Sentry from '@sentry/node';
 
-// [DEBUG] Ultra-Early Request Logger (Before Sentry/Helmet)
-app.use((req, res, next) => {
-    const timestamp = new Date().toISOString();
-    const logEntry = `[${timestamp}] ${req.method} ${req.url} (Early)\n`;
-    try {
-        fs.appendFileSync(path.join(process.cwd(), 'early_debug.log'), logEntry);
-    } catch (e) {}
-    if (req.url.startsWith('/admin')) {
-        console.log(`[Ultra-Early Admin] ${req.method} ${req.url} | Headers: ${JSON.stringify(req.headers)}`);
-    }
-    next();
-});
+// Trust Proxy for sessions/cookies behind Nginx Proxy Manager
+app.set('trust proxy', 1);
 
 initSentry(app);
 
@@ -148,17 +138,17 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       // [Security] Strict CSP for Tags (Nonce-based), Loose for Attributes (Migration in progress)
       // Added unpkg.com, cdn.jsdelivr.net, etc. explicitly
-      scriptSrc: ["'self'", (req: any, res: any) => `'nonce-${res.locals.nonce}'`, "https://cdn.tailwindcss.com", "https://cdn.jsdelivr.net", "https://js.stripe.com", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-eval'", "'unsafe-inline'"],
-      scriptSrcElem: ["'self'", (req: any, res: any) => `'nonce-${res.locals.nonce}'`, "https://cdn.tailwindcss.com", "https://cdn.jsdelivr.net", "https://js.stripe.com", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-eval'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", (req: any, res: any) => `'nonce-${res.locals.nonce}'`, "https://cdn.jsdelivr.net", "https://js.stripe.com", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-eval'", "'unsafe-inline'"],
+      scriptSrcElem: ["'self'", (req: any, res: any) => `'nonce-${res.locals.nonce}'`, "https://cdn.jsdelivr.net", "https://js.stripe.com", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-eval'", "'unsafe-inline'"],
       scriptSrcAttr: ["'unsafe-inline'"], 
       
-      styleSrc: ["'self'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-inline'"],
-      styleSrcElem: ["'self'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-inline'"],
+      styleSrc: ["'self'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-inline'"],
+      styleSrcElem: ["'self'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://cdnjs.cloudflare.com", config.APP_URL, "'unsafe-inline'"],
       styleSrcAttr: ["'unsafe-inline'"], 
       
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", config.APP_URL],
       imgSrc: ["'self'", "data:", "https:", "blob:", config.APP_URL],
-      connectSrc: ["'self'", "https://cdn.jsdelivr.net", "https://api.stripe.com", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://ka-f.fontawesome.com", "https://cdnjs.cloudflare.com", config.APP_URL],
+      connectSrc: ["'self'", "https://cdn.jsdelivr.net", "https://api.stripe.com", "https://unpkg.com", "https://ka-f.fontawesome.com", "https://cdnjs.cloudflare.com", config.APP_URL],
       frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com", "blob:", "mailto:", "tel:", config.APP_URL],
     },
   },
@@ -419,7 +409,7 @@ app.use('/api/v1/webhooks', webhookRoutes); // Public Webhooks (Signature Verifi
 import v2Router from './routes/v2';
 
 if (config.ARCHITECTURE_VERSION === 'v2') {
-    logger.warn('🚀 [BOOT] V2 Architecture (Service Composition) ENABLED. V1 API Suspended.');
+    logger.warn('[BOOT] V2 Architecture (Service Composition) ENABLED. V1 API Suspended.');
     
     // Create V2 specific router to inherit middleware
     const v2ApiRouter = express.Router();

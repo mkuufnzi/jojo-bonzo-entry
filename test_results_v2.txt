@@ -1,0 +1,11 @@
+npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+npm info using npm@10.9.0
+npm info using node@v22.12.0
+npm verbose title npm test src/tests/unit/recovery.service.test.ts
+npm verbose argv "test" "src/tests/unit/recovery.service.test.ts" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-03-10T05_25_47_895Z-
+npm verbose logfile C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-03-10T05_25_47_895Z-debug-0.log
+
+> afs_doc_tools@1.0.0 test
+> jest src/tests/unit/recovery.service.test.ts
+

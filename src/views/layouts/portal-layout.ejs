@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Unified CSS Stack -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/assets/css/style.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <style>
@@ -42,24 +42,8 @@
     </style>
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '<%= branding.themeData?.primary || "#6366f1" %>',
-                        accent: '<%= branding.themeData?.accent || "#6366f1" %>',
-                        portal: {
-                            bg: '#f8fafc',
-                            card: '#ffffff'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
+        // Runtime configurations for Alpine/Lucide if needed
+        window.THEME_PRIMARY = '<%= branding.themeData?.primary || "#6366f1" %>';
     </script>
 </head>
 <body class="h-full flex flex-col antialiased text-slate-900 overflow-x-hidden" x-data="{ sidebarOpen: false }">
@@ -197,7 +181,7 @@
             <div class="flex-1 bg-slate-50 relative">
                 <!-- n8n Chat Widget Target -->
                 <div class="absolute inset-0 flex items-center justify-center flex-col p-8 text-center opacity-40">
-                    <div class="text-4xl mb-4">🚀</div>
+                    <div class="text-4xl mb-4"></div>
                     <div class="font-bold text-slate-600">Connecting to Support Hub...</div>
                     <div class="text-xs text-slate-400 mt-2">Initializing secure n8n websocket connection</div>
                 </div>

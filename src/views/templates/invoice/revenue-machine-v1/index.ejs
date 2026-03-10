@@ -7,10 +7,10 @@
     <style>
         /* Template Specific CSS */
         :root {
-            --primary-color: <%= branding.theme.primary || '#FFC800' %>;
-            --secondary-color: <%= branding.theme.secondary || '#2D2D2D' %>;
-            --accent-color: <%= branding.theme.accent || '#FF6B00' %>;
-            --text-main: <%= branding.theme.text || '#1A1A1A' %>;
+            --primary-color: ${branding.theme.primary || '#FFC800'};
+            --secondary-color: ${branding.theme.secondary || '#2D2D2D'};
+            --accent-color: ${branding.theme.accent || '#FF6B00'};
+            --text-main: ${branding.theme.text || '#1A1A1A'};
             --bg-body: #F5F5F5;
             --bg-card: #FFFFFF;
             --success: #00C853;
@@ -51,12 +51,12 @@
            'spacer_1': { path: null, landmark: false, splittable: false },
            'spacer_2': { path: null, landmark: false, splittable: false },
            'customer_info': { path: './components/customer_info', landmark: false, splittable: false },
-           'marketing_banner': { path: './components/banner', landmark: false, splittable: false },
+           'marketing_banner': { path: '../../../components/smart-widgets/banner', landmark: false, splittable: false },
            'line_items': { path: './components/line_items', landmark: false, splittable: true },
            'totals': { path: './components/totals', landmark: false, splittable: false },
            'product_recommendations': { path: '../../../components/smart-widgets/product-recommendations', landmark: false, splittable: false },
            'product_support': { path: '../../../components/smart-widgets/tutorials', landmark: false, splittable: false },
-           'payment_details': { path: './components/payment_info', landmark: false, splittable: false },
+           'payment_details': { path: '../../../components/smart-widgets/payment-details', landmark: false, splittable: false },
            'customer_support': { path: '../../../components/smart-widgets/support-card', landmark: false, splittable: false },
            'footer': { path: './components/footer', landmark: true, splittable: false }
        };
@@ -103,4 +103,3 @@
         <% i++; %> 
     <% } %>
 </div>
-

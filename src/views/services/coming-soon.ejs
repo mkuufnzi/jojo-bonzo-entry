@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= service.name %> - Coming Soon | Floovioo </title>
-    <script src="https://cdn.tailwindcss.com" nonce="<%= nonce %>"></script>
+    <link rel="stylesheet" href="/assets/css/style.css" nonce="<%= nonce %>">
     <script src="https://unpkg.com/lucide@latest" nonce="<%= nonce %>"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/layouts/sidebar.css" nonce="<%= nonce %>">
@@ -21,7 +21,7 @@
                 <!-- Text Content -->
                 <div class="space-y-8">
                     <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[0.625rem] font-bold uppercase tracking-widest border border-blue-100">
-                        ⚡ Under Development
+                        Under Development
                     </div>
                     
                     <h1 class="text-5xl font-bold text-gray-900 leading-tight">
@@ -126,13 +126,13 @@
 
                 if (!response.ok) throw new Error(data.error || 'Failed to join waitlist');
 
-                msg.textContent = '🎉 You are on the list! We will reach out soon.';
+                msg.textContent = 'You are on the list! We will reach out soon.';
                 msg.className = 'mt-3 text-xs text-center font-bold text-green-600 flex items-center justify-center gap-1';
                 msg.classList.remove('hidden');
                 document.getElementById('email').value = '';
                 btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
             } catch (error) {
-                msg.textContent = '⚠️ ' + error.message;
+                msg.textContent = error.message;
                 msg.className = 'mt-3 text-xs text-center font-bold text-red-600';
                 msg.classList.remove('hidden');
                 btn.disabled = false;

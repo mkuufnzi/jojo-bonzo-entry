@@ -90,7 +90,7 @@ function smartInvoice() {
         },
         
         get nurtureMsg() {
-            return this.nurtureMessages[this.nurtureMsgIdx] || { icon: '✨', headline: 'Welcome', body: 'Thanks for your business' };
+            return this.nurtureMessages[this.nurtureMsgIdx] || { icon: '', headline: 'Welcome', body: 'Thanks for your business' };
         },
         
         cycleNurture() {

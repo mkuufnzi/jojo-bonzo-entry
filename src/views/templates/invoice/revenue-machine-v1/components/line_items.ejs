@@ -48,27 +48,37 @@
             </tr>
         </thead>
         <tbody>
-            <template x-for="item in items" :key="item.id || item.name">
+            <% (branding.model?.items || []).forEach((item, index) => { %>
                 <tr>
-                    <td>
-                        <div class="font-bold text-gray-900" x-text="item.name"></div>
-                        <div class="text-xs text-gray-500" x-text="item.description || item.category || ''"></div>
-                        
-                        <!-- Dynamic Tags (Example of smart features) -->
-                        <div class="flex gap-2 mt-1">
-                            <span class="item-tag highlight" x-show="item.price > 50">
-                                <span>⭐</span> Loyalty Item
-                            </span>
+                    <td class="flex items-center gap-3">
+                        <div class="w-10 h-10 shrink-0">
+                            <%- include('../../../../partials/common/smart-image', { 
+                                src: item.img, 
+                                alt: item.name, 
+                                className: 'w-10 h-10 rounded flex items-center justify-center bg-gray-50',
+                                size: 'sm',
+                                fallback: '📦'
+                            }) %>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-900"><%= item.name %></div>
+                            <div class="text-xs text-gray-500"><%= item.description || item.category || '' %></div>
+                            <div class="flex gap-2 mt-1">
+                                <% if (item.price > 50) { %>
+                                    <span class="item-tag highlight">
+                                        <span>⭐</span> Loyalty Item
+                                    </span>
+                                <% } %>
+                            </div>
                         </div>
                     </td>
-                    <td x-text="'$' + item.price.toFixed(2)"></td>
-                    <td x-text="item.qty"></td>
-                    <td class="text-right font-bold" x-text="'$' + (item.price * item.qty).toFixed(2)"></td>
+                    <td>$<%= item.price.toFixed(2) %></td>
+                    <td><%= item.qty %></td>
+                    <td class="text-right font-bold">$<%= (item.price * item.qty).toFixed(2) %></td>
                 </tr>
-            </template>
+            <% }); %>
             
             <% if (!branding.model?.items?.length) { %>
-                <!-- Fallback for empty state (Preview) -->
                 <tr>
                    <td class="text-gray-400 italic" colspan="4">No items loaded.</td>
                 </tr>

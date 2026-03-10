@@ -7,8 +7,7 @@
     <!-- Core Dependencies for Smart Documents -->
     <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
     <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="//unpkg.com/alpinejs" defer></script>
-    <script nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>" src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css" nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>">
 
     <style nonce="<%= typeof nonce !== 'undefined' ? nonce : '' %>">
         [x-cloak] { display: none !important; }
@@ -101,9 +100,14 @@
 
         // Run on load and resize
         window.addEventListener('load', () => {
-            setTimeout(fitPreview, 100); // Give paginator a moment
+            console.log('[Preview] Framework loaded. Delaying fitPreview for paginator...');
+            setTimeout(fitPreview, 1000); // Increased delay for stability
         });
         window.addEventListener('resize', fitPreview);
+        window.addEventListener('paginator:done', (e) => {
+            console.log('[Preview] Paginator signaling done! Pages:', e.detail.pages);
+            fitPreview();
+        });
     </script>
 
 </body>

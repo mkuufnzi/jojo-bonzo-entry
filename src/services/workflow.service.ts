@@ -463,8 +463,10 @@ export class WorkflowService {
       
       // ── 8. Local Template Rendering (optional) ──────────
       let compiledHtml: string | null = null;
+      
+      const isBrandingAction = type === 'generate_local_template' || type === 'apply_branding' || type === 'brand_and_email';
 
-      if (type === 'generate_local_template' || type === 'apply_branding') {
+      if (isBrandingAction) {
         const { templateGenerator } = require('./template-generator.service');
         const docType = payload.resourceType || payload.type?.split('.')[0] || 'invoice';
 
@@ -491,7 +493,10 @@ export class WorkflowService {
       }
 
       // ── 8. Local Fast-Path (bypass n8n for speed) ───────
-      const callbackUrl = `${config.APP_URL}/api/callbacks/recommendations/sync`;
+      const isTransactional = type === 'apply_branding' || type === 'brand_and_email';
+      const callbackUrl = isTransactional 
+        ? `${config.APP_URL}/api/callbacks/n8n/transactional-complete`
+        : `${config.APP_URL}/api/callbacks/recommendations/sync`;
       const useLocalGeneration =
         type === 'apply_branding' &&
         compiledHtml &&
@@ -562,9 +567,14 @@ export class WorkflowService {
           status: 'processing',
           flooviooId,
           rawPayload: envelope as any,
+          ...(compiledHtml ? { snapshotHtml: compiledHtml } : {}),
           createdAt: new Date(),
         },
       });
+
+      if (compiledHtml) {
+        logger.info({ trackedDocId }, '📸 [WorkflowService] HTML snapshot saved to ProcessedDocument');
+      }
 
       await createAuditLog({
         userId: effectiveUserId,
@@ -594,11 +604,27 @@ export class WorkflowService {
               : {}),
           },
         })
-        .then((response) => {
+        .then(async (response) => {
           logger.info(
             { docId: trackedDocId, status: response.status },
             '✅ [WorkflowService] n8n Dispatch Successful'
           );
+
+          // If we already have a local HTML snapshot, mark as completed immediately.
+          // The n8n callback can still update with a PDF URL later via CallbackController.
+          if (compiledHtml) {
+            await prisma.processedDocument
+              .update({
+                where: { id: trackedDocId },
+                data: {
+                  status: 'completed',
+                  processingTimeMs: Date.now() - new Date(processedDoc.createdAt).getTime(),
+                  updatedAt: new Date(),
+                },
+              })
+              .catch((e: Error) => logger.error({ err: e.message }, 'Failed to mark document completed after dispatch'));
+            logger.info({ docId: trackedDocId }, '✅ [WorkflowService] Document marked completed (local snapshot ready)');
+          }
         })
         .catch(async (err: Error) => {
           logger.error(
@@ -653,7 +679,7 @@ export class WorkflowService {
     const startTime = Date.now();
 
     try {
-      const pdfBuffer = await pdfService.generatePdfFromHtml(html);
+      const pdfBuffer = await pdfService.generateFromHtml(html);
       const filename = `branded-${payload.entityId || 'doc'}-${Date.now()}.pdf`;
       const brandedUrl = await storageService.saveFile(effectiveUserId, pdfBuffer, filename, 'processed');
       const duration = Date.now() - startTime;
@@ -671,6 +697,7 @@ export class WorkflowService {
           status: 'completed',
           flooviooId,
           brandedUrl,
+          snapshotHtml: html,
           processingTimeMs: duration,
           createdAt: new Date(),
         },

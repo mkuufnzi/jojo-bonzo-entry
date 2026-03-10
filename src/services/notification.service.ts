@@ -64,7 +64,7 @@ export class NotificationService {
     const users = await prisma.user.findMany({ 
         where: { businessId }, 
         select: { id: true } 
-    });
+    }) || [];
     
     // Dispatch notifications in parallel
     const notifyPromises = users.map(u => 

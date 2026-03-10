@@ -10,7 +10,7 @@ const execPromise = util.promisify(exec);
 export class BootManager {
   
   static async initialize() {
-    logger.info('🚀 Starting Boot Sequence...');
+    logger.info('Starting Boot Sequence...');
 
     try {
       // 1. Check Database Connection
@@ -43,7 +43,7 @@ export class BootManager {
       await this.syncStripePriceIds();
 
       // 5. Initialize V2 Architecture (Enterprise Services)
-      logger.info('🚀 Initializing V2 Services...');
+      logger.info('Initializing V2 Services...');
       await this.initializeV2Services();
       logger.info('✅ V2 Architecture Active.');
 
@@ -96,11 +96,11 @@ export class BootManager {
       // Replaces both the old 8AM erp-sync and 9AM daily-dispatch.
       await recoveryQueue.add('recovery:orchestrate', {}, {
         repeat: {
-          pattern: '*/15 * * * *'  // Every 15 minutes
+          pattern: '*/30 * * * *'  // Every 30 minutes
         },
         jobId: 'recovery-orchestrate-v2'
       });
-      logger.info('   ✅ Recovery Orchestrator Scheduled (*/15 * * * *)');
+      logger.info('   ✅ Recovery Orchestrator Scheduled (*/30 * * * *)');
 
       // 2. Boot-time Orchestrate (catches up immediately on server start)
       // Runs the orchestrator once on boot so the operator sees the full E2E flow.
@@ -258,7 +258,7 @@ export class BootManager {
                  currency: 'USD' 
               }
             });
-            logger.info(`   ✨ Automatically Created & Synced: ${plan.name} -> ${newStripeData.priceId}`);
+            logger.info(`   Automatically Created & Synced: ${plan.name} -> ${newStripeData.priceId}`);
             updatedCount++;
           } catch (err: any) {
             logger.error(`   ❌ Failed to auto-create Stripe product for ${plan.name}: ${err.message}`);

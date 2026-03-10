@@ -12,8 +12,8 @@
             <span class="text-slate-900 dark:text-white font-bold"><%= document.resourceId %></span>
         </div>
         <div class="flex items-center gap-3">
-            <% if (brandedUrl && brandedUrl !== '#') { %>
-            <a href="<%= brandedUrl %>" download class="bg-slate-900 dark:bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-xl transition-all flex items-center gap-2 shadow-lg">
+            <% if (document.status === 'completed' || document.snapshotHtml) { %>
+            <a href="/dashboard/transactional/history/<%= document.id %>/download" class="bg-slate-900 dark:bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-xl transition-all flex items-center gap-2 shadow-lg">
                 <i data-lucide="download" class="w-4 h-4"></i>
                 Download PDF
             </a>
@@ -76,21 +76,7 @@
                         <% } %>
                     </div>
                 </div>
-                <!-- Preview Area -->
-                <% if (brandedUrl && brandedUrl !== '#') { %>
-                <div class="relative bg-slate-50 dark:bg-slate-800/30">
-                    <iframe 
-                        src="<%= brandedUrl %>" 
-                        class="w-full border-0"
-                        style="height: 700px;"
-                        sandbox="allow-same-origin"
-                        title="Branded Document Preview"
-                        loading="lazy"
-                    ></iframe>
-                    <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-slate-900 to-transparent pointer-events-none"></div>
-                </div>
-                <% } else { %>
-                <!-- Live Preview Fallback -->
+                <!-- Snapshot/JIT Preview Iframe -->
                 <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
                     <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -98,7 +84,14 @@
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                              </span>
-                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Live Preview Engine Active</span>
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                <%= document.snapshotHtml ? 'Historical Snapshot (As-Was)' : 'Live Preview Engine Active' %>
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="document.getElementById('source-document').contentWindow.print()" class="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400" title="Print Document">
+                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                            </button>
                         </div>
                     </div>
                     <iframe 
@@ -106,10 +99,9 @@
                         src="/dashboard/transactional/history/<%= document.id %>/preview" 
                         class="w-full border-0 preview-frame" 
                         style="height: 700px;" 
-                        title="Live JIT Preview">
+                        title="Smart Document Preview">
                     </iframe>
                 </div>
-                <% } %>
             </div>
 
             <!-- Original vs Branded Comparison -->
@@ -173,7 +165,7 @@
                     <% if (upsells && upsells.length > 0) { %>
                         <% upsells.forEach(offer => { %>
                         <div class="flex items-center space-x-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                            <div class="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-sm group-hover:scale-110 transition-transform">✨</div>
+                            <div class="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-sm group-hover:scale-110 transition-transform"></div>
                             <div class="flex-1 min-w-0">
                                 <p class="font-bold text-xs text-slate-900 dark:text-white truncate"><%= offer.name || offer.productName || 'Product' %></p>
                                 <p class="text-[0.6rem] text-slate-400 truncate"><%= offer.reason || 'Smart Match' %></p>

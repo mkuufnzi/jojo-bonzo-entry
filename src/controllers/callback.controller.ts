@@ -72,6 +72,7 @@ export class CallbackController {
                     brandedUrl: pdfUrl || (status === 'success' ? doc.brandedUrl : null),
                     errorMessage: externalError || null,
                     processingTimeMs: duration,
+                    ...(html ? { snapshotHtml: html } : {}),
                     updatedAt: new Date()
                 }
             });

@@ -189,7 +189,7 @@ export class BusinessController {
         }
       });
 
-      logger.info({ userId, step, isSkipped }, '🚀 [Onboarding] Step Tracked');
+      logger.info({ userId, step, isSkipped }, '[Onboarding] Step Tracked');
       res.json({ success: true });
     } catch (error: any) {
       logger.error({ userId: req.user?.id || req.session.userId, err: error }, '[BusinessController] trackStep Error');
@@ -477,7 +477,7 @@ export class BusinessController {
     }
 
     static async submitCompleteOnboarding(req: Request, res: Response, next: NextFunction) {
-        console.log('🚀 [BusinessController] submitCompleteOnboarding called', { userId: req.user?.id || req.session.userId, body: req.body });
+        console.log('[BusinessController] submitCompleteOnboarding called', { userId: req.user?.id || req.session.userId, body: req.body });
         try {
             const userId = req.user?.id || req.session.userId!;
             const config = req.body.config || {};

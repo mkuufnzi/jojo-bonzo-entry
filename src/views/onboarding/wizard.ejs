@@ -903,7 +903,7 @@ function onboardingWizard(initialData) {
             }
             
             this.submitting = true;
-            console.log('🚀 [Step 1: Profile] Sending Payload:', JSON.stringify(this.formData.profile, null, 2));
+            console.log('[Step 1: Profile] Sending Payload:', JSON.stringify(this.formData.profile, null, 2));
             try {
                 const res = await fetch('/onboarding/api/profile', {
                     method: 'POST',
@@ -945,7 +945,7 @@ function onboardingWizard(initialData) {
 
         async saveBrandSettings() {
             this.submitting = true;
-            console.log('🚀 [Step 3: Brand] Sending Multi-part Form Data');
+            console.log('[Step 3: Brand] Sending Multi-part Form Data');
             try {
                 const formData = new FormData();
                 formData.append('persona', this.formData.brand.persona);
@@ -1031,7 +1031,7 @@ function onboardingWizard(initialData) {
              await new Promise(r => setTimeout(r, 50));
              
              const item = this.importConfigItem;
-             console.log('🚀 [Step 2: Preview] Fetching Data for:', item.slug);
+             console.log('[Step 2: Preview] Fetching Data for:', item.slug);
  
              try {
                  const entities = ['invoices', 'contacts', 'items'];
@@ -1132,7 +1132,7 @@ function onboardingWizard(initialData) {
             // Ensure UI renders
             await new Promise(r => setTimeout(r, 50));
             
-            console.log('🚀 [Step 2: Import] Triggering Historical Sync with filters:', JSON.stringify(filters, null, 2));
+            console.log('[Step 2: Import] Triggering Historical Sync with filters:', JSON.stringify(filters, null, 2));
             try {
                 const response = await fetch(`/onboarding/api/integrations/${item.slug}/import`, {
                     method: 'POST',
@@ -1172,7 +1172,7 @@ function onboardingWizard(initialData) {
 
         async submitComplete() {
             this.submitting = true;
-            console.log('🚀 [Step 4: Complete] Sending Final Payload:', JSON.stringify(this.formData, null, 2));
+            console.log('[Step 4: Complete] Sending Final Payload:', JSON.stringify(this.formData, null, 2));
             try {
                 const res = await fetch('/onboarding/api/complete', {
                     method: 'POST',

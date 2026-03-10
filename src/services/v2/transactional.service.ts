@@ -63,7 +63,7 @@ export class TransactionalService {
             try {
                 const cached = await redis.get(cacheKey);
                 if (cached) {
-                    logger.info({ invoiceId, cacheKey }, '⚡ [TransactionalService] Cache Hit (Preview)');
+                    logger.info({ invoiceId, cacheKey }, '[TransactionalService] Cache Hit (Preview)');
                     const parsed = JSON.parse(cached);
                     return parsed as PreviewResponse;
                 }

@@ -21,6 +21,7 @@ router.get('/transactional/templates', transactionalGuard, DashboardController.d
 router.get('/transactional/history', transactionalGuard, TransactionalController.renderHistory);
 router.get('/transactional/history/:id', transactionalGuard, TransactionalController.renderDetails);
 router.get('/transactional/history/:id/preview', transactionalGuard, TransactionalController.renderPreview);
+router.get('/transactional/history/:id/download', transactionalGuard, TransactionalController.downloadPdf);
 router.get('/transactional/history/:id/interact', transactionalGuard, TransactionalController.handleInteraction);
 router.get('/transactional/legacy-templates', transactionalGuard, DashboardController.dashboardTransactionalTemplatesLegacy);
 router.get('/transactional/api', transactionalGuard, DashboardController.dashboardTransactionalApi);

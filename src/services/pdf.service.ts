@@ -557,6 +557,14 @@ export class PdfService {
       options: options || {}
     });
   }
+
+  /**
+   * Alias for generatePdfFromHtml — used by TransactionalController and WorkflowService
+   * for snapshot-based PDF generation where no extra options are needed.
+   */
+  public async generateFromHtml(html: string): Promise<Buffer> {
+    return this.generatePdfFromHtml(html);
+  }
 }
 
 export const pdfService = new PdfService();

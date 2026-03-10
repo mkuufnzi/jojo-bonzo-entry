@@ -107,7 +107,7 @@ export class RevenueService {
                 price: o.price || 0,
                 currency: o.currency || 'USD',
                 sku: o.sku,
-                img: '✨',
+                img: '/images/placeholders/product-placeholder.png',
                 reason: o.reason
             }));
         }
@@ -128,7 +128,7 @@ export class RevenueService {
                 id: r.id,
                 name: r.name,
                 price: r.price || 0,
-                img: r.img || '✨',
+                img: r.img || '/images/placeholders/product-placeholder.png',
                 sku: r.sku || 'N/A',
                 reason: r.reason || 'Recommended',
                 match: 90,

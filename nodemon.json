@@ -1,7 +1,7 @@
 {
   "watch": ["src", "environments"],
   "ext": "ts,json,ejs,css,html",
-  "exec": "npx ts-node src/index.ts",
+  "exec": "npx ts-node",
   "env": {
     "NODE_ENV": "development",
     "DOTENV_CONFIG_PATH": "environments/.env.development"

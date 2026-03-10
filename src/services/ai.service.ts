@@ -229,7 +229,7 @@ class AiService {
            }
            
            if (extractedDraft) {
-               console.log('📝 [AI Service] Extracted Draft Content');
+               console.log('[AI Service] Extracted Draft Content');
            }
       }
 

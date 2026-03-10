@@ -969,6 +969,7 @@ model ProcessedDocument {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   rawPayload       Json?
+  snapshotHtml     String?
   app              App      @relation(fields: [appId], references: [id], onDelete: Cascade)
   business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   user             User     @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -1061,12 +1062,13 @@ model UnifiedProduct {
   description   String?
   price         Float?
   currency      String      @default("USD")
-  quantity      Int         @default(0)
-  category      String?
   source        String
   metadata      Json?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  category      String?
+  quantity      Int         @default(0)
+  imageUrl      String?
   business      Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
   integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
 
@@ -1081,14 +1083,14 @@ model UnifiedOrder {
   customerId    String
   externalId    String
   orderNumber   String?
-  totalAmount   Float                 @default(0)
-  totalPaid     Float                 @default(0)
   status        String
   orderDate     DateTime?
   source        String
   metadata      Json?
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
+  totalAmount   Float                 @default(0)
+  totalPaid     Float                 @default(0)
   business      Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
   customer      UnifiedCustomer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
   integration   Integration           @relation(fields: [integrationId], references: [id], onDelete: Cascade)

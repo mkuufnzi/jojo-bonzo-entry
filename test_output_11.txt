@@ -1,0 +1,169 @@
+  console.log
+    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL src/tests/unit/recovery.service.test.ts (22.857 s)
+  RecoveryService
+    syncOverdueInvoices
+      ├ù should create sessions from manual invoices and bypass QBO (5 ms)
+      ├ù should resolve customer emails correctly in manual mode (1 ms)
+      ├ù should fetch from QBO and create sessions when integration exists (1 ms)
+    findApplicableSequence
+      ├ù should select sequence based on amount rules (1 ms)
+      ├ù should fallback to default sequence if no rules match
+    processRecovery
+      ├ù should dispatch to workflowService for recovery_email action (1 ms)
+      ├ù should advance step index and calculate nextActionAt
+    Utility Logic
+      ├ù calculateNextActionDate should respect day offsets (1 ms)
+      ├ù injectVariables should replace {{key}} with data[key] (1 ms)
+    processBusinessOverdues
+      ├ù should queue actions for sessions due now (1 ms)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should create sessions from manual invoices and bypass QBO
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should resolve customer emails correctly in manual mode
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should fetch from QBO and create sessions when integration exists
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ findApplicableSequence ΓÇ║ should select sequence based on amount rules
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ findApplicableSequence ΓÇ║ should fallback to default sequence if no rules match
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should dispatch to workflowService for recovery_email action
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should advance step index and calculate nextActionAt
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ Utility Logic ΓÇ║ calculateNextActionDate should respect day offsets
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ Utility Logic ΓÇ║ injectVariables should replace {{key}} with data[key]
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+  ΓùÅ RecoveryService ΓÇ║ processBusinessOverdues ΓÇ║ should queue actions for sessions due now
+
+    TypeError: queueLib.createQueue.mockReturnValue is not a function
+
+      114 |         (prisma.debtCollectionSession.update as jest.Mock).mockResolvedValue({ count: 1 });
+      115 |         (prisma.debtCollectionAction.update as jest.Mock).mockResolvedValue({ count: 1 });
+    > 116 |         (queueLib.createQueue as jest.Mock).mockReturnValue({ add: mockAdd });
+          |                                             ^
+      117 |     });
+      118 |
+      119 |     describe('syncOverdueInvoices', () => {
+
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:116:45)
+
+Test Suites: 1 failed, 1 total
+Tests:       10 failed, 10 total
+Snapshots:   0 total
+Time:        23.713 s
+Ran all test suites matching src/tests/unit/recovery.service.test.ts.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

@@ -45,7 +45,35 @@ jest.mock('../../lib/prisma', () => ({
             findFirst: jest.fn()
         },
         contact: {
+            findMany: jest.fn().mockResolvedValue([]),
+            findFirst: jest.fn()
+        },
+        user: {
             findMany: jest.fn().mockResolvedValue([])
+        },
+        debtCollectionCustomer: {
+            findFirst: jest.fn(),
+            upsert: jest.fn()
+        },
+        debtCollectionCustomerProfile: {
+            findUnique: jest.fn(),
+            upsert: jest.fn()
+        },
+        debtCollectionInvoice: {
+            upsert: jest.fn(),
+            findMany: jest.fn().mockResolvedValue([])
+        },
+        debtCollectionCluster: {
+            findMany: jest.fn().mockResolvedValue([])
+        },
+        debtCollectionStateHistory: {
+            createMany: jest.fn()
+        },
+        workflowExecutionLog: {
+            create: jest.fn()
+        },
+        notification: {
+            create: jest.fn()
         }
     }
 }));

@@ -55,7 +55,7 @@
             if (target.matches('input:not([type="hidden"]):not([type="checkbox"]), textarea, select')) {
                 // Ignore internal search boxes or negligible inputs if needed
                 if (!window.isWorkDirty) {
-                    console.log('📝 [Nav-Guard] Work started by user interaction on:', target);
+                    console.log('[Nav-Guard] Work started by user interaction on:', target);
                     window.isWorkDirty = true;
                 }
             }

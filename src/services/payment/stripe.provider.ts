@@ -203,7 +203,7 @@ export class StripeProvider implements PaymentProvider {
   }
 
   async createProduct(name: string, amount: number, interval: 'month' | 'year' = 'month'): Promise<{ priceId: string; productId: string }> {
-    logger.info(`✨ Creating Stripe Product: ${name} ($${amount}/${interval})`);
+    logger.info(`Creating Stripe Product: ${name} ($${amount}/${interval})`);
     
     // 1. Create Product
     const product = await this.stripe.products.create({

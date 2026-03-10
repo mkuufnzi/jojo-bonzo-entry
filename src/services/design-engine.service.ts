@@ -64,6 +64,22 @@ export class DesignEngineService {
                     isBillable: true
                 },
                 {
+                    key: 'apply_branding',
+                    label: 'Apply Branding',
+                    description: 'Injects brand assets into a document layout.',
+                    endpoint: '/apply',
+                    method: 'POST',
+                    isBillable: true
+                },
+                {
+                    key: 'default',
+                    label: 'Default Webhook',
+                    description: 'Generic entry point for automation workflows.',
+                    endpoint: '/webhook',
+                    method: 'POST',
+                    isBillable: false
+                },
+                {
                     key: 'ping',
                     label: 'Ping Service',
                     description: 'Health check connectivity to external providers.',

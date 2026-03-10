@@ -67,7 +67,7 @@ async function main() {
     try {
         const { businessId } = await setup();
         await verifyOnboarding(businessId);
-        console.log('\n✨ Onboarding Verification Complete!');
+        console.log('\nOnboarding Verification Complete!');
     } catch (e) {
         console.error('❌ Verification Error:', e);
         process.exit(1);

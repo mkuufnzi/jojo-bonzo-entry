@@ -358,7 +358,7 @@ export class WebhookController {
                continue;
            }
 
-           logger.info({ userId, provider: normalizedProvider, eventType: event.type, entityId: event.entityId }, '⚡ [Webhook] Processing Event');
+           logger.info({ userId, provider: normalizedProvider, eventType: event.type, entityId: event.entityId }, '[Webhook] Processing Event');
            
            // 5. Data Enrichment (Fetch full entity if available)
            try {

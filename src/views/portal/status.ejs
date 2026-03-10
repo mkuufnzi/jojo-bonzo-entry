@@ -2,11 +2,11 @@
 <div class="p-8 md:p-12 h-full flex flex-col items-center justify-center text-center">
     <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mb-8 shadow-inner">
         <% if (status === 'success') { %>
-            ✅
+            <i data-lucide="check-circle-2" class="w-10 h-10"></i>
         <% } else if (status === 'added') { %>
-            🛒
+            <i data-lucide="shopping-cart" class="w-10 h-10"></i>
         <% } else { %>
-            ✨
+            <i data-lucide="sparkles" class="w-10 h-10"></i>
         <% } %>
     </div>
 

@@ -1,7 +1,7 @@
 <!-- SUPPORT / TUTORIALS -->
 <% 
     const tutorialsList = (branding.model?.tutorials || []).length > 0 ? branding.model.tutorials : [
-        { id: 1, title: "Quick Guide", duration: "2 min", type: "guide", thumb: "🚀", steps: ["Check your settings", "Connect your account", "Launch your first flow"], forProduct: "General Access" }
+        { id: 1, title: "Quick Guide", duration: "2 min", type: "guide", thumb: "", steps: ["Check your settings", "Connect your account", "Launch your first flow"], forProduct: "General Access" }
     ];
     const theme = (branding.themeData || branding.theme) || {};
     const primaryColor = theme.primary || '#6366f1';
@@ -37,7 +37,7 @@
      data-split="false">
      
      <div class="mb-5" style="margin-bottom: 20px !important;">
-         <div class="text-[14px] font-bold text-slate-800" style="color: var(--tut-text)">📚 Product Support & Guides</div>
+         <div class="text-[14px] font-bold text-slate-800" style="color: var(--tut-text)">Product Support & Guides</div>
          <div class="text-[11px] text-gray-400 mt-1">Personalized resources for your purchase</div>
      </div>
      
@@ -54,7 +54,7 @@
                       style="display: flex !important; flex-direction: row !important; align-items: center !important; width: 100% !important; padding: 20px !important;"
                       @click="isOpen = !isOpen">
                      <div class="w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0 shadow-sm border border-black/5" 
-                          style="background: var(--tut-light); width: 48px !important; height: 48px !important; flex-shrink: 0 !important;"><%= tut.thumb || '📝' %></div>
+                          style="background: var(--tut-light); width: 48px !important; height: 48px !important; flex-shrink: 0 !important;"><i data-lucide="book-open" class="w-5 h-5"></i></div>
                      <div class="flex-1 min-w-0">
                          <div class="flex flex-col" style="display: flex !important; flex-direction: column !important;">
                              <div class="flex items-center gap-2" style="display: flex !important; flex-direction: row !important; align-items: center !important;">
@@ -65,7 +65,7 @@
                                  </span>
                              </div>
                              <div class="text-[11px] text-gray-400 mt-1 truncate font-medium">
-                                 For: <span class="text-slate-600 font-bold"><%= tut.forProduct %></span> · ⏱ <span class="text-slate-600"><%= tut.duration %></span>
+                                 For: <span class="text-slate-600 font-bold"><%= tut.forProduct %></span> · Time <span class="text-slate-600"><%= tut.duration %></span>
                              </div>
                          </div>
                      </div>
@@ -105,7 +105,7 @@
                            target="_blank"
                            class="w-full py-3 rounded-lg text-[11px] font-bold border bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all flex items-center justify-center gap-2 decoration-none"
                            style="border-color: var(--tut-accent-alpha); color: var(--tut-primary); display: flex !important; align-items: center !important; justify-content: center !important;">
-                            <span class="text-sm">📺</span> Watch Full Tutorial
+                             <i data-lucide="play-circle" class="w-4 h-4"></i> Watch Full Tutorial
                         </a>
                      </div>
                  </div>

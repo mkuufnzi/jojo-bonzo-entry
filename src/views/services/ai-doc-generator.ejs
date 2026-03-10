@@ -475,7 +475,7 @@
                                                                     <textarea id="debugHtmlEditor"
                                                                         class="w-full h-64 p-4 font-mono text-xs bg-slate-900 text-green-400 rounded-xl"
                                                                         placeholder="Paste raw HTML here to test PDF export directly..."></textarea>
-                                                                    <p class="text-[0.6rem] text-slate-400 mt-2">✨ Tip:
+                                                                    <p class="text-[0.6rem] text-slate-400 mt-2">Tip:
                                                                         Paste your HTML here and click "Generate PDF" to
                                                                         test without re-generating from AI.</p>
                                                                 </div>
@@ -1147,7 +1147,7 @@
 
                                     // Magic Suggestion Handler (Fixes Document Type bug)
                                     window.applyMagicSuggestion = function (typeId) {
-                                        console.log('✨ [Frontend] Applying Magic Suggestion:', typeId);
+                                        console.log('[Frontend] Applying Magic Suggestion:', typeId);
                                         const template = docTemplates[typeId];
                                         if (!template) return;
 
@@ -1160,7 +1160,7 @@
                                         if (contextInput) contextInput.value = template.context;
                                         if (typeInput) {
                                             typeInput.value = typeId; // CRITICAL FIX
-                                            console.log('✅ [Frontend] Set Document Type to:', typeId);
+                                            console.log('[Frontend] Set Document Type to:', typeId);
                                         }
                                     }
 
@@ -1321,9 +1321,9 @@
                                             const summaryVal = document.getElementById('summaryInput').value;
                                             const features = window.SERVICE_CONFIG?.features || {};
 
-                                            console.log('🚀 [Frontend Debug] Form submitted');
-                                            console.log('🚀 [Frontend Debug] Summary value:', summaryVal ? `"${summaryVal.substring(0, 50)}..."` : '(empty)');
-                                            console.log('🚀 [Frontend Debug] Features:', features);
+                                            console.log('[Frontend Debug] Form submitted');
+                                            console.log('[Frontend Debug] Summary value:', summaryVal ? `"${summaryVal.substring(0, 50)}..."` : '(empty)');
+                                            console.log('[Frontend Debug] Features:', features);
 
                                             // Determine Logic Flow
                                             // If we have summary, we are definitely in Phase 2 (Generation)
@@ -1336,7 +1336,7 @@
                                                 isAnalysisPhase = false; // Skip analysis
                                             }
 
-                                            console.log('🚀 [Frontend Debug] isAnalysisPhase:', isAnalysisPhase);
+                                            console.log('[Frontend Debug] isAnalysisPhase:', isAnalysisPhase);
 
                                             // MAIN FORM ALWAYS ANALYZES
                                             // Generation is triggered via the Modal completely separately.
@@ -1364,9 +1364,9 @@
 
                                                 // ANALYSIS ONLY
                                                 const analyzeUrl = '/services/ai-doc-generator/analyze';
-                                                console.log('🔍 [Frontend Debug] Starting Analysis Phase');
-                                                console.log('🔍 [Frontend Debug] Calling URL:', analyzeUrl);
-                                                console.log('🔍 [Frontend Debug] Payload:', JSON.stringify(payload, null, 2));
+                                                console.log('[Frontend Debug] Starting Analysis Phase');
+                                                console.log('[Frontend Debug] Calling URL:', analyzeUrl);
+                                                console.log('[Frontend Debug] Payload:', JSON.stringify(payload, null, 2));
 
                                                 const res = await fetch(analyzeUrl, {
                                                     method: 'POST',
@@ -1374,7 +1374,7 @@
                                                     body: JSON.stringify(payload)
                                                 });
                                                 const initResult = await res.json();
-                                                console.log('🔍 [Frontend Debug] Analysis Response:', initResult);
+                                                console.log('[Frontend Debug] Analysis Response:', initResult);
 
                                                 if (res.status === 403 && (initResult.limitReached || initResult.upgradeRequired)) {
                                                     showToast('Limit Reached', 'Upgrading...', 'error');
@@ -1401,7 +1401,7 @@
                                     }
 
                                     async function pollForAnalysisOnly(jobId) {
-                                        console.log('🔍 [Poll] Starting Analysis Poll for Job:', jobId);
+                                        console.log('[Poll] Starting Analysis Poll for Job:', jobId);
                                         return new Promise((resolve, reject) => {
                                             let pollAttempts = 0;
                                             const pollInterval = setInterval(async () => {
@@ -1415,7 +1415,7 @@
                                                     const res = await fetch(`/services/ai-doc-generator/jobs/${jobId}`);
                                                     if (!res.ok) throw new Error('Status check failed');
                                                     const data = await res.json();
-                                                    console.log('🔍 [Poll] Status:', data.status);
+                                                    console.log('[Poll] Status:', data.status);
 
                                                     if (data.status === 'completed' || data.status === 'pending_hil') {
                                                         clearInterval(pollInterval);
@@ -1428,9 +1428,9 @@
                                                             result = result[0];
                                                         }
 
-                                                        console.log('🔍 [Poll] Job Ready (Phase 1). Result keys:', Object.keys(result));
-                                                        console.log('🔍 [Poll] result.jobId:', result.jobId);
-                                                        console.log('🔍 [Poll] result.requestId:', result.requestId);
+                                                        console.log('[Poll] Job Ready (Phase 1). Result keys:', Object.keys(result));
+                                                        console.log('[Poll] result.jobId:', result.jobId);
+                                                        console.log('[Poll] result.requestId:', result.requestId);
 
                                                         // Store N8N's IDs for Phase 2 (/generate) call
                                                         // N8N provides jobId and requestId in its response
@@ -1462,7 +1462,7 @@
                                                             msg = result.summary; // Fallback for old format
                                                         }
 
-                                                        console.log('🔍 [Poll] Showing Modal with summary:', msg);
+                                                        console.log('[Poll] Showing Modal with summary:', msg);
 
                                                         document.getElementById('reviewContent').innerHTML = msg;
                                                         document.getElementById('summaryInput').value = msg; // Set for Phase 2
@@ -1608,7 +1608,7 @@
 
                                         if (!html) {
                                             // Reset to Empty State (Clear ghost content)
-                                            console.log('⚡ [Preview] Clearing preview...');
+                                            console.log('[Preview] Clearing preview...');
                                             if (emptyState) emptyState.classList.remove('hidden');
                                             if (previewArea) previewArea.classList.add('hidden');
                                             if (previewFrame) previewFrame.srcdoc = '';
@@ -1616,7 +1616,7 @@
                                         }
 
                                         // Client-Side Preview (Instant, Zero Resource Cost)
-                                        console.log('⚡ [Preview] Rendering HTML directly in client...');
+                                        console.log('[Preview] Rendering HTML directly in client...');
 
                                         if (emptyState) emptyState.classList.add('hidden');
                                         if (previewArea) {
@@ -2245,7 +2245,7 @@
                                             throw new Error("Session context lost. Please re-analyze.");
                                         }
 
-                                        console.log('🚀 [Frontend] Confirm Draft - Payload Context:',
+                                        console.log('[Frontend] Confirm Draft - Payload Context:',
                                             { jobId: payload.jobId, requestId: payload.requestId });
 
                                         try {
@@ -2723,7 +2723,7 @@
                                                 documentType: document.getElementById('documentTypeInput')?.value || 'General'
                                             };
 
-                                            console.log('🚀 [Frontend] Requesting Format - Context:', payload);
+                                            console.log('[Frontend] Requesting Format - Context:', payload);
 
                                             const res = await fetch('/services/ai-doc-generator/format', {
                                                 method: 'POST',

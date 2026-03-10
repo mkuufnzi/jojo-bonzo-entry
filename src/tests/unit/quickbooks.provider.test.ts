@@ -64,25 +64,20 @@ describe('QBOProvider', () => {
         });
 
         it('should fetch customers using correct query', async () => {
-            // Mock QBO Response
-            mockFetch.mockResolvedValueOnce({
-                json: async () => ({
-                    QueryResponse: {
-                        Customer: [
-                            { Id: '1', DisplayName: 'Alice', Active: true, MetaData: { CreateTime: '2023-01-01' } },
-                            { Id: '2', DisplayName: 'Bob', Active: false }
-                        ]
-                    }
-                })
+            // Mock QBO Response via fetchRaw
+            jest.spyOn(provider, 'fetchRaw').mockResolvedValue({
+                QueryResponse: {
+                    Customer: [
+                        { Id: '1', DisplayName: 'Alice', Active: true, MetaData: { CreateTime: '2023-01-01' } },
+                        { Id: '2', DisplayName: 'Bob', Active: false }
+                    ]
+                }
             });
 
             const contacts = await provider.getContacts();
 
-            expect(mockFetch).toHaveBeenCalledWith(
-                expect.stringContaining('/query?query=select%20*%20from%20Customer%20MAXRESULTS%20100'),
-                expect.objectContaining({
-                    headers: expect.objectContaining({ 'Authorization': 'Bearer valid_token' })
-                })
+            expect(provider.fetchRaw).toHaveBeenCalledWith(
+                expect.stringContaining('/query?query=select%20*%20from%20Customer%20MAXRESULTS%20100')
             );
 
             expect(contacts).toHaveLength(2);
@@ -93,9 +88,7 @@ describe('QBOProvider', () => {
         });
 
         it('should handle empty response gracefully', async () => {
-            mockFetch.mockResolvedValueOnce({
-                json: async () => ({ QueryResponse: {} })
-            });
+            jest.spyOn(provider, 'fetchRaw').mockResolvedValue({ QueryResponse: {} });
             const contacts = await provider.getContacts();
             expect(contacts).toEqual([]);
         });
@@ -108,22 +101,19 @@ describe('QBOProvider', () => {
         });
 
         it('should fetch items (Inventory/Service) using correct query', async () => {
-            mockFetch.mockResolvedValueOnce({
-                json: async () => ({
-                    QueryResponse: {
-                        Item: [
-                            { Id: '10', Name: 'Consulting', UnitPrice: 100, Type: 'Service', Active: true },
-                            { Id: '11', Name: 'Widget', UnitPrice: 50, Type: 'Inventory', Sku: 'WID-01', Active: true }
-                        ]
-                    }
-                })
+            jest.spyOn(provider, 'fetchRaw').mockResolvedValue({
+                QueryResponse: {
+                    Item: [
+                        { Id: '10', Name: 'Consulting', UnitPrice: 100, Type: 'Service', Active: true },
+                        { Id: '11', Name: 'Widget', UnitPrice: 50, Type: 'Inventory', Sku: 'WID-01', Active: true }
+                    ]
+                }
             });
 
             const items = await provider.getItems();
 
-            expect(mockFetch).toHaveBeenCalledWith(
-                expect.stringContaining("select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory'%2C%20'Service'%2C%20'NonInventory')%20MAXRESULTS%20100"),
-                expect.anything()
+            expect(provider.fetchRaw).toHaveBeenCalledWith(
+                expect.stringContaining("select%20*%20from%20Item%20WHERE%20Type%20IN%20('Inventory'%2C%20'Service'%2C%20'NonInventory')%20MAXRESULTS%20100")
             );
 
             expect(items).toHaveLength(2);

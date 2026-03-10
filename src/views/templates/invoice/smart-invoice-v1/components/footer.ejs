@@ -26,12 +26,12 @@
             <a href="<%= branding.model.portal_url %>" 
                target="_blank"
                class="px-4 py-2 rounded-lg text-[11px] font-bold text-white border-0 decoration-none flex items-center gap-1.5"
-               style="<%= 'background: ' + (theme.gradient || 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)') %>">
-                <span>🌐</span> <span>View Interactive Version</span>
+               style="background: <%= theme.gradient || 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' %>;">
+                <span>View Interactive Version</span>
             </a>
         <% } %>
         <button class="px-4 py-2 rounded-lg text-[11px] font-bold bg-transparent border-2"
-                style="<%= 'border-color: ' + (theme.accent || '#c4b5fd') + '; color: ' + (theme.primary || '#6366f1') %>">
+                style="border-color: <%= theme.accent || '#c4b5fd' %>; color: <%= theme.primary || '#6366f1' %>;">
             Share &amp; Earn
         </button>
     </div>

@@ -1,0 +1,114 @@
+  console.log
+    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL src/tests/unit/recovery.service.test.ts (17.478 s)
+  RecoveryService
+    syncOverdueInvoices
+      ΓêÜ should create sessions from manual invoices and bypass QBO (14 ms)
+      ΓêÜ should resolve customer emails correctly in manual mode (2 ms)
+      ΓêÜ should fetch from QBO and create sessions when integration exists (6 ms)
+    findApplicableSequence
+      ΓêÜ should select sequence based on amount rules (2 ms)
+      ΓêÜ should fallback to default sequence if no rules match (1 ms)
+    processRecovery
+      ├ù should dispatch to workflowService for recovery_email action (57 ms)
+      ├ù should advance step index and calculate nextActionAt (2 ms)
+    Utility Logic
+      ΓêÜ calculateNextActionDate should respect day offsets (2 ms)
+      ΓêÜ injectVariables should replace {{key}} with data[key] (2 ms)
+    processBusinessOverdues
+      ΓêÜ should queue actions for sessions due now (5 ms)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should dispatch to workflowService for recovery_email action
+
+    TypeError: Cannot read properties of undefined (reading 'count')
+
+      1149 |             });
+      1150 |
+    > 1151 |             if (advanceResult.count === 0) {
+           |                               ^
+      1152 |                 console.log(`[Recovery E2E] ΓÜá∩╕Å Optimistic lock: another worker already advanced this session.`);
+      1153 |             } else {
+      1154 |                 console.log(`[Recovery E2E] Γ£à Session advanced. Next action at: ${hasMoreSteps ? this.calculateNextActionDate(steps, nextStepIdx, dueDate).toISOString() : 'N/A (completed)'}`);
+
+      at RecoveryService.processRecovery (src/modules/recovery/recovery.service.ts:1151:31)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:255:28)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should advance step index and calculate nextActionAt
+
+    TypeError: Cannot read properties of undefined (reading 'count')
+
+      1149 |             });
+      1150 |
+    > 1151 |             if (advanceResult.count === 0) {
+           |                               ^
+      1152 |                 console.log(`[Recovery E2E] ΓÜá∩╕Å Optimistic lock: another worker already advanced this session.`);
+      1153 |             } else {
+      1154 |                 console.log(`[Recovery E2E] Γ£à Session advanced. Next action at: ${hasMoreSteps ? this.calculateNextActionDate(steps, nextStepIdx, dueDate).toISOString() : 'N/A (completed)'}`);
+
+      at RecoveryService.processRecovery (src/modules/recovery/recovery.service.ts:1151:31)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:274:13)
+
+[2026-03-10 07:44:57.623 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: true
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 8 passed, 10 total
+Snapshots:   0 total
+Time:        17.634 s
+Ran all test suites matching src/tests/unit/recovery.service.test.ts.
+[2026-03-10 07:44:57.623 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mcustomersResolved[39m: 1
+    [35mtotal[39m: 1
+[2026-03-10 07:44:57.635 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: true
+[2026-03-10 07:44:57.635 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mcustomersResolved[39m: 1
+    [35mtotal[39m: 1
+[2026-03-10 07:44:57.637 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: false
+[2026-03-10 07:44:57.640 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mcustomersResolved[39m: 1
+    [35mtotal[39m: 1
+[2026-03-10 07:44:57.647 +0300] [32mINFO[39m: [36m≡ƒöä [Recovery E2E] Step 2: Dunning action created in database[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35msession[39m: "session_1"
+    [35mactionId[39m: "act_1"
+    [35mstep[39m: 1
+    [35mactionType[39m: "email"
+[2026-03-10 07:44:57.684 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Session processing failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'count')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'count')
+              at RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:1151:31)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:255:28)
+    }
+[2026-03-10 07:44:57.703 +0300] [32mINFO[39m: [36m≡ƒöä [Recovery E2E] Step 2: Dunning action created in database[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35msession[39m: "session_1"
+    [35mactionId[39m: "act_1"
+    [35mstep[39m: 1
+    [35mactionType[39m: "email"
+[2026-03-10 07:44:57.704 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Session processing failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'count')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'count')
+              at RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:1151:31)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:274:13)
+    }
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

@@ -2,7 +2,7 @@
 <div class="mt-6" data-split="true">
     <div class="flex justify-between items-center mb-3">
         <div>
-            <div class="text-[13px] font-bold font-sans" :style="'color: ' + theme.text">🎯 Recommended for You</div>
+            <div class="text-[13px] font-bold font-sans" :style="'color: ' + theme.text">Recommended for You</div>
             <div class="text-[10px] text-gray-400 font-sans">Personalized based on your order & purchase history</div>
         </div>
         <span class="text-[9px] font-bold px-2 py-0.5 rounded-lg font-sans" :style="'color: ' + theme.primary + '; background: ' + theme.light">AI-Powered</span>
@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="text-[10px] text-gray-500 bg-gray-50 rounded-md px-2 py-1.5 mb-2 leading-snug">
-                    💡 <span x-text="rec.reason"></span>
+                     <span x-text="rec.reason"></span>
                 </div>
 
                 <div class="flex justify-between items-center mb-2.5">
@@ -44,7 +44,7 @@
                 <button @click="toggleAdd(rec.id)" 
                         class="w-full py-2 rounded-lg text-[11px] font-bold transition-all border-none cursor-pointer"
                         :style="addedItems.includes(rec.id) ? 'background: ' + theme.accent + '; color: ' + theme.primary : 'background: ' + theme.gradient + '; color: #fff'">
-                    <span x-text="addedItems.includes(rec.id) ? '✓ Added' : '+ Add to Order'"></span>
+                    <span x-text="addedItems.includes(rec.id) ? 'Added' : '+ Add to Order'"></span>
                 </button>
             </div>
         </template>

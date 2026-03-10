@@ -673,7 +673,7 @@ export class SeederService {
                     for (const action of manifest.actions) {
                         // If webhook config doesn't exist for this action key, create it
                         if (!webhooks[action.key]) {
-                            // console.log(`   ✨ Auto-discovering webhook action: ${action.key} for ${service.slug}`);
+                            // console.log(`   Auto-discovering webhook action: ${action.key} for ${service.slug}`);
                             webhooks[action.key] = {
                                 url: '', // Empty by default, must be configured
                                 method: action.method || 'POST',
@@ -684,7 +684,7 @@ export class SeederService {
                         }
                     }
                     mergedConfig.webhooks = webhooks;
-                    if(discoveryCount > 0) console.log(`   ✨ Auto-discovered ${discoveryCount} webhook actions for ${service.slug}`);
+                    if(discoveryCount > 0) console.log(`   Auto-discovered ${discoveryCount} webhook actions for ${service.slug}`);
                 }
                 // ----------------------------------------------
 

@@ -12,21 +12,27 @@
             </tr>
         </thead>
         <tbody class="font-sans">
-            <template x-for="item in items" :key="item.id">
+            <% (branding.model.items || []).forEach((item, index) => { %>
                 <tr class="border-b border-gray-100">
                     <td class="py-2 w-9">
-                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg bg-gray-50" :style="'background: ' + theme.light" x-text="item.img"></div>
+                        <%- include('../../../../partials/common/smart-image', { 
+                            src: item.img, 
+                            alt: item.name, 
+                            className: 'w-9 h-9 rounded-lg flex items-center justify-center bg-gray-50',
+                            size: 'sm',
+                            fallback: '📦'
+                        }) %>
                     </td>
                     <td class="py-2 pl-3">
-                        <div class="text-[13px] font-bold" :style="'color: ' + theme.text" x-text="item.name"></div>
-                        <div class="text-[10px] text-gray-400" x-text="item.category"></div>
+                        <div class="text-[13px] font-bold" style="color: <%= branding.themeData.text || '#1e293b' %>"><%= item.name %></div>
+                        <div class="text-[10px] text-gray-400"><%= item.category %></div>
                     </td>
-                    <td class="py-2 text-[11px] text-gray-400" x-text="item.sku"></td>
-                    <td class="py-2 text-right text-[13px]" :style="'color: ' + theme.text" x-text="item.qty"></td>
-                    <td class="py-2 text-right text-[13px] text-gray-500" x-text="'$' + item.price.toFixed(2)"></td>
-                    <td class="py-2 text-right text-[13px] font-bold" :style="'color: ' + theme.text" x-text="'$' + (item.price * item.qty).toFixed(2)"></td>
+                    <td class="py-2 text-[11px] text-gray-400"><%= item.sku %></td>
+                    <td class="py-2 text-right text-[13px]" style="color: <%= branding.themeData.text || '#1e293b' %>"><%= item.qty %></td>
+                    <td class="py-2 text-right text-[13px] text-gray-500">$<%= item.price.toFixed(2) %></td>
+                    <td class="py-2 text-right text-[13px] font-bold" style="color: <%= branding.themeData.text || '#1e293b' %>">$<%= (item.price * item.qty).toFixed(2) %></td>
                 </tr>
-            </template>
+            <% }); %>
         </tbody>
     </table>
 </div>
@@ -34,7 +40,7 @@
 <!-- Added Upsells (Part of Line Items Logic) -->
 <div class="mt-4" x-show="addedItems.length > 0">
     <div class="rounded-lg p-3" :style="'background: ' + theme.light">
-        <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 font-sans" :style="'color: ' + theme.secondary">⚡ Added to Order</div>
+        <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 font-sans" :style="'color: ' + theme.secondary">Added to Order</div>
         <template x-for="id in addedItems" :key="id">
              <div class="flex justify-between items-center py-1.5 border-b border-black/5 last:border-0 font-sans">
                  <div class="text-xs font-medium text-black">

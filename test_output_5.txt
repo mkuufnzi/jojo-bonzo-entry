@@ -1,0 +1,219 @@
+  console.log
+    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL src/tests/unit/recovery.service.test.ts (25.056 s)
+  RecoveryService
+    syncOverdueInvoices
+      ├ù should create sessions from manual invoices and bypass QBO (29 ms)
+      ├ù should resolve customer emails correctly in manual mode (2 ms)
+      ├ù should fetch from QBO and create sessions when integration exists (7 ms)
+    findApplicableSequence
+      ΓêÜ should select sequence based on amount rules (3 ms)
+      ΓêÜ should fallback to default sequence if no rules match (1 ms)
+    processRecovery
+      ├ù should dispatch to workflowService for recovery_email action (51 ms)
+      ├ù should advance step index and calculate nextActionAt (1 ms)
+    Utility Logic
+      ΓêÜ calculateNextActionDate should respect day offsets (1 ms)
+      ΓêÜ injectVariables should replace {{key}} with data[key] (1 ms)
+    processBusinessOverdues
+      ΓêÜ should queue actions for sessions due now (8 ms)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should create sessions from manual invoices and bypass QBO
+
+    TypeError: Cannot read properties of undefined (reading 'map')
+
+      68 |     
+      69 |     // Dispatch notifications in parallel
+    > 70 |     const notifyPromises = users.map(u => 
+         |                                  ^
+      71 |         this.notifyUser(u.id, type, title, message, category, link)
+      72 |     );
+      73 |     
+
+      at NotificationService.notifyBusiness (src/services/notification.service.ts:70:34)
+      at async RecoveryService.syncOverdueInvoices (src/modules/recovery/recovery.service.ts:684:13)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:137:28)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should resolve customer emails correctly in manual mode
+
+    TypeError: Cannot read properties of undefined (reading 'map')
+
+      68 |     
+      69 |     // Dispatch notifications in parallel
+    > 70 |     const notifyPromises = users.map(u => 
+         |                                  ^
+      71 |         this.notifyUser(u.id, type, title, message, category, link)
+      72 |     );
+      73 |     
+
+      at NotificationService.notifyBusiness (src/services/notification.service.ts:70:34)
+      at async RecoveryService.syncOverdueInvoices (src/modules/recovery/recovery.service.ts:684:13)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:161:13)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should fetch from QBO and create sessions when integration exists
+
+    TypeError: Cannot read properties of undefined (reading 'map')
+
+      68 |     
+      69 |     // Dispatch notifications in parallel
+    > 70 |     const notifyPromises = users.map(u => 
+         |                                  ^
+      71 |         this.notifyUser(u.id, type, title, message, category, link)
+      72 |     );
+      73 |     
+
+      at NotificationService.notifyBusiness (src/services/notification.service.ts:70:34)
+      at async RecoveryService.syncOverdueInvoices (src/modules/recovery/recovery.service.ts:684:13)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:193:28)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should dispatch to workflowService for recovery_email action
+
+    TypeError: Cannot read properties of undefined (reading 'map')
+
+      68 |     
+      69 |     // Dispatch notifications in parallel
+    > 70 |     const notifyPromises = users.map(u => 
+         |                                  ^
+      71 |         this.notifyUser(u.id, type, title, message, category, link)
+      72 |     );
+      73 |     
+
+      at NotificationService.notifyBusiness (src/services/notification.service.ts:70:34)
+      at async RecoveryService.processRecovery (src/modules/recovery/recovery.service.ts:1051:22)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:249:28)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should advance step index and calculate nextActionAt
+
+    TypeError: Cannot read properties of undefined (reading 'map')
+
+      68 |     
+      69 |     // Dispatch notifications in parallel
+    > 70 |     const notifyPromises = users.map(u => 
+         |                                  ^
+      71 |         this.notifyUser(u.id, type, title, message, category, link)
+      72 |     );
+      73 |     
+
+      at NotificationService.notifyBusiness (src/services/notification.service.ts:70:34)
+      at async RecoveryService.processRecovery (src/modules/recovery/recovery.service.ts:1051:22)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:268:13)
+
+[2026-03-10 07:30:59.261 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: true
+[2026-03-10 07:30:59.262 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mcustomersResolved[39m: 1
+    [35mtotal[39m: 1
+[2026-03-10 07:30:59.267 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Sync failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'map')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'map')
+              at NotificationService.notifyBusiness (D:\apps\websites\saas\afs_doc_tools_source\src\services\notification.service.ts:70:34)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async RecoveryService.syncOverdueInvoices (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:646:17)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:137:28)
+    }
+[2026-03-10 07:30:59.290 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: true
+[2026-03-10 07:30:59.290 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mcustomersResolved[39m: 1
+    [35mtotal[39m: 1
+[2026-03-10 07:30:59.291 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Sync failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'map')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'map')
+              at NotificationService.notifyBusiness (D:\apps\websites\saas\afs_doc_tools_source\src\services\notification.service.ts:70:34)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async RecoveryService.syncOverdueInvoices (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:646:17)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:161:13)
+    }
+[2026-03-10 07:30:59.293 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: false
+[2026-03-10 07:30:59.298 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Sync failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'map')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'map')
+              at RecoveryService.syncOverdueInvoices (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:250:60)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:193:28)
+    }
+[2026-03-10 07:30:59.305 +0300] [32mINFO[39m: [36m≡ƒöä [Recovery E2E] Step 2: Dunning action created in database[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35msession[39m: "session_1"
+    [35mactionId[39m: "act_1"
+    [35mstep[39m: 1
+    [35mactionType[39m: "email"
+[2026-03-10 07:30:59.354 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Email Sending Failed[39m
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'map')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'map')
+              at NotificationService.notifyBusiness (D:\apps\websites\saas\afs_doc_tools_source\src\services\notification.service.ts:70:34)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:1019:25)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:249:28)
+    }
+[2026-03-10 07:30:59.355 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Session processing failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'map')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'map')
+              at NotificationService.notifyBusiness (D:\apps\websites\saas\afs_doc_tools_source\src\services\notification.service.ts:70:34)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:1051:22)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:249:28)
+    }
+[2026-03-10 07:30:59.356 +0300] [32mINFO[39m: [36m≡ƒöä [Recovery E2E] Step 2: Dunning action created in database[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35msession[39m: "session_1"
+    [35mactionId[39m: "act_1"
+    [35mstep[39m: 1
+    [35mactionType[39m: "email"
+[2026-03-10 07:30:59.357 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Email Sending Failed[39m
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'map')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'map')
+              at NotificationService.notifyBusiness (D:\apps\websites\saas\afs_doc_tools_source\src\services\notification.service.ts:70:34)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:1019:25)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:268:13)
+    }
+[2026-03-10 07:30:59.357 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Session processing failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'map')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'map')
+              at NotificationService.notifyBusiness (D:\apps\websites\saas\afs_doc_tools_source\src\services\notification.service.ts:70:34)
+              at processTicksAndRejections (node:internal/process/task_queues:105:5)
+              at async RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:1051:22)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:268:13)
+    }
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 5 passed, 10 total
+Snapshots:   0 total
+Time:        25.398 s
+Ran all test suites matching src/tests/unit/recovery.service.test.ts.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

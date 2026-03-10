@@ -22,6 +22,9 @@
             tax: <%- JSON.stringify(branding.model?.tax || 0) %>,
             total: <%- JSON.stringify(branding.model?.total || 0) %>
         },
+
+        // Normalized Invoice Metadata (DocNumber, Date, Status, Addresses)
+        invoiceMeta: <%- JSON.stringify(branding.model?.invoiceMeta || {}) %>,
         
         // Brand & Business Context
         business: {

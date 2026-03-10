@@ -1,0 +1,220 @@
+npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+npm info using npm@10.9.0
+npm info using node@v22.12.0
+npm verbose title npm test src/tests/unit/recovery.service.test.ts
+npm verbose argv "test" "src/tests/unit/recovery.service.test.ts" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-03-10T05_16_44_341Z-
+npm verbose logfile C:\Users\Gee\AppData\Local\npm-cache\_logs\2026-03-10T05_16_44_341Z-debug-0.log
+
+> afs_doc_tools@1.0.0 test
+> jest src/tests/unit/recovery.service.test.ts
+
+  console.log
+    [dotenv@17.2.3] injecting env (35) from environments\.env -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL src/tests/unit/recovery.service.test.ts (7.247 s)
+  RecoveryService
+    syncOverdueInvoices
+      ├ù should create sessions from manual invoices and bypass QBO (19 ms)
+      ├ù should resolve customer emails correctly in manual mode (2 ms)
+    findApplicableSequence
+      ├ù should select sequence based on amount rules (11 ms)
+      ├ù should fallback to default sequence if no rules match (1 ms)
+    processRecovery
+      ├ù should dispatch to workflowService for recovery_email action (3 ms)
+      ├ù should advance step index and calculate nextActionAt (1 ms)
+    Utility Logic
+      ΓêÜ calculateNextActionDate should respect day offsets (2 ms)
+      ΓêÜ injectVariables should replace {{key}} with data[key] (1 ms)
+    processBusinessOverdues
+      ├ù should queue actions for sessions due now (3 ms)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should create sessions from manual invoices and bypass QBO
+
+    TypeError: Cannot read properties of undefined (reading 'findMany')
+
+      62 |   async notifyBusiness(businessId: string, type: NotificationType, title: string, message: string, category?: NotificationCategory, link?: string) {
+      63 |     // Note: Assuming `businessId` exists on the User model as determined in DB schema
+    > 64 |     const users = await prisma.user.findMany({ 
+         |                                     ^
+      65 |         where: { businessId }, 
+      66 |         select: { id: true } 
+      67 |     }) || [];
+
+      at NotificationService.notifyBusiness (src/services/notification.service.ts:64:37)
+      at RecoveryService.syncOverdueInvoices (src/modules/recovery/recovery.service.ts:667:39)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:103:28)
+
+  ΓùÅ RecoveryService ΓÇ║ syncOverdueInvoices ΓÇ║ should resolve customer emails correctly in manual mode
+
+    TypeError: Cannot read properties of undefined (reading 'findMany')
+
+      62 |   async notifyBusiness(businessId: string, type: NotificationType, title: string, message: string, category?: NotificationCategory, link?: string) {
+      63 |     // Note: Assuming `businessId` exists on the User model as determined in DB schema
+    > 64 |     const users = await prisma.user.findMany({ 
+         |                                     ^
+      65 |         where: { businessId }, 
+      66 |         select: { id: true } 
+      67 |     }) || [];
+
+      at NotificationService.notifyBusiness (src/services/notification.service.ts:64:37)
+      at RecoveryService.syncOverdueInvoices (src/modules/recovery/recovery.service.ts:667:39)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:127:13)
+
+  ΓùÅ RecoveryService ΓÇ║ findApplicableSequence ΓÇ║ should select sequence based on amount rules
+
+    TypeError: Cannot read properties of undefined (reading 'findFirst')
+
+      686 |
+      687 |         // 1. Cluster-based Mapping (High Priority)
+    > 688 |         const customer = await p.debtCollectionCustomer.findFirst({
+          |                                                         ^
+      689 |             where: { businessId, externalId: invoice.customerExternalId || invoice.customerId },
+      690 |             include: { profile: { include: { cluster: true } } }
+      691 |         });
+
+      at RecoveryService.findApplicableSequence (src/modules/recovery/recovery.service.ts:688:57)
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:143:39)
+
+  ΓùÅ RecoveryService ΓÇ║ findApplicableSequence ΓÇ║ should fallback to default sequence if no rules match
+
+    TypeError: Cannot read properties of undefined (reading 'findFirst')
+
+      686 |
+      687 |         // 1. Cluster-based Mapping (High Priority)
+    > 688 |         const customer = await p.debtCollectionCustomer.findFirst({
+          |                                                         ^
+      689 |             where: { businessId, externalId: invoice.customerExternalId || invoice.customerId },
+      690 |             include: { profile: { include: { cluster: true } } }
+      691 |         });
+
+      at RecoveryService.findApplicableSequence (src/modules/recovery/recovery.service.ts:688:57)
+      at Object.<anonymous> (src/tests/unit/recovery.service.test.ts:149:39)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should dispatch to workflowService for recovery_email action
+
+    TypeError: Cannot read properties of undefined (reading 'findUnique')
+
+      908 |             
+      909 |             // Step 2.5: Inject Enriched Profile & Cluster (Phase 5)
+    > 910 |             const enrichedProfile = await p.debtCollectionCustomerProfile.findUnique({
+          |                                                                           ^
+      911 |                 where: { debtCustomerId: session.customerId },
+      912 |                 include: { cluster: true }
+      913 |             });
+
+      at RecoveryService.processRecovery (src/modules/recovery/recovery.service.ts:910:75)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:180:28)
+
+  ΓùÅ RecoveryService ΓÇ║ processRecovery ΓÇ║ should advance step index and calculate nextActionAt
+
+    TypeError: Cannot read properties of undefined (reading 'findUnique')
+
+      908 |             
+      909 |             // Step 2.5: Inject Enriched Profile & Cluster (Phase 5)
+    > 910 |             const enrichedProfile = await p.debtCollectionCustomerProfile.findUnique({
+          |                                                                           ^
+      911 |                 where: { debtCustomerId: session.customerId },
+      912 |                 include: { cluster: true }
+      913 |             });
+
+      at RecoveryService.processRecovery (src/modules/recovery/recovery.service.ts:910:75)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:199:13)
+
+  ΓùÅ RecoveryService ΓÇ║ processBusinessOverdues ΓÇ║ should queue actions for sessions due now
+
+    TypeError: p.contact.findFirst is not a function
+
+      1969 |
+      1970 |              // Always lookup the real internal contact to get rich data
+    > 1971 |              const contact = await p.contact.findFirst({
+           |                                              ^
+      1972 |                  where: { 
+      1973 |                      businessId, 
+      1974 |                      type: 'customer', 
+
+      at RecoveryService.processBusinessOverdues (src/modules/recovery/recovery.service.ts:1971:46)
+      at async Object.<anonymous> (src/tests/unit/recovery.service.test.ts:250:13)
+
+[2026-03-10 08:16:59.123 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: true
+Test Suites: 1 failed, 1 total
+Tests:       7 failed, 2 passed, 9 total
+Snapshots:   0 total
+Time:        7.395 s
+Ran all test suites matching src/tests/unit/recovery.service.test.ts.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
+[2026-03-10 08:16:59.124 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mcustomersResolved[39m: 1
+    [35mtotal[39m: 1
+[2026-03-10 08:16:59.125 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Sync failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'findFirst')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'findFirst')
+              at RecoveryService.findApplicableSequence (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:688:57)
+              at RecoveryService.syncOverdueInvoices (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:589:45)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:103:28)
+    }
+[2026-03-10 08:16:59.143 +0300] [32mINFO[39m: [36m≡ƒöì [Recovery] Starting Overdue Invoice Sync (V2)[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mmanualMode[39m: true
+[2026-03-10 08:16:59.144 +0300] [32mINFO[39m: [36m≡ƒôº [Recovery] Customer emails resolved[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35mcustomersResolved[39m: 1
+    [35mtotal[39m: 1
+[2026-03-10 08:16:59.144 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Sync failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'findFirst')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'findFirst')
+              at RecoveryService.findApplicableSequence (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:688:57)
+              at RecoveryService.syncOverdueInvoices (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:589:45)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:127:13)
+    }
+[2026-03-10 08:16:59.163 +0300] [32mINFO[39m: [36m≡ƒöä [Recovery E2E] Step 2: Dunning action created in database[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35msession[39m: "session_1"
+    [35mactionId[39m: "act_1"
+    [35mstep[39m: 1
+    [35mactionType[39m: "email"
+[2026-03-10 08:16:59.164 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Session processing failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'findUnique')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'findUnique')
+              at RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:910:75)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:180:28)
+    }
+[2026-03-10 08:16:59.166 +0300] [32mINFO[39m: [36m≡ƒöä [Recovery E2E] Step 2: Dunning action created in database[39m
+    [35mbusinessId[39m: "biz_test_123"
+    [35msession[39m: "session_1"
+    [35mactionId[39m: "act_1"
+    [35mstep[39m: 1
+    [35mactionType[39m: "email"
+[2026-03-10 08:16:59.166 +0300] [31mERROR[39m: [36mΓ¥î [Recovery] Session processing failed[39m
+    [35mbusinessId[39m: "biz_test_123"
+    err: {
+      "type": "TypeError",
+      "message": "Cannot read properties of undefined (reading 'findUnique')",
+      "stack":
+          TypeError: Cannot read properties of undefined (reading 'findUnique')
+              at RecoveryService.processRecovery (D:\apps\websites\saas\afs_doc_tools_source\src\modules\recovery\recovery.service.ts:910:75)
+              at async Object.<anonymous> (D:\apps\websites\saas\afs_doc_tools_source\src\tests\unit\recovery.service.test.ts:199:13)
+    }
+npm verbose cwd D:\apps\websites\saas\afs_doc_tools_source
+npm verbose os Windows_NT 10.0.19045
+npm verbose node v22.12.0
+npm verbose npm  v10.9.0
+npm verbose exit 1
+npm verbose code 1

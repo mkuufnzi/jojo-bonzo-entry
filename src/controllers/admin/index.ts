@@ -870,7 +870,7 @@ export class AdminController {
         try {
             const { url, method } = req.body;
             console.log(`\n**************************************************`);
-            console.log(`[AdminController] 🚀 TEST FIRE AT ${new Date().toISOString()}`);
+            console.log(`[AdminController] TEST FIRE AT ${new Date().toISOString()}`);
             console.log(`[AdminController] 🛰️ Target: ${method || 'POST'} ${url}`);
             console.log(`**************************************************\n`);
             

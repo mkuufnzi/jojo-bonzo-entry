@@ -49,7 +49,7 @@ export class OnboardingService {
    * @param product - Target Product Context (transactional, sales)
    */
   async startSync(userId: string, provider: string, product: string = 'transactional') {
-     logger.info({ userId, provider, product }, '🚀 [OnboardingService] Start Sync Request');
+     logger.info({ userId, provider, product }, '[OnboardingService] Start Sync Request');
      
      // 1. Deep Validation
      const { user, integration } = await this._validateContext(userId, provider);

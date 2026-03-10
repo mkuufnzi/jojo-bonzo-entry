@@ -27,8 +27,21 @@
         </div>
         <div class="text-right">
             <div class="text-[10px] uppercase tracking-[0.15em] opacity-60 font-sans">Invoice</div>
-            <div class="text-2xl font-bold font-sans">#INV-2025-0847</div>
-            <div class="text-[10.5px] mt-0.5 opacity-60 font-sans">Feb 1, 2025</div>
+            <%
+                const meta = branding.model?.invoiceMeta || {};
+                const docNum = meta.docNumber || invoiceData?.DocNumber || invoiceData?.Id || '';
+                const rawDate = meta.txnDate || invoiceData?.TxnDate || '';
+                // Format date for display (YYYY-MM-DD → readable)
+                let displayDate = rawDate;
+                try {
+                    if (rawDate && rawDate.match && rawDate.match(/^\d{4}-\d{2}-\d{2}/)) {
+                        displayDate = new Date(rawDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    }
+                } catch(e) { /* use raw */ }
+            %>
+            <div class="text-2xl font-bold font-sans">#INV-<%= docNum %></div>
+            <div class="text-[10.5px] mt-0.5 opacity-60 font-sans"><%= displayDate %></div>
         </div>
     </div>
 </div>
+

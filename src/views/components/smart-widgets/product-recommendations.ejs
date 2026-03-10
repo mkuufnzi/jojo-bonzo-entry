@@ -36,14 +36,17 @@
     <div class="grid grid-cols-3 gap-2">
         <% recs.forEach(rec => { %>
             <div class="bg-white rounded-lg border overflow-hidden transition-all hover:shadow-sm"
-                 :style="addedItems.includes(<%= rec.id %>) ? 'border-color: var(--rec-primary)' : 'border-color: #e5e7eb'">
+                 :style="addedItems.includes('<%= rec.id %>') ? 'border-color: var(--rec-primary)' : 'border-color: #e5e7eb'">
                 
                 <!-- Product Image -->
-                <div class="w-full h-16 bg-gray-50 overflow-hidden">
-                    <img src="<%= rec.img %>" 
-                         alt="<%= rec.name %>" 
-                         class="w-full h-full object-cover"
-                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-2xl bg-gray-50\'>📦</div>';">
+                <div class="w-full h-16 bg-gray-50 overflow-hidden flex items-center justify-center">
+                    <%- include('../../partials/common/smart-image', { 
+                        src: rec.img, 
+                        alt: rec.name, 
+                        className: 'w-full h-full flex items-center justify-center',
+                        size: 'md',
+                        fallback: '🛍️'
+                    }) %>
                 </div>
 
                 <!-- Info -->
@@ -62,8 +65,8 @@
                     <a href="<%= branding.generateActionLink('add_to_order', { sku: rec.sku }) %>" 
                        target="_blank"
                        class="w-full py-1 rounded text-[9px] font-bold transition-all border-none cursor-pointer block no-underline text-center"
-                       :style="addedItems.includes(<%= rec.id %>) ? 'background: var(--rec-accent); color: var(--rec-primary)' : 'background: var(--rec-gradient); color: #fff'">
-                        <span x-text="addedItems.includes(<%= rec.id %>) ? '✓ Added' : '+ Add'"></span>
+                       :style="addedItems.includes('<%= rec.id %>') ? 'background: var(--rec-accent); color: var(--rec-primary)' : 'background: var(--rec-gradient); color: #fff'">
+                        <span x-text="addedItems.includes('<%= rec.id %>') ? '✓ Added' : '+ Add'"></span>
                     </a>
                 </div>
             </div>
@@ -75,14 +78,17 @@
     <div class="border rounded-lg overflow-hidden" style="border-color: #e5e7eb;">
         <% recs.forEach((rec, idx) => { %>
             <div class="flex items-center gap-2.5 px-2.5 py-2 bg-white transition-colors <%= idx < recs.length - 1 ? 'border-b border-gray-100' : '' %>"
-                 :style="addedItems.includes(<%= rec.id %>) ? 'background-color: var(--rec-light)' : ''">
+                 :style="addedItems.includes('<%= rec.id %>') ? 'background-color: var(--rec-light)' : ''">
                 
                 <!-- Product Thumbnail -->
-                <div class="w-8 h-8 rounded overflow-hidden shrink-0 bg-gray-50">
-                    <img src="<%= rec.img %>" 
-                         alt="<%= rec.name %>" 
-                         class="w-full h-full object-cover"
-                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-sm bg-gray-50\'>📦</div>';">
+                <div class="w-8 h-8 rounded overflow-hidden shrink-0 bg-gray-50 flex items-center justify-center">
+                    <%- include('../../partials/common/smart-image', { 
+                        src: rec.img, 
+                        alt: rec.name, 
+                        className: 'w-8 h-8 rounded overflow-hidden flex items-center justify-center',
+                        size: 'sm',
+                        fallback: '🛍️'
+                    }) %>
                 </div>
                 
                 <!-- Info -->
@@ -103,8 +109,8 @@
                 <a href="<%= branding.generateActionLink('add_to_order', { sku: rec.sku }) %>" 
                    target="_blank"
                    class="shrink-0 px-2.5 py-1 rounded text-[9px] font-bold transition-all border-none cursor-pointer no-underline text-center"
-                   :style="addedItems.includes(<%= rec.id %>) ? 'background: var(--rec-accent); color: var(--rec-primary)' : 'background: var(--rec-gradient); color: #fff'">
-                    <span x-text="addedItems.includes(<%= rec.id %>) ? '✓' : '+ Add'"></span>
+                   :style="addedItems.includes('<%= rec.id %>') ? 'background: var(--rec-accent); color: var(--rec-primary)' : 'background: var(--rec-gradient); color: #fff'">
+                    <span x-text="addedItems.includes('<%= rec.id %>') ? '✓' : '+ Add'"></span>
                 </a>
             </div>
         <% }); %>

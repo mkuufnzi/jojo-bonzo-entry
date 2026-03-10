@@ -14,7 +14,7 @@ export class PdfController extends BaseServiceController {
      * Routes through ToolOrchestrator for centralized billing.
      */
     static async convertSession(req: Request, res: Response, next: NextFunction) {
-        console.log('🚀 [PDF Controller] convertSession - REQUEST RECEIVED (via Orchestrator)');
+        console.log('[PDF Controller] convertSession - REQUEST RECEIVED (via Orchestrator)');
         
         const userId = (req.session as any).userId;
 

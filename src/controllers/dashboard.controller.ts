@@ -18,7 +18,7 @@ export class DashboardController {
 
             // Fetch Subscription & Quota data
             const monthlyUsage = await usageService.getMonthlyUsage(userId);
-            const planLimit = (user as any).subscription?.plan?.documentLimit || 0;
+            const planLimit = (user as any)?.subscription?.plan?.documentLimit || 0;
 
             // Fetch Real Service Health
             const serviceStatuses = await usageService.getServicesHealth(userId);
@@ -199,7 +199,11 @@ export class DashboardController {
             activeBlueprints,
             processedCount,
             totalRevenue,
-            transactionalAnalytics: { volumeTrend, successRatio, latencyTrend },
+            transactionalAnalytics: { 
+                volumeTrend: volumeTrend || [], 
+                successRatio: successRatio || [], 
+                latencyTrend: latencyTrend || [] 
+            },
             title: 'Transactional Branding',
             activeService: 'transactional',
             recentLogs: processedLogs, 

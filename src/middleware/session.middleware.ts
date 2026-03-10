@@ -73,7 +73,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         // If user is marked as Admin but has default USER role, promote to ROOT for this session.
         // This fixes issues where RBAC checks fail because they look for specific admin roles.
         if ((res.locals.user as any).isAdmin && (!user.role || user.role === 'USER')) {
-            console.log(`[Session] 🚀 PROMOTING ${user.email} from '${user.role}' to 'ROOT'`);
+            console.log(`[Session] PROMOTING ${user.email} from '${user.role}' to 'ROOT'`);
             (res.locals.user as any).role = 'ROOT';
              // Also update the object ref if needed
             if ((req as any).user) (req as any).user.role = 'ROOT';

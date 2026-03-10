@@ -138,7 +138,7 @@
 
                          <!-- UPSELL ADDED ITEMS -->
                          <div x-show="addedItems.length > 0" class="mt-4 p-3 rounded-lg" :style="'background: ' + themes[currentTheme].light">
-                             <div class="text-[9px] font-bold uppercase tracking-widest mb-2" :style="'color: ' + themes[currentTheme].secondary">⚡ Added to Order</div>
+                             <div class="text-[9px] font-bold uppercase tracking-widest mb-2" :style="'color: ' + themes[currentTheme].secondary">Added to Order</div>
                              <template x-for="id in addedItems" :key="id">
                                  <div class="flex justify-between items-center py-1 border-b border-black/5 last:border-0">
                                      <div class="flex items-center gap-2">
@@ -275,7 +275,7 @@
                         name: "SparkTech",
                         primary: "#6366F1", secondary: "#8B5CF6", accent: "#C4B5FD", light: "#F5F3FF", text: "#312E81", muted: "#7C3AED",
                         gradient: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)",
-                        logo: "⚡", tagline: "Power your workflow.",
+                        logo: "/images/placeholders/product-placeholder.png", tagline: "Power your workflow.",
                         pattern: "radial-gradient(circle at 90% 80%, rgba(99,102,241,0.08) 0%, transparent 40%), radial-gradient(circle at 10% 10%, rgba(139,92,246,0.05) 0%, transparent 50%)",
                     }
                 },

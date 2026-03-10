@@ -6,7 +6,17 @@
      <div class="absolute -top-5 -right-5 w-24 h-24 rounded-full bg-white/5"></div>
      
      <div class="relative flex items-start gap-3.5 z-10">
-         <div class="text-2xl leading-none" x-text="nurtureMsg.icon"></div>
+         <div class="flex items-center justify-center">
+            <template x-if="nurtureMsg.icon && nurtureMsg.icon.length > 2">
+                <i :data-lucide="nurtureMsg.icon" class="w-5 h-5 text-white/80"></i>
+            </template>
+            <template x-if="nurtureMsg.icon && nurtureMsg.icon.length <= 2">
+                <div class="text-2xl leading-none" x-text="nurtureMsg.icon"></div>
+            </template>
+            <template x-if="!nurtureMsg.icon">
+                <i data-lucide="megaphone" class="w-5 h-5 text-white/80"></i>
+            </template>
+        </div>
          <div class="flex-1">
              <div class="text-[13px] font-bold text-white mb-1 font-sans" x-text="nurtureMsg.headline"></div>
              <div class="text-[11px] text-white/60 leading-relaxed font-sans" x-text="nurtureMsg.body"></div>

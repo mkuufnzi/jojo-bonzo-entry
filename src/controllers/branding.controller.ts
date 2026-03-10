@@ -154,7 +154,7 @@ export class BrandingController {
                 light: bodyColors?.light || '#F5F3FF',
                 text: bodyColors?.text || '#1e293b',
                 pattern: '', 
-                logo: req.body.logoUrl || profile.logoUrl || '⚡',
+                logo: req.body.logoUrl || profile.logoUrl || '/images/placeholders/product-placeholder.png',
                 logoUrl: req.body.logoUrl || profile.logoUrl,
                 tagline: req.body.tagline || profile.tagline,
                 gradient: `linear-gradient(135deg, ${bodyColors?.primary || '#6366F1'} 0%, ${bodyColors?.secondary || '#8B5CF6'} 100%)`
@@ -202,7 +202,7 @@ export class BrandingController {
                 accent: (dbProfile?.brandColors as any)?.accent || '#C4B5FD',
                 light: '#F5F3FF',
                 text: '#1e293b',
-                logo: dbProfile?.logoUrl || '⚡',
+                logo: dbProfile?.logoUrl || '/images/placeholders/product-placeholder.png',
                 logoUrl: profile.logoUrl,
                 tagline: profile.tagline,
                 gradient: `linear-gradient(135deg, ${(dbProfile?.brandColors as any)?.primary || '#6366F1'} 0%, ${(dbProfile?.brandColors as any)?.secondary || '#8B5CF6'} 100%)`
@@ -273,8 +273,8 @@ export class BrandingController {
         ];
 
         smartInvoice.nurtureMessages = [
-            { icon: '💎', headline: 'Join the VIP Club', body: 'Unlock free shipping and 20% off future orders.' },
-            { icon: '🌟', headline: 'Thank you!', body: 'Your support helps us bring more sustainable products to you.' }
+            { icon: '', headline: 'Join the VIP Club', body: 'Unlock free shipping and 20% off future orders.' },
+            { icon: '', headline: 'Thank you!', body: 'Your support helps us bring more sustainable products to you.' }
         ];
 
         const json = smartInvoice.toJSON();

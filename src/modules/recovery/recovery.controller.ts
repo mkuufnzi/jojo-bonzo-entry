@@ -214,7 +214,7 @@ export class RecoveryController {
                 removeOnFail: false
             });
 
-            logger.info({ businessId, jobId: job.id }, '🚀 [Recovery] Manual sync triggered');
+            logger.info({ businessId, jobId: job.id }, '[Recovery] Manual sync triggered');
 
             return res.json({
                 success: true,
@@ -970,7 +970,7 @@ export class RecoveryController {
                 }
             }
 
-            logger.info({ businessId, enrolledCount, total: customers.length }, '🚀 [Recovery] Customers enrolled');
+            logger.info({ businessId, enrolledCount, total: customers.length }, '[Recovery] Customers enrolled');
 
             // Auto-trigger batch processing so enrolled sessions fire IMMEDIATELY
             if (enrolledCount > 0) {

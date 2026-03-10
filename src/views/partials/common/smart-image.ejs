@@ -1,0 +1,39 @@
+<% 
+    /* 
+       Unified Smart Image / Emoji Partial 
+       Handles:
+       1. Emoji detection (regex) -> Renders as text <div>
+       2. URL detection -> Renders as <img> with fallback
+       3. Lucide Icon naming (optional) -> Placeholder for future expansion
+       
+       Expects:
+       - src: The image URL or Emoji string
+       - alt: Accessibility text
+       - className: CSS classes for the container
+       - imgClass: CSS classes for the <img> tag
+       - fallback: Character or text icon to show on error (defaults to 📦)
+       - size: 'sm', 'md', 'lg' or custom classes (influences text size for emojis)
+    */
+    
+    const fallbackIcon = locals.fallback || '📦';
+    const isEmoji = src && src.length <= 4 && /\p{Emoji}/u.test(src);
+    const containerClasses = locals.className || 'w-full h-full flex items-center justify-center';
+    
+    let textSizeClass = 'text-2xl';
+    if (locals.size === 'sm') textSizeClass = 'text-sm';
+    if (locals.size === 'xs') textSizeClass = 'text-[10px]';
+    if (locals.size === 'lg') textSizeClass = 'text-4xl';
+%>
+
+<div class="<%= containerClasses %>">
+    <% if (isEmoji) { %>
+        <div class="<%= textSizeClass %> leading-none"><%= src %></div>
+    <% } else if (src && (src.includes('http') || src.startsWith('/') || src.startsWith('./'))) { %>
+        <img src="<%= src %>" 
+             alt="<%= alt || '' %>" 
+             class="<%= locals.imgClass || 'w-full h-full object-cover' %>"
+             onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'<%= textSizeClass %> flex items-center justify-center\'><%= fallbackIcon %></div>';">
+    <% } else { %>
+        <div class="<%= textSizeClass %> leading-none"><%= src || fallbackIcon %></div>
+    <% } %>
+</div>

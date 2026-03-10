@@ -26,7 +26,17 @@
     <div class="flex items-center gap-6">
         <div class="shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg transform -rotate-3" 
              style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%)">
-             <span x-text="nurtureMsg.icon"></span>
+             <div class="flex items-center justify-center">
+                <template x-if="nurtureMsg.icon && nurtureMsg.icon.length > 2">
+                    <i :data-lucide="nurtureMsg.icon" class="w-8 h-8"></i>
+                </template>
+                <template x-if="nurtureMsg.icon && nurtureMsg.icon.length <= 2">
+                    <span x-text="nurtureMsg.icon"></span>
+                </template>
+                <template x-if="!nurtureMsg.icon">
+                    <i data-lucide="sparkles" class="w-8 h-8"></i>
+                </template>
+             </div>
         </div>
         <div class="flex-1 text-left">
             <h3 class="font-bold text-xl brand-font leading-tight" style="color: var(--secondary-color)" x-text="nurtureMsg.headline"></h3>

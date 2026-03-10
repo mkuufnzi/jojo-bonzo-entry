@@ -34,7 +34,7 @@
 <!-- Added Upsells (Part of Line Items Logic) -->
 <div class="px-8 mt-2" x-show="addedItems.length > 0">
     <div class="rounded-lg p-3" :style="'background: ' + theme.light">
-        <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 font-sans" :style="'color: ' + theme.secondary">⚡ Added to Order</div>
+        <div class="text-[9.5px] font-bold uppercase tracking-widest mb-2 font-sans" :style="'color: ' + theme.secondary">Added to Order</div>
         <template x-for="id in addedItems" :key="id">
              <div class="flex justify-between items-center py-1.5 border-b border-black/5 last:border-0 font-sans">
                  <div class="text-xs font-medium text-black">

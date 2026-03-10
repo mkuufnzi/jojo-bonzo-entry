@@ -14,7 +14,7 @@
     </style>
 `) %>
 
-<%- include('../../components/logic/smart-document-logic') %>
+<%- include('../../../components/logic/smart-document-logic') %>
 
 <!-- Template Interface -->
 <div class="font-sans text-slate-800 antialiased">
@@ -48,6 +48,13 @@
         <% if (branding.components?.product_support?.enabled) { %>
             <div class="doc-section mb-12" data-split="true">
                 <%- include('../../../components/smart-widgets/tutorials') %>
+            </div>
+        <% } %>
+
+        <!-- Section: Support Links -->
+        <% if (branding.components?.customer_support?.enabled) { %>
+            <div class="doc-section mb-6">
+                <%- include('../../../components/smart-widgets/support-links') %>
             </div>
         <% } %>
 

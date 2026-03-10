@@ -82,7 +82,7 @@ async function main() {
         const { businessId } = await setup();
         await verifyRevenueEngine(businessId);
         await verifyEventBus();
-        console.log('\n✨ Verification Complete!');
+        console.log('\nVerification Complete!');
     } catch (e) {
         console.error('❌ Verification Error:', e);
         process.exit(1);
