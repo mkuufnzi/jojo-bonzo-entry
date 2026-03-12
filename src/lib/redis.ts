@@ -130,4 +130,33 @@ export const healthCheck = async (): Promise<boolean> => {
     }
 };
 
+/**
+ * MemoryManager for Codebase Knowledge Base (KB)
+ * 
+ * Implements persistent storage for bug solutions, architectural notes,
+ * and general agentic session memories.
+ */
+export class MemoryManager {
+    static async saveMemory(key: string, value: any, ttl?: number): Promise<void> {
+        const client = getRedisClient();
+        if (!client) return;
+        const serialized = JSON.stringify({
+            data: value,
+            timestamp: new Date().toISOString()
+        });
+        if (ttl) {
+            await client.set(`kb:memory:${key}`, serialized, 'EX', ttl);
+        } else {
+            await client.set(`kb:memory:${key}`, serialized);
+        }
+    }
+
+    static async getMemory(key: string): Promise<any | null> {
+        const client = getRedisClient();
+        if (!client) return null;
+        const data = await client.get(`kb:memory:${key}`);
+        return data ? JSON.parse(data) : null;
+    }
+}
+
 export default getRedisClient;
